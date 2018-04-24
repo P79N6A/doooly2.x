@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdAvailablePointsDao">
+
+    <sql id="adAvailablePointsColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+        a.recharge_id AS "rechargeId",
+        a.report_id AS "reportId",
+        a.type AS "type",
+        a. STATUS AS "status",
+        a.business_rebate_amount AS "businessRebateAmount",
+        a.order_id AS "orderId",
+        a.create_date AS "createDate",
+        ab.company AS "company",
+        ab.logo AS "logo",
+        abs.store_name AS "storeName",
+        ag.group_name AS "groupName",
+        ag.group_short_name AS "groupShortName",
+        ag.logo_url AS "groupLogo"
+	</sql>
+
+    <sql id="joinTables">
+        LEFT JOIN ad_user u2 ON u2.id = a.user_id
+        LEFT JOIN ad_recharge ar ON ar.id = a.recharge_id
+        LEFT JOIN _order o ON a.order_id = o.id
+        LEFT JOIN ad_business ab ON o.bussinessId = ab.business_id
+		LEFT JOIN ad_business_store abs ON o.storesId = abs.store_number AND ab.id = abs.business_id
+        LEFT JOIN ad_group ag ON u2.group_num = ag.id
+    </sql>
+    
+    <select id="getTotalNum" resultType="int">
+        SELECT
+		    COUNT(1)
+        FROM
+            ad_available_points a
+        <include refid="joinTables"/>
+        <where>
+            a.del_flag = 0
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="income != null and income == 2">
+                AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+            </if>
+            <if test="income != null and income == 1">
+                AND a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0  
+            </if>
+            and a.status=1
+        </where>
+    </select>
+    
+    <select id="getConsumerPoints" resultType="java.math.BigDecimal">
+        SELECT
+		     IFNULL(SUM(ABS(a.business_rebate_amount)),0)
+        FROM
+            ad_available_points a
+        WHERE
+            a.del_flag = 0 AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+            AND a.user_id = #{userId}
+    </select>
+
+    <select id="getAdAvailablePoints" resultType="AdAvailablePoints">
+        SELECT
+            <include refid="adAvailablePointsColumns"/>
+            ,case when a.type = 10 then (
+			select ia.integral_name 
+			from ad_integral_acquire_record iar 
+			LEFT JOIN ad_integral_activity ia on iar.integral_activity_id = ia.id 
+			where iar.user_id=#{userId} limit 1) else "" end as "integralName"   FROM
+            ad_available_points a
+        <include refid="joinTables"/>
+        <where>
+            a.del_flag = 0
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="income != null and income == 2">
+                AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+            </if>
+            <if test="income != null and income == 1">
+                AND (a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0)
+            </if>
+             and a.status=1
+        </where>
+        ORDER BY
+            a.create_date DESC
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+
+    <select id="getAvailablePointDetail" resultType="AdAvailablePoints">
+        SELECT
+            <include refid="adAvailablePointsColumns"/>
+        FROM
+            ad_available_points a
+        <include refid="joinTables"/>
+        WHERE
+        a.id = #{availablePointsId}
+    </select>
+	<insert id="insert">
+		INSERT INTO ad_available_points(
+			user_id,
+			type,
+			status,
+			business_rebate_amount,
+			original_integral,
+			after_deal_points,
+			create_date,
+			update_date,
+			del_flag
+		) VALUES (
+			#{userId},
+			#{type},
+			#{status},
+			#{businessRebateAmount},
+			(select IFNULL(a.integral,0) from ad_user a where a.id = #{userId}),
+			(select IFNULL(a.integral,0) from ad_user a where a.id = #{userId}) + #{businessRebateAmount},
+			NOW(),
+			NOW(),
+			0
+		)
+	</insert>
+</mapper>

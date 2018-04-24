@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<context:component-scan base-package="com.doooly.publish.rest"
+		/>
+		
+	<!-- 应用属性文件读入 -->
+	<bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean" lazy-init="false">
+		<property name="ignoreResourceNotFound" value="false" />
+		<property name="locations">
+			<list>
+ 				<value>classpath:prop/share.properties</value>
+ 				<value>classpath:prop/wxpay.properties</value>
+ 				<value>classpath:prop/ofpay.properties</value>
+ 				<value>classpath:prop/sctcd.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 用于持有applicationProperties,将properties转变为静态方法使用,PropertiesHolder.getProperty("somekey")--> 
+	<bean class="com.doooly.common.constants.PropertiesHolder" lazy-init="false">
+		<property name="properties" ref="applicationProperties" />
+	</bean>	
+		
+	<!-- spring context holder -->	
+	<bean id="springContextHolder" class="com.doooly.common.context.SpringContextHolder"></bean>
+	<bean id="wechatUtil" class="com.doooly.common.util.WechatUtil"></bean>
+</beans>

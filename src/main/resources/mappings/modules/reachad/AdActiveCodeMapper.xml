@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdActiveCodeDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdActiveCode" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="ad_user_id" property="adUserId" jdbcType="BIGINT" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="card_number" property="cardNumber" jdbcType="VARCHAR" />
+    <result column="is_used" property="isUsed" jdbcType="CHAR" />
+    <result column="used_date" property="usedDate" jdbcType="TIMESTAMP" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, ad_user_id, code, card_number, is_used, used_date, create_by, del_flag, remarks, 
+    update_date, update_by, create_date
+  </sql>
+  
+  <select id="get" resultType="com.doooly.entity.reachad.AdActiveCode" parameterType="com.doooly.entity.reachad.AdActiveCode">
+  	Select * 
+  	From ad_active_code
+  	<where>
+  		<if test="id != null">
+  			id = #{id} and
+  		</if>
+  		<if test="adUserId != null">
+  			ad_user_id = #{adUserId} and
+  		</if>	
+  		<if test="code != null">
+  			code = #{code} and
+  		</if>
+  		<if test="cardNumber != null">
+  			card_number = #{cardNumber} and
+  		</if>
+  		<if test="isUsed != null">
+  			is_used = #{isUsed} and 
+  		</if>
+  		<if test="usedDate != null">
+  			used_date = #{usedDate} and
+  		</if>
+  		<if test="createBy != null">
+  			create_by = #{createBy} and
+  		</if>
+  		<if test="remarks != null">
+  			remarks = #{remarks} and
+  		</if>
+  		del_flag = 0
+  	</where>
+  </select>
+  
+  <update id="updateUseStatus" parameterType="com.doooly.entity.reachad.AdActiveCode">
+  	Update ad_active_code
+  	Set is_used = #{isUsed}, used_date = #{usedDate}
+  	Where card_number = #{cardNumber}
+  </update>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- 自动生成 -->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ad_active_code
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ad_active_code
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.doooly.entity.reachad.AdActiveCode" >
+    insert into ad_active_code (id, ad_user_id, code, 
+      card_number, is_used, used_date, 
+      create_by, del_flag, remarks, 
+      update_date, update_by, create_date
+      )
+    values (#{id,jdbcType=BIGINT}, #{adUserId,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, 
+      #{cardNumber,jdbcType=VARCHAR}, #{isUsed,jdbcType=CHAR}, #{usedDate,jdbcType=TIMESTAMP}, 
+      #{createBy,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR}, #{remarks,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.reachad.AdActiveCode" >
+    insert into ad_active_code
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="adUserId != null" >
+        ad_user_id,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="cardNumber != null" >
+        card_number,
+      </if>
+      <if test="isUsed != null" >
+        is_used,
+      </if>
+      <if test="usedDate != null" >
+        used_date,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="adUserId != null" >
+        #{adUserId,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNumber != null" >
+        #{cardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null" >
+        #{isUsed,jdbcType=CHAR},
+      </if>
+      <if test="usedDate != null" >
+        #{usedDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdActiveCode" >
+    update ad_active_code
+    <set >
+      <if test="adUserId != null" >
+        ad_user_id = #{adUserId,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNumber != null" >
+        card_number = #{cardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null" >
+        is_used = #{isUsed,jdbcType=CHAR},
+      </if>
+      <if test="usedDate != null" >
+        used_date = #{usedDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.reachad.AdActiveCode" >
+    update ad_active_code
+    set ad_user_id = #{adUserId,jdbcType=BIGINT},
+      code = #{code,jdbcType=VARCHAR},
+      card_number = #{cardNumber,jdbcType=VARCHAR},
+      is_used = #{isUsed,jdbcType=CHAR},
+      used_date = #{usedDate,jdbcType=TIMESTAMP},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=CHAR},
+      remarks = #{remarks,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+	
+	<!-- 根据专属码获取用户信息 -->
+	<select id="findCodeStatusByCode" resultType="AdActiveCode">
+		select 
+			a.id AS "id",
+			a.ad_user_id AS "adUserId",
+			a.code AS "code",
+			a.card_number AS "cardNumber",
+			a.is_used AS "isUsed",
+			a.used_date AS "usedDate",
+			a.create_by AS "createBy",
+			a.del_flag AS "delFlag",
+			a.remarks AS "remarks",
+			a.update_date AS "updateDate",
+			a.update_by AS "updateBy",
+			a.create_date AS "createDate",
+			a.valid_date AS "validDate",
+			a.gift_bag AS "giftBag",
+			u2.card_number AS "adUser.cardNumber",
+			u2.telephone AS "adUser.telephone",
+			u2.name AS "adUser.name",
+			u2.group_num AS "adUser.groupNum",
+			u2.is_active AS "adUser.isActive",
+			ag.group_short_name as "adUser.adGroup.groupShortName"
+		from
+			ad_active_code a 
+			left join ad_user u2 on a.ad_user_id = u2.id
+			left join ad_group ag on u2.group_num = ag.id
+		where 
+			a.code = #{code}
+	</select>
+	
+	<!-- 更新激活码表 -->
+	<update id="updateCodeIsUsed">
+		UPDATE 
+			ad_active_code 
+		SET 
+			is_used = "1",
+			used_date = now(),
+			update_date = now()
+		where id = #{adActiveCodeId}
+	</update>
+	
+	<!-- 更新激活码用户ID -->
+	<update id="updateUserId">
+		UPDATE 
+			ad_active_code 
+		SET 
+			ad_user_id = #{newId},
+			update_date = now()
+		where ad_user_id = #{oldId}
+	</update>
+</mapper>

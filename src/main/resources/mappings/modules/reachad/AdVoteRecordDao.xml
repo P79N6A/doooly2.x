@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdVoteRecordDao" >
+
+    <sql id="AdVoteRecordColumns">
+       a.id as 'id',
+       a.user_wechat_open_id as 'userWechatOpenId',
+       a.option_id as 'optionId',
+       a.create_date as 'createDate',
+       a.activity_id as 'activityId'
+    </sql>
+    
+    <select id="findByOptionIdAndOpenId" resultType="AdVoteRecord">
+         SELECT
+            <include refid="AdVoteRecordColumns"/>
+        FROM ad_vote_record a WHERE a.option_id = #{optionId} AND a.user_wechat_open_id = #{wechatOpenId}
+    </select>
+
+    <select id="findVoteCountByOpenId" resultType="java.lang.Integer">
+         SELECT
+           COUNT(1)
+        FROM ad_vote_record a WHERE a.user_wechat_open_id = #{wechatOpenId}
+    </select>
+    
+	    <select id="getByUserId" resultType="java.lang.String">
+	         select 
+	         	state
+	         from ad_vote_record
+	         where user_wechat_open_id = #{userId}
+	         and activity_id = #{activityId}
+	    </select>
+
+    <insert id="insert" parameterType="AdVoteRecord">
+        INSERT INTO ad_vote_record(user_wechat_open_id , option_id , create_date ,activity_id,state ,mobile)
+        VALUES (#{userWechatOpenId}, #{optionId},#{createDate},#{activityId},#{state},#{mobile});
+    </insert>
+    
+    <update id="updateState">
+		update
+			ad_vote_record
+		set
+			state = #{state},
+			update_date = now()
+		where
+			user_wechat_open_id = #{userId}
+		and 
+			activity_id = #{activityId}
+	</update>
+    
+</mapper>

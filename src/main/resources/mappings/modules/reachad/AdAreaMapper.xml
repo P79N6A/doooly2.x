@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdAreaDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdArea">
+	</resultMap>
+
+	<sql id="adAreaColumns">
+		a.id AS "id",
+		a.parent_id AS "parentId",
+		a.name AS "name", 
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.service_flag AS "serviceFlag"
+		
+	</sql>
+
+
+	<select id="findServicedAreaList" resultType="com.doooly.entity.reachad.AdArea">
+		SELECT 
+			a.id,a.name
+		FROM 
+			ad_area a
+			where a.service_flag =1 
+			
+	</select>
+	
+	
+</mapper>

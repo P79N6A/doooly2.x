@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:jdbc="http://www.springframework.org/schema/jdbc"  
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task" xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/aop 	http://www.springframework.org/schema/aop/spring-aop.xsd  
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd"
+	default-lazy-init="true">
+
+	<description>分布式事务配置</description>
+	
+    <!-- 加载配置属性文件 -->
+	<context:property-placeholder ignore-unresolvable="true" location="classpath:doooly.properties" />
+	
+	<!-- 加载应用属性实例，可通过  @Value("#{APP_PROP['jdbc.driver']}") String jdbcDriver 方式引用 -->
+    <util:properties id="APP_PROP" location="classpath:doooly.properties" local-override="true"/>
+	
+	<!-- 使用Annotation自动注册Bean，解决事物失效问题：在主容器中不扫描@Controller注解，在SpringMvc中只扫描@Controller注解。  -->
+	<!-- 扫描注解@Component , @Service , @Repository。 要把 controller去除，controller是在spring-servlet.xml中配置的，如果不去除会影响事务管理的。 -->
+	<context:component-scan
+		base-package="com.doooly.dao.*,com.doooly.business.*">
+	</context:component-scan>	
+	
+	<!--aop 注解风格支持   proxy-targer-class默认false,用jdk动态代理,true是cglib .expose-proxy当前代理是否为可暴露状态,值是"ture",则为可访问。 -->
+	<aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="true" />
+	<!--aop xml风格支持  -->
+	<aop:config expose-proxy="true" proxy-target-class="true" />
+
+
+ 	<!-- MyBatis begin -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.doooly.entity.readchad"/>
+       <!--  <property name="typeAliasesSuperType" value="com.doooly.common.persistence.BaseEntity"/> -->
+        <property name="mapperLocations" value="classpath:/mappings/modules/reachad/*.xml"/>
+		<property name="configLocation" value="classpath:conf/mybatis-config.xml"></property>
+    </bean>
+    
+    <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="basePackage" value="com.doooly.dao.reachad"/>
+        <property name="annotationClass" value="com.doooly.common.persistence.annotation.MyBatisDao"/>
+    </bean>	
+
+ 	<!-- MyBatis begin -->
+    <bean id="sqlSessionFactoryLife" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="lifeDataSource"/>
+        <property name="typeAliasesPackage" value="com.doooly.entity.reachlife"/>
+        <!-- <property name="typeAliasesSuperType" value="com.doooly.common.persistence.BaseEntity"/> -->
+        <property name="mapperLocations" value="classpath:/mappings/modules/reachlife/*.xml"/>
+		<property name="configLocation" value="classpath:conf/mybatis-config.xml"></property>
+    </bean>
+    
+    <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
+    <bean id="mapperScannerConfigurerLife" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryLife" />
+        <property name="basePackage" value="com.doooly.dao.reachlife"/>
+        <property name="annotationClass" value="com.doooly.common.persistence.annotation.MyBatisDao"/>
+    </bean>	
+    
+    <!-- atomikos分布式事物 -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="300" />
+    </bean>
+
+    <bean id="transactionManager"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+        <!-- 必须设置，否则程序出现异常 JtaTransactionManager does not support custom isolation levels by default -->
+        <property name="allowCustomIsolationLevels" value="true"/>
+		<property name="globalRollbackOnParticipationFailure" value="true" /> 
+    </bean>
+	
+	<!-- 配置 Annotation 驱动，扫描@Transactional注解的类定义事务  -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" /> 
+    <!-- MyBatis end -->
+    
+
+    
+	<!-- 配置 JSR303 Bean Validator 定义 -->
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
+	<!-- 缓存配置 -->
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:${ehcache.configFile}" />
+	</bean>
+	<!-- 数据源配置, JTA和Atom管理事务用 -->
+    <bean id="abstractXADataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close" abstract="true">
+        <property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource"/>
+        <property name="poolSize" value="10" />
+        <property name="minPoolSize" value="10"/>
+        <property name="maxPoolSize" value="30"/>
+        <property name="borrowConnectionTimeout" value="60"/>
+        <property name="reapTimeout" value="20"/>
+        <!-- 最大空闲时间 -->
+        <property name="maxIdleTime" value="60"/>
+        <property name="maintenanceInterval" value="60"/>
+        <property name="loginTimeout" value="60"/>
+        <property name="testQuery">
+            <value>select 1</value>
+        </property>
+    </bean>
+    
+
+    <bean id="dataSource" parent="abstractXADataSource">
+        <!-- value只要两个数据源不同就行，随便取名 -->
+        <property name="uniqueResourceName" value="dataSource_ad" />
+        <property name="xaDataSourceClassName"  value="${jdbc.driver}" />
+        <property name="xaProperties">
+            <props>
+				<!-- 基本属性 url、user、password -->
+                <prop key="URL">${jdbc.url}</prop>
+                <prop key="user">${jdbc.username}</prop>
+                <prop key="password">${jdbc.password}</prop>
+                <prop key="pinGlobalTxToPhysicalConnection">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="lifeDataSource" parent="abstractXADataSource">
+        <!-- value只要两个数据源不同就行，随便取名 -->
+        <property name="uniqueResourceName" value="dataSource_life" />
+        <property name="xaDataSourceClassName" value="${jdbc.driver}" />
+        <property name="xaProperties">
+            <props>
+				<!-- 基本属性 url、user、password -->
+                <prop key="URL">${jdbc.life.url}</prop>
+                <prop key="user">${jdbc.life.username}</prop>
+                <prop key="password">${jdbc.life.password}</prop>
+                <prop key="pinGlobalTxToPhysicalConnection">true</prop>
+            </props>
+        </property>
+    </bean>
+</beans>

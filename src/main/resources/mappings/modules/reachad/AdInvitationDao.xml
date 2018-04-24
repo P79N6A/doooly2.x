@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdInvitationDao">
+    
+	<insert id="insert" parameterType="AdInvitation">
+		insert into ad_invitation(user_id,invitation_code,invitation_type,invitation_max_num,invitation_avail,
+		invitation_min_num,gift_num,gift_lists,gift_state,validation_time,del_flag,create_date,flag)
+		values(#{userId},#{invitationCode},#{invitationType},#{invitationMaxNum},#{invitationAvail},
+		#{invitationMinNum},#{giftNum},#{giftLists},0,#{validationTime},1,now(),#{flag})
+	</insert>
+	<update id="updateByUserId"  parameterType="AdInvitation">
+		update ad_invitation set invitation_avail=invitation_avail-1,update_date=now() where user_id=#{userId} and invitation_avail>0
+	</update>
+	<update id="saveInvitationSelectedGifts" parameterType="AdInvitation">
+		update 
+			ad_invitation set gift_lists=#{giftLists},gift_state=#{giftState},validation_time=#{validationTime},update_date=now()
+		where user_id=#{userId} and invitation_type=#{invitationType}
+	</update>
+	<update id="updateInvitationGiftsState" parameterType="AdInvitation">
+		update 
+			ad_invitation set gift_state=#{giftState},update_date=now()
+		where user_id=#{userId} and invitation_type=#{invitationType}
+	</update>
+	<select id="getByUserIdInvitationType" resultType="AdInvitation">
+		select 
+			id,invitation_code,invitation_type,invitation_max_num,invitation_avail,user_id,invitation_min_num,gift_num,gift_lists,gift_state,validation_time 
+		from 
+			ad_invitation 
+		where 
+			user_id=#{userId} and invitation_type=#{invitationType}
+	</select>
+	<select id="getByInvitationCodeAndType" resultType="AdInvitation">
+		select 
+			invitation_code,invitation_type,invitation_max_num,invitation_avail,user_id,invitation_min_num,gift_num,gift_lists,gift_state,validation_time,flag 
+		from 
+			ad_invitation 
+		where 
+			invitation_code=#{invitationCode} and invitation_type=#{invitationType} 
+			<if test="giftState!=null">
+				and gift_state=#{giftState}
+			</if>
+	</select>
+	<select id="getInvitationListByUserId" resultType="java.lang.String">
+		select iu.telephone
+		from ad_invitation i join ad_user u on i.user_id=u.id
+		     join ad_user iu on u.card_number=iu.source_card_number
+		where u.id=#{userId} and iu.type=#{userType} 
+		<if test="startDate!=null">
+			and iu.update_date<![CDATA[>]]> #{startDate}
+		</if>
+		and iu.telephone<![CDATA[<>'']]>
+		and i.invitation_type=#{invitationType} 
+	</select>
+	<select id="saveAndActivationUser" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select FUNC_saveAndActivationUser(#{famMobile},#{invitationCode},#{invitationType},#{famPassword},#{name})
+	</select>
+	
+	<select id="saveUserNotActive" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select FUNC_saveUserNotActive(#{famMobile},#{invitationCode},#{invitationType},#{famPassword},#{name})
+	</select>
+	
+	<select id="findList" resultType="AdInvitation">
+	select i.id,i.invitation_code,i.invitation_type,i.invitation_avail,i.invitation_max_num,i.validation_time,i.gift_lists,u.telephone,u.card_number,c.product_sn,c.product_name
+	from ad_invitation i join ad_user u on i.user_id=u.id left join ad_coupon c on i.gift_lists = c.product_sn
+	where i.del_flag = 1 and u.del_flag = 0 
+	<if test="cardNumber != null and cardNumber != ''">
+				AND u.card_number LIKE concat('%',#{cardNumber},'%')
+	</if>
+	<if test="telephone != null and telephone != ''">
+				AND u.telephone LIKE concat('%',#{telephone},'%')
+	</if>
+	<if test="invitationType != null and invitationType != ''">
+				AND i.invitation_type=#{invitationType}
+	</if>
+<!-- 	 GROUP BY u.telephone -->
+	</select>
+	
+	<select id="get" resultType="AdInvitation">
+	select i.id,i.invitation_code,i.invitation_type,i.invitation_avail,i.invitation_max_num,i.validation_time,i.gift_lists,u.telephone,u.card_number,c.product_sn,c.product_name
+	from ad_invitation i join ad_user u on i.user_id=u.id left join ad_coupon c on i.gift_lists = c.product_sn
+	where i.id =#{id} and i.del_flag = 1 and u.del_flag = 0 
+	</select>
+	
+	<select id="findByTypeAndTelephone" resultType="AdInvitation">
+	select i.id,i.invitation_code,i.invitation_type,i.invitation_avail,i.invitation_max_num,i.validation_time,i.gift_lists,u.telephone,u.card_number
+	from ad_invitation i join ad_user u on i.user_id=u.id
+	where i.del_flag = 1 and u.del_flag = 0
+	<if test="invitationType != null and invitationType != ''">
+		AND i.invitation_type=#{invitationType}
+	</if>
+	<if test="telephone != null and telephone != ''">
+		AND u.telephone = #{telephone}
+	</if>
+	</select>
+	
+	
+	
+	<select id="findInvitationByCode" resultType="AdInvitation">
+	select i.id,i.invitation_code,i.invitation_type,i.invitation_avail,i.invitation_max_num,i.validation_time,i.gift_lists,i.user_id
+	from ad_invitation i
+	where i.del_flag = 1 and i.invitation_code = #{invitationCode}
+	</select>
+	
+	
+	<update id="update">
+		UPDATE ad_invitation SET  
+			invitation_avail = #{invitationAvail},
+			validation_time = #{validationTime},
+			invitation_max_num= #{invitationMaxNum},
+			gift_lists=#{giftLists}
+		WHERE id = #{id}
+	</update>
+</mapper>

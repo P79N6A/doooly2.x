@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBlocBlackUserDao">
+	<insert id="insert">
+		insert ignore into 
+			ad_bloc_black_user(bloc_id,user_id,mobile,`name`,group_name,create_date)
+		values
+			(#{blocId},#{userId},#{mobile},#{name},#{groupName},now())
+	</insert>
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdSystemNoticeDao">
+	<sql id="couponColumns">
+		id,
+		title,
+		content,
+		target,
+		create_date,
+		notice_type,
+		receive_user,
+		target_url,
+		new_target_url
+	</sql>
+
+	<select id="getSystemNoticeList" resultType="com.doooly.entity.reachad.AdSystemNotice">
+		select 
+			id as "id",
+			title as "title",
+			content as "content",
+			target as "target",
+			create_date as "createDate",
+			notice_type as "noticeType",
+			receive_user as "receiveUser",
+			target_url as "targetUrl",
+			new_target_url as "newTargetUrl"
+		from ad_system_notice
+		where
+		(receive_user = #{userId} OR receive_user = '0')
+		and
+		target = #{target}
+		order by 
+		create_date
+		desc
+		LIMIT #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getSystemNoticeNum" resultType="int">
+		select
+		  COUNT(1)
+		from ad_system_notice
+		where
+		(receive_user = #{userId} OR receive_user = '0')
+		and
+		target = #{target}
+	</select>
+
+	<select id="getNoReadList" resultType="com.doooly.entity.reachad.AdSystemNotice">
+		select
+          <include refid="couponColumns"/>
+        from ad_system_notice a
+        where a.id not in (
+        select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
+        and (a.receive_user = #{userId} or a.receive_user = '0')
+        and
+        a.target = #{target}
+	</select>
+
+	<select id="getNoReadNum" resultType="int">
+		select
+		  COUNT(1)
+		from ad_system_notice a
+		where a.id not in (
+            select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
+		and (a.receive_user = #{userId} or a.receive_user = '0')
+		and
+		a.target = #{target}
+	</select>
+
+    <insert id="insert" parameterType="com.doooly.entity.reachad.AdSystemNotice">
+        INSERT INTO ad_system_notice (
+            title,
+            content,
+            target,
+            create_date,
+            notice_type,
+            receive_user,
+        )
+        VALUES
+            (
+                #{title},
+                #{content},
+                #{target},
+                now(),
+                #{noticeType},
+                #{receiveUser}
+	        )
+    </insert>
+    
+    <update id="updateReadType">
+        UPDATE ad_system_notice SET read_type = 1 WHERE receive_user = #{userId} and target = #{target}
+    </update>
+    
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO ad_system_notice_read (
+            notice_id,
+            receive_user,
+            read_type
+        )
+        VALUES 
+          <foreach collection="list" item="adSystemNoticeRead" separator=",">
+              (
+                #{adSystemNoticeRead.noticeId},#{adSystemNoticeRead.receiveUser},#{adSystemNoticeRead.readType}
+              )
+          </foreach>
+    </insert>
+</mapper>

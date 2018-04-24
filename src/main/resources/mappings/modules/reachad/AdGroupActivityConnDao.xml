@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdGroupActivityConnDao">
+    
+	<select id="findGroup" resultType="AdGroupActivityConn">
+		SELECT 
+			a.group_id AS "groupId",
+	        ag.group_name AS "groupName"
+		FROM ad_group_activity_conn a
+        LEFT JOIN ad_group ag ON a.group_id = ag.id
+		WHERE a.other_activity_id = #{activityId}
+	</select>
+
+	<select id="findSecondGroup" resultType="AdGroupActivityConn">
+		SELECT
+			a.id AS "companyId",
+			a.super_group_id AS "groupId",
+	        a.group_name AS "groupName"
+		FROM ad_group a
+		WHERE a.super_group_id IN (${ids})
+	</select>
+
+	<select id="findDepartment" resultType="java.util.Map">
+		SELECT id departmentId,department_name departmentName,ad_group_id companyId FROM ad_group_department WHERE ad_group_id IN (${ids})
+	</select>
+	<select id="getRealGIft" resultType="AdGroupActivityConn">
+		SELECT 
+			a.id AS "id",
+			a.activity_id AS "activityId",
+			a.coupon_id AS "couponId",
+			a.group_id AS "groupId",
+			a.user_type AS "userType",
+			a.create_user AS "createUser",
+			a.other_activity_id AS "otherActivityId",
+	        a.create_date AS "createDate"
+		FROM ad_group_activity_conn a
+		WHERE a.activity_id = #{activityId} and #{groupNum} in (208,199,198,192,160) limit 1;
+	</select>
+
+</mapper>

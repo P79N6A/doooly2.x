@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBusinessStoreDao">
+    
+	<sql id="adBusinessStoreColumns">
+		a.id AS "id",
+		a.store_number AS "storeNumber",
+		a.store_name AS "storeName",
+		a.address AS "address",
+		a.business_id AS "businessId",
+		a.province AS "province",
+		a.city AS "city",
+		a.area AS "area",
+		a.phone_number AS "phoneNumber",
+		case when a.longitude is null then "" else a.longitude end AS "longitude",
+		case when a.latitude is null then "" else a.latitude end AS "latitude",
+		case when a.description is null then "" else a.description end AS "desc" 
+	</sql>
+	
+	
+	<select id="get" resultType="AdBusinessStore">
+		select <include refid="adBusinessStoreColumns"/> from ad_business_store a where a.id=#{id}
+	</select>
+	<select id="findList" resultType="AdBusinessStore">
+		select <include refid="adBusinessStoreColumns"/> from ad_business_store a where a.business_id=#{businessId} order by a.id
+	</select>
+	<select id="findAddressList" resultType="AdBusinessStore">
+		select <include refid="adBusinessStoreColumns"/> from ad_business_store a where a.business_id=#{businessId} 
+		and a.longitude is not null and a.longitude!=""
+		and a.latitude is not null and a.latitude!=""
+		order by a.id
+	</select>
+	<insert id="insert">
+		INSERT INTO ad_business_store(
+			store_number,store_name,address,province,city,area,phone_number,business_id
+		) VALUES (
+			#{storeNumber},#{storeName},#{address},#{province},#{city},#{area},#{phoneNumber},#{businessId}
+		)
+	</insert>
+	<update id="update">
+		UPDATE ad_business_store SET 	
+			store_number = #{storeNumber},
+			store_name = #{storeName},
+			province = #{province},
+			city = #{city},
+			area = #{area},
+			address = #{address}
+		WHERE id = #{id}
+	</update>
+	<select id="checkExitListStore" resultType="AdBusinessStore">
+		SELECT 
+			GROUP_CONCAT(a.store_number) as storeNumber
+		FROM ad_business_store a
+		where
+		 a.store_number IN
+			<foreach collection="storeList" item="store" open="(" close=")" separator=",">
+				#{store.code}
+			</foreach>
+		and a.business_id IN
+			<foreach collection="storeList" item="store" open="(" close=")" separator=",">
+				#{store.businessId}
+			</foreach>
+	</select>
+	<insert id="batchInsert" parameterType="java.util.List">
+		INSERT INTO ad_business_store(
+			store_number,
+			address,
+			store_name,
+			business_id,province,city,area
+		) VALUES
+		<foreach collection="list" item="item" separator=",">
+		 (	
+			#{item.storeNumber},
+			#{item.address},
+			#{item.storeName},
+			#{item.businessId},#{item.province},#{item.city},#{item.area}
+		)
+		</foreach>
+	</insert>
+	<delete id="batchDelete" parameterType="Map">
+		delete a.*  from ad_business_store a where a.id in
+		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+	</delete>
+	<delete id="delete" >
+		delete a.*  from ad_business_store a where a.id=#{id}
+	</delete>
+	 <select id="batchSelect"  parameterType="Map" resultType="AdBusinessStore">
+		SELECT 
+			<include refid="adBusinessStoreColumns"/>
+		FROM ad_business_store a
+		<where>
+			id IN
+			<foreach collection="ids" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>		
+	</select>	
+	
+	<select id="findStoreList" resultType="AdBusinessStore">
+		SELECT 
+			s.id AS "id",
+			s.store_name AS "storeName"
+		FROM ad_business_store s
+		WHERE s.business_id=#{businessId}
+			AND s.province=#{province}
+			AND s.city=#{city}
+			AND s.area=#{area}
+	</select>
+	
+</mapper>

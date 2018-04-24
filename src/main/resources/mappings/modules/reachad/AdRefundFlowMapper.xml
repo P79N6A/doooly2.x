@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdRefundFlowDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdRefundFlow" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
+    <result column="pay_type" property="payType" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="old_trans_no" property="oldTransNo" jdbcType="VARCHAR" />
+    <result column="refund_id" property="refundId" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="apply_amount" property="applyAmount" jdbcType="DECIMAL" />
+    <result column="submit_time" property="submitTime" jdbcType="TIMESTAMP" />
+    <result column="refund_status" property="refundStatus" jdbcType="VARCHAR" />
+    <result column="refund_callback_time" property="refundCallbackTime" jdbcType="TIMESTAMP" />
+    <result column="error_code" property="errorCode" jdbcType="VARCHAR" />
+    <result column="error_reason" property="errorReason" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_number, pay_type, user_id, old_trans_no, refund_id, amount, apply_amount, 
+    submit_time, refund_status, refund_callback_time, error_code, error_reason
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ad_refund_flow
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ad_refund_flow
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.entity.reachad.AdRefundFlow" >
+    insert into ad_refund_flow (id, order_number, pay_type, 
+      user_id, old_trans_no, refund_id, 
+      amount, apply_amount, submit_time, 
+      refund_status, refund_callback_time, error_code, 
+      error_reason)
+    values (#{id,jdbcType=BIGINT}, #{orderNumber,jdbcType=VARCHAR}, #{payType,jdbcType=VARCHAR}, 
+      #{userId,jdbcType=VARCHAR}, #{oldTransNo,jdbcType=VARCHAR}, #{refundId,jdbcType=VARCHAR}, 
+      #{amount,jdbcType=DECIMAL}, #{applyAmount,jdbcType=DECIMAL}, #{submitTime,jdbcType=TIMESTAMP}, 
+      #{refundStatus,jdbcType=VARCHAR}, #{refundCallbackTime,jdbcType=TIMESTAMP}, #{errorCode,jdbcType=VARCHAR}, 
+      #{errorReason,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.reachad.AdRefundFlow" >
+    insert into ad_refund_flow
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderNumber != null" >
+        order_number,
+      </if>
+      <if test="payType != null" >
+        pay_type,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="oldTransNo != null" >
+        old_trans_no,
+      </if>
+      <if test="refundId != null" >
+        refund_id,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="applyAmount != null" >
+        apply_amount,
+      </if>
+      <if test="submitTime != null" >
+        submit_time,
+      </if>
+      <if test="refundStatus != null" >
+        refund_status,
+      </if>
+      <if test="refundCallbackTime != null" >
+        refund_callback_time,
+      </if>
+      <if test="errorCode != null" >
+        error_code,
+      </if>
+      <if test="errorReason != null" >
+        error_reason,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="orderNumber != null" >
+        #{orderNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        #{payType,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="oldTransNo != null" >
+        #{oldTransNo,jdbcType=VARCHAR},
+      </if>
+      <if test="refundId != null" >
+        #{refundId,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="applyAmount != null" >
+        #{applyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="submitTime != null" >
+        #{submitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="refundStatus != null" >
+        #{refundStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="refundCallbackTime != null" >
+        #{refundCallbackTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="errorCode != null" >
+        #{errorCode,jdbcType=VARCHAR},
+      </if>
+      <if test="errorReason != null" >
+        #{errorReason,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdRefundFlow" >
+    update ad_refund_flow
+    <set >
+      <if test="orderNumber != null" >
+        order_number = #{orderNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null" >
+        pay_type = #{payType,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="oldTransNo != null" >
+        old_trans_no = #{oldTransNo,jdbcType=VARCHAR},
+      </if>
+      <if test="refundId != null" >
+        refund_id = #{refundId,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="applyAmount != null" >
+        apply_amount = #{applyAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="submitTime != null" >
+        submit_time = #{submitTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="refundStatus != null" >
+        refund_status = #{refundStatus,jdbcType=VARCHAR},
+      </if>
+      <if test="refundCallbackTime != null" >
+        refund_callback_time = #{refundCallbackTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="errorCode != null" >
+        error_code = #{errorCode,jdbcType=VARCHAR},
+      </if>
+      <if test="errorReason != null" >
+        error_reason = #{errorReason,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.reachad.AdRefundFlow" >
+    update ad_refund_flow
+    set order_number = #{orderNumber,jdbcType=VARCHAR},
+      pay_type = #{payType,jdbcType=VARCHAR},
+      user_id = #{userId,jdbcType=VARCHAR},
+      old_trans_no = #{oldTransNo,jdbcType=VARCHAR},
+      refund_id = #{refundId,jdbcType=VARCHAR},
+      amount = #{amount,jdbcType=DECIMAL},
+      apply_amount = #{applyAmount,jdbcType=DECIMAL},
+      submit_time = #{submitTime,jdbcType=TIMESTAMP},
+      refund_status = #{refundStatus,jdbcType=VARCHAR},
+      refund_callback_time = #{refundCallbackTime,jdbcType=TIMESTAMP},
+      error_code = #{errorCode,jdbcType=VARCHAR},
+      error_reason = #{errorReason,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

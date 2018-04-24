@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdInvitationRecordDao">
+
+	<select id="findInvitationRecordById" resultType="AdInvitationRecord">
+		SELECT 
+			*
+		FROM ad_invitation_record a
+		WHERE a.del_flag = '0' AND a.inviter_id = #{userId}
+	</select>
+
+	<insert id="insert" parameterType="AdInvitationRecord">
+		INSERT INTO ad_invitation_record(
+			inviter_id,
+			invitee_id,
+			code,
+			point,
+			create_date,
+			update_date,
+			del_flag,
+			flag
+		) VALUES (
+			#{inviterId},
+			#{inviteeId},
+			#{code},
+			#{point},
+			#{createDate},
+			#{updateDate},
+			#{delFlag},
+			#{flag}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE ad_invitation_record 
+		SET 	
+			point = #{point},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findCodeByUserIdAndSn" resultType="String">
+		SELECT a.code 
+		FROM ad_coupon_code a,ad_coupon b,ad_user c
+		WHERE a.coupon = b.id				
+			AND a.user_id = c.id
+			AND b.product_sn = #{productSN}
+			AND c.id = #{userId}
+		ORDER BY a.update_date DESC LIMIT 1
+	</select>
+
+	<!-- 	<select id="getFamilys" resultType="AdInvitationRecord"> -->
+	<!-- 		SELECT a.* FROM  ad_invitation_record a LEFT JOIN  -->
+	<!-- 			ad_user b ON b.id = a.inviter_id -->
+	<!-- 		WHERE  -->
+	<!-- 			(a.inviter_id = #{userId}  -->
+	<!-- 			OR a.invitee_id = #{userId}) -->
+	<!-- 			and a.flag = 1 -->
+	<!-- 	</select> -->
+	<select id="getFamilys" resultType="AdInvitationRecord">
+						SELECT
+			a.id as 'userId',
+			a.telephone 
+		FROM
+			ad_user a
+		WHERE
+			a.id = (
+				SELECT
+					a.inviter_id
+				FROM
+					ad_invitation_record a
+				WHERE
+					a.inviter_id = #{userId}
+				OR a.invitee_id = #{userId}
+				AND a.flag = 1
+				LIMIT 1
+			)
+		UNION ALL
+			SELECT
+				c.id as 'userId',
+				c.telephone
+			FROM
+				(
+					SELECT
+						a.id,
+						a.telephone
+					FROM
+						ad_user a
+					LEFT JOIN ad_invitation_record b ON b.invitee_id = a.id
+					WHERE
+						a.id IN (
+							SELECT
+								a.invitee_id
+							FROM
+								ad_invitation_record a
+							WHERE
+							 a.inviter_id = (
+								SELECT DISTINCT
+									b.inviter_id
+								FROM
+									ad_invitation_record b
+								WHERE
+									b.inviter_id = #{userId}
+								OR b.invitee_id = #{userId}
+							)
+							AND a.flag = 1
+						)
+					ORDER BY
+						b.create_date ASC
+				) c
+	</select>
+
+	<select id="findAllRecordListByInviterId" resultType="AdInvitationRecord">
+		SELECT
+		b.is_active as 'isActive',
+		a.invitee_id AS inviteeId,
+		b.name as 'name',
+		a.id AS id,
+		a.point AS POINT,
+		a.flag as flag,
+		a.create_date as createDate,
+		DATE_FORMAT(b.update_date, '%Y-%m-%d') AS codeUpdateDate,
+		b.telephone AS telephone
+		<!-- 			  b.is_used as isUsed  -->
+		FROM
+		ad_invitation_record a
+		INNER JOIN ad_user b ON a.invitee_id = b.id
+		WHERE 1=1
+		<!-- 			  AND(a.code = b.code or 1=1 -->
+		<!-- 			  and a.invitee_id = c.id  -->
+		AND a.inviter_id = #{userId}
+		<if test='flag != null and flag == "3"'>
+			AND a.flag = '3'
+		</if>
+		<if test='flag != null and flag == "2"'>
+			AND (a.flag = '1' or a.flag = '2')
+		</if>
+		<if test='flag != null and flag == "1"'>
+			AND a.flag = '1'
+		</if>
+		order by a.create_date desc
+	</select>
+
+	<select id="findRecodByInviteeId" resultType="AdInvitationRecord">
+		SELECT 
+			 a.type,
+			 a.flag,
+			 a.inviter_id
+		FROM
+			  ad_invitation_record a 
+		WHERE 
+			  a.invitee_id = #{userId}
+	</select>
+
+	<update id="updateType">
+		UPDATE ad_invitation_record 
+		SET
+			flag = 1
+			,
+			update_date = NOW()
+		WHERE invitee_id = #{userId}
+	</update>
+
+</mapper>

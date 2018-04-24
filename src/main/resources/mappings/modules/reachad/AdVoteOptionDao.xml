@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdVoteOptionDao" >
+
+    <sql id="AdVoteOptionColumns">
+       a.id as 'id',
+       a.sort_num as 'sortNum',
+       a.option_name as 'optionName',
+       a.vote_count as 'voteCount',
+       a.image_url as 'imageUrl',
+       a.option_content as 'optionContent',
+       a.activity_id as 'activityId'
+    </sql>
+    
+    <select id="findList" resultType="AdVoteOption" parameterType="java.lang.Integer">
+         SELECT
+            <include refid="AdVoteOptionColumns"/>
+         FROM ad_vote_option a
+         <if test="orderType == 1">
+             ORDER BY a.vote_count DESC ,a.sort_num
+         </if>
+         <if test="orderType == 0">
+             ORDER BY a.sort_num
+         </if>
+    </select>
+    <select id="findListByActivityId" resultType="AdVoteOption" parameterType="java.lang.Integer">
+         SELECT
+            <include refid="AdVoteOptionColumns"/>
+         FROM ad_vote_option a where a.activity_id = #{activityId}
+         <if test="orderType == 1">
+             ORDER BY a.vote_count DESC ,a.sort_num
+         </if>
+         <if test="orderType == 0">
+             ORDER BY a.sort_num
+         </if>
+    </select>
+    
+    <update id="updateVoteCount">
+         UPDATE ad_vote_option SET vote_count=vote_count+1 WHERE id = #{optionId}
+    </update>
+  
+</mapper>

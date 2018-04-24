@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdReturnFlowDao">
+  
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdReturnFlow">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="order_report_id" jdbcType="BIGINT" property="orderReportId" />
+    <result column="return_flow_number" jdbcType="VARCHAR" property="returnFlowNumber" />
+    <result column="return_flow_serialNumber" jdbcType="VARCHAR" property="returnFlowSerialnumber" />
+    <result column="pay_type" jdbcType="SMALLINT" property="payType" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="user_rebate" jdbcType="DECIMAL" property="userRebate" />
+    <result column="user_return_amount" jdbcType="DECIMAL" property="userReturnAmount" />
+    <result column="business_rebate_amount" jdbcType="DECIMAL" property="businessRebateAmount" />
+    <result column="billing_state" jdbcType="CHAR" property="billingState" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="del_flag" jdbcType="CHAR" property="delFlag" />
+    <result column="is_first" jdbcType="INTEGER" property="isFirst" />
+    <result column="is_source" jdbcType="INTEGER" property="isSource" />
+    <result column="first_count" jdbcType="INTEGER" property="firstCount" />
+    <result column="air_settle_accounts" jdbcType="DECIMAL" property="airSettleAccounts" />
+    <result column="remarks" jdbcType="VARCHAR" property="remarks" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    id, order_report_id, return_flow_number, return_flow_serialNumber, pay_type, amount, 
+    type, user_rebate, user_return_amount, business_rebate_amount, billing_state, create_by, 
+    del_flag, is_first, is_source, first_count, air_settle_accounts, remarks, update_date, 
+    update_by, create_date
+  </sql>	
+	
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.entity.reachad.AdReturnFlow">
+    insert into ad_return_flow (id, order_report_id, return_flow_number, 
+      return_flow_serialNumber, pay_type, amount, 
+      type, user_rebate, user_return_amount, 
+      business_rebate_amount, billing_state, create_by, 
+      del_flag, is_first, is_source, 
+      first_count, air_settle_accounts, remarks, 
+      update_date, update_by, create_date
+      )
+    values (#{id,jdbcType=BIGINT}, #{orderReportId,jdbcType=BIGINT}, #{returnFlowNumber,jdbcType=VARCHAR}, 
+      #{returnFlowSerialnumber,jdbcType=VARCHAR}, #{payType,jdbcType=SMALLINT}, #{amount,jdbcType=DECIMAL}, 
+      #{type,jdbcType=CHAR}, #{userRebate,jdbcType=DECIMAL}, #{userReturnAmount,jdbcType=DECIMAL}, 
+      #{businessRebateAmount,jdbcType=DECIMAL}, #{billingState,jdbcType=CHAR}, #{createBy,jdbcType=VARCHAR}, 
+      #{delFlag,jdbcType=CHAR}, #{isFirst,jdbcType=INTEGER}, #{isSource,jdbcType=INTEGER}, 
+      #{firstCount,jdbcType=INTEGER}, #{airSettleAccounts,jdbcType=DECIMAL}, #{remarks,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  
+   <select id="getByOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from ad_return_flow
+    where order_report_id = #{orderId,jdbcType=BIGINT}
+  </select>
+  
+   <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdReturnFlow">
+    update ad_return_flow
+    <set>
+      <if test="orderReportId != null">
+        order_report_id = #{orderReportId,jdbcType=BIGINT},
+      </if>
+      <if test="returnFlowNumber != null">
+        return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="returnFlowSerialnumber != null">
+        return_flow_serialNumber = #{returnFlowSerialnumber,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null">
+        pay_type = #{payType,jdbcType=SMALLINT},
+      </if>
+      <if test="amount != null">
+        amount = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=CHAR},
+      </if>
+      <if test="userRebate != null">
+        user_rebate = #{userRebate,jdbcType=DECIMAL},
+      </if>
+      <if test="userReturnAmount != null">
+        user_return_amount = #{userReturnAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="businessRebateAmount != null">
+        business_rebate_amount = #{businessRebateAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="billingState != null">
+        billing_state = #{billingState,jdbcType=CHAR},
+      </if>
+      <if test="createBy != null">
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="isFirst != null">
+        is_first = #{isFirst,jdbcType=INTEGER},
+      </if>
+      <if test="isSource != null">
+        is_source = #{isSource,jdbcType=INTEGER},
+      </if>
+      <if test="firstCount != null">
+        first_count = #{firstCount,jdbcType=INTEGER},
+      </if>
+      <if test="airSettleAccounts != null">
+        air_settle_accounts = #{airSettleAccounts,jdbcType=DECIMAL},
+      </if>
+      <if test="remarks != null">
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null">
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null">
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+	
+</mapper>

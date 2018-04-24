@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdReturnDetailDao">
+
+	
+  <insert id="insert" parameterType="com.doooly.entity.reachad.AdReturnDetail" >
+    insert into 
+    ad_return_detail 
+    (
+	      id, 
+	      return_flow_id, 
+	      category_id, 
+	      code, 
+	      goods, 
+	      amount, 
+	      number, 
+	      create_by, 
+	      del_flag, 
+	      remarks, 
+	      tax, 
+	      update_date, 
+	      update_by, 
+	      create_date 
+      )
+    values 
+    (
+    		  #{id,jdbcType=BIGINT}, 
+    		  #{returnFlowId,jdbcType=BIGINT}, 
+	      #{categoryId,jdbcType=VARCHAR}, 
+	      #{code,jdbcType=VARCHAR}, 
+	      #{goods,jdbcType=VARCHAR}, 
+	      #{amount,jdbcType=DECIMAL}, 
+	      #{number,jdbcType=DECIMAL}, 
+	      #{createBy,jdbcType=VARCHAR}, 
+	      #{delFlag,jdbcType=CHAR}, 
+	      #{remarks,jdbcType=VARCHAR}, 
+	      #{tax,jdbcType=DECIMAL}, 
+	      #{updateDate,jdbcType=TIMESTAMP}, 
+	      #{updateBy,jdbcType=VARCHAR}, 
+	      #{createDate,jdbcType=TIMESTAMP} 
+     )
+  </insert>
+	
+</mapper>

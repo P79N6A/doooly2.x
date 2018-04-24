@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.TouristCardDao" >
+
+
+	<update id="updatePrivilege">
+		UPDATE ad_user_business_expansion SET f15 = #{f15} WHERE id = #{id}
+	</update>
+
+	<select id="findByUidBid" resultType="com.doooly.business.touristCard.datacontract.entity.SctcdAccount">
+		SELECT
+		id AS "id",
+		user_id AS "userId",
+		business_id AS "businessId",
+		business_type AS "businessType",
+		f1 AS "cardno",
+		f2 AS "phoneno",
+		f3 AS "pwd",
+		f4 AS "userName",
+		f5 AS "idCard",
+		f6 AS "userAddress",
+		f7 AS "validate",
+		f8 AS "issuers",
+		f15 AS "f15",
+		create_date AS "createDate",
+		del_flag AS "delFlag"
+		FROM ad_user_business_expansion
+		WHERE user_id = #{userId}
+		AND business_type = 'app-guide'
+	</select>
+
+	<select id="findRechargeHistory" resultType="com.doooly.business.touristCard.datacontract.entity.SctcdRechargeDetail">
+		SELECT
+			total_mount AS "rechargeAmount",
+			create_date AS "createDate",
+			CASE WHEN `type` = 1 THEN '充值成功'
+			WHEN `type` = 5 THEN '充值失败'
+			ELSE '未知' END AS "result",
+			`type`
+		FROM ad_order_report
+		WHERE user_id = #{userId}
+		AND bussiness_id = #{businessId}
+		AND product_type = #{productType}
+		<if test="cardno != null and cardno !=''">
+			AND remarks = #{cardno}
+		</if>
+		AND (`type` = 1 OR `type` = 5)
+		AND del_flag = 0
+		ORDER BY create_date DESC
+	</select>
+
+	<select id="countRechargeNum" resultType="java.lang.Integer">
+		SELECT
+			COUNT(id) AS "totalNum"
+		FROM ad_order_report
+		WHERE user_id = #{userId}
+		AND bussiness_id = #{businessId}
+		AND product_type = #{productType}
+		<if test="cardno != null and cardno !=''">
+			AND remarks = #{cardno}
+		</if>
+		AND (`type` = 1 OR `type` = 5)
+		AND del_flag = 0
+	</select>
+
+	<insert id="addSctcdAccount" parameterType="com.doooly.entity.reachad.AdUserBusinessExpansion">
+		INSERT INTO ad_user_business_expansion (
+			user_id, business_id, business_type,
+			f1, f2, f3, f4, f5,
+			f6, f7, f8, f9, f10,
+			f11, f12, f13, f14, f15,
+			create_date, del_flag)
+		SELECT
+			#{userId}, #{businessId}, #{businessType},
+			#{f1}, #{f2}, #{f3}, #{f4}, #{f5},
+			#{f6}, #{f7}, #{f8}, #{f9}, #{f10},
+			#{f11}, #{f12}, #{f13}, #{f14}, #{f15},
+			#{createDate}, #{delFlag}
+		FROM dual
+		WHERE NOT EXISTS(
+		      SELECT * FROM ad_user_business_expansion
+		      WHERE user_id = #{userId}
+		      AND business_id = #{businessId}
+		      AND business_type = #{businessType}
+		      AND f1 = #{f1}
+		      AND del_flag = #{delFlag}
+		)
+	</insert>
+
+	<update id="updateSctcdAccountDelFlag" parameterType="com.doooly.entity.reachad.AdUserBusinessExpansion">
+		UPDATE ad_user_business_expansion SET del_flag = #{delFlag} WHERE id = #{id}
+	</update>
+
+	<select id="findSctcdAccount" resultType="com.doooly.business.touristCard.datacontract.entity.SctcdAccount">
+		SELECT
+			id AS "id",
+			user_id AS "userId",
+			business_id AS "businessId",
+			business_type AS "businessType",
+			f1 AS "cardno",
+			f2 AS "phoneno",
+			f3 AS "pwd",
+			f4 AS "userName",
+			f5 AS "idCard",
+			f6 AS "userAddress",
+			f7 AS "validate",
+			f8 AS "issuers",
+			create_date AS "createDate",
+			del_flag AS "delFlag"
+		FROM ad_user_business_expansion
+		WHERE user_id = #{userId}
+		AND business_id = #{businessId}
+		AND business_type = 'sctcd-account'
+		<if test="cardno != null and cardno != ''">
+			AND f1 = #{cardno}
+		</if>
+		AND del_flag = 0;
+	</select>
+
+	<select id="findOneSctcdAccount" resultType="com.doooly.business.touristCard.datacontract.entity.SctcdAccount">
+		SELECT
+		id AS "id",
+		user_id AS "userId",
+		business_id AS "businessId",
+		business_type AS "businessType",
+		f1 AS "cardno",
+		f2 AS "phoneno",
+		f3 AS "pwd",
+		f4 AS "userName",
+		f5 AS "idCard",
+		f6 AS "userAddress",
+		f7 AS "validate",
+		f8 AS "issuers",
+		create_date AS "createDate",
+		del_flag AS "delFlag"
+		FROM ad_user_business_expansion
+		WHERE user_id = #{userId}
+		AND business_id = #{businessId}
+		AND business_type = 'sctcd-account'
+		<if test="cardno != null and cardno != ''">
+			AND f1 = #{cardno}
+		</if>
+	</select>
+</mapper>

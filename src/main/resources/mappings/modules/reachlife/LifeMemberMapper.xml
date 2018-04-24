@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeMemberDao">
+	<!-- common column -->
+	<sql id="Base_Column_List" >
+		a.id AS "id",
+		a.create_date AS "createDate",
+		a.modify_date AS "modifyDate",
+		a.address AS "address",
+		a.amount AS "amount",
+		a.attribute_value0 AS "attributeValue0",
+		a.attribute_value1 AS "attributeValue1",
+		a.attribute_value2 AS "attributeValue2",
+		a.attribute_value3 AS "attributeValue3",
+		a.attribute_value4 AS "attributeValue4",
+		a.attribute_value5 AS "attributeValue5",
+		a.attribute_value6 AS "attributeValue6",
+		a.attribute_value7 AS "attributeValue7",
+		a.attribute_value8 AS "attributeValue8",
+		a.attribute_value9 AS "attributeValue9",
+		a.balance AS "balance",
+		a.birth AS "birth",
+		a.email AS "email",
+		a.gender AS "gender",
+		a.is_enabled AS "isEnabled",
+		a.is_locked AS "isLocked",
+		a.locked_date AS "lockedDate",
+		a.login_date AS "loginDate",
+		a.login_failure_count AS "loginFailureCount",
+		a.login_ip AS "loginIp",
+		a.mobile AS "mobile",
+		a.name AS "name",
+		a.password AS "password",
+		a.phone AS "phone",
+		a.register_ip AS "registerIp",
+		a.username AS "username",
+		a.zip_code AS "zipCode",
+		a.is_wechat_binding AS "isWechatBinding",
+		a.wechatid AS "wechatid",
+		a.create_user AS "createUser",
+		a.delete_flg AS "deleteFlg",
+		a.identity_card AS "identityCard",
+		a.member_type AS "memberType",
+		a.modify_user AS "modifyUser",
+		a.super_user_id AS "superUserId",
+		a.group_id AS "groupId",
+		a.ad_id AS "adId"
+	</sql>
+	<insert id="addMember" parameterType="LifeMember">
+		insert into xx_member(mobile,name,username,is_enabled,ad_id,group_id,login_failure_count,modify_date,create_date)
+		values(#{mobile},#{name},#{username},2,#{adId},(select id from xx_group where ad_id=#{groupId}),0,now(),now())
+		ON DUPLICATE KEY UPDATE is_enabled=2
+	</insert>
+	<update id="updateMemberActiveStatus" parameterType="com.doooly.entity.reachlife.LifeMember">
+	  Update xx_member
+	  <set>
+	    <if test="modifyDate != null">
+	      modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+	    </if>
+	    <if test="isEnabled != null">
+	      is_enabled = #{isEnabled,jdbcType=INTEGER},
+	    </if>
+	    <if test="loginFailureCount != null">
+	      login_failure_count = #{loginFailureCount,jdbcType=INTEGER},
+	    </if>
+	    <if test="sourceCardNumber != null">
+	      source_card_number = #{sourceCardNumber,jdbcType=VARCHAR},
+	    </if>
+	    <if test="password != null and password != ''">
+	      password = #{password,jdbcType=VARCHAR},
+	    </if>
+	  </set>
+	  where mobile = #{mobile}
+	</update>
+  
+	<!-- ID获取用户信息 -->
+	<select id="get" parameterType="String" resultType="com.doooly.entity.reachlife.LifeMember">
+		select
+			<include refid="Base_Column_List"/>
+		from 
+			xx_memeber a 
+		where 1=1 
+		and a.id = #{id}
+	</select>
+  
+  	<select id="getByAdId" resultType="LifeMember">
+		select * from xx_member
+		where
+			ad_id = #{adId}
+	</select>
+	
+	<!-- 卡号获取会员信息 -->
+	<select id="findMemberByUsername" resultType="LifeMember">
+		select * from xx_member
+		where username = #{username} and delete_flg = "0" limit 1
+	</select>
+	
+	<!-- 更新会员信息 -->
+	<update id="updateActiveStatus">
+		UPDATE xx_member SET
+			modify_date = #{modifyDate},
+			<if test="mobile != null">
+				mobile = #{mobile},
+			</if>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="groupId != null">
+				group_id = #{groupId},
+			</if>
+			<if test="password != null">
+				password = #{password},
+			</if>
+			<if test="adId != null">
+				ad_id = #{adId},
+			</if>
+			is_enabled = #{isEnabled},
+			login_failure_count = #{loginFailureCount}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 手机号获取会员信息 -->
+	<select id="findMemberByMobile" resultType="LifeMember">
+		select 
+			<include refid="Base_Column_List"/>
+		from xx_member a
+		where a.mobile = #{mobile} and a.delete_flg = "0" limit 1
+	</select>
+	
+	<!-- 查询会员信息 -->
+	<select id="findLifeMemberByAdId" resultType="LifeMember">
+		SELECT 
+			<include refid="Base_Column_List"/>
+		FROM xx_member a 
+		WHERE a.ad_id=#{adId} and a.delete_flg = "0"
+	</select>
+	
+	<!-- 删除会员信息 -->
+	<delete id="deleteMember">
+		update
+			xx_member
+		set 
+			delete_flg = "1"
+		where id = #{id}
+	</delete>
+	
+	<insert id="insert">
+		INSERT INTO xx_member(
+			id,
+			create_date,
+			modify_date,
+			address,
+			amount,
+			attribute_value0,
+			attribute_value1,
+			attribute_value2,
+			attribute_value3,
+			attribute_value4,
+			attribute_value5,
+			attribute_value6,
+			attribute_value7,
+			attribute_value8,
+			attribute_value9,
+			balance,
+			birth,
+			email,
+			gender,
+			is_enabled,
+			is_locked,
+			locked_date,
+			login_date,
+			login_failure_count,
+			login_ip,
+			mobile,
+			name,
+			password,
+			phone,
+			register_ip,
+			username,
+			zip_code,
+			is_wechat_binding,
+			wechatid,
+			create_user,
+			delete_flg,
+			identity_card,
+			member_type,
+			modify_user,
+			super_user_id,
+			group_id,
+			ad_id
+			<if test="sourceCardNumber!=null and sourceCardNumber!=''">
+				,source_card_number
+			</if>
+		) VALUES (
+			#{id},
+			#{createDate},
+			#{modifyDate},
+			#{address},
+			#{amount},
+			#{attributeValue0},
+			#{attributeValue1},
+			#{attributeValue2},
+			#{attributeValue3},
+			#{attributeValue4},
+			#{attributeValue5},
+			#{attributeValue6},
+			#{attributeValue7},
+			#{attributeValue8},
+			#{attributeValue9},
+			#{balance},
+			#{birth},
+			#{email},
+			#{gender},
+			#{isEnabled},
+			#{isLocked},
+			#{lockedDate},
+			#{loginDate},
+			#{loginFailureCount},
+			#{loginIp},
+			#{mobile},
+			#{name},
+			md5(#{password}),
+			#{phone},
+			#{registerIp},
+			#{username},
+			#{zipCode},
+			#{isWechatBinding},
+			#{wechatid},
+			#{createUser},
+			#{deleteFlg},
+			#{identityCard},
+			#{memberType},
+			#{modifyUser},
+			#{superUserId},
+			#{groupId},
+			#{adId}
+			<if test="sourceCardNumber!=null and sourceCardNumber!=''">
+				,#{sourceCardNumber}
+			</if>
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE xx_member SET 	
+			modify_date = #{modifyDate},
+			address = #{address},
+			amount = #{amount},
+			attribute_value0 = #{attributeValue0},
+			attribute_value1 = #{attributeValue1},
+			attribute_value2 = #{attributeValue2},
+			attribute_value3 = #{attributeValue3},
+			attribute_value4 = #{attributeValue4},
+			attribute_value5 = #{attributeValue5},
+			attribute_value6 = #{attributeValue6},
+			attribute_value7 = #{attributeValue7},
+			attribute_value8 = #{attributeValue8},
+			attribute_value9 = #{attributeValue9},
+			balance = #{balance},
+			birth = #{birth},
+			email = #{email},
+			gender = #{gender},
+			is_enabled = #{isEnabled},
+			is_locked = #{isLocked},
+			locked_date = #{lockedDate},
+			login_date = #{loginDate},
+			login_failure_count = #{loginFailureCount},
+			login_ip = #{loginIp},
+			mobile = #{mobile},
+			name = #{name},
+			password = #{password},
+			phone = #{phone},
+			register_ip = #{registerIp},
+			username = #{username},
+			zip_code = #{zipCode},
+			is_wechat_binding = #{isWechatBinding},
+			wechatid = #{wechatid},
+			create_user = #{createUser},
+			delete_flg = #{deleteFlg},
+			identity_card = #{identityCard},
+			member_type = #{memberType},
+			modify_user = #{modifyUser},
+			super_user_id = #{superUserId},
+			group_id = #{groupId},
+			ad_id = #{adId}
+		WHERE id = #{id}
+	</update>
+	
+	<!-- 保存用户信息 -->
+	<insert id="saveMember" parameterType="com.doooly.entity.reachlife.LifeMember" useGeneratedKeys="true"
+		keyProperty="id">
+		INSERT INTO xx_member(
+			id,
+			create_date,
+			modify_date,
+			address,
+			amount,
+			attribute_value0,
+			attribute_value1,
+			attribute_value2,
+			attribute_value3,
+			attribute_value4,
+			attribute_value5,
+			attribute_value6,
+			attribute_value7,
+			attribute_value8,
+			attribute_value9,
+			balance,
+			birth,
+			email,
+			gender,
+			is_enabled,
+			<if test="isLocked != null and isLocked != ''">
+				is_locked,
+			</if>
+			locked_date,
+			login_date,
+			login_failure_count,
+			login_ip,
+			mobile,
+			name,
+			password,
+			phone,
+			register_ip,
+			username,
+			zip_code,
+			is_wechat_binding,
+			wechatid,
+			create_user,
+			delete_flg,
+			identity_card,
+			member_type,
+			modify_user,
+			super_user_id,
+			group_id,
+			ad_id
+			<if test="sourceCardNumber!=null and sourceCardNumber!=''">
+				,source_card_number
+			</if>
+		) VALUES (
+			#{id},
+			#{createDate},
+			#{modifyDate},
+			#{address},
+			#{amount},
+			#{attributeValue0},
+			#{attributeValue1},
+			#{attributeValue2},
+			#{attributeValue3},
+			#{attributeValue4},
+			#{attributeValue5},
+			#{attributeValue6},
+			#{attributeValue7},
+			#{attributeValue8},
+			#{attributeValue9},
+			#{balance},
+			#{birth},
+			#{email},
+			#{gender},
+			#{isEnabled},
+			<if test="isLocked != null and isLocked != ''">
+				#{isLocked},
+			</if>
+			#{lockedDate},
+			#{loginDate},
+			#{loginFailureCount},
+			#{loginIp},
+			#{mobile},
+			#{name},
+			md5(#{password}),
+			#{phone},
+			#{registerIp},
+			#{username},
+			#{zipCode},
+			#{isWechatBinding},
+			#{wechatid},
+			#{createUser},
+			#{deleteFlg},
+			#{identityCard},
+			#{memberType},
+			#{modifyUser},
+			#{superUserId},
+			#{groupId},
+			#{adId}
+			<if test="sourceCardNumber!=null and sourceCardNumber!=''">
+				,#{sourceCardNumber}
+			</if>
+		)
+	</insert>
+</mapper>

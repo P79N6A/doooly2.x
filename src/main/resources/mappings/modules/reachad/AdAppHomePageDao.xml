@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdAppHomePageDao">
+	
+	<select id="findAdUserInfos" resultType="com.doooly.entity.reachad.AdAppUserInfos">
+		SELECT
+			a.name AS 'memberName',
+			a.integral AS 'availablePoints',
+			c.group_name AS 'enterpriseName',
+			c.logo_url AS 'enterpriseLogoURL',
+			b.app_head_image_url AS 'memberHeadImgURL',
+			b.auth_flag AS 'authFlag'
+		FROM ad_user a
+		LEFT JOIN ad_user_personal_info b ON a.id = b.id
+		LEFT JOIN ad_group c ON a.group_num = c.id
+		WHERE a.id = #{userId}
+		AND a.del_flag = 0
+	</select>
+
+	<select id="findAdUserInfosAndNoviceGuide" resultType="com.doooly.entity.reachad.AdAppUserInfos">
+		SELECT
+			a.name AS 'memberName',
+			a.integral AS 'availablePoints',
+			c.group_name AS 'enterpriseName',
+			c.logo_url AS 'enterpriseLogoURL',
+			b.app_head_image_url AS 'memberHeadImgURL',
+			b.auth_flag AS 'authFlag',
+			d.f1 AS 'noviceGuideFinished',
+			d.f2 AS 'integralGuideFinished',
+			d.f15 AS 'appIndexPrivilege'
+		FROM ad_user a
+		LEFT JOIN ad_user_personal_info b ON a.id = b.id
+		LEFT JOIN ad_group c ON a.group_num = c.id
+		LEFT JOIN ad_user_business_expansion d ON a.id = d.user_id
+		AND d.business_type = 'app-guide' AND d.del_flag = 0
+		WHERE a.id = #{userId}
+		AND a.del_flag = 0
+	</select>
+
+	<select id="getAdUserThirftInfos" resultType="com.doooly.entity.reachad.AdAppUserShoppingThrift">
+		SELECT
+			COUNT(id) AS 'thriftTotal',
+			SUM(total_price) - SUM(total_mount) AS 'thriftAmount'
+		FROM ad_order_report
+		WHERE user_id = #{userId}
+		AND `type` = 1 AND state =1
+		AND del_flag = 0;
+	</select>
+
+	<select id="getAdUserCouponInfos" resultType="com.doooly.entity.reachad.AdAppUserCoupon">
+		<![CDATA[
+			SELECT
+				cc.coupon AS "couponId",
+				DATEDIFF(cac.end_date, NOW()) AS 'expiredDays'
+			FROM
+				ad_coupon_activity_conn cac
+			LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+			LEFT JOIN ad_coupon_code cc ON cc.coupon = c.id
+			AND cac.activity_id = cc.activity_id
+			INNER JOIN ad_user u ON u.id = cc.user_id
+			INNER JOIN ad_group_activity_conn gac ON u.group_num = gac.group_id
+			AND gac.activity_id = cac.activity_id
+			WHERE cc.user_id = #{userId}
+			AND cc.is_used = 0 AND cc.del_flag = 0
+			AND c.del_flag = 0 AND u.del_flag = 0
+			AND cac.begin_date <= NOW() AND NOW() <= cac.end_date
+			ORDER BY cc.receive_date DESC
+		]]>
+	</select>
+
+	<select id="findAdGroupActivityConnByActivityIdAndUserId" resultType="com.doooly.entity.reachad.AdGroupActivityConn">
+		SELECT
+			gac.id AS 'id',
+			gac.activity_id AS 'activityId',
+			gac.coupon_id AS 'couponId',
+			gac.group_id AS 'groupId',
+			gac.user_type AS 'userType',
+			gac.create_user AS 'createUser',
+			gac.create_date AS 'createDate',
+			gac.other_activity_id AS 'otherActivityId'
+		FROM ad_group_activity_conn gac
+		LEFT JOIN ad_user u ON gac.group_id = u.group_num
+		WHERE gac.activity_id = #{exclusiveCouponActivityId}
+		AND u.id = #{userId}
+		AND u.del_flag = 0
+	</select>
+
+	<select id="findExclusiveCoupon" resultType="com.doooly.entity.coupon.ExclusiveCoupon">
+		<![CDATA[
+			SELECT
+				cac.id AS 'cacId',
+				cac.coupon_remind_quantity AS 'couponRemindQuantity',
+				ca.id AS 'activityId',
+				c.id AS 'couponId',
+				ca.name AS 'activityName',
+				c.name  AS 'couponName',
+				c.coupon_unit AS 'couponUnit',
+				c.coupon_value AS 'couponAmount',
+				ca.begin_date AS 'activityBeginDate',
+				ca.end_date AS 'activityEndDate',
+				c.begin_date AS 'couponBeginDate',
+				c.end_date AS 'couponEndDate',
+				ca.list_image_url AS 'activityListImageUrl',
+				ca.detail_image_url AS 'activityDetailImageUrl',
+				ca.introduction AS 'activityIntroduction',
+				ca.activity_link_url AS 'activityLinkUrl',
+				c.product_id  AS 'productId',
+				c.product_name  AS 'productName',
+				c.business_id AS 'businessId',
+				c.business_name  AS 'businessName'
+			FROM ad_coupon_activity_conn cac
+			LEFT JOIN ad_coupon_activity ca ON cac.activity_id = ca.id
+			LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+			WHERE cac.activity_id = #{exclusiveCouponActivityId}
+			AND cac.begin_date <= NOW()
+			AND NOW() <= cac.end_date
+			AND ca.activity_type = #{exclusiveCouponCode}
+			AND ca.delete_flag = 0
+			AND c.del_flag = 0
+			AND c.is_open = 1
+		]]>
+	</select>
+
+	<select id="findUserReceivedExclusiveCoupon" resultType="com.doooly.entity.reachad.AdCouponCode">
+		SELECT
+			 a.user_id AS 'userId',
+			 a.coupon AS 'coupon',
+			 a.activity_id AS 'activityId'
+		FROM ad_coupon_code a
+		WHERE a.user_id = #{userId}
+		AND a.del_flag = 0
+		AND a.activity_id = #{activityId}
+		AND a.coupon IN
+		<foreach collection="couponIds" open="(" separator="," close=")" item="couponId">
+			#{couponId}
+		</foreach>
+	</select>
+
+	<select id="findUserGuide" resultType="com.doooly.entity.home.UserGuideFinish">
+		SELECT
+			id AS 'id',
+			user_id AS 'userId',
+			business_type AS 'businessType',
+			f1 AS 'noviceGuideFinished',
+			f2 AS 'integralGuideFinished'
+		FROM ad_user_business_expansion
+		WHERE user_id = #{userId}
+		AND business_type = #{businessType}
+		AND del_flag = 0
+	</select>
+
+	<insert id="insertUserGuideFinish" parameterType="com.doooly.entity.home.UserGuideFinish">
+		INSERT INTO ad_user_business_expansion (
+			user_id,
+			business_type,
+			<if test="noviceGuideFinished != null">f1,</if>
+			<if test="integralGuideFinished != null">f2,</if>
+			create_date,
+			del_flag)
+		VALUE (
+			#{userId},
+			#{businessType},
+			<if test="noviceGuideFinished != null">#{noviceGuideFinished},</if>
+			<if test="integralGuideFinished != null">#{integralGuideFinished},</if>
+			NOW(),
+			0)
+	</insert>
+
+	<update id="updateUserGuideFinish" parameterType="com.doooly.entity.home.UserGuideFinish">
+		UPDATE ad_user_business_expansion
+		<set>
+			<if test="noviceGuideFinished != null">f1 = #{noviceGuideFinished},</if>
+			<if test="integralGuideFinished != null">f2 = #{integralGuideFinished},</if>
+		</set>
+		WHERE user_id = #{userId}
+		AND business_type = #{businessType}
+		AND del_flag = 0
+	</update>
+
+	<select id="findUserGuideInfos" resultType="com.doooly.entity.reachad.AdUserBusinessExpansion">
+		SELECT
+			id, user_id, business_type, f1, f2, f15
+		FROM ad_user_business_expansion
+		WHERE user_id = #{userId}
+		AND business_type = 'app-guide'
+		AND del_flag = 0
+	</select>
+
+	<select id="getSplashScreen" resultType="com.doooly.entity.home.SplashScreenDataContract">
+		SELECT
+			id AS 'groupId',
+			IFNULL(app_start_up_url, '') AS 'appStartUpUrl',
+			IFNULL(app_start_up_verions, '') AS 'appStartUpVerions'
+		FROM ad_group
+		WHERE id = #{groupId}
+		AND del_flag = 0
+	</select>
+
+	<select id="getAdCouponActivityInfos" resultType="com.doooly.entity.coupon.AdCouponActivityInfos">
+		SELECT
+			`name` AS 'activityName',
+			activity_type AS 'activityType',
+			introduction AS 'introduction'
+		FROM ad_coupon_activity
+		WHERE id = #{activityId}
+		AND delete_flag = 0
+	</select>
+</mapper>

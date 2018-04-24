@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdActivityCategoryDao">
+
+    <sql id="AdActivityCategoryColumns">
+		a.id AS "id",
+		a.category_num AS "categoryNum",
+		a.category_name AS "categoryName",
+		a.platform AS "platform",
+		a.state AS "state",
+		a.sort AS "sort",
+		a.create_date AS "create_date",
+		a.update_date AS "update_date"
+	</sql>
+	
+	<select id="findList" resultType="AdActivityCategory">
+		SELECT 
+			<include refid="AdActivityCategoryColumns"/>
+<!-- 			b.end_date, -->
+<!-- 			b.begin_date -->
+		FROM ad_activity_category a
+		LEFT JOIN
+			 ad_coupon_activity b
+		ON
+			 a.id = b.category_id
+		LEFT JOIN
+			 ad_basic_type c
+		ON 
+			 c.id = b.activity_type
+		<where>
+			a.del_flag = '0'
+			and a.state = '1'
+			and a.platform in (#{platform},99)
+			<if test="state !=null and state != ''">
+			   	AND a.state = #{state}
+			</if>
+			<if test="activityCategory !=null and activityCategory != ''">
+			   	AND a.id = #{activityCategory}
+			</if>
+		</where>
+		GROUP BY
+ 			a.id
+		<choose>
+			<otherwise>
+			ORDER BY a.sort ASC ,a.create_date DESC
+			</otherwise>
+		</choose>
+	</select>
+		
+	<select id="get" resultType="AdActivityCategory">
+		SELECT 
+			<include refid="AdActivityCategoryColumns"/>
+		FROM ad_activity_category a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getCategoryNum" resultType="java.lang.Integer">
+		SELECT 
+			max(id)
+		FROM ad_activity_category 
+	</select>
+	
+	<update id="delete">
+		UPDATE ad_activity_category SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<insert id="insert" keyProperty="id">
+		INSERT INTO ad_activity_category(
+			category_num,
+			category_name,
+			platform,
+			state,
+			sort,
+			del_flag,
+			create_date,
+			update_date
+		) VALUES (
+			#{categoryNum},
+			#{categoryName},
+			#{platform},
+			#{state},
+			#{sort},
+			0,
+			#{createDate},
+			#{updateDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ad_activity_category SET 
+			category_name = #{categoryName},
+			platform = #{platform},
+			state = #{state},
+			sort = #{sort},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

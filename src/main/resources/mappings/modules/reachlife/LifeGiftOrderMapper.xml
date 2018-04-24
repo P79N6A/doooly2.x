@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeGiftOrderDao">
+	
+	<!-- 保存福利数据 -->
+	<insert id="insert" parameterType="com.doooly.entity.reachlife.LifeGiftOrder">
+		insert into
+			xx_gift_order
+		(
+			create_date,
+			member,
+			receive_date,
+			modify_date,
+			code,
+			product,
+			sn,
+			status
+		)
+		values
+		(
+			#{createDate},
+			#{member},
+			#{receiveDate},
+			#{modifyDate},
+			#{code},
+			#{product},
+			#{sn},
+			#{status}
+		)
+	</insert>  
+</mapper>

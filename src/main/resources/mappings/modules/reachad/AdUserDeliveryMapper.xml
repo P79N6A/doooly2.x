@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdUserDeliveryDao">
+
+	<sql id="Base_Column_List" >
+    	d.id AS "id", 
+		d.user_id AS "userId", 
+		d.receiver_name AS "receiverName", 
+		d.receiver_telephone AS "receiverTelephone", 
+		d.province AS "province", 
+		d.city AS "city", 
+		d.area AS "area", 
+		d.address AS "address", 
+		d.is_default AS "isDefault", 
+		d.create_date AS "createDate", 
+		d.update_date AS "updateDate"
+  	</sql>
+	
+	<select id="getUserDeliveryList" resultType="com.doooly.entity.reachad.AdUserDelivery">
+        SELECT 
+        	<include refid="Base_Column_List"/>
+		FROM ad_user_delivery d
+		WHERE d.user_id = #{userId}
+    </select>
+    
+	<select id="getDefaultDelivery" resultType="com.doooly.entity.reachad.AdUserDelivery">
+        SELECT 
+        	<include refid="Base_Column_List"/>
+		FROM ad_user_delivery d
+		WHERE d.user_id = #{userId}
+		ORDER BY d.is_default DESC 
+		LIMIT 1
+    </select>
+    
+    <select id="get" resultType="com.doooly.entity.reachad.AdUserDelivery">
+        SELECT 
+			<include refid="Base_Column_List"/>
+		FROM ad_user_delivery d
+		WHERE d.id = #{id}
+    </select>
+    
+  	<insert id="insert" parameterType="com.doooly.entity.reachad.AdUserDelivery" >
+	    INSERT INTO ad_user_delivery (
+	    	id,
+	    	user_id,
+	    	receiver_name,
+	    	receiver_telephone,
+	    	province,
+	    	city,
+	    	area,
+	    	address,
+	    	is_default,
+	    	create_date,
+	    	update_date
+	   	)VALUES (
+		    #{id}, 
+		    #{userId},
+		    #{receiverName},
+		    #{receiverTelephone},
+		    #{province},
+		    #{city},
+		    #{area},
+		    #{address},
+		    #{isDefault},
+		    #{createDate},
+		    #{updateDate}
+	    )
+  	</insert>
+    
+    <update id="update" parameterType="com.doooly.entity.reachad.AdUserDelivery">
+	  	UPDATE ad_user_delivery
+	  	SET 
+	  		receiver_name = #{receiverName}, 
+	  		receiver_telephone = #{receiverTelephone},
+	  		province = #{province},
+		    city = #{city},
+		   	area = #{area},
+	  		address = #{address},
+	  		is_default = #{isDefault},
+	  		update_date = #{updateDate}
+	  	WHERE 
+	  		id = #{id}
+  	</update>
+  	
+  	<delete id="delete" parameterType="java.lang.Long" >
+	    DELETE FROM ad_user_delivery
+	    WHERE id = #{id}
+  	</delete>
+  	
+  	<update id="updateNonDefaultDelivery" parameterType="java.lang.String">
+	  	UPDATE ad_user_delivery d
+			SET d.is_default = 0
+		WHERE d.user_id = #{userId}
+  	</update>
+  	
+  	<update id="updateDefaultDelivery" parameterType="java.lang.String">
+	  	UPDATE ad_user_delivery d
+			SET d.is_default = 1
+		WHERE d.id = #{deliveryId}
+  	</update>
+				
+</mapper>

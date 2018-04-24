@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdReturnPointsDao">
+    
+	<sql id="adReturnPointsColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.order_id AS "orderId",
+        a.report_id AS "reportId",
+        a.amount AS "amount",
+        a.type AS "type",
+        a. STATUS AS "status",
+        a.create_date AS "createDate",
+        ab.company AS "company",
+        ab.logo AS "logo",
+        abs.store_name AS "storeName"
+	</sql>
+
+    <sql id="joinTables">
+        LEFT JOIN ad_user u ON a.user_id = u.id
+        LEFT JOIN _order o ON a.order_id = o.id
+        LEFT JOIN ad_business ab ON o.bussinessId = ab.business_id
+        LEFT JOIN ad_business_store abs ON o.storesId = abs.store_number AND ab.id = abs.business_id
+    </sql>
+
+
+    <select id="getTotalNum" resultType="int">
+        SELECT
+           COUNT(1)
+        FROM
+           ad_return_points a
+        <include refid="joinTables"/>
+        <where>
+            a.del_flag = 0
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="income != null and income == 2">
+                AND a.type != 1
+            </if>
+            <if test="income != null and income == 1">
+                AND a.type = 1
+            </if>
+             and a.status = 2
+        </where>
+    </select>
+
+    <select id="getAdReturnPoints" resultType="AdReturnPoints">
+        SELECT
+            <include refid="adReturnPointsColumns"/>
+        FROM
+            ad_return_points a
+        <include refid="joinTables"/>
+        <where>
+            a.del_flag = 0 AND a.user_id = #{userId}
+            <if test="income != null and income == 2">
+                AND a.type != 1
+            </if>
+            <if test="income != null and income == 1">
+                AND a.type = 1
+            </if>
+            and a.status = 2
+        </where>
+        ORDER BY
+        a.create_date DESC
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+
+    <select id="getAvailablePointDetail" resultType="AdReturnPoints">
+        SELECT
+            <include refid="adReturnPointsColumns"/>
+        FROM
+            ad_return_points a
+        <include refid="joinTables"/>
+        WHERE a.id = #{returnPointsId}
+    </select>
+
+    <select id="getByUserIds" resultType="AdReturnPoints">
+        SELECT 
+        	d.logo as 'logo',
+			d.company as 'company',
+			a.order_id,
+			a.amount,
+			a.create_date,
+			c.store_name as "storeName",
+			a.type,
+			a.status
+		FROM
+			ad_return_points a
+		LEFT JOIN 
+			_order b ON a.order_id = b.id
+		LEFT JOIN 
+			ad_business d ON d.business_id = b.bussinessId
+		LEFT JOIN 
+			ad_business_store c ON b.storesId = c.store_number AND d.id = c.business_id
+		WHERE
+		 a.create_date between #{beginDate} and #{endDate}
+		 and
+		 a.status = 2
+		 and
+		 a.user_id IN  
+		<foreach collection="familyIdsList" item="userId"   open="("  separator="," close=")">
+			#{userId}
+		</foreach>
+		ORDER BY a.create_date DESC 
+    </select>
+
+    <select id="getCountByUserIds" resultType="Integer">
+      	select
+      		COUNT(DISTINCT(user_id))
+      	from
+      		ad_return_points
+      	where
+      		TO_DAYS(create_date) =TO_DAYS(NOW())
+      	AND
+      	user_id IN  
+		<foreach collection="familyIdsList" item="userId"   open="("  separator="," close=")">
+			#{userId}
+		</foreach>
+    </select>
+    
+    </mapper>

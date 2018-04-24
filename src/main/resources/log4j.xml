@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %c - %m%n" />
+		</layout>
+
+	</appender>
+	<appender class="org.apache.log4j.RollingFileAppender" name="file">
+		<param name="File" value="/data/logs/doooly/daily.log" />
+		<param name="MaxFileSize" value="100KB" />
+		<param name="MaxBackupIndex" value="2" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%t] %-17c{2} (%13F:%L) %3x - %m%n" />
+		</layout>
+
+	</appender>
+	<root>
+		<priority value ="DEBUG" />
+		<appender-ref ref="console" />
+		<appender-ref ref="file" />
+	</root>
+
+</log4j:configuration>

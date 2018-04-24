@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdSelfProductCouponDao">
+    <sql id="adSelfProductCouponColumns">
+        a.id AS "id",
+        a.order_id AS "orderId",
+        a.number AS "number",
+        a.coupon_card_number AS "couponCardNumber",
+        a.coupon_card_password AS "couponCardPassword",
+        a.purchase_status AS "purchaseStatus",
+        a.use_status AS "useStatus",
+        a.user_card_number AS "userCardNumber",
+        a.telephone AS "telephone",
+        a.use_date AS "useDate",
+        a.create_date AS "createDate",
+        a.create_user AS "createUser",
+        a.update_date AS "updateDate",
+        a.update_user AS "updateUser",
+        a.del_flag AS "delFlag"
+    </sql>
+
+    <sql id="adSelfProductCouponJoins">
+    </sql>
+
+    <select id="getProductCoupon" resultType="com.doooly.entity.reachad.AdSelfProductCoupon">
+        SELECT
+            <include refid="adSelfProductCouponColumns"/>
+        FROM
+            ad_self_product_coupon a,
+            ad_self_product_sku b
+        WHERE
+        a.number = b.external_number
+        AND a.purchase_status = 1
+        AND b.id = #{productSkuId} LIMIT 1
+    </select>
+
+    <update id="update">
+        UPDATE ad_self_product_coupon SET
+        purchase_status = #{purchaseStatus},
+        user_card_number = #{userCardNumber},
+        order_id = #{orderId},
+        telephone = #{telephone},
+        update_date = now()
+        WHERE id = #{id}
+    </update>
+</mapper>

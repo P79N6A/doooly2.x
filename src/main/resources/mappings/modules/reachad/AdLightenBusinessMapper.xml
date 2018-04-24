@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdLightenBusinessDao">
+
+
+	<insert id="lightenBusiness"  parameterType="com.doooly.entity.reachad.AdBusinessLighten">
+		insert into ad_business_lighten
+		(
+			business_id,
+			user_id,
+			type,
+			lighten_time,
+			del_flag,
+			create_time,
+			update_time
+		)
+		VALUES
+		<foreach collection="businessIdAllList" item="businessId" separator=",">
+		(
+			#{businessId},
+			#{userId},
+			1,
+			now(),
+			0,
+			now(),
+			now()
+		)
+		</foreach>
+		
+	</insert>
+	
+	
+	<insert id="insert"  parameterType="com.doooly.entity.reachad.AdBusinessLighten"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into ad_business_lighten
+		(
+			business_id,
+			user_id,
+			type,
+			lighten_time,
+			del_flag,
+			create_time,
+			update_time
+		)
+		VALUES
+		(
+			#{businessId},
+			#{userId},
+			#{type},
+			#{lightenTime},
+			#{delFlag},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<select id="getByUserId" resultType="com.doooly.entity.reachad.AdBusinessLighten">
+		select 
+			id,
+			business_id,
+			user_id,
+			type,
+			lighten_time,
+			del_flag,
+			create_time,
+			update_time
+		
+		from ad_business_lighten
+		where 
+		 user_id = #{userId}
+		 and
+		 del_flag = 0
+	</select>
+	
+	<select id="getByUserIdIsLingten" resultType="com.doooly.entity.reachad.AdBusinessLighten">
+		 select 
+			id,
+			business_id,
+			user_id,
+			type,
+			lighten_time,
+			del_flag,
+			create_time,
+			update_time
+		
+		 from ad_business_lighten
+		 where 
+		 user_id = #{userId}
+		 and
+		 del_flag = 0
+		 and 
+		 type = 1
+	</select>
+
+
+	<select id="lightenBusinessType" resultType="com.doooly.entity.reachad.AdBusinessLighten">
+		select 
+			id,
+			business_id,
+			user_id,
+			type,
+			lighten_time,
+			del_flag,
+			create_time,
+			update_time
+		from ad_business_lighten
+		where 
+		 user_id = #{userId}
+		 and
+		 business_id = #{businessId}
+		 and
+		 del_flag = 0 order by type desc limit 1
+	
+	</select>
+	
+
+
+</mapper>

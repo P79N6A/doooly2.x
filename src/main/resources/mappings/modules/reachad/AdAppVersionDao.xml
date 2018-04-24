@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdAppVersionDao">
+
+    <sql id="adColumns">
+        a.id AS "id",
+        a.unique_identification AS "uniqueIdentification",
+        a.version_code AS "versionCode",
+        a.device_number AS "deviceNumber",
+        a.device_name AS "deviceName",
+        a.type AS "type",
+        a.create_date AS "createDate",
+        a.update_date AS "updateDate"
+    </sql>
+
+    <select id="getVersionInfo" resultType="AdAppVersion">
+        SELECT
+            <include refid="adColumns"/>
+        FROM
+            ad_app_version a
+        WHERE a.unique_identification = #{uniqueIdentification} AND a.type = #{type}
+    </select>
+
+
+    <insert id="insert" parameterType="AdAppVersion" useGeneratedKeys="true" keyProperty="id">
+      INSERT INTO ad_app_version (
+            unique_identification,
+            version_code,
+            device_number,
+            device_name,
+            type,
+            create_date,
+            update_date
+        )
+        VALUES
+            (
+                #{uniqueIdentification},
+                #{versionCode},
+                #{deviceNumber},
+                #{deviceName},
+                #{type},
+                now(),
+                now()
+            )
+    </insert>
+
+    <update id="update" parameterType="AdAppVersion" >
+        UPDATE ad_app_version a SET version_code = #{versionCode} WHERE a.unique_identification = #{uniqueIdentification} AND a.type = #{type}
+    </update>
+    
+
+</mapper>

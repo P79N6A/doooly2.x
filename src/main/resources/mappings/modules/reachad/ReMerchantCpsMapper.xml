@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.ReMerchantCpsDao">
+    <resultMap id="resultMap"
+		type="com.doooly.entity.reachad.ReMerchantCps">
+	</resultMap>
+	
+	<sql id="reMerchantCpsColumns">
+		a.id AS "id",
+		a.ad_business_id AS "adBusinessId",
+		a.set_status AS "setStatus",
+		a.cps_status AS "cpsStatus"
+	</sql>
+	
+	<select id="getCpsByBusinessId" resultMap="resultMap">
+		select 
+			<include refid="reMerchantCpsColumns"/>
+		from	
+			re_merchant_cps	a
+		where
+			ad_business_id=#{adBusinessId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO re_merchant_cps(
+			id,
+			ad_business_id,
+			set_status,
+			cps_status
+		) VALUES (
+			#{id},
+			#{adBusinessId},
+			#{setStatus},
+			#{cpsStatus}
+		)
+	</insert>
+	
+	<insert id="batchInsert">
+		INSERT INTO re_merchant_cps(
+			id,
+			ad_business_id,
+			set_status,
+			cps_status
+		) VALUES
+		<foreach collection="list" item="item" separator=",">
+		 (	
+			#{id},
+			#{adBusinessId},
+			#{setStatus},
+			#{cpsStatus}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete">
+		DELETE FROM re_merchant_cps
+		WHERE id = #{id}
+	</delete>
+	
+</mapper>

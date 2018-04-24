@@ -1,0 +1,1236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdUserDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdUser" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="group_num" property="groupNum" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="CHAR" />
+    <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+    <result column="mailbox" property="mailbox" jdbcType="VARCHAR" />
+    <result column="identity_card" property="identityCard" jdbcType="VARCHAR" />
+    <result column="card_number" property="cardNumber" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="pay_password" property="payPassword" jdbcType="VARCHAR" />
+    <result column="integral" property="integral" jdbcType="DECIMAL" />
+    <result column="start_integral" property="startIntegral" jdbcType="DECIMAL" />
+    <result column="expect_integral" property="expectIntegral" jdbcType="DECIMAL" />
+    <result column="line_credit" property="lineCredit" jdbcType="DECIMAL" />
+    <result column="is_active" property="isActive" jdbcType="CHAR" />
+    <result column="is_pay_password" property="isPayPassword" jdbcType="CHAR" />
+    <result column="type" property="type" jdbcType="SMALLINT" />
+    <result column="data_syn" property="dataSyn" jdbcType="CHAR" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="source_card_number" property="sourceCardNumber" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, group_num, name, sex, telephone, mailbox, identity_card, card_number, password, 
+    pay_password, integral, start_integral, expect_integral, line_credit, is_active, 
+    is_pay_password, type, data_syn, create_by, del_flag, state, remarks, source_card_number, 
+    update_date, update_by, create_date
+  </sql>
+  
+  <select id="get" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+  	Select *
+  	From ad_user
+  	<where>
+  		<if test="cardNumber != null and cardNumber != ''">
+  			card_number = #{cardNumber} 
+  		</if> 
+  		<if test="telephone != null and telephone != ''">
+  			and telephone = #{telephone}
+  		</if>
+  		<if test="isActive != null and isActive != ''">
+  			and is_active = #{isActive}
+  		</if>
+  		and del_flag = 0
+  	</where>
+  	<!-- <where>
+  		<choose>
+  			<when test="cardNumber != null">
+  				
+  			</when>
+  			<otherwise>
+  				
+  			</otherwise>
+  		</choose>
+  	</where>	 -->
+  </select>
+  
+  <select id="getById" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+  	Select *
+  	From ad_user
+  	<where>
+  		id = #{id}
+  		and del_flag = 0
+  	</where>
+  </select>
+  
+  <update id="updateActiveStatus" parameterType="com.doooly.entity.reachad.AdUser">
+  	Update ad_user
+  	Set 
+  		is_active = #{isActive}, 
+  		active_date = #{activeDate},
+  		update_date = #{updateDate},
+  		<if test="password != null and password != ''">
+  			password = #{password},
+  			pay_password = #{payPassword},
+  		</if>
+  		data_syn = #{dataSyn}
+  	Where 
+  		telephone = #{telephone}
+  </update>
+  
+  <update id="updatePwd" >
+  	UPDATE 
+  		ad_user
+  	SET
+  		password = md5(#{newPwd})
+  	WHERE
+  		telephone = #{mobile}
+  </update>
+  
+   <select id="getUserCounts" parameterType="AdUser" resultType="java.lang.Integer">
+  	select count(id) from ad_user
+  	<include refid="whereSql"/>
+  </select>
+  <select id="getUserTels" parameterType="java.util.Map" resultType="java.lang.String">
+  	select GROUP_CONCAT(u.telephone) 
+  	from 
+  	(select telephone from ad_user
+  	<include refid="whereSql"/>
+  	limit #{offset},#{page}
+  	)u
+  </select>
+  <sql id="whereSql">
+  	<where>
+  		del_flag=0
+  		and
+  		is_active=2
+  		<if test="groupNum!=null">
+  			and group_num=#{groupNum}
+  		</if>
+  		<if test="cardNumber!=null and cardNumber!=''">
+  			and card_number like concat(#{cardNumber},'%')
+  		</if>
+  		<if test="type!=null">
+  			and `type`=#{type}
+  		</if>
+  	</where>
+  </sql> 
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ad_user
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="getIdByPhoneOrCard" resultType="java.lang.Long">
+  	select
+  		id
+  	from
+  		ad_user
+  	where
+  		telephone=#{phoneOrCard}
+  		or card_number=#{phoneOrCard}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ad_user
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.doooly.entity.reachad.AdUser" >
+    insert into ad_user (id, group_num, name, 
+      sex, telephone, mailbox, 
+      identity_card, card_number, password, 
+      pay_password, integral, start_integral, 
+      expect_integral, line_credit, is_active, 
+      is_pay_password, type, data_syn, 
+      create_by, del_flag, state, 
+      remarks, source_card_number, update_date, 
+      update_by, create_date)
+    values (#{id,jdbcType=BIGINT}, #{groupNum,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, 
+      #{sex,jdbcType=CHAR}, #{telephone,jdbcType=VARCHAR}, #{mailbox,jdbcType=VARCHAR}, 
+      #{identityCard,jdbcType=VARCHAR}, #{cardNumber,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{payPassword,jdbcType=VARCHAR}, #{integral,jdbcType=DECIMAL}, #{startIntegral,jdbcType=DECIMAL}, 
+      #{expectIntegral,jdbcType=DECIMAL}, #{lineCredit,jdbcType=DECIMAL}, #{isActive,jdbcType=CHAR}, 
+      #{isPayPassword,jdbcType=CHAR}, #{type,jdbcType=SMALLINT}, #{dataSyn,jdbcType=CHAR}, 
+      #{createBy,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR}, #{state,jdbcType=INTEGER}, 
+      #{remarks,jdbcType=VARCHAR}, #{sourceCardNumber,jdbcType=VARCHAR}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{updateBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.reachad.AdUser" >
+    insert into ad_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="groupNum != null" >
+        group_num,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="telephone != null" >
+        telephone,
+      </if>
+      <if test="mailbox != null" >
+        mailbox,
+      </if>
+      <if test="identityCard != null" >
+        identity_card,
+      </if>
+      <if test="cardNumber != null" >
+        card_number,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="payPassword != null" >
+        pay_password,
+      </if>
+      <if test="integral != null" >
+        integral,
+      </if>
+      <if test="startIntegral != null" >
+        start_integral,
+      </if>
+      <if test="expectIntegral != null" >
+        expect_integral,
+      </if>
+      <if test="lineCredit != null" >
+        line_credit,
+      </if>
+      <if test="isActive != null" >
+        is_active,
+      </if>
+      <if test="isPayPassword != null" >
+        is_pay_password,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="dataSyn != null" >
+        data_syn,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="sourceCardNumber != null" >
+        source_card_number,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="groupNum != null" >
+        #{groupNum,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=CHAR},
+      </if>
+      <if test="telephone != null" >
+        #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="mailbox != null" >
+        #{mailbox,jdbcType=VARCHAR},
+      </if>
+      <if test="identityCard != null" >
+        #{identityCard,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNumber != null" >
+        #{cardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="payPassword != null" >
+        #{payPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="integral != null" >
+        #{integral,jdbcType=DECIMAL},
+      </if>
+      <if test="startIntegral != null" >
+        #{startIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="expectIntegral != null" >
+        #{expectIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="lineCredit != null" >
+        #{lineCredit,jdbcType=DECIMAL},
+      </if>
+      <if test="isActive != null" >
+        #{isActive,jdbcType=CHAR},
+      </if>
+      <if test="isPayPassword != null" >
+        #{isPayPassword,jdbcType=CHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=SMALLINT},
+      </if>
+      <if test="dataSyn != null" >
+        #{dataSyn,jdbcType=CHAR},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCardNumber != null" >
+        #{sourceCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdUser" >
+    update ad_user
+    <set >
+      <if test="groupNum != null" >
+        group_num = #{groupNum,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=CHAR},
+      </if>
+      <if test="telephone != null" >
+        telephone = #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="mailbox != null" >
+        mailbox = #{mailbox,jdbcType=VARCHAR},
+      </if>
+      <if test="identityCard != null" >
+        identity_card = #{identityCard,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNumber != null" >
+        card_number = #{cardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="payPassword != null" >
+        pay_password = #{payPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="integral != null" >
+        integral = #{integral,jdbcType=DECIMAL},
+      </if>
+      <if test="startIntegral != null" >
+        start_integral = #{startIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="expectIntegral != null" >
+        expect_integral = #{expectIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="lineCredit != null" >
+        line_credit = #{lineCredit,jdbcType=DECIMAL},
+      </if>
+      <if test="isActive != null" >
+        is_active = #{isActive,jdbcType=CHAR},
+      </if>
+      <if test="isPayPassword != null" >
+        is_pay_password = #{isPayPassword,jdbcType=CHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=SMALLINT},
+      </if>
+      <if test="dataSyn != null" >
+        data_syn = #{dataSyn,jdbcType=CHAR},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceCardNumber != null" >
+        source_card_number = #{sourceCardNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.reachad.AdUser" >
+    update ad_user
+    set group_num = #{groupNum,jdbcType=BIGINT},
+      name = #{name,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=CHAR},
+      telephone = #{telephone,jdbcType=VARCHAR},
+      mailbox = #{mailbox,jdbcType=VARCHAR},
+      identity_card = #{identityCard,jdbcType=VARCHAR},
+      card_number = #{cardNumber,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      pay_password = #{payPassword,jdbcType=VARCHAR},
+      integral = #{integral,jdbcType=DECIMAL},
+      start_integral = #{startIntegral,jdbcType=DECIMAL},
+      expect_integral = #{expectIntegral,jdbcType=DECIMAL},
+      line_credit = #{lineCredit,jdbcType=DECIMAL},
+      is_active = #{isActive,jdbcType=CHAR},
+      is_pay_password = #{isPayPassword,jdbcType=CHAR},
+      type = #{type,jdbcType=SMALLINT},
+      data_syn = #{dataSyn,jdbcType=CHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=CHAR},
+      state = #{state,jdbcType=INTEGER},
+      remarks = #{remarks,jdbcType=VARCHAR},
+      source_card_number = #{sourceCardNumber,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateSelfInfomation" parameterType="com.doooly.entity.reachad.AdUser" >
+    update ad_user
+    set group_num = #{groupNum,jdbcType=BIGINT},
+      name = #{name,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=CHAR},
+      telephone = #{telephone,jdbcType=VARCHAR},
+      update_date = NOW()
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="getCountByWeekActive" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT} 
+  	and u.update_date BETWEEN DATE_SUB(CURDATE(), INTERVAL #{1,jdbcType=SMALLINT} DAY) and DATE_SUB(CURDATE(), INTERVAL #{1,jdbcType=SMALLINT}-1 DAY) ;
+  </select>
+  
+  <select id="getCountByWeekMember" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT} 
+  	and DATE_SUB(CURDATE(), INTERVAL #{1,jdbcType=SMALLINT}-1 DAY) > u.update_date;
+  </select>
+  
+  <select id="getCountByMonthActive" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT} 
+  	and date_format(u.update_date,'%Y-%m') = date_format(DATE_SUB(curdate(), INTERVAL #{1,jdbcType=SMALLINT}  MONTH),'%Y-%m');
+  </select>
+  
+  <select id="getCountByMonthMember" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT} 
+  	and date_format(u.update_date,'%Y-%m') &lt;= date_format(DATE_SUB(curdate(), INTERVAL #{1,jdbcType=SMALLINT}  MONTH),'%Y-%m');
+  </select>
+  
+  <select id="getCountByToday" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT} 
+  	and to_days(u.update_date) = to_days(now());
+  </select>
+  
+  <select id="getCountByTotal" resultType="java.lang.Integer">
+  	SELECT COUNT(0) 
+  	FROM ad_user u 
+  	where  u.del_flag = 0 
+  	and u.is_active = 2 
+  	and u.type=#{0,jdbcType=SMALLINT};
+  </select>
+  
+  <!-- add by ylzhang begin -->
+  <select id="getTotalWealth" resultType="java.lang.Integer">
+  	SELECT
+  		wealth
+  	FROM
+  		ad_user
+  	WHERE
+  		id=#{id}
+  </select>
+  
+  <update id="updateWealthByUserId">
+    UPDATE ad_user u
+    SET u.wealth = #{wealth}
+    WHERE u.id = #{userId}
+  </update>
+  <insert id="addActiveUser" parameterType="AdUser" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+  	insert into ad_user(telephone,name,card_number,password,pay_password,is_active,`type`,data_syn,group_num,active_date,update_date,create_by,update_by,create_date)
+  	values(#{telephone},#{name},#{cardNumber},md5('111111'),md5('111111'),#{isActive},0,#{dataSyn},#{groupNum},#{activeDate},#{updateDate},1,1,now())
+  	ON DUPLICATE KEY UPDATE is_active=#{isActive},data_syn=#{dataSyn},active_date=#{activeDate},update_date=#{activeDate}
+  </insert>
+  <select id="getTotalWealthPercent" resultType="java.lang.Integer">
+  	SELECT ROUND(T1.C1/T2.C2*100,0) FROM 
+		(SELECT COUNT(1) AS C1 FROM ad_user WHERE wealth &lt; #{wealth}) T1, 
+		(SELECT COUNT(1) AS C2 FROM ad_user) T2
+  </select>
+  
+  <select id="getUserWithMaxWealth" resultType="com.doooly.entity.reachad.AdUser">
+  	SELECT * FROM ad_user u ORDER BY u.wealth DESC LIMIT 1
+  </select>
+  <!-- add by ylzhang end -->
+
+	<!-- 根据卡号或手机号获取用户信息 -->
+	<select id="getUserInfo" parameterType="com.doooly.entity.reachad.AdUser" resultType="com.doooly.entity.reachad.AdUser">
+		select 
+			a.id,
+			a.telephone,
+			a.card_number as cardNumber,
+			a.del_flag delFlag,
+			a.is_active as isActive,
+			a.password,
+			a.update_date as updateDate,
+			up.data_sources as dataSources,
+  			up.is_audit as isAudit
+		from ad_user a LEFT JOIN ad_user_personal_info up on a.id = up.id 
+		where 1=1 
+		and (a.telephone = #{telephone} or a.card_number = #{cardNumber})
+	</select>
+	
+	<select id="findAdUserConnByUserId" resultType="com.doooly.entity.reachad.AdUserConn" >
+		select 
+			a.id as "userId",
+			a.name as "name",
+			a.telephone "telephone",
+			a.sex as "sex",
+			a.card_number as "cardNumber",
+			a.type as "userType",
+			b.app_head_image_url as "appHeadImageUrl",
+			b.work_number as "workNumber",
+			DATE_FORMAT(b.birthday,'%Y-%m-%d') as "birthday",
+			c.logo_url as "logoUrl",
+			c.mini_logo_url as "miniLogoUrl",
+			c.display_url as "displayUrl",
+			c.background_url as "backgroundUrl",
+			c.group_name as "groupName",
+			c.group_num as "groupNum",
+			c.id as "groupId",
+			c.group_short_name as groupShortName,
+			d.department_name as "departmentName",
+			e.family_relationship as "familyRelation",
+			IFNULL(b.auth_flag,"0") as authFlag
+		from ad_user a 
+			left join ad_user_personal_info b on b.id = a.id
+			left join ad_group c on c.id = a.group_num
+			left join ad_group_department d on d.id = b.ad_group_department_id
+			left join ad_family_user e ON e.user_id = a.id
+			where a.id = #{userId}
+ 	</select>
+ 	
+	<select id="getMemberCount" resultType="java.lang.Integer" >
+		select 
+			count(0)
+		from ad_user a 
+			where a.group_num = (select b.group_num from ad_user b where b.id = #{userId}) and a.del_flag=0
+  		and
+  		a.is_active=2
+ 	</select>
+ 	
+ 	<update id="updateUserData" parameterType="com.doooly.entity.reachad.AdUserConn">
+		UPDATE ad_user a 
+		<set>
+			<if test="name != null and name != ''" >
+	       		a.name = #{name}
+	    	</if>
+			<if test="sex != null and sex != ''" >
+	       		a.sex = #{sex}
+	    	</if>
+		</set>
+		WHERE a.id = #{userId}
+  	</update>
+  	
+  	<select id="getPersonalInfoByUserId" resultType="java.lang.Integer" >
+		select 
+			count(0)
+		from ad_user_personal_info a 
+			where a.id = #{userId}
+ 	</select>
+ 	
+ 	<insert id="insertPersonalData" parameterType="com.doooly.entity.reachad.AdUserConn" >
+    	insert into ad_user_personal_info
+    	<trim prefix="(" suffix=")" suffixOverrides="," >
+    		<if test="id != null" >
+		        id,
+		    </if>
+		    <if test="birthday != null" >
+		    	birthday,
+		    </if>
+		    <if test="appHeadImageUrl != null" >
+		    	app_head_image_url,
+		    </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="userId != null" >
+		        #{userId},
+		    </if>
+		    <if test="birthday != null" >
+		    	STR_TO_DATE(#{birthday},'%Y-%m-%d'),
+		    </if>
+		    <if test="appHeadImageUrl != null" >
+		    	#{appHeadImageUrl},
+		    </if>
+		</trim> 
+  	</insert>
+  	
+ 	<update id="updatePersonalData" parameterType="com.doooly.entity.reachad.AdUserConn">
+		UPDATE ad_user_personal_info b	
+		<set>
+	      <if test="birthday != null and birthday != ''" >
+	      	b.birthday = STR_TO_DATE(#{birthday},'%Y-%m-%d'),
+	      </if>
+	      <if test="appHeadImageUrl != null and appHeadImageUrl != ''" >
+	        b.app_head_image_url = #{appHeadImageUrl},
+	      </if>
+	    </set>
+		WHERE b.id = #{userId}
+  	</update>
+ 	
+  	
+    <select id="getFamilyUserInfo" resultType="com.doooly.entity.reachad.AdUserConn">
+        select
+			b.app_head_image_url as "appHeadImageUrl",
+			a.name as "name",
+			a.card_number as "cardNumber",
+			c.logo_url as "logoUrl",
+			a.telephone as "telephone",
+			a.is_active as "isActive"
+		from ad_user a
+			left join ad_user_personal_info b on b.id = a.id
+			left join ad_group c on c.id = a.group_num
+			where a.id = #{userId}
+    </select>
+    
+    <select id="getAvailablePoint" resultType="java.math.BigDecimal">
+	    select integral from ad_user where id = #{userId} and del_flag=0   
+	</select>
+	
+	<select id="getReturnPoint" resultType="java.math.BigDecimal">
+		SELECT IFNULL(SUM(amount),0)-(
+			SELECT IFNULL(SUM(amount),0)
+			FROM ad_return_points p
+			INNER JOIN ad_user u
+				ON u.id = p.user_id
+			WHERE u.id = #{userId}
+			AND p.type = 5 AND p.del_flag=0 AND p.status=2)
+		FROM ad_return_points p
+		INNER JOIN ad_user u
+			ON u.id = p.user_id
+		WHERE u.id = #{userId}
+		AND p.type = 1 AND p.del_flag=0 AND p.status=2
+    </select>
+	
+    <select id="getSharedPoints" resultType="java.math.BigDecimal">
+	    SELECT SUM(u.integral)
+		FROM ad_family f
+		INNER JOIN ad_family_user fu
+			ON f.id = fu.family_id
+		INNER JOIN ad_user u 
+			ON u.id = fu.user_id
+		WHERE f.point_share_switch = 0
+			AND fu.family_id = (SELECT family_id FROM ad_family_user where user_id = #{userId})
+			AND fu.user_id != #{userId}    
+			AND u.del_flag = 0
+	</select>
+	
+	<select id="getFamilysByids" resultType="AdUser" parameterType="String">
+		select
+			id,telephone
+		from ad_user 
+		where
+			del_flag = 0
+		and
+			is_active = '2'
+		and
+			id in
+		<foreach collection="userList" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</select>
+	
+	
+	<select id="findInviterNameByInviteeId" resultType="java.lang.String">
+		SELECT b.name 
+		FROM ad_user a
+		INNER JOIN ad_user b
+			ON a.source_card_number = b.card_number
+		WHERE a.id = #{userId}
+	</select>
+
+	<!-- 根据手机号/工号 获取用户信息 -->
+	<select id="getUserByTelWorkNum" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+		select 
+			count(a.id) + 1 as 'count',
+			a.id as 'id',
+			a.telephone as 'telephone',
+			a.card_number as 'card_number',
+			ag.group_name as "adGroup.groupName",
+			ai.id as "personalInfo.id",
+			ai.work_number as "personalInfo.workNumber"
+		from ad_user a 
+		left join ad_group ag on a.group_num = ag.id
+		left join ad_user_personal_info ai on ai.id = a.id
+		where a.telephone = #{telephone}
+		UNION ALL
+ 		select 
+			COUNT(a.id) + 1 as 'count',
+			a.id as 'id',
+			a.telephone as 'telephone',
+			a.card_number as 'card_number',
+			g.group_name as "adGroup.groupName",
+			ai.id as "personalInfo.id",
+			ai.work_number as "personalInfo.workNumber"
+		from ad_user a 
+		left join ad_group g on g.id = a.group_num
+		left join ad_user_personal_info ai on ai.id = a.id
+		join ad_active_code as ac on ac.ad_user_id = a.id and ac.id = #{adActiveCodeId}
+		where 1=1 
+		and SUBSTR(a.card_number,6) = #{workNumber} and a.group_num = #{groupNum}
+	</select>
+	
+	<!-- 手机号获取用户信息 -->
+	<select id="findByTelephone" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+		select 
+			a.id,
+			a.telephone,
+			a.card_number,
+			ag.group_name as "adGroup.groupName",
+			ai.id as "personalInfo.id",
+			ai.work_number as "personalInfo.workNumber"
+		from ad_user a 
+		left join ad_group ag on a.group_num = ag.id
+		left join ad_user_personal_info ai on ai.id = a.id
+		where a.telephone = #{telephone}
+	</select>
+	
+	<!-- 工号获取用户信息 -->
+	<select id="findUserByNameAndWorkNumber" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+		select 
+			ai.id as "personalInfo.id",
+			ai.work_number as "personalInfo.workNumber",
+			a.id AS "id",
+			a.group_num AS "adGroup.id",
+			a.card_number AS "cardNumber",
+			a.name AS "name",
+			a.telephone AS "telephone",
+			a.is_active AS "isActive",
+			a.source_card_number as "sourceCardnumber",
+			g.group_name AS "adGroup.groupName",
+			a.group_num AS "groupNum",
+			g.group_num AS "adGroup.groupNum"
+		from ad_user a
+		left join ad_group g on g.id = a.group_num
+		left join ad_user_personal_info ai on ai.id = a.id
+		join ad_active_code as ac on ac.ad_user_id = a.id and ac.id = #{adActiveCode.id}
+		where 1=1
+		and SUBSTR(a.card_number,6) = #{personalInfo.workNumber} and a.group_num = #{adGroup.id}
+	</select>
+	
+	<!-- 保存用户个人信息 -->
+	<insert id="savePersonalInfo">
+		insert into 
+		ad_user_personal_info
+		(
+			id,
+			work_number
+		)values
+		(
+			#{id},
+			#{workNumber}
+		)
+	</insert>
+	
+	<!-- 更新user,personal表信息 -->
+	<update id="updateUserPersonal" parameterType="com.doooly.entity.reachad.AdUser">
+		UPDATE 
+			ad_user a 
+			left join ad_user_personal_info aupi on a.id = aupi.id
+		SET 
+			a.is_active =#{isActive},
+		  	a.data_syn =#{dataSyn},
+		  	<if test="telephone != null">
+			  	a.telephone = #{telephone},
+		  	</if>
+		  	<if test="cardNumber != null">
+			  	a.card_number = #{cardNumber},
+		  	</if>
+		  	<if test="name != null">
+			  	a.name = #{name},
+		  	</if>
+		  	<if test="personalInfo != null and personalInfo.workNumber != null">
+			  	aupi.work_number = #{personalInfo.workNumber},
+		  	</if>
+		  	<if test="groupNum != null">
+			  	a.group_num = #{groupNum},
+		  	</if>
+		  	<if test="password != null">
+				a.password = #{password},
+			</if>
+		  	<!-- a.data_syn = 1, -->
+		  	a.update_date = #{updateDate},
+		  	a.active_date = #{activeDate}
+	 	WHERE 
+	 		a.id=#{id}
+	</update>
+	
+	<!-- 删除用户信息 -->
+	<update id="deleteAdUser">
+		update 
+			ad_user 
+		set 
+			del_flag = 1,
+			update_date = now()
+		where 
+		 	id = #{id}
+	</update>
+	
+	<select id="findByMobile" resultType="AdUser">
+		select * from ad_user
+		Where telephone = #{mobile} limit 1
+	</select>
+	<select id="findByMobileBySelfApplication" resultType="AdUser">
+		select a.id,
+			a.telephone,
+			a.card_number as cardNumber,
+			a.del_flag delFlag,
+			a.is_active as isActive,
+			a.password,
+			up.data_sources as dataSources,
+  			up.is_audit as isAudit
+		from ad_user a LEFT JOIN ad_user_personal_info up on a.id = up.id 
+		Where telephone = #{mobile} limit 1
+	</select>
+	
+	<select id="findByCardNumber" resultType="AdUser">
+		SELECT 
+			a.id AS "id",
+		a.group_num AS "adGroup.id",
+		a.card_number AS "cardNumber",
+		a.card_range AS "cardRange",
+		a.sex AS "sex",
+		a.name AS "name",
+		a.state AS "state",
+		a.telephone AS "telephone",
+		a.mailbox AS "mailbox",
+		a.identity_card AS "identityCard",
+		a.password AS "password",
+		a.pay_password AS "payPassword", 
+		a.integral AS "integral",
+		a.start_integral AS "startIntegral",
+		a.expect_integral AS "expectIntegral",
+		a.line_credit AS "lineCredit",
+		a.is_active AS "isActive",
+		a.last_is_active AS "lastIsActive",
+		a.is_pay_password AS "isPayPassword",
+		a.data_syn AS "dataSyn",
+		a.type AS "type",
+		a.create_by AS "createBy.id",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		a.active_date AS "activeDate",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.create_date AS "createDate",
+		a.source_card_number as "sourceCardnumber"
+		FROM ad_user a
+		LEFT JOIN ad_group g ON a.group_num = g.id
+		WHERE a.card_number = #{cardNumber} 
+	</select>
+	
+	<select id="getUser" resultType="AdUser">
+		SELECT 
+		a.id AS "id",
+		a.group_num AS "groupNum",
+		a.card_number AS "cardNumber",
+		a.sex AS "sex",
+		a.name AS "name",
+		a.telephone AS "telephone",
+		a.mailbox AS "mailbox",
+		a.identity_card AS "identityCard",
+		a.password AS "password",
+		a.pay_password AS "payPassword",
+		a.integral AS "integral",
+		a.start_integral AS "startIntegral",
+		a.expect_integral AS "expectIntegral",
+		a.line_credit AS "lineCredit",
+		a.is_active AS "isActive",
+		a.last_is_active AS "lastIsActive",
+		a.is_pay_password AS "isPayPassword",
+		a.data_syn AS "dataSyn",			
+		a.type AS "type",
+		a.create_by AS "createBy.id",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.create_date AS "createDate",
+		a.source_card_number as "sourceCardnumber"
+		FROM ad_user a WHERE 1=1 
+		<if test="cardNumber!=null and cardNumber!=''">
+			and a.card_number=#{cardNumber}
+		</if>
+		<if test="telephone!=null and telephone!=''">
+			and a.telephone=#{telephone}
+		</if>
+		limit 1
+	</select>
+	
+	
+	<select id="getMyFamilyInfo" resultType="java.util.Map">
+					SELECT
+			id
+		FROM
+			(
+				SELECT
+					a.id
+				FROM
+					ad_user a
+				LEFT JOIN ad_invitation_record b ON a.id = b.inviter_id
+				WHERE
+					(
+						b.inviter_id = #{userId}
+						OR b.invitee_id = #{userId}
+					)
+				GROUP BY
+					a.id
+				UNION ALL
+					SELECT
+						a.invitee_id
+					FROM
+						ad_invitation_record a
+					LEFT JOIN ad_user b ON b.id = a.inviter_id
+					WHERE
+						a.inviter_id = (
+							SELECT
+								a.id
+							FROM
+								ad_user a
+							LEFT JOIN ad_invitation_record b ON a.id = b.inviter_id
+							WHERE
+								(
+									b.inviter_id = #{userId}
+									OR b.invitee_id = #{userId}
+								)
+							GROUP BY
+								a.id
+						)
+			) a
+		WHERE
+			a.id != #{userId}
+	</select>
+	<select id="find12NumberCountByGroupId" resultType="java.lang.String">
+		select  CASE when MAX(a.card_number) is null then '0000000' else MAX(a.card_number) END as cardNumber from ad_user a where LENGTH(a.card_number) =12
+		AND a.card_number LIKE 
+					concat(#{groupNum},'%')
+	</select>
+	<select id="isDongHang" resultType="java.lang.Integer">
+		select b.id as 'blocId' from ad_user a 
+			LEFT JOIN ad_group g on a.group_num =g.id
+			LEFT JOIN ad_bloc b on g.bloc_id=b.id 
+			where a.id =#{userId} and b.id in (88,92)
+	</select>
+	
+	<select id="findByTelephones" resultType="java.lang.String">
+		select 
+			a.id
+		from ad_user a
+		where 
+		a.telephone in
+		<foreach collection="mobiles" open="(" close=")" separator="," item="mobile">
+		#{mobile}
+		</foreach>
+	</select>
+	
+	<select id="getIds" resultType="java.lang.String">
+		select 
+			a.telephone
+		from ad_user a
+		where 
+		a.id in
+		<foreach collection="userIds" open="(" close=")" separator="," item="id">
+		#{id}
+		</foreach>
+	</select>
+	
+	<!-- 根据企业group_num生成用户新卡号 -->
+	<select id="createCardNumber" resultType="java.lang.String">
+		select 
+			case 
+				ISNULL(MAX(a.card_number)) 
+			when 1 
+			then CONCAT(b.group_num,'0000001')
+			else 
+				case 
+				when LENGTH(SUBSTRING(MAX(a.card_number), 6) + 1) &lt; 7 
+				then CONCAT(b.group_num,LPAD(SUBSTRING(MAX(a.card_number), 6) + 1,7,0))
+				ELSE CONCAT(b.group_num, SUBSTRING(MAX(a.card_number), 6) + 1)
+				end
+			end 
+		from ad_user a 
+		left JOIN ad_group b on SUBSTRING(a.card_number, 1, 5) = b.group_num
+		where 1=1 
+		and b.id = #{groupId}
+		and LENGTH(a.card_number) >= 12 
+	</select>
+	
+	<!-- 保存用户信息  -->
+	<insert id="saveUser" parameterType="com.doooly.entity.reachad.AdUser" useGeneratedKeys="true"
+		keyProperty="id">
+    	insert into ad_user
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+		  <if test="id != null" >
+		    id,
+		  </if>
+		  <if test="groupNum != null" >
+		    group_num,
+		  </if>
+		  <if test="name != null" >
+		    name,
+		  </if>
+		  <if test="sex != null" >
+		    sex,
+		  </if>
+		  <if test="telephone != null" >
+		    telephone,
+		  </if>
+		  <if test="mailbox != null" >
+		    mailbox,
+		  </if>
+		  <if test="identityCard != null" >
+		    identity_card,
+		  </if>
+		  <if test="cardNumber != null" >
+		    card_number,
+		  </if>
+		  <if test="password != null" >
+		    password,
+		  </if>
+		  <if test="payPassword != null" >
+		    pay_password,
+		  </if>
+		  <if test="integral != null" >
+		    integral,
+		  </if>
+		  <if test="startIntegral != null" >
+		    start_integral,
+		  </if>
+		  <if test="expectIntegral != null" >
+		    expect_integral,
+		  </if>
+		  <if test="lineCredit != null" >
+		    line_credit,
+		  </if>
+		  <if test="isActive != null" >
+		    is_active,
+		  </if>
+		  <if test="activeDate != null" >
+		    active_date,
+		  </if>
+		  <if test="isPayPassword != null" >
+		    is_pay_password,
+		  </if>
+		  <if test="type != null" >
+		    type,
+		  </if>
+		  <if test="dataSyn != null" >
+		    data_syn,
+		  </if>
+		  <if test="createBy != null" >
+		    create_by,
+		  </if>
+		  <if test="delFlag != null" >
+		    del_flag,
+		  </if>
+		  <if test="state != null" >
+		    state,
+		  </if>
+		  <if test="remarks != null" >
+		    remarks,
+		  </if>
+		  <if test="sourceCardNumber != null" >
+		    source_card_number,
+		  </if>
+		  <if test="updateDate != null" >
+		    update_date,
+		  </if>
+		  <if test="updateBy != null" >
+		    update_by,
+		  </if>
+		  <if test="createDate != null" >
+		    create_date,
+		  </if>
+		</trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="id != null" >
+	        #{id,jdbcType=BIGINT},
+	      </if>
+	      <if test="groupNum != null" >
+	        #{groupNum,jdbcType=BIGINT},
+	      </if>
+	      <if test="name != null" >
+	        #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sex != null" >
+	        #{sex,jdbcType=CHAR},
+	      </if>
+	      <if test="telephone != null" >
+	        #{telephone,jdbcType=VARCHAR},
+	      </if>
+	      <if test="mailbox != null" >
+	        #{mailbox,jdbcType=VARCHAR},
+	      </if>
+	      <if test="identityCard != null" >
+	        #{identityCard,jdbcType=VARCHAR},
+	      </if>
+	      <if test="cardNumber != null" >
+	        #{cardNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="password != null" >
+	        #{password,jdbcType=VARCHAR},
+	      </if>
+	      <if test="payPassword != null" >
+	        #{payPassword,jdbcType=VARCHAR},
+	      </if>
+	      <if test="integral != null" >
+	        #{integral,jdbcType=DECIMAL},
+	      </if>
+	      <if test="startIntegral != null" >
+	        #{startIntegral,jdbcType=DECIMAL},
+	      </if>
+	      <if test="expectIntegral != null" >
+	        #{expectIntegral,jdbcType=DECIMAL},
+	      </if>
+	      <if test="lineCredit != null" >
+	        #{lineCredit,jdbcType=DECIMAL},
+	      </if>
+	      <if test="isActive != null" >
+	        #{isActive,jdbcType=CHAR},
+	      </if>
+	      <if test="activeDate != null" >
+	      	#{activeDate,jdbcType=TIMESTAMP},
+		  </if>
+	      <if test="isPayPassword != null" >
+	        #{isPayPassword,jdbcType=CHAR},
+	      </if>
+	      <if test="type != null" >
+	        #{type,jdbcType=SMALLINT},
+	      </if>
+	      <if test="dataSyn != null" >
+	        #{dataSyn,jdbcType=CHAR},
+	      </if>
+	      <if test="createBy != null" >
+	        #{createBy,jdbcType=VARCHAR},
+	      </if>
+	      <if test="delFlag != null" >
+	        #{delFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="state != null" >
+	        #{state,jdbcType=INTEGER},
+	      </if>
+	      <if test="remarks != null" >
+	        #{remarks,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sourceCardNumber != null" >
+	        #{sourceCardNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="updateDate != null" >
+	        #{updateDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updateBy != null" >
+	        #{updateBy,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createDate != null" >
+	        #{createDate,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	</insert>
+	<update id="addIntegral" >
+		UPDATE ad_user 	
+		 set integral = integral +#{addIntegral}
+		WHERE id = #{userId}
+  	</update>
+  	
+  	<select id="getOrderTotal" resultType="com.doooly.entity.reachad.AdUserConn">
+  		SELECT
+			COUNT(CASE WHEN a.state = 0 and a.type= 10 THEN 1 END) AS "orderTotal",
+			COUNT(CASE WHEN a.state = 1 AND a.type =1 THEN 1 END) AS "finishTotal",
+			COUNT(CASE WHEN (a.state = 1 AND a.type = 5) OR (a.state = 2 AND a.type=99) THEN 1 END) AS "cancelTotal"
+		FROM ad_order_report a
+		WHERE a.del_flag = 0
+		AND a.user_id = #{userId}
+  	</select>
+  	
+  	<!-- 获取微信端已登录用户初始化信息 -->
+  	<select id="getWechatUserInitInfo" resultType="HashMap" parameterType="com.doooly.entity.reachad.AdUser">
+  		select 
+  			a.id as userId,
+  			a.name as userName,
+  			a.telephone as mobile,
+  			b.group_short_name as groupShortName 
+  		from ad_user a 
+  		LEFT JOIN ad_group b on a.group_num=b.id 
+  		where a.card_number = #{cardNumber}
+  	</select>
+</mapper>

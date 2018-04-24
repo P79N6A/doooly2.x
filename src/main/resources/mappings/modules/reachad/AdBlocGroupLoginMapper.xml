@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBlocGroupLoginDao">
+	<select id="selectByBlocChannel" resultType="AdBlocGroupLogin">
+		select 
+			bloc_id,black_group_name,action_period,secret_key
+		from 
+			ad_bloc_group_login
+		where 
+			bloc_channel=#{blocChannel} and del_flag=0
+	</select>
+</mapper>

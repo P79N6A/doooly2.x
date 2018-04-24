@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdIntegralActivityDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdIntegralActivity" >
+  </resultMap>
+  <sql id="Base_Column_List" >
+  </sql>
+  
+  <update id="updateIntegralGiveOut">
+  update 
+  	ad_integral_activity 
+  	set available_integral=available_integral - #{subIntegral} 
+  where 
+  	id =#{integralId} 
+  	and available_integral>=#{subIntegral}
+  
+  </update>
+</mapper>

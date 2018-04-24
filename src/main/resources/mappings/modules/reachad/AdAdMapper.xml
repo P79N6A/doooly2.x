@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdadDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdAd">
+	</resultMap>
+
+	<sql id="adColumns">
+		a.id AS "id",
+		a.title AS "title",
+		a.image_path AS "imagePath", 
+		a.type AS "type",
+		a.sort AS "sort",
+		a.state AS "state",
+		a.create_date AS "createDate",
+		a.image_link_url AS "imageLinkUrl",
+		a.begin_date AS "beginDate",
+		a.end_date AS "endDate",
+		a.content AS "content",
+		a.media_type AS "mediaType",
+		a.link_type as "linkType"
+		
+	</sql>
+	<select id="findAll" resultType="com.doooly.entity.reachad.AdAd">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			ad_ad a 
+			where a.type = 0 
+			and a.state =1 and a.channel=2
+			and a.media_type = 0 
+			and NOW() between begin_date and end_date 
+			order by a.sort
+			limit 5
+	</select>
+
+	<select id="findAllByType" resultType="com.doooly.entity.reachad.AdAd">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			ad_ad a left join ad_ad_group_conn agc on a.id =agc.ad_id
+			left join ad_group g on agc.group_id = g.id
+			where a.state =1 and g.id = (select u.group_num from ad_user u where u.id=#{userId})
+			<if test="state == 0 and type ==2">
+			and a.type in (2,5)
+			</if>
+			<if test="state == 0 and type ==3">
+			and a.type in (3,7)
+			</if>
+			<if test="state == 1 and type ==2">
+			and a.type in (2,4)
+			</if>
+			<if test="state == 1 and type ==3">
+			and a.type in (3,6)
+			</if>
+			and a.media_type = 0 and a.channel=2
+			and NOW() between begin_date and end_date 
+			order by a.sort
+			limit 8
+	</select>
+	
+	
+</mapper>

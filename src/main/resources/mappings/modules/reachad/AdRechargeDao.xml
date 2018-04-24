@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdRechargeDao">
+
+    <sql id="adRechargeColumns">
+        a.id AS "id",
+        a.user_id AS "adUser.id",
+        a.amount AS "amount",
+        a.type AS "type",
+        a.group_id AS "adGroup.id",
+        a.create_date AS "createDate",
+        a.update_date AS "updateDate",
+        a.remarks AS "remarks"
+    </sql>
+
+    <select id="get" resultType="AdRecharge">
+        SELECT
+        <include refid="adRechargeColumns"/>
+        FROM ad_recharge a
+        WHERE a.id = #{id}
+    </select>
+
+</mapper>

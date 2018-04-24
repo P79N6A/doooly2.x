@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.SysDictDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.SysDict">
+	</resultMap>
+	<sql id="adColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.value AS "value", 
+		a.description AS "description",
+		a.sort AS "sort",
+		a.parent_id AS "parentId",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.label AS "label",
+		a.remarks AS "remarks"
+		
+	</sql>
+
+
+	<select id="findAll" resultType="com.doooly.entity.reachad.SysDict">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			sys_dict a 
+			where a.type ='business_type'
+	</select>
+	<select id="findAllByUserIdAndAddress" resultType="com.doooly.entity.reachad.SysDict">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			sys_dict a 
+			where a.type ='business_type' and a.`value` in ( SELECT
+		b.type AS "type"
+		FROM
+			ad_business b 
+		join ad_business_area_conn abac on abac.business_id = b.id
+			join ad_area aa on aa.id = abac.area_id 
+			join ad_business_group abg on b.id = abg.business_id 
+		where b.is_hot=1 and b.deal_type !=2 and b.is_active=2 and b.del_flag=0 and (aa.name =#{address} or aa.name ="全国")
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})) ORDER BY a.`value`
+	</select>
+	
+	<!-- 根据类型查询企业口令问题 -->
+	<select id="getSysDict" resultType="com.doooly.entity.reachad.SysDict">
+		select 
+			a.label,
+			a.type,
+			a.description 
+		from sys_dict a 
+		where a.type = #{type} and a.del_flag = 0
+	</select>
+</mapper>

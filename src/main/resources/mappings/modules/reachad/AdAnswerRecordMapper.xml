@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdAnswerRecordDao">
+	<resultMap id="resultMap" 
+		type="com.doooly.entity.reachad.AdAnswerRecord">
+	</resultMap>
+	
+	<select id="findRecentlyAnswerRecords" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+  		select 
+			a.*,
+			CASE WHEN b.option_type=c.answer_type THEN "T" 
+				 WHEN b.option_type != c.answer_type THEN "F"  
+				 ELSE "N" END AS answerResult,
+			c.points AS points
+		from (
+			select DATE_FORMAT(DATE_SUB(NOW(), interval 3 day),'%Y-%m-%d') as answerTime
+			UNION
+			select DATE_FORMAT(DATE_SUB(NOW(), interval 2 day),'%Y-%m-%d') as answerTime
+			UNION
+			select DATE_FORMAT(DATE_SUB(NOW(), interval 1 day),'%Y-%m-%d') as answerTime
+			UNION
+			select DATE_FORMAT(NOW(),'%Y-%m-%d') as answerTime
+		) a
+		LEFT JOIN 
+		 	(select * from ad_answer_record bb where bb.answer_user=#{userId}) b
+		ON a.answerTime=DATE_FORMAT(b.answer_time,'%Y-%m-%d')
+		LEFT JOIN
+			ad_question_bank c
+		ON b.question_id = c.id
+		ORDER BY a.answerTime ASC
+  	</select>
+	
+	<insert id="insert" parameterType="com.doooly.entity.reachad.AdAnswerRecord" >
+      INSERT INTO ad_answer_record(
+			id,
+			question_id,
+			option_type,
+			answer_user,
+			answer_time,
+			coupon_id,
+			activity_id,
+			age,
+			order_num
+		) VALUES (
+			#{id},
+			#{questionId},
+			#{optionType},
+			#{answerUser},
+			#{answerTime},
+			#{couponId},
+			#{activityId},
+			#{age},
+			#{orderNum}
+		)
+  	</insert>
+  
+  	<update id="updateOptionType" parameterType="com.doooly.entity.reachad.AdAnswerRecord">
+  	 	UPDATE ad_answer_record SET
+	  		option_type = #{optionType}, 
+	  		answer_time = #{answerTime}
+  		 WHERE answer_user = #{answerUser} AND DATE_FORMAT(answer_time,'%Y-%m-%d')=DATE_FORMAT(#{answerTime},'%Y-%m-%d')
+  	</update>
+  	
+  	<select id="findCorrectRecordsOfYesterday" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+  		SELECT 
+  			a.id AS "id",a.answer_user AS "answerUser",b.points AS "points"
+		FROM 
+			ad_answer_record a 
+		INNER JOIN ad_question_bank b
+			ON a.question_id = b.id
+		WHERE 
+			DATE_FORMAT(a.answer_time,'%Y-%m-%d')=DATE_FORMAT(DATE_SUB(NOW(), interval 1 day),'%Y-%m-%d')
+			AND a.option_type=b.answer_type
+  	</select>
+  	
+  	<update id="update" parameterType="com.doooly.entity.reachad.AdAnswerRecord">
+  	 	UPDATE ad_answer_record SET
+  	 		continue_right_days = #{continueRightDays}
+  		 WHERE id = #{id}
+  	</update>
+  	
+  	<select id="getAnswerRecordByUserId" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+  		SELECT r.continue_right_days AS "continueRightDays" 
+  		FROM ad_answer_record r
+		WHERE r.answer_user = #{userId}
+		AND r.option_type IS NOT NULL
+		AND DATE_FORMAT(DATE_SUB(NOW(),INTERVAL #{intervalDays} DAY),'%Y-%m-%d') = DATE_FORMAT(r.answer_time,'%Y-%m-%d')
+  	</select>
+  	
+  	<select id="getAnswerRecordAgeByUserId" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+  		SELECT 
+  			r.age AS "age" ,
+  			c.product_name AS "productName",
+  			c.product_sn AS "productSn",
+  			c.id as "couponId",
+  			a.id as "activityId"
+  		FROM ad_answer_record r
+  		LEFT JOIN ad_coupon_activity a
+			ON r.activity_id = a.id
+		LEFT JOIN ad_coupon c
+			ON r.coupon_id = c.id
+		WHERE r.answer_user = #{userId}
+		AND r.order_num IS NOT NULL
+  	</select>
+  	
+  	<select id="getAnswerCouponByUserId" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+		SELECT c.product_name
+			FROM ad_answer_record r
+		LEFT JOIN ad_coupon_activity a
+			ON r.activity_id = a.id
+		INNER JOIN ad_coupon c
+			ON r.coupon_id = c.id
+		INNER JOIN ad_coupon_code cc
+			ON cc.coupon=c.id 
+		WHERE r.answer_user = #{userId}
+			AND r.order_num IS NOT NULL
+			AND cc.user_id  = #{userId}
+  	</select>
+  	
+  	<!-- 答题是否完成 -->
+  	<select id="getAnswerRecord" resultType="com.doooly.entity.reachad.AdAnswerRecord">
+		select a.id,(select count(b.coupon_id) from ad_answer_record b where b.answer_user = #{user_id}) as couponCount 
+		from ad_answer_record a 
+		where a.answer_user = #{user_id} 
+		and a.order_num in (6,7)
+  	</select>
+  	
+  	<!-- 删除答题记录 -->
+  	<delete id="deleteRecordByUserId">
+		DELETE FROM ad_answer_record 
+		WHERE answer_user=#{user_id} 
+		AND order_num IS NOT NULL
+  	</delete>
+	
+</mapper>

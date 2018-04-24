@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdQuestionRuleDao">
+	<resultMap id="resultMap" 
+		type="com.doooly.entity.reachad.AdQuestionRule">
+	</resultMap>
+	
+	<sql id="questionRuleColumns">
+		a.id AS "id",
+		a.type AS "type",
+		a.create_user AS "createUser",
+		a.create_date AS "createDate",
+		a.value1 AS "value1",
+		a.value2 AS "value2",
+		a.value3 AS "value3",
+		a.value4 AS "value4"
+	</sql>
+	
+	<select id="getAll" resultType="com.doooly.entity.reachad.AdQuestionRule" >
+	    SELECT 
+	    	<include refid="questionRuleColumns" />
+	    FROM ad_question_rule a
+	    <!-- <where>
+			<if test="type != null and type != ''">
+				AND type = #{type}
+			</if>
+		</where> -->
+  	</select>
+</mapper>

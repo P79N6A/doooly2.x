@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdIntegralAcquireRecordDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdIntegralAcquireRecord" >
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, integral_activity_id,integral, create_date
+  </sql>
+  
+  <select id="checkIsHadProvided"  parameterType="java.lang.Long" resultType="com.doooly.entity.reachad.AdIntegralAcquireRecord">
+  	Select 
+	a.id, 
+	a.user_id as "userId", 
+	a.integral_activity_id as "integralActivityId",
+	a.integral as "integral", 
+	a.create_date as "createDate",
+	ia.integral_name as "integralName"
+  	From ad_integral_acquire_record a
+  	left join ad_integral_activity ia on a.integral_activity_id=ia.id
+  	<where>
+  		user_id = #{userId}
+  	</where>
+  	 limit 1
+  </select>
+  
+  <insert id="insert">
+		INSERT INTO ad_integral_acquire_record(
+			user_id,
+			integral_activity_id,
+			integral,
+			create_date
+		) VALUES (
+			#{userId},
+			#{integralActivityId},
+			#{integral},
+			NOW()
+		)
+	</insert>
+</mapper>

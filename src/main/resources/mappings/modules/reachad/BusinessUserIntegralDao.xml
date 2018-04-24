@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.BusinessUserIntegralDao" >
+    
+    <select id="getDiDiIntegral" resultType="com.doooly.entity.reachad.BusinessUserIntegral">
+        SELECT
+            business_id AS businessId,
+            user_id AS userId,
+            business_member_id AS businessMemberId,
+            business_integral AS businessIntegral,
+            remark AS remark,
+            create_date AS createDate,
+            update_date AS updateDate
+        FROM
+            ad_business_user_integral
+        WHERE business_id = #{businessId} AND user_id=#{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.doooly.entity.reachad.BusinessUserIntegral">
+        INSERT INTO ad_business_user_integral (
+            `business_id`,
+            `user_id`,
+            `business_member_id`,
+            `business_integral`,
+            `create_date`,
+            `update_date`
+        )
+        VALUES
+            (
+                #{businessId},
+                #{userId},
+                #{businessMemberId},
+                #{businessIntegral},
+                now(),
+                now()
+            )
+    </insert>
+
+    <insert id="insertRecord" parameterType="com.doooly.entity.reachad.BusinessUserIntegral">
+        INSERT INTO ad_business_user_integral_record (
+            `business_id`,
+            `user_id`,
+            `amount`,
+            `type`,
+            `create_date`
+        )
+        VALUES
+            (
+                #{businessId},
+                #{userId},
+                #{amount},
+                #{type},
+                now()
+            )
+    </insert>
+
+    <update id="update" parameterType="com.doooly.entity.reachad.BusinessUserIntegral">
+        UPDATE ad_business_user_integral SET business_integral=#{businessIntegral}, update_date=now() WHERE business_id = #{businessId} AND user_id=#{userId}
+    </update>
+    
+    <delete id="delete" parameterType="com.doooly.entity.reachad.BusinessUserIntegral">
+        DELETE FROM ad_business_user_integral WHERE business_id = #{businessId} AND user_id=#{userId} AND business_member_id =#{businessMemberId}
+    </delete>
+
+</mapper>

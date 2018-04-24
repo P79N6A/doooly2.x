@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBusinessPrivilegeActivityDao">
+    
+	<sql id="AdBusinessPrivilegeActivityColumns">
+		a.business_id AS "businessId",
+		a.user_id AS "userId",
+		a.is_open_privilege AS "isOpenPrivilege",
+		a.create_date AS "createDate"
+	</sql>
+	
+	
+	<select id="get" resultType="AdBusinessPrivilegeActivity">
+		select
+              <include refid="AdBusinessPrivilegeActivityColumns"/>
+        from ad_business_privilege_activity a
+        where a.business_id = #{businessId} AND a.user_id = #{userId}
+	</select>
+
+    <insert id="insert" parameterType="AdBusinessPrivilegeActivity">
+        INSERT INTO ad_business_privilege_activity (
+            business_id,
+            user_id,
+            is_open_privilege,
+            create_date
+        )
+        VALUES
+            (
+                #{businessId},
+                #{userId},
+                1,
+                now()
+            )
+    </insert>
+
+
+    <insert id="setUserPrivilege" parameterType="AdBusinessPrivilegeActivity">
+        INSERT INTO ad_business_privilege_activity (
+            business_id,
+            user_id,
+            is_open_privilege,
+            create_date,
+            privilege_type
+        )
+        VALUES
+        (
+            #{businessId},
+            #{userId},
+            1,
+            now(),
+            #{privilegeType}
+        )
+    </insert>
+
+    <select id="getUserPrivilege" resultType="AdBusinessPrivilegeActivity">
+        select
+          <include refid="AdBusinessPrivilegeActivityColumns"/>
+        from
+          ad_business_privilege_activity a
+        where
+        a.privilege_type = #{privilegeType} AND a.user_id = #{userId} and business_id = 0
+    </select>
+
+</mapper>

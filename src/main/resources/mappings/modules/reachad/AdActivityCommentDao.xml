@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdActivityCommentDao">
+    
+	<sql id="adActivityCommentColumns">
+		a.id AS "id",
+		a.comment_user_id AS "commentUserId",
+		a.content AS "content",
+		a.pictrues AS "pictrues",
+		a.support_count AS "supportCount",
+		a.activity_id AS "activityId",
+		a.update_date AS "updateDate",
+		au.telephone AS "telephone",
+	    au.card_number AS "cardNumber"
+	</sql>
+
+	<select id="getAllComment" resultType="java.util.Map">
+		SELECT 
+			<include refid="adActivityCommentColumns"/>
+		FROM ad_activity_comment a
+        LEFT JOIN ad_user au ON a.comment_user_id = au.id
+		WHERE a.activity_id = #{activityId}
+        ORDER BY a.id DESC
+        limit #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT
+			count(1)
+		FROM ad_activity_comment a
+		LEFT JOIN ad_user au ON a.comment_user_id = au.id
+		WHERE a.activity_id = #{activityId}
+	</select>
+
+    <update id="updateSupportCount">
+        UPDATE ad_activity_comment SET support_count = support_count+1 WHERE id = #{commentId}
+    </update>
+	<insert id="insert">
+		INSERT INTO ad_activity_comment(
+			comment_user_id,
+			content,
+			pictrues,
+			support_count,
+			activity_id,
+			update_date
+		) VALUES (
+			#{commentUserId},
+			#{content},
+			#{pictrues},
+			#{supportCount},
+			#{activityId},
+			NOW()
+		)
+	</insert>
+</mapper>

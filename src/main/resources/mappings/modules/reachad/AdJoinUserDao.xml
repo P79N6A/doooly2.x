@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdJoinUserDao">
+    
+	<sql id="adJoinUserColumns">
+		a.id AS "id",
+		a.join_user AS "joinUser",
+		a.item_id AS "itemId",
+		a.activity_id AS "activityId",
+		a.update_date AS "updateDate",
+		a.support_count AS "supportCount",
+		a.user_name AS "userName",
+		a.mobile AS "mobile",
+		a.employee_number AS "employeeNumber",
+		a.group_id AS "groupId",
+		a.company_id AS "companyId",
+		a.department_id AS "departmentId",
+		au.telephone AS "telephone",
+	    au.card_number AS "cardNumber"
+	</sql>
+
+	<select id="getAllAdJoinUser" resultType="java.util.Map">
+		SELECT 
+		<include refid="adJoinUserColumns"/>
+		FROM ad_join_user a
+        LEFT JOIN ad_user au ON a.join_user = au.id
+		WHERE a.activity_id = #{activityId}  GROUP BY a.join_user ORDER BY a.id DESC LIMIT 4
+	</select>
+
+	<select id="getJoinUserNum" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM (
+            SELECT 1 FROM ad_join_user WHERE activity_id = #{activityId} GROUP BY join_user) temp
+	</select>
+
+	<select id="findAdJoinUserByJoinUser" resultType="java.lang.Boolean">
+		SELECT
+			COUNT(1)
+		FROM ad_join_user a
+		WHERE a.join_user = #{joinUser}
+	</select>
+
+	<select id="findAllJoinUser" resultType="java.util.Map">
+		SELECT
+            auc.id AS "id",
+            a.join_user AS "joinUser",
+            a.user_name AS "userName",
+            a.id AS "joinRecordId",
+            a.support_count AS "supportCount",
+            ag.group_short_name AS "groupName",
+            ag1.group_name AS "companyName",
+            agd.department_name AS "departmentName",
+            au.telephone AS "telephone",
+	        au.card_number AS "cardNumber"
+        FROM
+            ad_auto_column auc
+        INNER JOIN ad_join_user a ON auc.activity_id = a.activity_id AND auc.id = a.item_id
+        LEFT JOIN ad_group ag ON a.group_id = ag.id
+        LEFT JOIN ad_group ag1 ON a.company_id = ag1.id
+        LEFT JOIN ad_group_department agd ON a.department_id = agd.id
+        LEFT JOIN ad_user au ON a.join_user = au.id
+        WHERE auc.activity_id = #{activityId} AND auc.data_type != 0
+	</select>
+
+	<select id="findJoinUser" resultType="java.util.Map">
+		SELECT
+            auc.id,auc.name,SUM(IF(a.item_id is NOT NULL,1,0)) AS "signupNum"
+        FROM
+            ad_auto_column auc
+        LEFT JOIN ad_join_user a ON auc.activity_id = a.activity_id AND auc.id = a.item_id
+        WHERE auc.activity_id = #{activityId} AND auc.data_type != 0
+        GROUP BY auc.id
+	</select>
+
+	<insert id="batchInsert" parameterType="java.util.List">
+		INSERT INTO ad_join_user(
+			join_user,
+			item_id,
+			activity_id,
+			update_date,
+			support_count,
+			user_name,
+			mobile,
+			employee_number,
+			group_id,
+			company_id,
+			department_id
+		) VALUES
+        <foreach collection="list" item="adJoinUser" separator=",">
+            (
+            #{adJoinUser.joinUser},
+            #{adJoinUser.itemId},
+            #{adJoinUser.activityId},
+            now(),
+            0,
+            <if test="adJoinUser.userName == null" >null,</if>
+            <if test="adJoinUser.userName != null" >#{adJoinUser.userName},</if>
+            <if test="adJoinUser.mobile == null" >null,</if>
+            <if test="adJoinUser.mobile != null" >#{adJoinUser.mobile},</if>
+            <if test="adJoinUser.employeeNumber == null" >null,</if>
+            <if test="adJoinUser.employeeNumber != null" >#{adJoinUser.employeeNumber},</if>
+            <if test="adJoinUser.groupId == null" >null,</if>
+            <if test="adJoinUser.groupId != null" >#{adJoinUser.groupId},</if>
+            <if test="adJoinUser.companyId == null" >null,</if>
+            <if test="adJoinUser.companyId != null" >#{adJoinUser.companyId},</if>
+            <if test="adJoinUser.departmentId == null" >null</if>
+            <if test="adJoinUser.departmentId != null" >#{adJoinUser.departmentId}</if>
+            )
+        </foreach>
+	</insert>
+
+    <update id="updateSupportCount">
+        UPDATE ad_join_user SET support_count = support_count+1 WHERE id = #{joinRecordId}
+    </update>
+
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdPortRecordDao">
+
+    <insert id="insert" parameterType="com.doooly.entity.reachad.AdPortRecord">
+         INSERT INTO ad_port_record (
+                    `user_id`,
+                    `port_name`,
+                    `remark`,
+                    `create_date`
+                )
+                VALUES
+                    (
+                        #{userId},
+                        #{portName},
+                        #{remark},
+                        now()
+                    )
+    </insert>
+
+</mapper>

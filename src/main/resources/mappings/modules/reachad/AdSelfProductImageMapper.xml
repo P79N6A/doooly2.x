@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdSelfProductImageDao">
+
+    <select id="getImageByProductId" resultType="com.doooly.business.product.entity.AdSelfProductImage">
+		SELECT 
+			i.id AS "id",
+			i.image AS "image",
+			i.detail_image AS "detailImage"
+		FROM ad_self_product_image i
+		WHERE i.self_product_id = #{productId}
+    </select>
+
+</mapper>

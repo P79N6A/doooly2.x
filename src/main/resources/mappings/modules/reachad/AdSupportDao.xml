@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdSupportDao">
+    
+	<sql id="adSupportColumns">
+		a.id AS "id",
+		a.support_user AS "supportUser",
+		a.comment_id AS "commentId",
+		a.activity_id AS "activityId",
+		a.join_record_id AS "joinRecordId",
+		a.update_date AS "updateDate"
+	</sql>
+	
+	<select id="findAdSupport" parameterType="AdSupport" resultType="java.lang.Boolean">
+		SELECT 
+			COUNT(1)
+		FROM ad_support a
+		<where>
+            <choose>
+                <when test="type != null and type == 0 and activityId != null and supportUser != null">a.support_user = #{supportUser} AND a.activity_id = #{activityId}</when>
+                <when test="type != null and type == 1 and commentId != null and supportUser != null">a.support_user = #{supportUser} AND a.comment_id = #{commentId}</when>
+                <when test="type != null and type == 2 and joinRecordId != null and supportUser != null">a.support_user = #{supportUser} AND a.join_record_id = #{joinRecordId}</when>
+                <otherwise>1=0</otherwise>
+            </choose>
+        </where>
+	</select>
+
+    <insert id="insertSupport">
+        INSERT INTO ad_support(
+            support_user,
+            comment_id,
+            activity_id,
+            join_record_id,
+            update_date
+        ) VALUES (
+            #{supportUser},
+            #{commentId},
+            #{activityId},
+            #{joinRecordId},
+            now()
+        )
+    </insert>
+	
+</mapper>

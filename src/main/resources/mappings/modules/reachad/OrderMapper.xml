@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.OrderDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.Order">
+	</resultMap>
+
+	<sql id="orderColumns">
+		id,
+		userid,
+		orderUserId,
+		bussinessId,
+		storesId,
+		payPassword,
+		verificationCode,
+		amount,
+		totalAmount,
+		price,
+		totalPrice,
+		payType,
+		orderNumber,
+		serialNumber,
+		orderDate,
+		state,
+		orderType,
+		type,
+		source,
+		isPayPassword,
+		orderDetail,
+		isRebate,
+		BusinessRebate,
+		UserRebate,
+		createDateTime,
+		check_state
+	</sql>
+
+	<!--用户完成的订单数-->
+	<select id="getFinishedOrderCnt" resultType="java.lang.Integer">
+		SELECT count(DISTINCT id)
+		FROM _order o
+		WHERE o.userid = #{userId} AND type = 1 AND state = 1;
+	</select>
+
+	<select id="getCountByWeek" resultType="java.lang.Integer">
+		SELECT 
+			count(0)
+		FROM 
+			_order
+		WHERE 
+			state = 1
+			and type=1
+			and createDateTime BETWEEN DATE_SUB(CURDATE(), INTERVAL 
+			#{0,jdbcType=SMALLINT} DAY) and DATE_SUB(CURDATE(), INTERVAL
+			#{1,jdbcType=SMALLINT}-1 DAY) ;
+	</select>
+
+	<select id="getCountByMonth" resultType="java.lang.Integer">
+		SELECT count(0)
+		FROM _order
+		and type=1
+		and date_format(createDateTime,'%Y-%m') = date_format(DATE_SUB(curdate(),
+		INTERVAL #{0,jdbcType=SMALLINT} MONTH),'%Y-%m');
+	</select>
+	
+	<!-- ______________________________________查询______________________________________ -->
+
+	<select id="getOrderInfoByOrderNumber" resultMap="resultMap">
+		SELECT
+			SUM(a.amount) AS "totalAmount",
+			SUM(a.price) AS "totalPrice"
+		FROM
+			_order a
+		WHERE
+			a.state=1
+			AND a.type=1
+			AND a.userid=#{userId}
+			AND a.bussinessId=#{bussinessId}
+			AND a.orderNumber=#{orderNumber}
+	</select>
+	<select id="getPaidOrder" resultMap="resultMap">
+		select 
+			<include refid="orderColumns"/> 
+		from 
+		_order a 
+		where a.userid=#{userId} and a.totalAmount != 0 and orderDate &lt; #{beginDate} 
+		and type =1 and state = 1
+		ORDER BY a.orderDate desc limit 1;
+	</select>
+	<select id="getNewestOrder" resultMap="resultMap">
+		select 
+			<include refid="orderColumns"/> 
+		from 
+		_order a 
+		where a.userid=#{userId} and orderDate &gt; #{beginDate} and orderDate &lt; #{endDate} 
+		and a.totalAmount != 0 and type =1 and state = 1
+		ORDER BY a.orderDate desc;
+	</select>
+	
+	<!-- ______________________________________积分查询订单总金额______________________________________ -->
+
+	<select id="get" resultMap="resultMap">
+		SELECT
+			<include refid="orderColumns"/>
+		FROM
+			_order a
+		WHERE a.id=#{orderId}
+	</select>
+	
+	<select id="getTotalByOrderNumber" resultMap="resultMap">
+		SELECT
+			SUM(a.amount) AS "totalAmount",
+			SUM(a.UserRebate) AS "userRebate",
+			SUM(a.price) AS "totalPrice",
+			SUM(CASE when a.payType = 0 THEN a.amount else 0 end) as 'amount'
+		FROM
+			_order a
+		WHERE a.type=1 AND a.orderNumber=#{orderNumber}
+	</select>
+	<select id="getTotalByOrderNumberByTypeFive" resultMap="resultMap">
+		SELECT
+			SUM(a.amount) AS "totalAmount",
+			SUM(a.UserRebate) AS "userRebate",
+			SUM(a.price) AS "totalPrice",
+			SUM(CASE when a.payType = 0 THEN a.amount else 0 end) as 'amount'
+		FROM
+			_order a
+		WHERE a.type=5 AND a.orderNumber=#{orderNumber}
+	</select>
+	
+	<select id="getTotalBySerialNumber" resultMap="resultMap">
+		SELECT
+			SUM(a.amount) AS "totalAmount",
+			SUM(a.UserRebate) AS "userRebate",
+			SUM(a.price) AS "totalPrice",
+			SUM(CASE when a.payType = 0 THEN a.amount else 0 end) as 'amount'
+		FROM
+			_order a
+		WHERE a.type=1 AND a.serialNumber LIKE CONCAT(#{serialNumber},'%')
+	</select>
+	
+	 <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.entity.reachad.Order" >
+	    insert into _order (id, userid, orderUserId, 
+	      bussinessId, storesId, payPassword, 
+	      verificationCode, amount, totalAmount, 
+	      price, totalPrice, payType, 
+	      orderNumber, serialNumber, orderDate, 
+	      originOrderNumber, state, orderType, 
+	      type, source, isPayPassword, 
+	      isRebate, BusinessRebate, UserRebate, 
+	      createDateTime, check_state, orderDetail
+	      )
+	    values (#{id,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, #{orderUserId,jdbcType=INTEGER}, 
+	      #{bussinessId,jdbcType=VARCHAR}, #{storesId,jdbcType=VARCHAR}, #{payPassword,jdbcType=VARCHAR}, 
+	      #{verificationCode,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{totalAmount,jdbcType=DECIMAL}, 
+	      #{price,jdbcType=DECIMAL}, #{totalPrice,jdbcType=DECIMAL}, #{payType,jdbcType=INTEGER}, 
+	      #{orderNumber,jdbcType=VARCHAR}, #{serialNumber,jdbcType=VARCHAR}, #{orderDate,jdbcType=TIMESTAMP}, 
+	      #{originOrderNumber,jdbcType=VARCHAR}, #{state,jdbcType=INTEGER}, #{orderType,jdbcType=INTEGER}, 
+	      #{type,jdbcType=INTEGER}, #{source,jdbcType=INTEGER}, #{isPayPassword,jdbcType=INTEGER}, 
+	      #{isRebate,jdbcType=INTEGER}, #{businessRebate,jdbcType=DECIMAL}, #{userRebate,jdbcType=DECIMAL}, 
+	      #{createDateTime,jdbcType=TIMESTAMP}, #{checkState,jdbcType=BIT}, #{orderDetail,jdbcType=LONGVARCHAR}
+	      )
+	  </insert>
+	  
+	  <insert id="insertDetail" parameterType="com.doooly.entity.reachad.OrderDetail" >
+	    insert into _orderDetail (id, orderId, code, 
+	      goods, amount, price, 
+	      number, tax, category, 
+	      first_category, second_category, brand_name, 
+	      createDateTime)
+	    values (#{id,jdbcType=BIGINT}, #{orderid,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, 
+	      #{goods,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{price,jdbcType=DECIMAL}, 
+	      #{number,jdbcType=DECIMAL}, #{tax,jdbcType=DECIMAL}, #{category,jdbcType=VARCHAR}, 
+	      #{firstCategory,jdbcType=VARCHAR}, #{secondCategory,jdbcType=VARCHAR}, #{brandName,jdbcType=VARCHAR}, 
+	      #{createdatetime,jdbcType=TIMESTAMP})
+  	</insert>
+	
+	<update id="updateById" parameterType="com.doooly.entity.reachad.Order" >
+    update _order
+    <set >
+      <if test="userid != null" >
+        userid = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="orderUserId != null" >
+        orderUserId = #{orderUserId,jdbcType=INTEGER},
+      </if>
+      <if test="bussinessId != null" >
+        bussinessId = #{bussinessId,jdbcType=VARCHAR},
+      </if>
+      <if test="storesId != null" >
+        storesId = #{storesId,jdbcType=VARCHAR},
+      </if>
+      <if test="payPassword != null" >
+        payPassword = #{payPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="verificationCode != null" >
+        verificationCode = #{verificationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="totalAmount != null" >
+        totalAmount = #{totalAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="totalPrice != null" >
+        totalPrice = #{totalPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="payType != null" >
+        payType = #{payType,jdbcType=INTEGER},
+      </if>
+      <if test="orderNumber != null" >
+        orderNumber = #{orderNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNumber != null" >
+        serialNumber = #{serialNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="orderDate != null" >
+        orderDate = #{orderDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="originOrderNumber != null" >
+        originOrderNumber = #{originOrderNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="orderType != null" >
+        orderType = #{orderType,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="source != null" >
+        source = #{source,jdbcType=INTEGER},
+      </if>
+      <if test="isPayPassword != null" >
+        isPayPassword = #{isPayPassword,jdbcType=INTEGER},
+      </if>
+      <if test="isRebate != null" >
+        isRebate = #{isRebate,jdbcType=INTEGER},
+      </if>
+      <if test="businessRebate != null" >
+        BusinessRebate = #{businessRebate,jdbcType=DECIMAL},
+      </if>
+      <if test="userRebate != null" >
+        UserRebate = #{userRebate,jdbcType=DECIMAL},
+      </if>
+      <if test="createDateTime != null" >
+        createDateTime = #{createDateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkState != null" >
+        check_state = #{checkState,jdbcType=BIT},
+      </if>
+      <if test="orderDetail != null" >
+        orderDetail = #{orderDetail,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateBussinessIdByNum" parameterType="java.lang.String" >
+    update 
+    		_order
+    set
+    		bussinessId = #{bussinessId}
+    where 
+    		orderNumber = #{orderNumber}
+    		and type = '5'
+  </update>
+	
+</mapper>

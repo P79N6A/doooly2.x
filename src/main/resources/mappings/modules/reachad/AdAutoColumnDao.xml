@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdAutoColumnDao">
+
+	<sql id="adAutoColumnColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.button_name AS "buttonName",
+		a.data_type AS "dataType",
+		a.is_checked AS "isChecked",
+		a.activity_id AS "activityId",
+		a.update_date AS "updateDate",
+		a.number AS "number"
+	</sql>
+
+	<select id="getSignupForm" resultType="AdAutoColumn">
+		SELECT
+			<include refid="adAutoColumnColumns"/>
+		FROM ad_auto_column a
+		WHERE a.activity_id = #{activityId} AND a.data_type = #{dataType}
+	</select>
+</mapper>

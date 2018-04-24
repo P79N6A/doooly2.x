@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdFamilyUserDao">
+    
+
+    <sql id="adFamilyUserColumns">
+        a.id AS "id",
+        a.family_id AS "familyId",
+        a.user_id AS "userId",
+        a.is_Point_share AS "isPointShare",
+        a.family_relationship AS "familyRelationship",
+        a.del_flag AS "delFlag",
+        a.update_date AS "updateDate",
+        a.create_date AS "createDate"
+    </sql>
+
+
+	<select id="getMyFamilyList" resultType="java.util.Map">
+		SELECT
+            a.user_id AS "userId",
+            IFNULL(a.is_Point_share,0) AS "isPointShare",
+            IFNULL(b.point_share_switch,0) AS "pointShareSwitch",
+			c.name "name",
+            e.app_head_image_url as "appHeadImageUrl"
+        FROM
+            ad_family_user a
+        LEFT JOIN ad_family b ON a.family_id = b.id
+        LEFT JOIN ad_user c ON a.user_id = c.id
+        INNER JOIN (SELECT family_id FROM ad_family_user WHERE user_id = #{userId} ) d ON d.family_id = b.id
+        left join ad_user_personal_info e on c.id = e.id
+	</select>
+
+	<select id="getMyFamily" resultType="AdFamilyUser">
+		SELECT
+           <include refid="adFamilyUserColumns"/>
+        FROM
+            ad_family_user a
+        WHERE
+            a.user_id = #{userId}
+	</select>
+
+    <insert id="insert" parameterType="AdFamilyUser">
+        INSERT INTO ad_family_user (
+                family_id,
+                user_id,
+                is_Point_share,
+                family_relationship,
+                del_flag,
+                update_date,
+                create_date
+            )
+            VALUES
+                (
+                    #{familyId},
+                    #{userId},
+                    #{isPointShare},
+                    #{familyRelationship},
+                    #{delFlag},
+                    now(),
+                    now()
+                )
+    </insert>
+
+    <update id="updateFamilyUser">
+        UPDATE ad_family_user SET is_Point_share = #{pointShareSwitch} WHERE user_id =#{userId}
+    </update>
+    
+    <update id="updateFamilyRelation">
+        UPDATE ad_family_user SET family_relationship = #{familyRelation},update_date = now() WHERE user_id =#{userId}
+    </update>
+
+</mapper>

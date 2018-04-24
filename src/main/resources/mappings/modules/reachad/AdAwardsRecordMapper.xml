@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdAwardsRecordDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdAwardsRecord">
+	</resultMap>
+
+	<sql id="AdAwardsRecordColumns">
+		a.id AS "id",
+		a.price_level AS "priceLevel",
+		a.week_num AS "weekNum", 
+		a.group_id AS "groupId",
+		a.user_id AS "userId",
+		a.coupon_code AS "couponCode",
+		a.create_date AS "createDate",
+		a.type AS "type",
+		a.order_num AS "orderNum"
+	</sql>
+	<select id="getByUserId" resultType="com.doooly.entity.reachad.AdAwardsRecord">
+		SELECT 
+			<include refid="AdAwardsRecordColumns" />
+		FROM 
+			ad_awards_record a where a.user_id=#{userId} limit 1
+	</select>
+	<select id="getGroupCountByGroupId" resultType="java.lang.Integer">
+		SELECT 
+			count(0)+1
+		FROM 
+			ad_awards_record a where a.group_id=#{groupNum} and a.week_num = #{weekNum}
+	</select>
+	<select id="findList" resultMap="resultMap">
+		SELECT 
+			CASE WHEN a.price_level=1 THEN "一等奖"
+			 WHEN a.price_level = 2 THEN "二等奖" 
+			 when a.price_level = 3 THEN "三等奖" 
+			 ELSE "四等奖" END AS "priceLevel",
+			 u.card_number AS "cardNum",u.telephone AS "telephone"
+		FROM 
+			ad_awards_record a left join ad_user u on a.user_id = u.id 
+			order by a.create_date desc
+			limit 30
+	</select>
+	<insert id="insert" parameterType="com.doooly.entity.reachad.AdAwardsRecord" >
+      INSERT INTO ad_awards_record(
+			id,
+			price_level,
+			week_num, 
+			group_id,
+			user_id ,
+			coupon_code,
+			create_date,
+			type,
+			order_num
+		) VALUES (
+			#{id},
+			#{priceLevel},
+			#{weekNum},
+			#{groupId},
+			#{userId},
+			#{couponCode},
+			NOW(),
+			#{type},
+			#{orderNum}
+		)
+  	</insert>
+  	<update id="update" parameterType="com.doooly.entity.reachad.AdAwardsRecord">
+  	 	UPDATE ad_awards_record SET
+	  		coupon_code = #{couponCode}, 
+	  		price_level = #{priceLevel}
+  		 WHERE user_id = #{userId}
+  	</update>
+</mapper>

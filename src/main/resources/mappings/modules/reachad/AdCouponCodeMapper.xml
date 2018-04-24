@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdCouponCodeDao">
+	<resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdCouponCode">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="sys_user_id" property="sysUserId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="coupon" property="coupon" jdbcType="BIGINT" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="is_used" property="isUsed" jdbcType="CHAR" />
+		<result column="used_date" property="usedDate" jdbcType="TIMESTAMP" />
+		<result column="businessid" property="businessid" jdbcType="VARCHAR" />
+		<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+		<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,
+		sys_user_id,
+		user_id,
+		coupon,
+		code,
+		is_used,
+		used_date,
+		businessid,
+		create_date,
+		update_date
+	</sql>
+
+	<resultMap type="com.doooly.entity.reachad.AdCouponCode" id="couponMap">
+
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="sys_user_id" property="sysUserId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="used_user_id" property="usedUserId" jdbcType="INTEGER" />
+		<result column="coupon" property="coupon" jdbcType="BIGINT" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="is_used" property="isUsed" jdbcType="CHAR" />
+		<result column="used_date" property="usedDate" jdbcType="TIMESTAMP" />
+		<result column="businessid" property="businessid" jdbcType="VARCHAR" />
+		<result column="del_flag" property="delFlag" jdbcType="CHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="telephone" property="telephone" jdbcType="VARCHAR" />
+		<result column="activity_id" property="activityId" jdbcType="INTEGER" />
+		<result column="receive_date" property="receiveDate" jdbcType="TIMESTAMP" />
+		<result column="group_id" property="groupId" jdbcType="VARCHAR" />
+		<result column="is_view" property="isView" jdbcType="CHAR" />
+		<result column="is_locked" property="isLocked" jdbcType="CHAR" />
+
+		<association property="adCoupon" javaType="com.doooly.entity.reachad.AdCoupon">
+			<id column="coupon_id" property="id" jdbcType="BIGINT" />
+			<result column="business_id" property="businessId" jdbcType="BIGINT" />
+			<result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+			<result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+			<result column="name" property="name" jdbcType="VARCHAR" />
+			<result column="product_sn" property="productSn" jdbcType="VARCHAR" />
+			<result column="quantity" property="quantity" jdbcType="INTEGER" />
+			<result column="is_open" property="isOpen" jdbcType="CHAR" />
+			<result column="product_id" property="productId" jdbcType="VARCHAR" />
+			<result column="product_name" property="productName" jdbcType="VARCHAR" />
+			<result column="business_name" property="businessName" jdbcType="VARCHAR" />
+			<result column="activity_name" property="activityName" jdbcType="VARCHAR" />
+			<result column="is_creat" property="isCreat" jdbcType="CHAR" />
+			<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+			<result column="coupon_type" property="couponType" jdbcType="CHAR" />
+			<result column="distribution_quantity" property="distributionQuantity" jdbcType="INTEGER" />
+			<result column="remind_quantity" property="remindQuantity" jdbcType="INTEGER" />
+			<result column="product_second_category" property="productSecondCategory" jdbcType="INTEGER" />
+			<result column="first_show" property="firstShow" jdbcType="CHAR" />
+			<result column="product_first_category" property="productFirstCategory" jdbcType="INTEGER" />
+			<result column="receive_type" property="receiveType" jdbcType="CHAR" />
+			<result column="coupon_value" property="couponValue" jdbcType="DECIMAL" />
+			<result column="coupon_unit" property="couponUnit" jdbcType="VARCHAR" />
+			<result column="type" property="type" jdbcType="CHAR" />
+			<result column="wechat_detail_image" property="wechatDetailImage" jdbcType="VARCHAR" />
+			<result column="pc_detail_image" property="pcDetailImage" jdbcType="VARCHAR" />
+			<result column="description" property="description" jdbcType="VARCHAR" />
+			<result column="kind" property="kind" jdbcType="CHAR" />
+			<result column="tag_id" property="tagId" jdbcType="INTEGER" />
+			<result column="coupon_category" property="couponCategory" jdbcType="INTEGER" />
+			<result column="business_online_url" property="businessOnlineUrl" jdbcType="VARCHAR" />
+			<result column="business_app_url" property="businessAppUrl" jdbcType="VARCHAR" />
+			<result column="app_download" property="appDownload" jdbcType="CHAR" />
+			<result column="business_activity" property="businessActivity" jdbcType="CHAR" />
+			<result column="business_activity_url" property="businessActivityUrl" jdbcType="VARCHAR" />
+			<result column="coupon_user_detail" property="couponUserDetail" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+
+	<!-- 查询自营抵扣券 -->
+	<select id="getSelfCoupon" resultMap="couponMap">
+		SELECT
+		c.*,cou.id coupon_id,cou.*
+		FROM
+		ad_coupon cou,ad_coupon_code c
+		WHERE
+		cou.id = c.coupon and c.id = #{couponId} and c.is_used != '1' and c.user_id = #{userId}
+		and now() BETWEEN begin_date and end_date
+	</select>
+
+	<!-- UNLOCK  -->
+	<update id="unlockCoupon" >
+		update ad_coupon_code set is_locked = '0',update_date=now() where id = #{couponId} and user_id = #{userId}
+	</update>
+
+	<!-- LOCK  -->
+	<update id="lockCoupon" >
+		update ad_coupon_code set is_locked = '1',update_date=now() where id = #{couponId} and user_id = #{userId}
+	</update>
+
+	<!-- 更新优惠码用户ID -->
+	<select id="excuteSendGiftCouponProc" parameterType="java.util.Map"
+		statementType="CALLABLE">
+		{call
+		Proc_SendGiftCouponByProductSN(
+		#{productSN,mode=IN,jdbcType=VARCHAR}
+		,#{userId,mode=IN,jdbcType=INTEGER}
+		,#{couponCodeId,mode=OUT,jdbcType=INTEGER}
+		)}
+	</select>
+
+	<!-- 根据ID获取优惠码 -->
+	<select id="get" resultType="com.doooly.entity.reachad.AdCouponCode"
+		parameterType="String">
+		Select
+		<include refid="Base_Column_List" />
+		From
+		ad_coupon_code a
+		Where a.id = #{id}
+	</select>
+	<select id="getSendCount" resultType="Integer">
+		Select
+		count(0)
+		From
+		ad_coupon_code a
+		Where a.activity_id=#{activityId} and a.coupon=#{couponId} and a.user_id is
+		not null
+	</select>
+	<!-- 发券后,更新兑换码数据 -->
+	<update id="updateCouponCode" >
+		update
+			ad_coupon_code a 
+		left join 
+			ad_coupon b 
+		on b.id = a.coupon
+		left join
+			ad_business c
+		on c.id = b.business_id
+		set 
+			a.user_id = #{adCouponCode.userId},
+			a.activity_id = #{adCouponCode.activityId},
+			a.update_date = now(),
+			a.receive_date = now()
+		where 
+			a.code = #{adCouponCode.code}
+		and 
+			c.business_id = #{businessId}
+	</update>
+	<!-- 获取优惠券码 -->
+	<select id="getCodeByCoupon" parameterType="com.doooly.entity.reachad.AdCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode">
+		select a.*,
+			c.business_id as businessid
+		from 
+		(
+			select 
+				aa.coupon,
+				aa.id,
+				aa.code 
+			from ad_coupon_code aa 
+			where 1=1
+			and aa.coupon = #{coupon}
+			and IFNULL(aa.user_id,'') = ''
+			<if test="activityId != null and activityId !=''">
+				and aa.activity_id = #{activityId} 
+			</if>
+		) a 
+		left join ad_coupon b on a.coupon = b.id
+		left join ad_business c on b.business_id = c.id
+		<if test="businessid != null and businessid !=''">
+			and c.business_id = #{businessid}
+		</if>
+	</select>
+	
+	<!-- 获取优惠券码字符串集合 -->
+	<select id="getCodeStrList" parameterType="com.doooly.entity.reachad.AdCouponCode" resultType="String">
+		select a.code
+		from 
+		(
+			select 
+				aa.code,
+				aa.coupon
+			from ad_coupon_code aa 
+			where 1=1
+			and aa.coupon = #{coupon}
+			and IFNULL(aa.user_id,'') = ''
+			<if test="activityId != null and activityId !=''">
+				and aa.activity_id = #{activityId} 
+			</if>
+		) a 
+		left join ad_coupon b on a.coupon = b.id
+		left join ad_business c on b.business_id = c.id
+		<if test="businessid != null and businessid !=''">
+			and c.business_id = #{businessid}
+		</if>
+	</select>
+
+	<!-- 用户是否已领取活动券码 -->
+	<select id="checkIfSendCode" resultType="String" parameterType="com.doooly.entity.reachad.AdCouponCode">
+		select 
+			 a.code
+		from 
+			ad_coupon_code a 
+		where 
+		a.activity_id = #{activityId} 
+		and a.user_id = #{userId} 
+		and a.coupon = #{coupon}
+	</select>
+	
+	<select id="getCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode" >
+		select 
+			 a.code AS "code",
+			 a.is_used AS "isUsed"
+		from 
+			ad_coupon_code a 
+			left join ad_coupon_activity_conn acac on a.coupon = acac.coupon_id and a.activity_id = acac.activity_id
+		where 
+		a.activity_id = #{activityId} 
+		and a.user_id = #{userId} 
+		and a.coupon = #{couponId}
+	</select>
+	
+	<!-- 查询已经拥有该活动卡券的用户 -->
+	<select id="checkIsHadCode" resultType="java.lang.Long" >
+		select 
+			 a.user_id
+		from 
+			ad_coupon_code a 
+		<where>
+			a.user_id in
+			<foreach collection="userIds" open="(" close=")" separator="," item="id">
+			#{id}
+			</foreach>
+			and 
+			a.activity_id = #{activityId}
+			and
+			a.coupon = #{couponId}
+		</where>	
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 更新兑换码被查看 -->
+	<update id="updateCodeIsView" parameterType="java.lang.String">
+		update
+			ad_coupon_code a 
+		set 
+			a.is_view = 1,
+			a.update_date = now()
+		where 
+			a.code = #{code}
+	</update>
+	
+	<update id="batchUpdateCouponCode" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">  
+				update 
+					ad_coupon_code a
+				left join 
+					ad_coupon b 
+				on b.id = a.coupon
+				left join
+					ad_business c
+				on c.id = b.business_id
+				set
+						a.user_id=#{item.userId},
+						a.activity_id=#{item.activityId},
+						a.update_date=now(),
+						a.receive_date=now()
+				where a.code=#{item.code}
+				and
+				c.business_id = #{businessId}
+		</foreach>
+	</update>
+	
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeComplaintDao">
+	
+	<!-- 保存申述数据 -->
+	<insert id="insert" parameterType="com.doooly.entity.reachlife.LifeComplaint">
+		insert into
+			life_complaint
+		(
+			create_date,
+			modify_date,
+			complaint_sn,
+			contact_info,
+			content,
+			create_by,
+			create_ip,
+			del_flag,
+			group_name,
+			group_num,
+			image_paths,
+			member_num,
+			name,
+			status,
+			type,
+			update_by,
+			update_date,
+			update_ip,
+			complete_date
+		)
+		values
+		(
+			#{createDate},
+			#{modifyDate},
+			#{complaintSn},
+			#{contactInfo},
+			#{content},
+			#{createBy},
+			#{createIp},
+			#{delFlag},
+			#{groupName},
+			#{groupNum},
+			#{imagePaths},
+			#{memberNum},
+			#{name},
+			#{status},
+			#{type},
+			#{updateBy},
+			#{updateDate},
+			#{updateIp},
+			#{completeDate}
+		)
+	</insert>  
+</mapper>

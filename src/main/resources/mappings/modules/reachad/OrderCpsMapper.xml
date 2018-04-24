@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.OrderCpsDao">
+	<resultMap id="resultMap" 
+		type="com.doooly.entity.reachad.OrderCps">
+	</resultMap>
+	<sql id="orderCpsColumns">
+		id,
+		order_type,
+		cps_fee,
+		user_id,
+		business_id,
+		order_number,
+		cps_number,
+		create_date,
+		update_date,
+		del_flag
+	</sql>
+
+	<!-- ______________________________________查询______________________________________ -->
+
+	<select id="get" resultMap="resultMap">
+		select
+		<include refid="orderCpsColumns" />
+		from
+		_order_cps
+		where
+		id = #{id}
+	</select>
+
+	<select id="getByOrderNumber" resultMap="resultMap">
+		select
+		<include refid="orderCpsColumns" />
+		from
+			_order_cps
+		where
+			user_id=#{userId}
+			and business_id=#{businessId}
+			and order_number=#{orderNumber}
+	</select>
+	
+	<select id="getMaxCpsNumber" resultType="java.lang.Integer">
+		select
+			MAX(cps_number)
+		from	
+			_order_cps
+		where
+			user_id=#{userId}
+			and business_id=#{businessId}
+	</select>
+
+	<!-- ______________________________________新增______________________________________ -->
+
+	<insert id="insert" parameterType="com.doooly.entity.reachad.OrderCps"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into _order_cps
+		(
+		order_type,
+		cps_fee,
+		user_id,
+		business_id,
+		order_number,
+		cps_number,
+		create_date,
+		update_date,
+		del_flag
+		)
+		values
+		(
+		#{orderType},
+		#{cpsFee},
+		#{userId},
+		#{businessId},
+		#{orderNumber},
+		#{cpsNumber},
+		#{createDate},
+		#{updateDate},
+		#{delFlag}
+		)
+	</insert>
+
+	<!-- ______________________________________更新______________________________________ -->
+
+	<update id="update" parameterType="com.doooly.entity.reachad.OrderCps">
+		update _order_cps
+		<set>
+			<if test="orderType != null">
+				order_type = #{orderType},
+			</if>
+			<if test="cpsFee != null">
+				cps_fee = #{cpsFee},
+			</if>
+			<if test="userId != null">
+				user_id = #{userId},
+			</if>
+			<if test="businessId != null">
+				business_id = #{businessId},
+			</if>
+			<if test="orderNumber != null">
+				order_number = #{orderNumber},
+			</if>
+			<if test="cpsNumber != null">
+				cps_number = #{cpsNumber},
+			</if>
+			<if test="createDate != null">
+				create_date = #{createDate},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+			<if test="delFlag != null">
+				del_flag = #{delFlag},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

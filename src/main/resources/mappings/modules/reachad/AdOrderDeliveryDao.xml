@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdOrderDeliveryDao">
+	
+    <insert id="insert" parameterType="com.doooly.business.order.vo.OrderExtVo">
+	    insert into ad_order_delivery 
+	    (	
+	    	id,
+	    	order_report_id,
+	    	type,
+	    	apply_card_area1,
+	   		apply_card_store1, 
+	      	apply_card_area2, 
+	      	apply_card_store2, 
+	      	delivery_name, 
+	      	delivery_telephone, 
+	      	identity_card, 
+	      	identity_card_image, 
+	      	apply_card_image, 
+	      	create_date, 
+	      	update_date,
+	      	emp_card
+	      )
+	    values 
+	    (	
+	    	#{ext.id,jdbcType=INTEGER},
+	    	#{orderId},
+	      	#{ext.type,jdbcType=TINYINT}, 
+	      	#{ext.applyCardArea1,jdbcType=VARCHAR}, 
+	      	#{ext.applyCardStore1,jdbcType=VARCHAR}, 
+	      	#{ext.applyCardArea2,jdbcType=VARCHAR}, 
+	      	#{ext.applyCardStore2,jdbcType=VARCHAR}, 
+	      	#{ext.deliveryName,jdbcType=VARCHAR}, 
+	      	#{ext.deliveryTelephone,jdbcType=VARCHAR}, 
+	      	#{ext.identityCard,jdbcType=VARCHAR}, 
+	      	#{ext.identityCardImage,jdbcType=VARCHAR}, 
+	      	#{ext.applyCardImage,jdbcType=VARCHAR}, 
+	      	#{ext.createDate,jdbcType=TIMESTAMP}, 
+	      	#{ext.updateDate,jdbcType=TIMESTAMP},
+	      	#{ext.empCard,jdbcType=VARCHAR}
+	      )
+  </insert>
+
+    <update id="update" parameterType="com.doooly.business.order.vo.OrderExtVo">
+         update ad_order_delivery
+	    <set >
+	      <if test="orderReportId != null" >
+	        order_report_id = #{orderReportId,jdbcType=BIGINT},
+	      </if>
+	      <if test="type != null" >
+	        type = #{type,jdbcType=TINYINT},
+	      </if>
+	      <if test="applyCardArea1 != null" >
+	        apply_card_area1 = #{applyCardArea1,jdbcType=VARCHAR},
+	      </if>
+	      <if test="applyCardStore1 != null" >
+	        apply_card_store1 = #{applyCardStore1,jdbcType=VARCHAR},
+	      </if>
+	      <if test="applyCardArea2 != null" >
+	        apply_card_area2 = #{applyCardArea2,jdbcType=VARCHAR},
+	      </if>
+	      <if test="applyCardStore2 != null" >
+	        apply_card_store2 = #{applyCardStore2,jdbcType=VARCHAR},
+	      </if>
+	      <if test="deliveryName != null" >
+	        delivery_name = #{deliveryName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="deliveryTelephone != null" >
+	        delivery_telephone = #{deliveryTelephone,jdbcType=VARCHAR},
+	      </if>
+	      <if test="identityCard != null" >
+	        identity_card = #{identityCard,jdbcType=VARCHAR},
+	      </if>
+	      <if test="identityCardImage != null" >
+	        identity_card_image = #{identityCardImage,jdbcType=VARCHAR},
+	      </if>
+	      <if test="applyCardImage != null" >
+	        apply_card_image = #{applyCardImage,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createDate != null" >
+	        create_date = #{createDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updateDate != null" >
+	        update_date = #{updateDate,jdbcType=TIMESTAMP},
+	      </if>
+			<if test="empCard != null" >
+				emp_card = #{empCard,jdbcType=VARCHAR},
+			</if>
+	    </set>
+	    where id = #{id,jdbcType=INTEGER}
+    </update>
+
+</mapper>

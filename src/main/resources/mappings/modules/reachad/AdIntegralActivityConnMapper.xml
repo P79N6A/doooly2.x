@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdIntegralActivityConnDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdIntegralActivityConn" >
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, activity_id, integral_id,integral_for_each, create_date
+  </sql>
+  
+  <select id="checkIsHadActivity"  parameterType="java.lang.Long" resultType="com.doooly.entity.reachad.AdIntegralActivityConn">
+  	Select 
+		a.id, 
+		a.activity_id as "activityId", 
+		a.integral_id as "integralId",
+		a.integral_for_each as "integralForEach", 
+		a.create_date as "createDate",
+		ia.available_integral as "availableIntegral"
+  	From ad_integral_activity_conn a
+	  	join ad_coupon_activity ca on a.activity_id = ca.id
+	  	join ad_integral_activity ia on a.integral_id=ia.id
+	  	left join ad_group_activity_conn gac on ca.id =gac.activity_id
+	  	left join ad_user u on gac.group_id=u.group_num
+	  	join ad_basic_type bt on ca.activity_type = bt.id
+	  	where u.id = #{userId} and bt.`name` = "积分活动"
+	  	AND ca.delete_flag = 0
+		and ca.state=1
+	  	and ca.begin_date &lt; NOW()
+		and ca.end_date &gt; NOW()
+		ORDER BY ca.update_date desc limit 1
+  </select>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdFamilyDao">
+
+    <sql id="adFamilyColumns">
+        a.id AS "id",
+        a.point_share_switch AS "pointShareSwitch",
+        a.point_share_date AS "pointShareDate",
+        a.create_date AS "createDate"
+    </sql>
+
+    <insert id="insert" parameterType="AdFamily" useGeneratedKeys="true" keyProperty="id">
+      INSERT INTO ad_family (
+            point_share_switch,
+            point_share_date,
+            create_date
+        )
+        VALUES
+            (
+                #{pointShareSwitch},
+                #{pointShareDate},
+                now()
+            )
+    </insert>
+
+    <update id="updateFamily">
+        UPDATE ad_family a ,ad_family_user b SET a.point_share_switch = #{pointShareSwitch} WHERE a.id = b.family_id AND b.user_id = #{userId}
+    </update>
+
+    <select id="getMyFamily" resultType="AdFamily">
+        SELECT
+            <include refid="adFamilyColumns"/>
+        FROM
+            ad_family a,
+            ad_family_user b
+        WHERE
+            a.id = b.family_id
+        AND b.user_id = #{userId}
+    </select>
+    
+
+</mapper>

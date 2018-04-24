@@ -1,0 +1,1 @@
+keytool -genkey -alias test -keyalg RSA -keypass mypassword -storepass mypassword -dname "CN=, OU=, O=, L=, ST=, C=" -validity 3650 -keystore test.jks

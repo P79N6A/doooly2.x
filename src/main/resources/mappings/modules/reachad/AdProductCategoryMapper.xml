@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdProductCategoryDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdProductCategory">
+	</resultMap>
+
+	<sql id="categoryColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.sort AS "sort",
+		a.href AS "href",
+		a.is_show AS "isShow",
+		a.icon AS "icon",
+		a.type AS "type",
+		a.parent_id AS "parentId",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<select id="findFirstCategory" resultType="com.doooly.entity.reachad.AdProductCategory">
+		SELECT 
+			<include refid="categoryColumns" />
+		FROM 
+			ad_product_category a
+		WHERE 
+			a.is_show = 1 and a.parent_id = 0 order by sort
+	</select>
+
+	<select id="findSecondCategory" resultType="com.doooly.entity.reachad.AdProductCategory">
+		SELECT 
+			<include refid="categoryColumns" />
+		FROM 
+			ad_product_category a
+		WHERE 
+			a.parent_id = #{0,jdbcType=BIGINT} and a.type = #{1,jdbcType=BIGINT} and a.is_show = 1 order by sort
+	</select>
+	
+	
+</mapper>

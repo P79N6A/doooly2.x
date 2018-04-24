@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBusinessDao">
+	<resultMap id="resultMap"
+		type="com.doooly.entity.reachad.AdBusiness">
+	</resultMap>
+    
+	<sql id="adBusinessColumns">
+		a.id AS "id",
+		a.company AS "company",
+		a.office_id AS "office.id",
+		a.type AS "type",
+		a.logo AS "logo",
+		a.mini_logo AS "miniLogo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.user_name AS "userName",
+		a.password AS "password",
+		a.user_rebate AS "userRebate",
+		a.bussiness_rebate AS "bussinessRebate",
+		a.max_business_rebate AS "maxBusinessRebate",
+		a.order_detail_type AS "orderDetailType",
+		a.no_small_ticket_type AS "noSmallTicketType",
+		a.union_login AS "unionLogin",
+		a.data_synchronization AS "dataSynchronization",
+		a.bussiness_rebate_type AS "bussinessRebateType",
+		<!-- a.user_rebate_type AS "userRebateType", -->
+		a.server_start_time AS "serverStartTime",
+		a.is_active AS "isActive",
+		a.server_end_time AS "serverEndTime",
+		a.open_offLine_scan AS "openOffLineScan",
+		a.scan_image_url AS "scanImageUrl",
+		a.create_by AS "createBy.id",
+		a.del_flag AS "delFlag",
+		a.modify_date AS "modifyDate",
+		a.remarks AS "remarks",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.create_date AS "createDate",
+		a.is_hot AS "isHot",
+		a.list_image_wechat AS "listImageWechat",
+		o.name AS "office.name",
+		a.business_introduce as 'businessIntroduce',
+		a.open_one_number as 'openOneNnumber',
+		a.is_support_integral as 'isSupportIntegral',
+		a.is_rebate_apply as 'isRebateApply'
+	</sql>
+	<sql id="adBusinessColumnsO">
+		a.id AS "id",
+		a.company AS "company",
+		a.office_id AS "office.id",
+		a.type AS "type",
+		a.logo AS "logo",
+		a.mini_logo AS "miniLogo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.user_name AS "userName",
+		a.password AS "password",
+		a.user_rebate AS "userRebate",
+		a.bussiness_rebate AS "bussinessRebate",
+		a.max_business_rebate AS "maxBusinessRebate",
+		a.order_detail_type AS "orderDetailType",
+		a.no_small_ticket_type AS "noSmallTicketType",
+		a.union_login AS "unionLogin",
+		a.data_synchronization AS "dataSynchronization",
+		a.bussiness_rebate_type AS "bussinessRebateType",
+		<!-- a.user_rebate_type AS "userRebateType", -->
+		a.server_start_time AS "serverStartTime",
+		a.is_active AS "isActive",
+		a.server_end_time AS "serverEndTime",
+		a.del_flag AS "delFlag",
+		a.modify_date AS "modifyDate",
+		a.remarks AS "remarks",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate",
+		a.is_hot AS "isHot",
+		a.open_offLine_scan AS "openOffLineScan",
+		a.scan_image_url AS "scanImageUrl",
+		a.benefit_way AS "benefitWay",
+		a.benefit_content AS "benefitContent",
+		a.list_image_wechat AS "listImageWechat",
+		a.notice_info AS "noticeInfo",a.is_support_integral as 'isSupportIntegral',
+		a.business_introduce as 'businessIntroduce'
+	</sql>
+	<sql id="adBusinessHColumns">
+		a.id AS "id",
+		a.company AS "company",
+		a.office_id AS "office.id",
+		a.type AS "type",
+		a.logo AS "logo",
+		a.mini_logo AS "miniLogo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.user_name AS "userName",
+		a.password AS "password",
+		a.user_rebate AS "userRebate",
+		a.bussiness_rebate AS "bussinessRebate",
+		a.max_business_rebate AS "maxBusinessRebate",
+		a.order_detail_type AS "orderDetailType",
+		a.no_small_ticket_type AS "noSmallTicketType",
+		a.union_login AS "unionLogin",
+		a.data_synchronization AS "dataSynchronization",
+		a.bussiness_rebate_type AS "bussinessRebateType",
+		<!-- a.user_rebate_type AS "userRebateType", -->
+		a.server_start_time AS "serverStartTime",
+		a.is_active AS "isActive",
+		a.server_end_time AS "serverEndTime",
+		a.del_flag AS "delFlag",
+		a.modify_date AS "modifyDate",
+		a.remarks AS "remarks",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate",
+		a.is_hot AS "isHot",
+		a.open_offLine_scan AS "openOffLineScan",
+		a.scan_image_url AS "scanImageUrl",
+		a.discount AS "discount",
+		a.list_image_wechat AS "listImageWechat",
+		a.deal_type As "dealType",
+		a.business_introduce as 'businessIntroduce',
+		a.benefit_way AS "benefitWay",
+		a.benefit_content AS "benefitContent",
+		a.notice_info AS "noticeInfo",
+        a.open_one_number as 'openOneNnumber',
+        a.is_rebate_apply as 'isRebateApply',
+        a.wechat_jump_style as "wechatJumpStyle",a.is_support_integral as 'isSupportIntegral',
+        a.app_jump_style as "appJumpStyle"
+	</sql>
+	<sql id="adBusinessRebateColumns">
+		a.id AS "id",
+		a.company AS "company",
+		a.office_id AS "office.id",
+		a.type AS "type",
+		a.logo AS "logo",
+		a.mini_logo AS "miniLogo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.user_name AS "userName",
+		a.password AS "password",
+		a.user_rebate AS "userRebate",
+		a.max_business_rebate AS "maxBusinessRebate",
+		a.order_detail_type AS "orderDetailType",
+		a.no_small_ticket_type AS "noSmallTicketType",
+		a.union_login AS "unionLogin",
+		a.data_synchronization AS "dataSynchronization",
+		a.bussiness_rebate_type AS "bussinessRebateType",
+		<!-- a.user_rebate_type AS "userRebateType", -->
+		a.server_start_time AS "serverStartTime",
+		a.is_active AS "isActive",
+		a.server_end_time AS "serverEndTime",
+		a.del_flag AS "delFlag",
+		a.modify_date AS "modifyDate",
+		a.remarks AS "remarks",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate",
+		a.is_hot AS "isHot",
+		a.open_offLine_scan AS "openOffLineScan",
+		a.scan_image_url AS "scanImageUrl",
+		a.discount AS "discount",
+		a.list_image_wechat AS "listImageWechat",
+		a.deal_type As "dealType",
+		a.business_introduce as 'businessIntroduce',a.is_support_integral as 'isSupportIntegral',
+        a.open_one_number as 'openOneNnumber'
+	</sql>
+	
+	<!-- 武钢热门商户 -->
+	<select id="findHotMerchantForWuSteel" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			a.id AS "id",
+			a.company AS "company",
+			a.office_id AS "office.id",
+			a.type AS "type",
+			a.logo AS "logo",
+			a.mini_logo AS "miniLogo",
+			a.url AS "url",
+			a.app_url AS "appUrl",
+			a.business_id AS "businessId",
+			a.user_name AS "userName",
+			a.password AS "password",
+			a.user_rebate AS "userRebate",
+			a.max_business_rebate AS "maxBusinessRebate",
+			a.order_detail_type AS "orderDetailType",
+			a.no_small_ticket_type AS "noSmallTicketType",
+			a.union_login AS "unionLogin",
+			a.data_synchronization AS "dataSynchronization",
+			a.bussiness_rebate_type AS "bussinessRebateType",
+			a.server_start_time AS "serverStartTime",
+			a.is_active AS "isActive",
+			a.server_end_time AS "serverEndTime",
+			a.del_flag AS "delFlag",
+			a.modify_date AS "modifyDate",
+			CASE WHEN a.remarks is NULL then "" ELSE a.remarks END AS "remarks",
+			a.update_date AS "updateDate",
+			a.create_date AS "createDate",
+			a.is_hot AS "isHot",
+			a.discount AS "discount",
+			a.list_image_wechat AS "listImageWechat",
+			a.deal_type As "dealType",a.is_support_integral as 'isSupportIntegral',
+			a.business_introduce as 'businessIntroduce',a.bussiness_rebate AS "bussinessRebate"
+			,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		FROM
+			ad_business a 
+		join ad_business_group abg on a.id = abg.business_id 
+		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and abg.group_id = (select u.group_num from ad_user u where u.id=#{userId})
+		GROUP BY a.id
+		order by a.sort desc
+	</select>
+	
+	<select id="getAdBusinessId" resultType="java.lang.Long">
+		select a.id
+		from ad_business a
+		where a.business_id=#{businessId}
+	</select>
+	<select id="get" resultType="com.doooly.entity.reachad.AdBusiness">
+		select <include refid="adBusinessHColumns" />,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		from ad_business a
+		where a.id=#{id}
+	</select>
+	<select id="findHotMerchant" resultType="com.doooly.entity.reachad.AdBusiness">
+		select <include refid="adBusinessHColumns" />
+		from ad_business a
+		where a.is_hot=#{isHot} and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 order by a.sort desc
+	</select>
+	<select id="getByBusinessIdAndCategoryId" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+	<include refid="adBusinessRebateColumns" />,rr.rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		JOIN ad_business_rebate_rule rr ON a.id = rr.business_id
+		WHERE
+			a.business_id = #{businessId}
+		 and a.is_active=2 ORDER BY rr.rebate  limit 1
+	</select>
+	<select id="getByBusinessIdForProductRebate" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+	<include refid="adBusinessRebateColumns" />,rr.rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		JOIN ad_business_rebate_rule rr ON a.id = rr.business_id
+		WHERE
+			a.id = #{businessId}
+		 and a.is_active=2 ORDER BY rr.rebate  limit 1
+	</select>
+	<select id="getByBusinessId" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+	<include refid="adBusinessRebateColumns" />,a.bussiness_rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		WHERE
+		a.business_id = #{businessId}
+	</select>
+	<select id="findHotMerchantWithLighten" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+		<include refid="adBusinessRebateColumns" />,a.bussiness_rebate AS "bussinessRebate",CASE WHEN abl.type is NULL then 0 ELSE abl.type END AS "lightenType"
+		,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		FROM
+			ad_business a LEFT JOIN ad_business_lighten abl on a.id = abl.business_id and abl.type=1 and abl.del_flag=0 and abl.user_id=#{userId} join ad_business_area_conn abac on abac.business_id = a.id
+			join ad_area aa on aa.id = abac.area_id 
+			join ad_business_group abg on a.id = abg.business_id 
+		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and (aa.name =#{address} or aa.name="全国")
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
+		 order by a.sort,abl.type desc
+	</select>
+	<select id="findAllBusinessLogo" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			a.logo,
+			a.id,
+			a.is_hot		
+			FROM
+			ad_business a
+		LEFT JOIN ad_business_area_conn b ON a.id = b.business_id
+		LEFT JOIN ad_area c ON c.id = b.area_id
+			WHERE 
+			c.name=#{address}
+			and a.del_flag = 0
+	</select>
+		<select id="findAllBusinessByUserId" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			a.logo,
+			a.id,
+			a.is_hot		
+			FROM
+			ad_business a
+			LEFT JOIN ad_business_group b ON a.id = b.business_id
+			LEFT JOIN ad_group c ON c.id= b.group_id
+			LEFT JOIN ad_user d ON c.id = d.group_num
+		WHERE 
+			a.del_flag = 0
+			AND d.id = #{userId}
+			and a.is_active = 2
+			and a.is_hot = 1
+	</select>
+	
+	
+	<select id="findAllBusinessAllLogo" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			a.logo,
+			a.id,
+			a.is_hot		
+			FROM
+			ad_business a
+		WHERE 
+			a.del_flag = 0
+	</select>
+	<select id="findScanList" resultType="com.doooly.entity.reachad.AdBusiness">
+		select
+			<include refid="adBusinessRebateColumns" />
+		from
+			ad_business a LEFT JOIN ad_business_lighten abl on a.id = abl.business_id and abl.type=1 and abl.del_flag=0 and abl.user_id=#{userId} 
+		where 
+		a.deal_type =1 and a.is_active=2 and a.del_flag=0 order by a.sort,abl.type desc
+	</select>
+	
+	<select id="findByUsernamePassword" resultType="java.lang.Boolean">
+        SELECT COUNT(1) FROM ad_business WHERE business_id=#{businessId} AND user_name=#{username} AND password = #{password}
+    </select>
+	<select id="getHotTotalNum" resultType="java.lang.Integer">
+        SELECT
+		count(ct.id) from (
+		select count(0) as id
+		FROM
+			ad_business a 
+		join ad_business_area_conn abac on abac.business_id = a.id
+			join ad_area aa on aa.id = abac.area_id 
+			join ad_business_group abg on a.id = abg.business_id 
+		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and (aa.name =#{address} or aa.name ="全国")
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId}) GROUP BY a.id) ct
+    </select>
+	<select id="findHotMerchantByPage" resultType="com.doooly.entity.reachad.AdBusiness">
+        SELECT
+		a.id AS "id",
+		a.company AS "company",
+		a.long_logo AS "logo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.discount AS "discount",
+		a.deal_type As "dealType",
+		a.is_support_integral as 'isSupportIntegral',
+		a.is_new_end_date AS "isNewEndTime",
+		a.is_new_begin_date AS "isNewBeginTime",
+		CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		FROM
+			ad_business a 
+		join ad_business_area_conn abac on abac.business_id = a.id
+			join ad_area aa on aa.id = abac.area_id 
+			join ad_business_group abg on a.id = abg.business_id 
+		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and (aa.name =#{address} or aa.name ="全国")
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
+		 <if test="type != null and type != ''">
+				AND a.type = #{type}
+		</if>  
+		GROUP BY a.id
+		  order by a.sort desc LIMIT #{startIndex},#{pageSize}
+    </select>
+	<select id="findDongHangMerchantByPage" resultType="com.doooly.entity.reachad.AdBusiness">
+        SELECT
+		a.id AS "id",
+		a.company AS "company",
+		a.office_id AS "office.id",
+		a.type AS "type",
+		a.logo AS "logo",
+		a.mini_logo AS "miniLogo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.user_name AS "userName",
+		a.password AS "password",
+		a.user_rebate AS "userRebate",
+		a.max_business_rebate AS "maxBusinessRebate",
+		a.order_detail_type AS "orderDetailType",
+		a.no_small_ticket_type AS "noSmallTicketType",
+		a.union_login AS "unionLogin",
+		a.data_synchronization AS "dataSynchronization",
+		a.bussiness_rebate_type AS "bussinessRebateType",
+		a.server_start_time AS "serverStartTime",
+		a.is_active AS "isActive",
+		a.server_end_time AS "serverEndTime",
+		a.del_flag AS "delFlag",
+		a.modify_date AS "modifyDate",
+		CASE WHEN a.remarks is NULL then "" ELSE a.remarks END AS "remarks",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate",
+		a.is_hot AS "isHot",
+		a.discount AS "discount",
+		a.list_image_wechat AS "listImageWechat",
+		a.deal_type As "dealType",a.is_support_integral as 'isSupportIntegral',
+		a.business_introduce as 'businessIntroduce',a.bussiness_rebate AS "bussinessRebate"
+		,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		FROM
+			ad_business a 
+		join ad_business_area_conn abac on abac.business_id = a.id
+			join ad_area aa on aa.id = abac.area_id 
+			join ad_business_group abg on a.id = abg.business_id 
+		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and aa.name ="全国"
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
+		 <if test="type != null and type != ''">
+				AND a.type = #{type}
+		</if>  
+		GROUP BY a.id
+		  order by a.sort desc LIMIT #{startIndex},#{pageSize}
+    </select>
+	 
+    <select id="findBusinessList" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			a.id AS "id",
+		a.company AS "company",
+<!-- 		a.type AS "type", -->
+<!-- 		a.logo AS "logo", -->
+		a.mini_logo AS "miniLogo",
+<!-- 		a.url AS "url", -->
+<!-- 		a.app_url AS "appUrl", -->
+		a.business_id AS "businessId",
+<!-- 		a.server_start_time AS "serverStartTime", -->
+<!-- 		a.is_active AS "isActive", -->
+<!-- 		a.server_end_time AS "serverEndTime", -->
+<!-- 		a.del_flag AS "delFlag", -->
+<!-- 		a.discount AS "discount", -->
+<!-- 		a.list_image_wechat AS "listImageWechat", -->
+		a.scan_image_url AS "scanImageUrl",a.is_support_integral as 'isSupportIntegral'
+		,a.deal_type As "dealType"
+		FROM
+			ad_business a
+			JOIN ad_business_group abg ON a.id = abg.business_id 
+			JOIN ad_group g ON abg.group_id = g.id
+			JOIN ad_user u ON u.group_num = g.id
+		WHERE
+			u.id = #{userId} AND a.open_offLine_scan = 1 AND a.deal_type = 1 AND a.del_flag = 0 AND a.is_active = 2 GROUP BY abg.business_id
+	</select>
+	
+    <select id="getMarketableProductId" resultType="java.lang.Integer">
+		SELECT p.id FROM ad_self_product p
+		WHERE p.is_marketable != 0
+			AND p.state = 4
+			AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date 
+			AND p.del_flag = 0
+			AND p.business_id = #{businessId}
+		LIMIT 1
+	</select>
+	
+	<select id="getById" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			<include refid="adBusinessRebateColumns" />,a.bussiness_rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		WHERE
+		a.id = #{id}
+	</select>
+</mapper>

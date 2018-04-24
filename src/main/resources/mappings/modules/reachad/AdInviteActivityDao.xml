@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdInviteActivityDao">
+    <sql id="adInviteActivityColumns">
+        a.id AS "id",
+        a.act_num AS "actNum",
+        a.act_name AS "actName",
+        a.status AS "status",
+        a.bag_id AS "bagId",
+        a.group_id AS "groupId",
+        a.serial AS "serial",
+        a.total_people_quantity AS "totalPeopleQuantity",
+        a.total_code_quantity AS "totalCodeQuantity",
+        a.used_code_quantity AS "usedCodeQuantity",
+        a.new_user_quantity AS "newUserQuantity",
+        a.valid_date AS "validDate",
+        a.create_date AS "createDate",
+        a.update_date AS "updateDate",
+        a.begin_time AS "beginTime",
+        a.end_time AS "endTime",
+        a.del_flag AS "delFlag",
+        a.function_stage AS "functionStage",
+        a.act_desc AS "actDesc",
+        a.browser_count AS "browserCount",
+        a.address AS "address",
+        a.plateform_type AS "plateformType",
+        a.link_url AS "linkUrl",
+        a.introduction AS "introduction",
+        a.list_image AS "listImage",
+        a.detail_image AS "detailImage",
+        a.support_count AS "supportCount",
+        a.register_type AS "registerType",
+        a.sort AS "sort"
+    </sql>
+
+    <select id="getActivityDetail" resultType="AdInviteActivity">
+        SELECT
+        <include refid="adInviteActivityColumns"/>
+        FROM ad_invite_activity a
+        WHERE a.id = #{id}
+    </select>
+    
+    <update id="updateSupportCount">
+        UPDATE ad_invite_activity SET support_count = support_count+1 WHERE id = #{activityId}
+    </update>
+
+    <update id="updateBrowserCount">
+        UPDATE ad_invite_activity SET browser_count = browser_count+1 WHERE id = #{activityId}
+    </update>
+
+</mapper>

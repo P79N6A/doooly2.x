@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdQuestionOptionDao">
+	<resultMap id="resultMap" 
+		type="com.doooly.entity.reachad.AdQuestionOption">
+	</resultMap>
+  	
+  	<select id="getTopicAndOptionsByRecord" resultType="com.doooly.entity.reachad.AdQuestionOption">
+  		SELECT b.name AS "topic.name",
+		  	   b.points AS "topic.points",
+		  	   c.type AS "type",
+		  	   c.description AS "description",
+		  	   c.question_id AS "questionId"
+  		FROM ad_answer_record a
+		INNER JOIN ad_question_bank b 
+			ON a.question_id = b.id
+		INNER JOIN ad_question_option c
+			ON b.id = c.question_id
+		WHERE a.answer_user=#{userId} AND DATE_FORMAT(a.answer_time,'%Y-%m-%d')=DATE_FORMAT(#{date},'%Y-%m-%d')
+  	</select>
+  	
+  	<select id="getTopicAndOptionsRandom" resultType="com.doooly.entity.reachad.AdQuestionOption">
+  		SELECT a.name AS "topic.name",
+	  		   a.points AS "topic.points",
+	  		   b.type AS "type",
+	  		   b.description AS "description",
+	  		   b.question_id AS "questionId"
+	  	FROM(
+	  		SELECT * FROM ad_question_bank 
+			WHERE id >= ((SELECT MAX(id) FROM ad_question_bank)) * RAND()  
+			LIMIT 1)a 
+		INNER JOIN ad_question_option b
+		ON a.id = b.question_id
+  	</select>
+  	
+  	<select id="getTopicAndOptionsFirst" resultType="com.doooly.entity.reachad.AdQuestionOption">
+  		SELECT
+  			b.name AS "topic.name",
+  			o.type AS "type",
+  			o.description AS "description",
+  			b.order AS "questionOrder"
+		FROM ad_question_bank b
+		INNER JOIN ad_question_option o
+			ON b.id = o.question_id
+		INNER JOIN ad_question_bank_manage m
+			ON m.id = b.bank_id
+		LEFT JOIN ad_coupon_activity a
+			ON a.id = m.activity_id
+		WHERE m.type='1'
+			AND b.order=#{questionOrder}
+  	</select>
+  	
+  	<select id="getTopicAndOptionsNext" resultType="com.doooly.entity.reachad.AdQuestionOption">
+  		SELECT 		
+			b.name AS "topic.name",
+			o.type AS "type",
+			o.description AS "description",
+			b.order AS "questionOrder"
+		FROM ad_question_bank b
+		INNER JOIN ad_question_option o
+			ON b.id = o.question_id
+		INNER JOIN ad_question_bank_manage m
+			ON m.id = b.bank_id
+		LEFT JOIN ad_coupon_activity a
+			ON a.id = m.activity_id
+		WHERE m.type='1'
+		AND b.order = (
+			SELECT oo.next_question_order 
+			FROM ad_question_option oo 
+			INNER JOIN ad_question_bank bb 
+				ON oo.question_id = bb.id 
+			WHERE oo.type = #{optionType}
+				AND bb.order = #{questionOrder})
+  	</select>
+  	
+  	<select id="getRecordByOrderAndType" resultType="com.doooly.entity.reachad.AdQuestionOption">
+  		SELECT
+			o.question_id AS "questionId",
+			o.type AS "type",
+			a.id AS "activityId",
+			o.coupon_id AS "couponId",
+			o.age AS "age",
+			b.order AS "questionOrder"
+		FROM ad_question_bank b
+		INNER JOIN ad_question_option o
+			ON b.id = o.question_id
+		INNER JOIN ad_question_bank_manage m
+			ON m.id = b.bank_id
+		LEFT JOIN ad_coupon_activity a
+			ON a.id = m.activity_id
+		WHERE m.type='1'
+			AND b.order=#{questionOrder}
+			AND o.type=#{optionType}
+  	</select>
+  	
+</mapper>

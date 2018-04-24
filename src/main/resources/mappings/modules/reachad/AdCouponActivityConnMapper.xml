@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdCouponActivityConnDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdCouponActivityConn">
+	</resultMap>
+
+	<sql id="adCouponActivityConnColumns">
+		cac.id AS "id",
+		cac.activity_id AS "activityId",
+		cac.coupon_id AS "couponId", 
+		cac.coupon_quantity AS "couponQuantity",
+		cac.coupon_used_quantity AS "couponUsedQuantity",
+		cac.coupon_remind_quantity AS "couponRemindQuantity",
+		cac.create_date AS "createDate",
+		cac.begin_date AS "beginDate",
+		cac.end_date AS "endDate",
+		ca.list_image_url AS "wechatDetailImage",
+		c.pc_detail_image AS "pcDetailImage",
+		c.product_sn  AS "productSn",
+		CASE WHEN cc.user_id is NULL then 0 ELSE 1 END AS type 
+		
+	</sql>
+	<sql id="adCouponActivityConnColumnsTask">
+		cac.id AS "id",
+		cac.activity_id AS "activityId",
+		cac.coupon_id AS "couponId", 
+		cac.coupon_quantity AS "couponQuantity",
+		cac.coupon_used_quantity AS "couponUsedQuantity",
+		cac.coupon_remind_quantity AS "couponRemindQuantity",
+		ca.create_date AS "createDate",
+		ca.begin_date AS "beginDate",
+		ca.end_date AS "endDate",
+		ca.list_image_url AS "wechatDetailImage",
+		c.pc_detail_image AS "pcDetailImage",
+		c.product_sn  AS "productSn"
+	</sql>
+	<sql id="adCouponActivityConnJoins">
+		
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		JOIN ad_coupon_activity ca ON cac.activity_id = ca.id
+		join ad_product_category apc on ca.category = apc.id
+ 		LEFT JOIN ad_coupon_code cc ON cc.coupon = c.id 
+	</sql>
+	<sql id="adCouponActivityConnJoinsTask">
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		JOIN ad_coupon_activity ca ON cac.activity_id = ca.id
+	</sql>
+
+
+	<select id="getShouldCouponAndActivity" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			<include refid="adCouponActivityConnColumnsTask" />
+		FROM 
+			ad_coupon_activity_conn cac
+		<include refid="adCouponActivityConnJoinsTask" />
+		where
+		cac.coupon_remind_quantity> 0
+		AND c.is_open = 1
+		AND ca.delete_flag = 0
+		AND ca.category is not null
+		and ca.state=1
+		and  ca.end_date &lt; #{date}
+		and ca.receive_type=1
+<!-- 		and ca.delete_flag =1 -->
+<!-- 		and ca.plateform_type =0 -->
+<!-- 		order by ca.sort  -->
+	</select>
+	<select id="getCountByActivityIdImmediate" resultType="Integer">
+		SELECT 
+			count(0)
+		FROM 
+			ad_coupon_activity_conn cac JOIN ad_coupon_activity ca ON cac.activity_id = ca.id
+		where
+		cac.coupon_remind_quantity > 0 
+		and  ca.end_date &gt; #{date}
+		and cac.activity_id = #{activityId}
+	</select>
+	<select id="findCouponByCategory" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			<include refid="adCouponActivityConnColumns" />
+		FROM 
+			ad_coupon_activity_conn cac
+		<include refid="adCouponActivityConnJoins" /> and cc.user_id =#{adId} and cc.activity_id= ca.id
+		join ad_user uu on uu.id = #{adId}
+		JOIN ad_group_activity_conn gac ON uu.group_num = gac.group_id and ca.id = gac.activity_id
+		where
+		cac.coupon_remind_quantity > 0 
+		AND c.is_open = 1
+		AND ca.delete_flag = 0
+		AND ca.category is not null
+		and ca.state=1
+		and  ca.begin_date &lt; #{date}
+		and  ca.end_date &gt; #{date}
+		and ca.receive_type=0
+		and ca.plateform_type =0
+	
+		<if test="type != 2 ">
+			and  ca.category= #{catagoryId}
+		</if> 
+		order by ca.update_date desc limit 5
+	</select>
+	
+	<update id="reduceRemindQuantity">
+		update ad_coupon_activity_conn a 
+		set 
+			a.coupon_remind_quantity = a.coupon_remind_quantity - 1,
+			a.coupon_used_quantity = a.coupon_used_quantity + 1
+		where a.activity_id=#{activityId} and a.coupon_id=#{couponId}
+	</update>
+	
+	<update id="BatchreduceRemindQuantity">
+		update ad_coupon_activity_conn a 
+		set 
+			a.coupon_remind_quantity = a.coupon_remind_quantity - #{count},
+			a.coupon_used_quantity = a.coupon_used_quantity + #{count}
+		where a.activity_id=#{activityId} and a.coupon_id=#{couponId}
+	</update>
+	
+	<update id="updateUsedQuantity" parameterType="com.doooly.entity.reachad.AdCouponActivityConn">
+		update ad_coupon_activity_conn a 
+		set a.coupon_remind_quantity = #{couponRemindQuantity} , a.coupon_used_quantity = #{couponUsedQuantity}
+		where a.id= #{id}
+	</update>
+	
+	<!-- add by yuelou.zhang begin -->
+	<select id="findAvailableCoupons" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			c.id AS "coupon.id",
+			<!-- c.wechat_detail_image AS "coupon.wechatDetailImage", -->
+			ca.list_image_url AS "coupon.wechatDetailImage",
+			<!-- c.product_name AS "coupon.productName", -->
+			ca.name AS "coupon.productName",
+			<!-- c.description AS "coupon.description", -->
+			ca.description AS "coupon.description",
+			cac.id AS "id",
+			DATE_FORMAT(ca.begin_date,'%Y-%m-%d %H:%i:%s') AS "beginDate",
+			DATE_FORMAT(ca.end_date,'%Y-%m-%d %H:%i:%s') AS "endDate",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "couponId",
+			(select count(rr.id) from ad_register_record rr
+  			where rr.activity_id = cac.activity_id AND rr.coupon_id = cac.coupon_id) AS "registerNum",
+  			(SELECT count(arr.id) FROM ad_register_record arr 
+			WHERE arr.activity_id = cac.activity_id AND arr.coupon_id = cac.coupon_id AND arr.user_id=#{userId}) AS "registerFlag"
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon_activity ca 
+			ON cac.activity_id = ca.id
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_basic_type t
+			ON t.id = ca.activity_type
+		JOIN ad_user uu 
+			ON uu.id = #{userId}
+		JOIN ad_group_activity_conn gac 
+			ON uu.group_num = gac.group_id and ca.id = gac.activity_id
+		WHERE
+			NOW() between ca.begin_date AND ca.end_date
+			AND ca.state = '1'   
+			AND ca.receive_type='1' 
+			AND t.id = '4'
+			AND c.is_open = 1
+		ORDER BY ca.sort DESC
+	</select>
+	
+	<select id="getCouponDetailsByConnId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			c.id AS "coupon.id",
+			<!-- c.wechat_detail_image AS "coupon.wechatDetailImage", -->
+			ca.detail_image_url AS "coupon.wechatDetailImage",
+			<!-- c.product_name AS "coupon.productName", -->
+			ca.name AS "coupon.productName",
+			<!-- c.description AS "coupon.description", -->
+			ca.description AS "coupon.description",
+			c.wechat_convert_method AS "coupon.wechatConvertMethod",
+			c.wechat_introduction AS "coupon.wechatIntroduction",
+			c.wechat_attention AS "coupon.wechatAttention",
+			c.kind AS "coupon.kind",
+			c.coupon_value AS "coupon.couponValue",
+			c.app_download AS 'coupon.appDownload',
+			c.business_activity AS 'coupon.businessActivity',
+			c.business_activity_url AS 'coupon.businessActivityUrl',
+			c.coupon_user_detail AS 'coupon.couponUserDetail',
+			cac.id AS "id",
+			DATE_FORMAT(ca.begin_date,'%Y-%m-%d %H:%i:%s') AS "beginDate",
+			DATE_FORMAT(ca.end_date,'%Y-%m-%d %H:%i:%s') AS "endDate",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "couponId",
+			(select count(rr.id) from ad_register_record rr
+  				where rr.activity_id = cac.activity_id AND rr.coupon_id = cac.coupon_id) AS "registerNum",
+  			(SELECT count(arr.id) FROM ad_register_record arr 
+			WHERE arr.activity_id = cac.activity_id AND arr.coupon_id = cac.coupon_id AND arr.user_id=#{userId}) AS "registerFlag",
+			(SELECT b.business_introduce FROM ad_business b WHERE b.id = c.business_id) AS "businessIntroduce"
+		FROM 
+			ad_coupon_activity_conn cac
+		JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		JOIN ad_coupon_activity ca 
+			ON cac.activity_id = ca.id
+		WHERE
+			cac.id=#{actConnId}
+	</select>
+	
+	<!-- 可使用 -->
+	<select id="findUnuseCoupons" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			cac.id AS "id",
+			cac.begin_date AS "coupon.beginDate",
+			cac.end_date AS "coupon.endDate",
+			c.kind AS "coupon.kind",
+			c.id AS "coupon.id",
+			c.coupon_value AS "coupon.couponValue",
+			c.business_name AS "coupon.businessName",
+			cc.code AS "couponCode",
+			cc.id AS "couponCodeId",
+			cc.is_view AS "isView",
+			c.product_name as "coupon.productName"
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cac.activity_id = cc.activity_id
+		INNER JOIN ad_user u
+			ON u.id = cc.user_id
+		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		WHERE
+			NOW() &lt;= cac.end_date
+			AND cc.is_used = 0
+			AND cc.user_id = #{userId}
+		<choose>
+			<when test="couponCategory == 15">
+				AND cc.is_locked = 0
+				AND c.coupon_category = #{couponCategory}
+				ORDER BY c.coupon_value DESC
+			</when>
+			<otherwise>
+				ORDER BY cc.receive_date DESC
+			</otherwise>
+		</choose> 
+	</select>
+	
+	<!-- 已使用 -->
+	<select id="findUsedCoupons" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			cac.begin_date AS "coupon.beginDate",
+			cac.end_date AS "coupon.endDate",
+			c.kind AS "coupon.kind",
+			c.id AS "coupon.id",
+			c.coupon_value AS "coupon.couponValue",
+			c.business_name AS "coupon.businessName",
+			cc.code AS "couponCode",
+			cc.id AS "couponCodeId",
+			c.product_name as "coupon.productName"
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cac.activity_id = cc.activity_id
+		INNER JOIN ad_user u
+			ON u.id = cc.user_id
+ 		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		WHERE
+			cc.is_used = 1
+			AND cc.user_id = #{userId}
+		<choose>
+			<when test="couponCategory == 15">
+				AND cc.is_locked = 0
+				AND c.coupon_category = #{couponCategory}
+				ORDER BY c.coupon_value DESC
+			</when>
+			<otherwise>
+				ORDER BY cc.receive_date DESC
+			</otherwise>
+		</choose> 
+	</select>
+	
+	<!-- 已过期 -->
+	<select id="findExpiredCoupons" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			cac.begin_date AS "coupon.beginDate",
+			cac.end_date AS "coupon.endDate",
+			c.kind AS "coupon.kind",
+			c.id AS "coupon.id",
+			c.coupon_value AS "coupon.couponValue",
+			c.business_name AS "coupon.businessName",
+			cc.code AS "couponCode",
+			cc.id AS "couponCodeId",
+			c.product_name as "coupon.productName",
+			cac.id as "id"
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cac.activity_id = cc.activity_id
+		INNER JOIN ad_user u
+			ON u.id = cc.user_id
+ 		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		WHERE
+			NOW() &gt; cac.end_date
+			AND cc.is_used = 0
+			AND cc.user_id = #{userId}
+		<choose>
+			<when test="couponCategory == 15">
+				AND cc.is_locked = 0
+				AND c.coupon_category = #{couponCategory}
+				ORDER BY c.coupon_value DESC
+			</when>
+			<otherwise>
+				ORDER BY cc.receive_date DESC
+			</otherwise>
+		</choose> 
+	</select>
+	
+	<!-- 未领取 -->
+	<select id="findUnclaimedCoupons" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			cac.id AS "id",
+			cac.begin_date AS "coupon.beginDate",
+			cac.end_date AS "coupon.endDate",
+			c.kind AS "coupon.kind",
+			c.coupon_unit AS "coupon.couponUnit",
+			c.coupon_value AS "coupon.couponValue",
+			c.business_name AS "coupon.businessName",
+			t.name AS "couponTagName",
+			pc.name AS "firstCategoryName",
+			cac.activity_id AS "activityId",
+			c.id as 'couponId'
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id	
+		LEFT JOIN ad_coupon_code cc
+   		 	ON cc.coupon = c.id AND cac.activity_id = cc.activity_id AND cc.user_id = #{userId}
+		LEFT JOIN ad_product_category pc
+			ON pc.id = c.product_first_category
+		INNER JOIN ad_user u
+			ON u.id = #{userId}
+ 		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		INNER JOIN ad_basic_type t
+			ON t.id = c.coupon_category
+		INNER JOIN ad_coupon_activity ca 
+			ON cac.activity_id = ca.id
+		WHERE
+			NOW() BETWEEN ca.begin_date AND ca.end_date
+			AND ca.receive_type = '0'
+			AND cc.user_id IS NULL
+			AND c.is_open = 1
+	</select>
+	
+	<!-- 待使用卡券  去使用 -->
+	<select id="getCouponDetail" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			ab.logo as 'adBusiness.logo',
+			c.wechat_detail_image AS "coupon.wechatDetailImage",
+			c.product_name AS "coupon.productName",
+			cac.begin_date AS "coupon.beginDate",
+			cac.end_date AS "coupon.endDate",
+			c.kind AS "coupon.kind",
+			c.business_name AS "coupon.businessName",
+			c.coupon_value AS "coupon.couponValue",
+			c.wechat_convert_method AS "coupon.wechatConvertMethod",
+			c.wechat_introduction AS "coupon.wechatIntroduction",
+			c.wechat_attention AS "coupon.wechatAttention",
+			cc.code AS "couponCode",
+			ab.company as "adBusiness.company",
+			ab.mini_logo as "adBusiness.miniLogo",
+			ab.id as "adBusiness.id",
+			ab.url as "adBusiness.url",
+			DATE_FORMAT(cc.receive_date,'%Y.%m.%d %H:%i:%s') AS "codeReceiveDate",
+			ab.deal_type as "adBusiness.dealType",
+			c.business_online_url as "coupon.businessOnlineUrl",
+			c.business_app_url as "coupon.businessAppUrl",
+			c.app_download AS 'coupon.appDownload',
+			c.business_activity AS 'coupon.businessActivity',
+			c.business_activity_url AS 'coupon.businessActivityUrl'
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cc.activity_id = cac.activity_id
+		left join ad_business ab  
+			on ab.id = c.business_id
+		WHERE
+			cc.user_id = #{userId}
+			AND cac.id = #{actConnId}
+	</select>
+	<!-- add by yuelou.zhang end -->
+	<select id="getByActivityIdAndLevel" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+			SELECT
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "coupon.id",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			b.business_id AS "coupon.businessId",
+			c.product_name AS "coupon.productName"
+		FROM
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		LEFT JOIN ad_business b on c.business_id = b.id
+		 where cac.activity_id = #{activityId} and cac.level = #{level}
+		
+	</select>
+	
+	<select id="getByActivityId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "coupon.id",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			cac.level AS "level",
+			b.business_id AS "coupon.businessId",
+			c.product_name AS "coupon.productName"
+		FROM
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		LEFT JOIN ad_business b ON c.business_id = b.id
+		WHERE cac.activity_id = #{activityId}
+	</select>
+	<select id="getActivityConnByActivityId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "coupon.id",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			cac.level AS "level",
+			b.business_id AS "coupon.businessId",
+			c.product_name AS "coupon.productName",
+			cac.coupon_id as 'couponId'
+		FROM
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		LEFT JOIN ad_business b ON c.business_id = b.id
+		WHERE cac.activity_id = #{activityId} ORDER BY cac.level
+	</select>
+	
+	<select id="getByActivityIdAndCouponId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "coupon.id",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			cac.level AS "level",
+			b.business_id AS "coupon.businessId",
+			c.product_name AS "coupon.productName"
+		FROM
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		LEFT JOIN ad_business b ON c.business_id = b.id
+		WHERE cac.activity_id = #{activityId} and cac.coupon_id = #{couponId}
+	</select>
+	
+	<select id="getNowActivityCoupon" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT 
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "couponId",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			cac.level AS "level",
+			ab.business_id as 'adBusiness.businessId'
+		FROM
+			ad_coupon_activity_conn cac
+		left join
+			ad_coupon_activity aca on cac.activity_id = aca.id
+		left join 
+			ad_business ab on ab.id = aca.business_id
+		WHERE 
+			cac.`end_date` &lt;  NOW() 
+		ORDER BY cac.`end_date` DESC 	
+		LIMIT 20
+	</select>
+	
+	
+	<!-- 卡券回收,冲减卡券活动关联库存 -->
+	<update id="updateCouponActivityConnCount" parameterType="com.doooly.entity.reachad.AdCouponActivityConn">
+		update 
+			ad_coupon_activity_conn
+		set 
+			coupon_quantity = coupon_quantity - #{count},
+			coupon_remind_quantity = coupon_remind_quantity - #{count}
+		where 1=1 
+		and activity_id = #{activityId}
+		and coupon_id = #{couponId}
+	</update>
+	
+	<!-- 可使用 抵扣券数量-->
+	<select id="getVoucherCouponNum" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(1)
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cac.activity_id = cc.activity_id
+		INNER JOIN ad_user u
+			ON u.id = cc.user_id
+		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		WHERE
+			NOW() &lt;= cac.end_date
+			AND cc.is_used = 0
+			AND cc.user_id = #{userId}
+			AND cc.is_locked = 0
+			AND c.coupon_category = 15
+			AND c.coupon_value &lt;=#{amount}
+	</select>
+	
+</mapper>

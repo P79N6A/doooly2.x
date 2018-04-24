@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdRegisterRecordDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdRegisterRecord">
+	</resultMap>
+
+	<sql id="adColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.activity_id AS "activityId", 
+		a.coupon_id AS "couponId",
+		a.coupon_code AS "couponCode",
+		a.receive_status AS "receiveStatus",
+		a.create_date AS "createDate",
+		c.business_id as "businessId"
+	</sql>
+
+
+	<select id="getRecordByCouponAndActivity" resultType="com.doooly.entity.reachad.AdRegisterRecord">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			ad_register_record a 
+			LEFT JOIN ad_coupon b on a.coupon_id = b.id 
+			left join ad_business c on b.business_id = c.id
+			where a.activity_id=#{activityId} and a.coupon_id=#{couponId}
+	</select>
+	
+	<insert id="insert" parameterType="com.doooly.entity.reachad.AdRegisterRecord" >
+      INSERT INTO ad_register_record(
+			id,
+			user_id,
+			activity_id,
+			coupon_id,
+			coupon_code,
+			receive_status,
+			create_date
+		) VALUES (
+			#{id},
+			#{userId},
+			#{activityId},
+			#{couponId},
+			#{couponCode},
+			#{receiveStatus},
+			#{createDate}
+		)
+  	</insert>
+  	
+  	<select id="getTotalRegisterNum" parameterType="com.doooly.entity.reachad.AdRegisterRecord" resultType="java.lang.Integer">
+		SELECT 
+			count(1)
+		FROM 
+			ad_register_record a 
+		WHERE a.activity_id=#{activityId} 
+			AND a.coupon_id=#{couponId}
+	</select>
+  	
+</mapper>

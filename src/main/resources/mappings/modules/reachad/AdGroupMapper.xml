@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdGroupDao">
+	<resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdGroup">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="group_name" property="groupName" jdbcType="VARCHAR" />
+		<result column="group_num" property="groupNum" jdbcType="VARCHAR" />
+		<result column="is_active" property="isActive" jdbcType="CHAR" />
+		<result column="official_integral" property="officialIntegral"
+			jdbcType="DECIMAL" />
+		<result column="official_number" property="officialNumber"
+			jdbcType="VARCHAR" />
+		<result column="relation_start_no" property="relationStartNo"
+			jdbcType="VARCHAR" />
+		<result column="relation_end_no" property="relationEndNo"
+			jdbcType="VARCHAR" />
+		<result column="super_group_id" property="superGroupId"
+			jdbcType="BIGINT" />
+		<result column="ud_id" property="udId" jdbcType="VARCHAR" />
+		<result column="un_official_integral" property="unOfficialIntegral"
+			jdbcType="DECIMAL" />
+		<result column="active_date" property="activeDate" jdbcType="TIMESTAMP" />
+		<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+		<result column="del_flag" property="delFlag" jdbcType="CHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, group_name, group_num, is_active, official_integral, official_number,
+		relation_start_no,
+		relation_end_no, super_group_id, ud_id, un_official_integral, active_date, create_by,
+		del_flag, remarks, update_date, update_by, create_date
+	</sql>
+
+	<select id="findGroupByUDID" resultType="com.doooly.entity.reachad.AdGroup"
+		parameterType="java.lang.String">
+		Select *
+		From ad_group
+		Where ud_id = #{0}
+	</select>
+
+
+	<select id="findNameByID" resultType="java.lang.String"
+		parameterType="java.lang.Long">
+		Select group_name
+		From ad_group
+		Where id = #{0}
+	</select>
+
+	<select id="findGroupByGroupName" resultType="AdGroup"
+		parameterType="java.lang.String">
+		Select id,group_num
+		From ad_group
+		Where group_name = #{0} and is_active=2
+	</select>
+
+
+
+
+
+
+
+	<!-- **************************************************自动生成的SQL*********************************************************************** -->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from ad_group
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from ad_group
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<insert id="insert" parameterType="com.doooly.entity.reachad.AdGroup">
+		insert into ad_group (id, group_name, group_num,
+		is_active, official_integral, official_number,
+		relation_start_no, relation_end_no, super_group_id,
+		ud_id, un_official_integral, active_date,
+		create_by, del_flag, remarks,
+		update_date, update_by, create_date
+		)
+		values (#{id,jdbcType=BIGINT}, #{groupName,jdbcType=VARCHAR},
+		#{groupNum,jdbcType=VARCHAR},
+		#{isActive,jdbcType=CHAR}, #{officialIntegral,jdbcType=DECIMAL},
+		#{officialNumber,jdbcType=VARCHAR},
+		#{relationStartNo,jdbcType=VARCHAR},
+		#{relationEndNo,jdbcType=VARCHAR}, #{superGroupId,jdbcType=BIGINT},
+		#{udId,jdbcType=VARCHAR}, #{unOfficialIntegral,jdbcType=DECIMAL},
+		#{activeDate,jdbcType=TIMESTAMP},
+		#{createBy,jdbcType=VARCHAR}, #{delFlag,jdbcType=CHAR}, #{remarks,jdbcType=VARCHAR},
+		#{updateDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR},
+		#{createDate,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.doooly.entity.reachad.AdGroup">
+		insert into ad_group
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="groupName != null">
+				group_name,
+			</if>
+			<if test="groupNum != null">
+				group_num,
+			</if>
+			<if test="isActive != null">
+				is_active,
+			</if>
+			<if test="officialIntegral != null">
+				official_integral,
+			</if>
+			<if test="officialNumber != null">
+				official_number,
+			</if>
+			<if test="relationStartNo != null">
+				relation_start_no,
+			</if>
+			<if test="relationEndNo != null">
+				relation_end_no,
+			</if>
+			<if test="superGroupId != null">
+				super_group_id,
+			</if>
+			<if test="udId != null">
+				ud_id,
+			</if>
+			<if test="unOfficialIntegral != null">
+				un_official_integral,
+			</if>
+			<if test="activeDate != null">
+				active_date,
+			</if>
+			<if test="createBy != null">
+				create_by,
+			</if>
+			<if test="delFlag != null">
+				del_flag,
+			</if>
+			<if test="remarks != null">
+				remarks,
+			</if>
+			<if test="updateDate != null">
+				update_date,
+			</if>
+			<if test="updateBy != null">
+				update_by,
+			</if>
+			<if test="createDate != null">
+				create_date,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="groupName != null">
+				#{groupName,jdbcType=VARCHAR},
+			</if>
+			<if test="groupNum != null">
+				#{groupNum,jdbcType=VARCHAR},
+			</if>
+			<if test="isActive != null">
+				#{isActive,jdbcType=CHAR},
+			</if>
+			<if test="officialIntegral != null">
+				#{officialIntegral,jdbcType=DECIMAL},
+			</if>
+			<if test="officialNumber != null">
+				#{officialNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="relationStartNo != null">
+				#{relationStartNo,jdbcType=VARCHAR},
+			</if>
+			<if test="relationEndNo != null">
+				#{relationEndNo,jdbcType=VARCHAR},
+			</if>
+			<if test="superGroupId != null">
+				#{superGroupId,jdbcType=BIGINT},
+			</if>
+			<if test="udId != null">
+				#{udId,jdbcType=VARCHAR},
+			</if>
+			<if test="unOfficialIntegral != null">
+				#{unOfficialIntegral,jdbcType=DECIMAL},
+			</if>
+			<if test="activeDate != null">
+				#{activeDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createBy != null">
+				#{createBy,jdbcType=VARCHAR},
+			</if>
+			<if test="delFlag != null">
+				#{delFlag,jdbcType=CHAR},
+			</if>
+			<if test="remarks != null">
+				#{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				#{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateBy != null">
+				#{updateBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				#{createDate,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdGroup">
+		update ad_group
+		<set>
+			<if test="groupName != null">
+				group_name = #{groupName,jdbcType=VARCHAR},
+			</if>
+			<if test="groupNum != null">
+				group_num = #{groupNum,jdbcType=VARCHAR},
+			</if>
+			<if test="isActive != null">
+				is_active = #{isActive,jdbcType=CHAR},
+			</if>
+			<if test="officialIntegral != null">
+				official_integral = #{officialIntegral,jdbcType=DECIMAL},
+			</if>
+			<if test="officialNumber != null">
+				official_number = #{officialNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="relationStartNo != null">
+				relation_start_no = #{relationStartNo,jdbcType=VARCHAR},
+			</if>
+			<if test="relationEndNo != null">
+				relation_end_no = #{relationEndNo,jdbcType=VARCHAR},
+			</if>
+			<if test="superGroupId != null">
+				super_group_id = #{superGroupId,jdbcType=BIGINT},
+			</if>
+			<if test="udId != null">
+				ud_id = #{udId,jdbcType=VARCHAR},
+			</if>
+			<if test="unOfficialIntegral != null">
+				un_official_integral = #{unOfficialIntegral,jdbcType=DECIMAL},
+			</if>
+			<if test="activeDate != null">
+				active_date = #{activeDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createBy != null">
+				create_by = #{createBy,jdbcType=VARCHAR},
+			</if>
+			<if test="delFlag != null">
+				del_flag = #{delFlag,jdbcType=CHAR},
+			</if>
+			<if test="remarks != null">
+				remarks = #{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null">
+				create_date = #{createDate,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.doooly.entity.reachad.AdGroup">
+		update ad_group
+		set group_name = #{groupName,jdbcType=VARCHAR},
+		group_num = #{groupNum,jdbcType=VARCHAR},
+		is_active = #{isActive,jdbcType=CHAR},
+		official_integral = #{officialIntegral,jdbcType=DECIMAL},
+		official_number = #{officialNumber,jdbcType=VARCHAR},
+		relation_start_no = #{relationStartNo,jdbcType=VARCHAR},
+		relation_end_no = #{relationEndNo,jdbcType=VARCHAR},
+		super_group_id = #{superGroupId,jdbcType=BIGINT},
+		ud_id = #{udId,jdbcType=VARCHAR},
+		un_official_integral = #{unOfficialIntegral,jdbcType=DECIMAL},
+		active_date = #{activeDate,jdbcType=TIMESTAMP},
+		create_by = #{createBy,jdbcType=VARCHAR},
+		del_flag = #{delFlag,jdbcType=CHAR},
+		remarks = #{remarks,jdbcType=VARCHAR},
+		update_date = #{updateDate,jdbcType=TIMESTAMP},
+		update_by = #{updateBy,jdbcType=VARCHAR},
+		create_date = #{createDate,jdbcType=TIMESTAMP}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+    <select id="getGroupLogoByUserId" resultType="com.doooly.entity.reachad.AdGroup" parameterType="java.lang.Integer">
+
+        Select a.logo_url AS "logoUrl",a.mini_logo_url as "miniLogoUrl"
+        ,a.group_short_name as "groupShortName"
+        ,a.display_url as "displayUrl"
+        ,a.bloc_id as "blocId"
+        From ad_group a Where a.id = (select u.group_num from ad_user u where u.id = #{0})
+    </select>
+    
+    
+    <select id="findGroupByUserId" resultType="AdGroup">
+		SELECT  
+		a.id,
+		a.group_name,
+		a.logo,
+		a.logo_url as 'logoUrl',
+		a.mini_logo_url as 'miniLogoUrl',
+		a.display_url as 'displayUrl'
+		FROM ad_group a 
+		LEFT JOIN 
+			ad_user b ON b.group_num = a.id
+		WHERE b.id = #{userId}
+	</select>
+    <select id="getAllCompany" resultType="AdGroup">
+		SELECT  
+		a.id,
+		a.group_name
+		FROM ad_group a 
+		INNER JOIN ad_group_department gd on a.id  = gd.ad_group_id
+		WHERE a.del_flag=0 and a.is_active=2 GROUP BY a.id
+	</select>
+	<select id="findGroupByID" resultType="com.doooly.entity.reachad.AdGroup"
+		parameterType="java.lang.String">
+		Select *
+		From ad_group
+		Where id = #{0}
+	</select>
+
+	<select id="findGroupByGroupNum" resultType="com.doooly.entity.reachad.AdGroup"
+		parameterType="java.lang.String">
+		Select *
+		From ad_group
+		Where group_num = #{0}
+	</select>
+	
+	<!-- 根据企业口令获取企业集合 -->
+	<select id="getGroupListByCommand" resultType="com.doooly.entity.reachad.AdGroup">
+		select 
+			a.id,
+			a.group_name 
+		from ad_group a 
+		left join ad_bloc b on a.bloc_id=b.id 
+		where 1=1
+		and replace(b.bloc_command,' ',' ') = replace(#{groupCommand},' ',' ')
+		<if test="groupId != null">
+			and a.id = #{groupId}
+		</if>
+		and b.del_flag = 0 
+		and a.is_active = 2 
+		and a.del_flag = 0
+		and a.super_group_id is NULL
+	</select>
+</mapper>

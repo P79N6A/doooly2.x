@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.doooly.AdAppVersionUrlDao">
+
+    <sql id="adColumns">
+        a.id AS "id",
+        a.download_url AS "downloadUrl",
+        a.version_code AS "versionCode",
+        a.type AS "type",
+        a.create_date AS "createDate",
+        a.update_date AS "updateDate",
+        a.domain_name AS "domainName"
+    </sql>
+
+    <select id="getVersionInfo" resultType="AdAppVersionUrl">
+        SELECT
+            <include refid="adColumns"/>
+        FROM
+            ad_app_version_url a
+        WHERE a.type = #{type}
+        ORDER BY id DESC LIMIT 1
+    </select>
+    
+    <update id="upDateAppVersion" parameterType="AdAppVersionUrl">
+        UPDATE ad_app_version_url SET download_url = #{downloadUrl},update_date = now() WHERE type = #{type}
+    </update>
+    
+    <insert id="insert" parameterType="AdAppVersionUrl">
+        INSERT INTO ad_app_version_url (
+            download_url,
+            version_code,
+            type,
+            create_date,
+            update_date
+        )
+        VALUES
+            (
+                #{downloadUrl},
+                #{versionCode},
+                #{type},
+                now(),
+                now()
+            )
+    </insert>
+</mapper>

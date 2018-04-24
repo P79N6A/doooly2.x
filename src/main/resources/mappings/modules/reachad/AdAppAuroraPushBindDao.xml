@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdAppAuroraPushBindDao">
+
+    <select id="findByUserId" resultType="AdAppAuroraPushBind">
+        SELECT * FROM ad_app_aurora_push_bind WHERE user_id = #{userId} AND registration_id =#{registrationId} LIMIT 1
+    </select>
+
+
+    <insert id="saveAuroraPushBind" parameterType="AdAppAuroraPushBind" >
+        INSERT INTO ad_app_aurora_push_bind (
+            registration_id,
+            unique_identification,
+            user_id,
+            type,
+            create_date,
+            update_date
+        )
+        VALUES
+        (
+            #{registrationId},
+            #{uniqueIdentification},
+            #{userId},
+            #{type},
+            now(),
+            now()
+        )
+    </insert>
+</mapper>

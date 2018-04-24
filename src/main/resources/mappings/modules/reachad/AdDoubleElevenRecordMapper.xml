@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdDoubleElevenRecordDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdDoubleElevenRecord">
+	</resultMap>
+
+	<sql id="adColumns">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.type AS "type",
+		a.point_count AS "pointCount",
+		a.super_user_id AS "superUserId",
+		a.create_date AS "createDate"
+	</sql>
+	<select id="findTotalDataBySuperId" resultType="com.doooly.entity.reachad.AdDoubleElevenRecord">
+		select 
+		CASE when SUM(a.point_count) is null then 0.00 else SUM(a.point_count) end as 'totalCount',
+		COUNT(a.id) as 'memberCount'
+		from ad_double_eleven_record a where a.super_user_id = #{userId} and a.type =1
+	</select>
+
+	<select id="findDataBySuperId" resultType="com.doooly.entity.reachad.AdDoubleElevenRecord">
+		SELECT 
+			<include refid="adColumns" />,u.telephone as 'telephone'
+		FROM 
+			ad_double_eleven_record a LEFT JOIN ad_user u on a.user_id = u.id
+			where a.super_user_id = #{userId} and a.type =1
+			order by a.create_date desc
+			limit 5
+	</select>
+	<select id="findDataByUserId" resultType="com.doooly.entity.reachad.AdDoubleElevenRecord">
+		SELECT 
+			<include refid="adColumns" />,u.telephone as 'telephone'
+		FROM 
+			ad_double_eleven_record a LEFT JOIN ad_user u on a.user_id = u.id
+			where a.user_id = #{userId} and a.type =1
+			order by a.create_date desc
+			limit 5
+	</select>
+	<select id="findDataByUserIdForTypeZero" resultType="com.doooly.entity.reachad.AdDoubleElevenRecord">
+		SELECT 
+			<include refid="adColumns" />,u.telephone as 'telephone'
+		FROM 
+			ad_double_eleven_record a LEFT JOIN ad_user u on a.user_id = u.id
+			where a.user_id = #{userId} and a.type =0
+			order by a.create_date desc
+			limit 1
+	</select>
+	<insert id="insert">
+		INSERT INTO ad_double_eleven_record(
+			user_id,type,point_count,super_user_id,create_date
+		) VALUES (
+			#{userId},#{type},#{pointCount},#{superUserId},NOW()
+		)
+	</insert>
+	
+</mapper>

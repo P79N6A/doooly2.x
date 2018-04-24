@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdBusinessActivityOrderDao">
+	<resultMap id="BaseResultMap"
+		type="com.doooly.entity.reachad.AdBusinessActivityOrder">
+		<id column="id" property="id" jdbcType="BIGINT" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id
+	</sql>
+
+	<!-- 保存商家活动订单 -->
+	<insert id="insert" parameterType="com.doooly.entity.reachad.AdBusinessActivityOrder">
+		insert into
+		ad_business_activity_order
+		(
+			user_id,
+			order_no,
+			business_id,
+			coupon_code,
+			activity_id,
+			create_date,
+			store_id
+		)
+		values
+		(
+			#{userId},
+			#{orderNo},
+			#{businessId},
+			#{couponCode},
+			#{activityId},
+			#{createDate},
+			#{storeId}
+		)
+	</insert>
+	
+	<select id="getActivityOrder" resultType="com.doooly.entity.reachad.AdBusinessActivityOrder">
+		select 
+				* 
+		from 
+			ad_business_activity_order
+		where 
+			user_id = #{userId} and 
+			activity_id = #{activityId} and 
+			business_id = #{businessId}
+	</select>
+	
+	<select id="getByOrderNumber" resultType="com.doooly.entity.reachad.AdBusinessActivityOrder">
+		select 
+				* 
+		from 
+			ad_business_activity_order
+		where 
+			order_no = #{orderNumber}
+	</select>
+	
+</mapper>

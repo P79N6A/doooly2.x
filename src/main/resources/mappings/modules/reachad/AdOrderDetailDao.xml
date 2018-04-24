@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdOrderDetailDao">
+	
+    <insert id="insert" parameterType="com.doooly.business.order.vo.OrderItemVo">
+	    insert into ad_order_detail 
+		(	
+			id, 
+		    order_report_id, 
+		    category_id, 
+	      	code, 
+	      	goods, 
+	      	amount, 
+	      	price, 
+	      	number, 
+	      	create_by, 
+	      	del_flag, 
+	      	remarks, 
+	      	tax, 
+	      	update_date, 
+	      	update_by, 
+	      	create_date,
+	      	sku,
+	      	product_sku_id,
+	      	ret_code, 
+	      	ret_msg, 
+      		ret_state, 
+      		card_oid, 
+      		card_code, 
+      		card_pass,
+      		product_img,
+      		external_number,
+      		duihuan_url
+      )
+    	  values (
+	    	#{id,jdbcType=BIGINT},
+	    	#{orderReportId,jdbcType=BIGINT},
+	    	#{categoryId,jdbcType=VARCHAR},
+	      	#{code,jdbcType=VARCHAR}, 
+	      	#{goods,jdbcType=VARCHAR}, 
+	      	#{amount,jdbcType=DECIMAL}, 
+	      	#{price,jdbcType=DECIMAL}, 
+	      	#{number,jdbcType=DECIMAL}, 
+	      	#{createBy,jdbcType=VARCHAR}, 
+	      	#{delFlag,jdbcType=CHAR}, 
+	      	#{remarks,jdbcType=VARCHAR}, 
+	      	#{tax,jdbcType=DECIMAL}, 
+	      	#{updateDate,jdbcType=TIMESTAMP}, 
+	      	#{updateBy,jdbcType=VARCHAR}, 
+	      	#{createDate,jdbcType=TIMESTAMP},
+	      	#{sku,jdbcType=VARCHAR},
+	      	#{productSkuId,jdbcType=VARCHAR},
+	      	#{retCode,jdbcType=VARCHAR},
+	      	#{retMsg,jdbcType=VARCHAR},
+	      	#{retState,jdbcType=VARCHAR},
+	      	#{cardOid,jdbcType=VARCHAR},
+	      	#{cardCode,jdbcType=VARCHAR},
+	      	#{cardPass,jdbcType=VARCHAR},
+	      	#{productImg,jdbcType=VARCHAR},
+	      	#{externalNumber,jdbcType=VARCHAR},
+	      	#{duihuanUrl,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+  
+  <insert id="bantchInsert" parameterType="com.doooly.business.order.vo.OrderItemVo">
+	    insert into ad_order_detail (
+		    order_report_id, 
+		    category_id, 
+	      	code, 
+	      	goods, 
+	      	amount, 
+	      	price, 
+	      	number, 
+	      	create_by, 
+	      	del_flag, 
+	      	remarks, 
+	      	tax, 
+	      	update_date, 
+	      	update_by, 
+	      	create_date,
+	      	sku,
+	      	product_sku_id,
+	      	ret_code, 
+	      	ret_msg, 
+      		ret_state, 
+      		card_oid, 
+      		card_code, 
+      		card_pass,
+      		product_img,
+      		external_number,
+	  		duihuan_url
+		)   
+	    values  
+	    <foreach collection="items" item="item" index="index" separator="," >  
+	    (
+	    		#{orderId}, 
+	    		#{item.categoryId,jdbcType=VARCHAR}, 
+	      	#{item.code,jdbcType=VARCHAR}, 
+	      	#{item.goods,jdbcType=VARCHAR}, 
+	      	#{item.amount,jdbcType=DECIMAL}, 
+	      	#{item.price,jdbcType=DECIMAL}, 
+	      	#{item.number,jdbcType=DECIMAL}, 
+	      	#{item.createBy,jdbcType=VARCHAR}, 
+	      	#{item.delFlag,jdbcType=CHAR}, 
+	      	#{item.remarks,jdbcType=VARCHAR}, 
+	      	#{item.tax,jdbcType=DECIMAL}, 
+	      	#{item.updateDate,jdbcType=TIMESTAMP}, 
+	      	#{item.updateBy,jdbcType=VARCHAR}, 
+	      	#{item.createDate,jdbcType=TIMESTAMP},    
+	      	#{item.sku,jdbcType=VARCHAR},
+	      	#{item.productSkuId,jdbcType=VARCHAR},
+	      	#{item.retCode,jdbcType=VARCHAR},
+	      	#{item.retMsg,jdbcType=VARCHAR},
+	      	#{item.retState,jdbcType=VARCHAR},
+	      	#{item.cardOid,jdbcType=VARCHAR},
+	      	#{item.cardCode,jdbcType=VARCHAR},
+	      	#{item.cardPass,jdbcType=VARCHAR},    
+	      	#{item.productImg,jdbcType=VARCHAR},    
+	      	#{item.externalNumber,jdbcType=VARCHAR},
+	      	#{item.duihuanUrl,jdbcType=VARCHAR}
+	    )
+	    </foreach> 
+  </insert>
+  
+
+    <update id="update" parameterType="com.doooly.business.order.vo.OrderItemVo">
+         update ad_order_detail
+	    <set >
+	      <if test="orderReportId != null and orderReportId != ''" >
+	        order_report_id = #{orderReportId,jdbcType=BIGINT},
+	      </if>
+	      <if test="categoryId != null and categoryId != ''" >
+	        category_id = #{categoryId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="code != null and code != ''" >
+	        code = #{code,jdbcType=VARCHAR},
+	      </if>
+	      <if test="goods != null and goods != ''" >
+	        goods = #{goods,jdbcType=VARCHAR},
+	      </if>
+	      <if test="amount != null and amount != ''" >
+	        amount = #{amount,jdbcType=DECIMAL},
+	      </if>
+	      <if test="price != null and price != ''" >
+	        price = #{price,jdbcType=DECIMAL},
+	      </if>
+	      <if test="number != null and number != ''" >
+	        number = #{number,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createBy != null and createBy != ''" >
+	        create_by = #{createBy,jdbcType=VARCHAR},
+	      </if>
+	      <if test="delFlag != null and delFlag != ''" >
+	        del_flag = #{delFlag,jdbcType=CHAR},
+	      </if>
+	      <if test="remarks != null and remarks != ''" >
+	        remarks = #{remarks,jdbcType=VARCHAR},
+	      </if>
+	      <if test="tax != null and tax != ''" >
+	        tax = #{tax,jdbcType=DECIMAL},
+	      </if>
+	      <if test="updateDate != null and updateDate != ''" >
+	        update_date = #{updateDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updateBy != null and updateBy != ''" >
+	        update_by = #{updateBy,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createDate != null and createDate != ''" >
+	        create_date = #{createDate,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="sku != null and sku != ''" >
+	        sku = #{sku,jdbcType=VARCHAR},
+	      </if>
+	      <if test="productSkuId != null and productSkuId != ''" >
+	        product_sku_id = #{productSkuId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="retCode != null and retCode != ''" >
+	        ret_code = #{retCode,jdbcType=VARCHAR},
+	      </if>
+	      <if test="retMsg != null and retMsg != ''" >
+	        ret_msg = #{retMsg,jdbcType=VARCHAR},
+	      </if>
+	      <if test="retState != null and retState != ''" >
+	        ret_state = #{retState,jdbcType=VARCHAR},
+	      </if>
+	      <if test="cardOid != null and cardOid != ''" >
+	        card_oid = #{cardOid,jdbcType=VARCHAR},
+	      </if>
+	      <if test="cardCode != null and cardCode != ''" >
+	        card_code = #{cardCode,jdbcType=VARCHAR},
+	      </if>
+	      <if test="cardPass != null and cardPass != ''" >
+	        card_pass = #{cardPass,jdbcType=VARCHAR},
+	      </if>
+	    </set>
+	    where id = #{id,jdbcType=BIGINT}
+    </update>
+    
+
+</mapper>

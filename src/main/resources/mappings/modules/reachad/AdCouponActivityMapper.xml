@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdCouponActivityDao">
+	<resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdCouponActivity">
+	</resultMap>
+	<sql id="Base_Column_List">
+   		id,
+		name,
+		state,
+		create_user,
+		create_date,
+		update_user,
+		update_date,
+		begin_date,
+		end_date,
+		receive_type,
+		activity_type,
+		plateform_type,
+		business_id,
+		list_image_url,
+		detail_image_url,
+		introduction,
+		activity_link_url,
+		sort,
+		activity_code,
+		delete_flag,
+		category,
+		description,
+		option_count,
+		vote_count,
+		pv_count,
+		rule_image
+    </sql>
+	<sql id="adCouponActivityColumnsAll">
+   		a.id as 'id',
+		a.name as 'name',
+		a.state as 'state',
+		a.create_user as 'createUser',
+		a.create_date as 'createDate',
+		a.update_user as 'updateUser',
+		a.update_date as 'updateDate',
+		a.begin_date as 'beginDate',
+		a.end_date as 'endDate',
+		a.receive_type as 'receiveType',
+		a.activity_type as 'activityType',
+		a.plateform_type as 'plateformType',
+		a.business_id as 'businessId',
+		a.list_image_url as 'listImageUrl',
+		a.detail_image_url as 'detailImageUrl',
+		a.introduction as 'introduction',
+		a.activity_link_url as 'activityLinkUrl',
+		a.sort as 'sort',
+		a.activity_code as 'activityCode',
+		a.delete_flag as 'deleteFlag',
+		a.category as 'category',
+		a.description as 'description',
+		a.option_count as 'optionCount',
+		a.vote_count as 'voteCount',
+		a.pv_count as 'pvCount',
+		a.rule_image as 'ruleImage'
+    </sql>
+
+	<!-- 热门活动 -->
+	<select id="getHotActivity" resultType="java.util.HashMap">
+		SELECT
+		ac.name 'name',
+		ac.list_image_url 'listImageUrl',
+		ac.detail_image_url 'detailImageUrl',
+		ac.activity_link_url 'activityLinkUrl',
+		ac.activity_type 'activityType',
+		b.logo 'logo',
+		b.company 'company',
+		ac.activity_type as 'activityType',
+		ac.introduction as 'introduction',
+		ac.id as 'id',
+		ac.end_date as 'endDate',
+		b.deal_type as 'dealType',
+		IFNULL(b.max_user_rebate, 0) as 'maxUserRebate',
+		b.discount as 'discount',
+		b.url as 'url',
+		b.id as 'businessId',
+		b.business_introduce as 'businessIntroduce'
+		FROM ad_coupon_activity ac
+		INNER JOIN ad_group_activity_conn cn ON ac.id = cn.activity_id
+		INNER JOIN ad_business b ON ac.business_id = b.id
+		INNER JOIN ad_activity_category acc ON ac.category_id = acc.id
+		WHERE ac.id = cn.activity_id
+		AND cn.group_id = #{groupId}
+		AND ac.plateform_type in (#{client},99)
+		AND ac.delete_flag = '0'
+		AND ac.state = '1'
+		AND (now() between ac.begin_date and ac.end_date)
+		<if test="isRecommendation == 0 ">
+			AND acc.id = #{categoryId}
+		</if>
+		<if test="isRecommendation == 1">
+			AND ac.is_recommendation = #{isRecommendation}
+		</if>
+		ORDER BY ac.sort DESC
+		LIMIT #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getHotActivityCnt" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM ad_coupon_activity ac
+		INNER JOIN ad_group_activity_conn cn ON ac.id = cn.activity_id
+		INNER JOIN ad_business b ON ac.business_id = b.id
+		INNER JOIN ad_activity_category acc ON ac.category_id = acc.id
+		WHERE ac.id = cn.activity_id
+		AND cn.group_id = #{groupId}
+		AND ac.plateform_type in (#{client},99)
+		AND ac.delete_flag = '0'
+		AND ac.state = '1'
+		AND (now() between ac.begin_date and ac.end_date)
+		<if test="isRecommendation == 0 ">
+			AND acc.id = #{categoryId}
+		</if>
+		<if test="isRecommendation == 1">
+			AND ac.is_recommendation = #{isRecommendation}
+		</if>
+	</select>
+
+	<update id="closeActivity">
+  	    UPDATE ad_coupon_activity SET state = 0 where id = #{id}
+    </update>
+
+	<sql id="adCouponActivityColumns">
+       a.id as 'id',
+       a.end_date as 'endDate',
+       a.option_count as 'optionCount',
+       a.vote_count as 'voteCount',
+       a.pv_count as 'pvCount',
+       a.rule_image as 'ruleImage',
+       a.name as 'name',
+       a.introduction as 'introduction'
+    </sql>
+
+	<select id="getActivityDetail" resultType="AdCouponActivity">
+		SELECT
+		<include refid="adCouponActivityColumns"/>
+		FROM ad_coupon_activity a WHERE a.id = #{activityId}
+	</select>
+	<select id="getActivityUserCount" resultType="java.lang.Integer">
+         select COUNT(e.card_number)
+		from ad_coupon_activity_conn a
+			INNER JOIN ad_coupon c on a.coupon_id = c.id 
+			INNER JOIN (select dd.activity_id,dd.coupon,dd.code,dd.is_used,dd.user_id,dd.receive_date,dd.used_date 
+							from ad_coupon_code dd 
+							where dd.activity_id = #{activityId}
+							and dd.coupon in 
+							(select ee.coupon_id from ad_coupon_activity_conn ee where ee.activity_id = #{activityId})
+							
+			) d on c.id=d.coupon
+			INNER JOIN ad_user e on e.id = d.user_id and e.is_active = 2 and e.del_flag = 0
+			INNER JOIN ad_group g on e.group_num = g.id
+		where a.activity_id = #{activityId}
+		order by d.receive_date desc
+    </select>
+	<select id="get" resultType="AdCouponActivity">
+		SELECT
+		<include refid="adCouponActivityColumns"/>, a.begin_date as 'beginDate'
+		FROM ad_coupon_activity a WHERE a.id = #{id}
+	</select>
+	<select id="getBenefitsActivityList" resultType="AdCouponActivity">
+		SELECT
+		<include refid="adCouponActivityColumnsAll"/>
+		FROM ad_coupon_activity a
+		JOIN ad_group_activity_conn agac ON a.id = agac.activity_id
+		JOIN ad_user au ON agac.group_id = au.group_num
+		WHERE
+		au.id = #{userId} and a.state = 1 and a.delete_flag=0 and a.begin_date &lt; NOW() and a.end_date &gt; NOW()
+	</select>
+
+	<update id="updateBrowserCount">
+        UPDATE ad_coupon_activity SET pv_count=pv_count+1 WHERE id = #{activityId}
+    </update>
+
+	<update id="updateVoteCount">
+        UPDATE ad_coupon_activity SET vote_count=vote_count+1 WHERE id = #{activityId}
+    </update>
+
+	<select id="getNowActivityCoupon" resultType="java.util.Map">
+			SELECT 
+				a.id AS 'activityId',
+				c.business_id AS 'businessId',
+				b.`coupon_id` AS 'couponId'
+			FROM 
+				ad_coupon_activity a
+			LEFT JOIN 
+				ad_coupon_activity_conn b
+			ON a.id = b.`activity_id`
+			LEFT JOIN ad_coupon ac on b.coupon_id = ac.id
+			JOIN 
+				ad_business c 
+			ON ac.business_id = c.id
+			WHERE 
+				a.`end_date` &lt; NOW() 
+			ORDER BY a.`end_date` DESC
+			LIMIT 20
+	</select>
+
+	<select id="getActivityIdByIdFlag" resultType="AdCouponActivity">
+			SELECT 
+				a.id
+			FROM 
+				ad_coupon_activity a
+			WHERE 
+				a.id_flag = #{idFlag}
+			ORDER BY  a.create_date DESC
+			limit 1
+	</select>
+
+
+</mapper>

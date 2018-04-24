@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdGroupDepartmentDao">
+	<resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdGroupDepartment">
+		
+	</resultMap>
+	<sql id="Base_Column_List">
+		
+	</sql>
+
+	<select id="getDepartmentDatasByGroupId" resultType="com.doooly.entity.reachad.AdGroupDepartment">
+		SELECT  
+		a.id as 'id',
+		a.department_name as 'departmentName',a.super_id as 'superId'
+		FROM ad_group_department a 
+		WHERE a.delete_status=0 and a.ad_group_id=#{0}
+	</select> 
+</mapper>

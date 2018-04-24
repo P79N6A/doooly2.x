@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdArticleDao">
+    
+    <select id="getArticleProductList" resultType="com.doooly.entity.reachad.AdProduct">
+        SELECT
+            a.image_wechat AS "imageWechat",
+            a.name AS "name",
+            a.market_price AS "marketPrice",
+            a.sell_count AS "sellCount",
+            a.user_rebate AS "userRebate",
+            a.bussiness_rebate AS "bussinesRebate",
+            ab.id AS "businessId",
+            ab.discount AS "discount",
+            ab.logo AS "businessLogo",
+            ab.deal_type AS "dealType",
+            ab.company AS "businessName",
+            IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
+            a.link_url_wechat AS "linkUrlWechat",
+            c.content AS "content",
+            c.title AS "title",
+            c.digest AS "digest",
+            c.imgUrl AS "imgUrl",
+            c.image_path AS "imagePath"
+        FROM
+        ad_product a
+        LEFT JOIN ad_business ab ON a.business_id= ab.business_id
+        LEFT JOIN ad_article_product_conn aapc ON a.id = aapc.product_id
+        LEFT JOIN ad_article c ON c.id = aapc.article_id
+        WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now()) AND c.id = #{articleId}
+    </select>
+
+
+    <select id="getArticleList" resultType="java.util.Map">
+        SELECT
+            a.image_wechat AS "imageWechat",
+            a.name AS "name",
+            a.market_price AS "marketPrice",
+            a.user_rebate AS "userRebate",
+            ab.bussiness_rebate AS "bussinesRebate",
+            IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
+            ab.id AS "businessId",
+            ab.discount AS "discount",
+            ab.logo AS "businessLogo",
+            ab.deal_type AS "dealType",
+            ab.company AS "businessName",
+            ab.user_rebate AS "businessUserRebate",
+            a.link_url_wechat AS "linkUrlWechat",
+            c.image_path AS "imagePath",
+            c.id AS "articleId"
+        FROM
+        ad_product a
+        LEFT JOIN ad_business ab ON a.business_id= ab.business_id
+        LEFT JOIN ad_article_product_conn aapc ON a.id = aapc.product_id
+        LEFT JOIN ad_article c ON c.id = aapc.article_id
+        WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now()) AND c.id = #{articleId}
+    </select>
+
+    <select id="getNewArticle" resultType="com.doooly.entity.reachad.AdArticle">
+        SELECT id FROM ad_article WHERE NOW() BETWEEN begin_date AND end_date ORDER BY create_date DESC LIMIT 1
+    </select>
+
+</mapper>

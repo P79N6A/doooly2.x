@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdActivityGiftDao">
+	<resultMap id="BaseResultMap" type="com.doooly.entity.reachad.AdActivityGift">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="bag_id" property="activityId" jdbcType="BIGINT" />
+		<result column="product_id" property="productId" jdbcType="BIGINT" />
+		<result column="number" property="number" jdbcType="BIGINT" />
+		<result column="support_flag" property="supportFlag" jdbcType="BIGINT" />
+		<result column="business_id" property="businessId" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id
+	</sql>
+
+	<!-- 根据商家编号获取对应活动礼品信息 -->
+	<select id="getBusinessActivityGift" resultType="com.doooly.entity.reachad.AdActivityGift" parameterType="com.doooly.entity.reachad.AdActivityGift">
+	  	SELECT
+			a.product_id as productId,
+			b.product_sn productSn,
+			b.product_name as productName,
+			a.number
+		FROM
+			ad_invite_gift a
+		INNER JOIN ad_coupon b ON a.product_id = b.product_id
+		INNER JOIN ad_business_activity_info c ON a.business_activity_id = c.id
+		WHERE 1=1
+		and c.business_id = #{businessId}
+  </select>
+</mapper>

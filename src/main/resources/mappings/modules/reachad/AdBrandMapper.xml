@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdBrandDao">
+	<resultMap id="resultMap"
+		type="com.doooly.entity.reachad.AdBrand">
+	</resultMap>
+    
+	
+	<sql id="adBrandColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.brand_image_url AS "brandImageUrl",
+		ifnull(a.description,'') AS "description",
+		a.business_id AS "businessId",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate",
+		a.business_brand_url AS "businessBrandUrl",
+		a.foreign_name AS "foreignName",
+		a.is_show AS "isShow",
+		a.sort AS "sort",
+		a.benefit_way AS "benefitWay",
+  		a.benefit_content AS "benefitContent",
+  		a.notice_info AS "noticeInfo",
+  		ifnull(a.recommend_reason,'') AS "recommendReason",
+		b.discount AS "discount"
+		
+	</sql>
+
+	<select id="findAll" resultType="com.doooly.entity.reachad.AdBrand">
+		select <include refid="adBrandColumns" />
+		from ad_brand a
+		LEFT JOIN ad_business b
+		on	a.business_id = b.business_id where a.is_show=1 and a.brand_image_url is not null order by a.sort
+	</select>
+	<select id="get" resultType="com.doooly.entity.reachad.AdBrand">
+		select <include refid="adBrandColumns" />
+		from ad_brand a
+		LEFT JOIN ad_business b
+		on	a.business_id = b.business_id where a.id=#{id} and a.is_show=1 and a.brand_image_url is not null
+	</select>
+	
+</mapper>

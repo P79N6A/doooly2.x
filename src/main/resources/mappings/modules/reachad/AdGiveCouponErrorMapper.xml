@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdGiveCouponErrorDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdGiveCouponError">
+	</resultMap>
+
+	<sql id="adColumns">
+		a.id AS "id",
+		a.user_id AS "title",
+		a.activity_id AS "image_path", 
+		a.coupon_id AS "type",
+		a.create_date AS "createDate",
+	</sql>
+
+
+	<insert id="insert">
+		INSERT INTO ad_give_coupon_error(
+		user_id,
+		activity_id, 
+		coupon_id,
+		create_date
+		) VALUES (
+			#{userId},
+			#{activityId},
+			#{couponId},
+			#{createDate}
+		)
+	</insert>
+	
+	
+</mapper>

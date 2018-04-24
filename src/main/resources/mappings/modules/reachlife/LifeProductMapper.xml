@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeProductDao">
+
+	<!-- common column -->
+	<sql id="Base_Column_List" >
+		a.id AS "id",
+		a.create_date AS "createDate",
+		a.modify_date AS "modifyDate",
+		a.allocated_stock AS "allocatedStock",
+		a.attribute_value0 AS "attributeValue0",
+		a.attribute_value1 AS "attributeValue1",
+		a.attribute_value10 AS "attributeValue10",
+		a.attribute_value11 AS "attributeValue11",
+		a.attribute_value12 AS "attributeValue12",
+		a.attribute_value13 AS "attributeValue13",
+		a.attribute_value14 AS "attributeValue14",
+		a.attribute_value15 AS "attributeValue15",
+		a.attribute_value16 AS "attributeValue16",
+		a.attribute_value17 AS "attributeValue17",
+		a.attribute_value18 AS "attributeValue18",
+		a.attribute_value19 AS "attributeValue19",
+		a.attribute_value2 AS "attributeValue2",
+		a.attribute_value3 AS "attributeValue3",
+		a.attribute_value4 AS "attributeValue4",
+		a.attribute_value5 AS "attributeValue5",
+		a.attribute_value6 AS "attributeValue6",
+		a.attribute_value7 AS "attributeValue7",
+		a.attribute_value8 AS "attributeValue8",
+		a.attribute_value9 AS "attributeValue9",
+		a.cost AS "cost",
+		a.full_name AS "fullName",
+		a.hits AS "hits",
+		a.image AS "image",
+		a.introduction AS "introduction",
+		a.is_gift AS "isGift",
+		a.is_list AS "isList",
+		a.is_marketable AS "isMarketable",
+		a.is_top AS "isTop",
+		a.keyword AS "keyword",
+		a.market_price AS "marketPrice",
+		a.memo AS "memo",
+		a.month_hits AS "monthHits",
+		a.month_hits_date AS "monthHitsDate",
+		a.month_sales AS "monthSales",
+		a.month_sales_date AS "monthSalesDate",
+		a.name AS "name",
+		a.point AS "point",
+		a.price AS "price",
+		a.sales AS "sales",
+		a.score AS "score",
+		a.score_count AS "scoreCount",
+		a.seo_description AS "seoDescription",
+		a.seo_keywords AS "seoKeywords",
+		a.seo_title AS "seoTitle",
+		a.sn AS "sn",
+		a.stock AS "stock",
+		a.stock_memo AS "stockMemo",
+		a.total_score AS "totalScore",
+		a.unit AS "unit",
+		a.week_hits AS "weekHits",
+		a.week_hits_date AS "weekHitsDate",
+		a.week_sales AS "weekSales",
+		a.week_sales_date AS "weekSalesDate",
+		a.weight AS "weight",
+		a.product_category AS "productCategory",
+		a.buy_upper_limit AS "buyUpperLimit",
+		a.attention AS "attention",
+		a.buy_end_time AS "buyEndTime",
+		a.buy_start_time AS "buyStartTime",
+		a.buy_type AS "buyType",
+		a.buy_url AS "buyUrl",
+		a.buy_wechat_url AS "buyWechatUrl",
+		a.exchange_flow AS "exchangeFlow",
+		a.privilege_explain AS "privilegeExplain",
+		a.service_range AS "serviceRange",
+		a.surplus_quantity AS "surplusQuantity",
+		a.total_quantity AS "totalQuantity",
+		a.usable_method AS "usableMethod",
+		a.valid_end_time AS "validEndTime",
+		a.valid_start_time AS "validStartTime",
+		a.wechat_image AS "wechatImage",
+		a.wechat_detail_image AS "wechatDetailImage",
+		a.coverage AS "coverage",
+		a.settlement_count AS "settlementCount",
+		a.delete_flag AS "deleteFlag"
+	</sql>
+	
+	<!-- 更新商品 -->
+	<update id="update" parameterType="com.doooly.entity.reachlife.LifeProduct">
+		update 
+			xx_product
+		set
+			<if test="modifyDate != null">modify_date = #{modifyDate},</if>
+			<if test="stock != null">stock = #{stock}</if>
+		where id = #{id}
+	</update>
+	
+	<!-- 根据ID获取商品类数据 -->
+	<select id="get" parameterType="String" resultType="com.doooly.entity.reachlife.LifeProduct">
+		Select 
+			<include refid="Base_Column_List"/>
+		From xx_product a
+		Where 1=1
+		and a.id = #{id}
+	</select>
+</mapper>

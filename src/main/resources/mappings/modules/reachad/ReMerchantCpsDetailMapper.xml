@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.ReMerchantCpsDetailDao">
+	<resultMap id="resultMap"
+		type="com.doooly.entity.reachad.ReMerchantCpsDetail">
+	</resultMap>
+	<sql id="cpsDetailColumns">
+		a.id AS "id",
+		a.order_number AS "orderNumber",
+		a.item_number AS "itemNumber",
+		a.count_type AS "countType",
+		a.threshold_value AS "thresholdValue",
+		a.cps_scale AS "cpsScale",
+		a.cpa_fee AS "cpaFee",
+		a.category_id AS "categoryId",
+		a.merchant_cps_id AS "merchantCpsId"
+	</sql>
+
+	<select id="getDetailByOrderNumber" resultMap="resultMap">
+		select
+		<include refid="cpsDetailColumns" />
+		from
+		re_merchant_cps_detail a
+		<where>
+			<if test="merchantCpsId !=null">
+				a.merchant_cps_id=#{merchantCpsId}
+			</if>
+			<if test="orderNumber !=null">
+				and a.order_number=#{orderNumber}
+			</if>
+		</where>
+	</select>
+
+	<select id="getOrderCount" resultType="java.lang.Integer">
+		SELECT Count(0)
+		FROM(
+		SELECT Count(0)
+		FROM re_merchant_cps_detail
+		WHERE
+		merchant_cps_id=#{merchantCpsId}
+		GROUP BY order_number
+		)
+		as number
+	</select>
+</mapper>

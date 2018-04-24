@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeGroupDao">
+    
+	<sql id="lifeGroupColumns">
+		a.id AS "id",
+		a.create_date AS "createDate",
+		a.modify_date AS "modifyDate",
+		a.del_flg AS "delFlg",
+		a.group_name AS "groupName",
+		a.group_num AS "groupNum",
+		a.official_integral AS "officialIntegral",
+		a.official_number AS "officialNumber",
+		a.remarks AS "remarks",
+		a.super_group_id AS "superGroupId",
+		a.ud_id AS "udId",
+		a.create_by AS "createBy.id",
+		a.is_active AS "isActive",
+		a.un_official_integral AS "unOfficialIntegral",
+		a.update_by AS "updateBy.id",
+		a.ad_id AS "adId",
+		a.data_syn as "dataSyn"
+	</sql>
+	
+	<sql id="lifeGroupJoins">
+	</sql>
+    
+	<select id="getGroupByGroupId" resultType="LifeGroup">
+		SELECT 
+		<include refid="lifeGroupColumns"/>
+		FROM xx_group a WHERE a.ad_id = #{adId} AND a.del_flg = #{delFlg} limit 1
+	</select>
+</mapper>

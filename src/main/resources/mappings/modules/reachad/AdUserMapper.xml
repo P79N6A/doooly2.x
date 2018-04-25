@@ -1242,6 +1242,6 @@
   		from ad_user a 
 		where a.telephone = #{telephone} 
 		and a.group_num in 
-		(select b.id from ad_group b INNER JOIN ad_bloc c on b.bloc_id=c.id and (c.bloc_name like '%武钢有限%' or c.bloc_name like '%武汉钢铁%'))
+		(select b.id from ad_group b INNER JOIN ad_bloc c on b.bloc_id=c.id and c.id in (83,95))
   	</select>
 </mapper>

@@ -5,12 +5,13 @@ public class ConstantsLogin {
 	public static final String TOKEN = "token";
 
 	/**
-	 * channel-终端渠道key 终端类型: wechat-微信端，app-移动app端，h5-浏览器
+	 * channel-终端渠道key 终端类型: wechat-微信端，app-兜礼移动app端，h5-浏览器，wiscoapp-武钢APP
 	 */
 	public static final String CHANNEL = "channel";
 	public static final String CHANNEL_WECHAT = "wechat";
 	public static final String CHANNEL_APP = "app";
 	public static final String CHANNEL_H5 = "h5";
+	public static final String CHANNEL_WISCOAPP = "wiscoapp";
 
 	/** code名称 */
 	public static final String CODE = "code";
@@ -28,7 +29,7 @@ public class ConstantsLogin {
 				"1004", "用户信息不存在"), USER_DELETED("1005", "用户信息已删除"), USER_NOT_ACTIVED("1006",
 						"用户未激活"), FREEZE_OR_CANCEL("1007", "用户已冻结或已注销"), PASSWORD_ERROR("1008", "密码错误"), USER_ID_DIFF(
 								"1009", "A、B库用户ID不匹配"), IS_CHECKING("1010", "员工信息正在审核"), CHECK_NOT_PASS("1011",
-										"审核未通过"), TELLOGIN_TYPE("1012", "切换到验证码登录，自动激活");
+										"审核未通过"), TELLOGIN_TYPE("1012", "切换到验证码登录，自动激活"), NOT_WUGANG_USER("1013", "非武钢员工,不可登录武钢APP");
 		// 成员变量
 		private String code;
 		private String msg;

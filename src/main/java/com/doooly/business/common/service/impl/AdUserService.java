@@ -241,6 +241,8 @@ public class AdUserService implements AdUserServiceI {
 			String is_check = param.getString("is_check");
 			// 接收登录输入密码
 			String inputPassword = param.getString("password");
+			// 终端渠道
+			String channel = param.getString(ConstantsLogin.CHANNEL);
 			loginUser = adUserDao.getUserInfo(userParam);
 			logger.info("====【validateUserInfo】登录名获取用户信息：" + JSONObject.toJSONString(loginUser));
 			if (loginUser == null) {
@@ -248,6 +250,15 @@ public class AdUserService implements AdUserServiceI {
 				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_EXIST.getMsg());
 				return jsonResult;
 			} else {
+				// 非武钢企业会员不可以登录武钢APP
+				if (channel.equals(ConstantsLogin.CHANNEL_WISCOAPP)) {
+					AdUser userModel = adUserDao.getUserByTelephoneBloc(loginName);
+					if (userModel == null) {
+						jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.NOT_WUGANG_USER.getCode());
+						jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.NOT_WUGANG_USER.getMsg());
+						return jsonResult;
+					}
+				}
 				// 放入用户主键
 				jsonResult.put("userId", loginUser.getId());
 				if ("1".equals(loginUser.getDelFlag())) {

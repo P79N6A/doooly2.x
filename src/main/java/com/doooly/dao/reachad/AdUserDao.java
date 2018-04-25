@@ -290,4 +290,12 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 
 	 */
 	public HashMap<String, Object> getWechatUserInitInfo(AdUser adUser);
+
+	/**
+	 * 查询手机号对应会员是否为武钢员工
+	 * 
+	 * @param telephone
+	 *            - 手机号
+	 */
+	public AdUser getUserByTelephoneBloc(@Param("telephone") String telephone);
 }

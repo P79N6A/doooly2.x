@@ -93,10 +93,10 @@ public class MobileRechargePreference implements ProductProcessor {
                     result = sendRedPackToWugang(order.getOrderNumber(), record.getSourceOpenId());
                 }
                 logger.info("channel={},sourceUserId={},result={}", record.getChannel(), record.getSourceUserId(), result);
+                AdUser sourceUser = adUserServiceI.getById(String.valueOf(record.getSourceUserId()));
                 if(result != null && "SUCCESS".equals(result.getResult_code())) {
                     //给分享人推送信息1
                     long sourceUserId = record.getSourceUserId();
-                    AdUser sourceUser = adUserServiceI.getById(String.valueOf(record.getSourceUserId()));
                     JSONObject data = new JSONObject();
                     data.put("openId", record.getSourceOpenId());
                     data.put("channel", record.getChannel());
@@ -104,19 +104,18 @@ public class MobileRechargePreference implements ProductProcessor {
                     data.put("telphone", sourceUser.getTelephone());
                     redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL", data.toString());
                     logger.info("SEND_REDPACK_CHANNEL end.");
-
-                    //给分享人推送信息2
-                    AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
-                    JSONObject data2 = new JSONObject();
-                    data2.put("openId", record.getSourceOpenId());
-                    data2.put("channel", record.getChannel());
-                    data2.put("userId", record.getSourceUserId());
-                    data2.put("telphone", sourceUser.getTelephone());
-                    data2.put("userName", user.getName());
-                    logger.info("data2 = {}", data2);
-                    redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL2", data2.toString());
-                    logger.info("SEND_REDPACK_CHANNEL2 end.");
                 }
+                //给分享人推送信息2
+                AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
+                JSONObject data2 = new JSONObject();
+                data2.put("openId", record.getSourceOpenId());
+                data2.put("channel", record.getChannel());
+                data2.put("userId", record.getSourceUserId());
+                data2.put("telphone", sourceUser.getTelephone());
+                data2.put("userName", user.getName());
+                logger.info("data2 = {}", data2);
+                redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL2", data2.toString());
+                logger.info("SEND_REDPACK_CHANNEL2 end.");
             }
             //3.====================发50元券给下单用户==============================
             AdCouponActivity activity = adCouponActivityService.getActivityIdByIdFlag("recharge_activity");

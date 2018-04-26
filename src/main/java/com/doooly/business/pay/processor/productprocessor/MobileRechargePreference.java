@@ -47,7 +47,7 @@ public class MobileRechargePreference implements ProductProcessor {
     public final static String WUGANG_WXJS_APPID = PropertiesHolder.getProperty("wugang.certpath");
     public final static String WUGANG_WXJS_MCH_ID = PropertiesHolder.getProperty("wugang.mch_id");
     public final static String WUGANG_WXJS_KEY = PropertiesHolder.getProperty("wugang.key");
-    public final static String WUGANG_CERT_SSL_PATH = PropertiesHolder.getProperty("wugang.key");
+    public final static String WUGANG_CERT_SSL_PATH = PropertiesHolder.getProperty("wxjs.certpath");
 
     public final static String REDPACK_AMOUNT = PropertiesHolder.getProperty("redpack.amount");
 
@@ -83,16 +83,7 @@ public class MobileRechargePreference implements ProductProcessor {
             AdRechargeRecord record = adRechargeRecordDao.getLastRecord(String.valueOf(order.getUserId()));
             logger.info("record = {}", record);
             if (!record.getUserId().equals(record.getSourceUserId())) {
-                //给分享人推送信息
-                long sourceUserId = record.getSourceUserId();
-                AdUser sourceUser = adUserServiceI.getById(String.valueOf(record.getSourceUserId())) ;
-                JSONObject data = new JSONObject();
-                data.put("openId", record.getSourceOpenId());
-                data.put("channel", record.getChannel());
-                data.put("userId", record.getSourceUserId());
-                data.put("telphone", sourceUser.getTelephone());
-                redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL", data.toString());
-                logger.info("SEND_REDPACK_CHANNEL end.");
+
                 //发红包
                 logger.info("channel={},sourceUserId={},sourceOpenId={}", record.getChannel(), record.getSourceUserId(), record.getSourceOpenId());
                 SendRedPackResult result = null;
@@ -101,18 +92,31 @@ public class MobileRechargePreference implements ProductProcessor {
                 } else if ("wugang".equals(record.getChannel())) {
                     result = sendRedPackToWugang(order.getOrderNumber(), record.getSourceOpenId());
                 }
-                logger.info("channel={},sourceUserId={},result_code={}", record.getChannel(), record.getSourceUserId(), result.getResult_code());
-                //给分享人推送信息
-                AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId())) ;
-                JSONObject data2 = new JSONObject();
-                data2.put("openId", record.getSourceOpenId());
-                data2.put("channel", record.getChannel());
-                data2.put("userId", record.getSourceUserId());
-                data2.put("telphone", sourceUser.getTelephone());
-                data2.put("userName", user.getName());
-                logger.info("data2 = {}", data2);
-                redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL2", data2.toString());
-                logger.info("SEND_REDPACK_CHANNEL2 end.");
+                logger.info("channel={},sourceUserId={},result={}", record.getChannel(), record.getSourceUserId(), result);
+                if(result != null && "SUCCESS".equals(result.getResult_code())) {
+                    //给分享人推送信息1
+                    long sourceUserId = record.getSourceUserId();
+                    AdUser sourceUser = adUserServiceI.getById(String.valueOf(record.getSourceUserId()));
+                    JSONObject data = new JSONObject();
+                    data.put("openId", record.getSourceOpenId());
+                    data.put("channel", record.getChannel());
+                    data.put("userId", record.getSourceUserId());
+                    data.put("telphone", sourceUser.getTelephone());
+                    redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL", data.toString());
+                    logger.info("SEND_REDPACK_CHANNEL end.");
+
+                    //给分享人推送信息2
+                    AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
+                    JSONObject data2 = new JSONObject();
+                    data2.put("openId", record.getSourceOpenId());
+                    data2.put("channel", record.getChannel());
+                    data2.put("userId", record.getSourceUserId());
+                    data2.put("telphone", sourceUser.getTelephone());
+                    data2.put("userName", user.getName());
+                    logger.info("data2 = {}", data2);
+                    redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL2", data2.toString());
+                    logger.info("SEND_REDPACK_CHANNEL2 end.");
+                }
             }
             //3.====================发50元券给下单用户==============================
             AdCouponActivity activity = adCouponActivityService.getActivityIdByIdFlag("recharge_activity");
@@ -196,7 +200,7 @@ public class MobileRechargePreference implements ProductProcessor {
         data.put("client_ip", sendRedPack.getClient_ip());
         data.put("act_name", sendRedPack.getAct_name());
         data.put("remark", sendRedPack.getRemark());
-        String sign = WxUtil.createSign(data, DOOOLY_WXJS_KEY);
+        String sign = WxUtil.createSign(data, WUGANG_WXJS_KEY);
         sendRedPack.setSign(sign);
 
         String respXml = WxUtil.toXml(sendRedPack, SendRedPack.class);

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.report.WechatEventPushDao">
+	<!-- 微信推送事件信息存储 -->
+	<insert id="insert" parameterType="com.doooly.entity.report.WechatEventPush" >
+		INSERT INTO t_wechat_push_record(
+			to_user_name,
+ 			from_user_name,
+  			create_time,
+ 			msg_type,
+ 			event,
+ 			event_key,
+ 			channel,
+ 			create_date
+		) VALUES (
+			#{toUserName},
+			#{fromUserName},
+			#{createTime},
+			#{msgType},
+			#{event},
+			#{eventKey},
+			#{channel},
+			NOW()
+		)
+  	</insert>
+</mapper>

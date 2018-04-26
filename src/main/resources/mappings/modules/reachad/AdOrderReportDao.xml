@@ -40,6 +40,7 @@
 		<result column="service_charge" property="serviceCharge" jdbcType="DECIMAL" />
 		<result column="voucher" property="voucher" jdbcType="DECIMAL" />
 		<result column="coupon_id" property="couponId" jdbcType="VARCHAR" />
+		<result column="support_pay_type" property="supportPayType" jdbcType="VARCHAR" />
         <collection property="items" column="id" ofType="com.doooly.business.order.vo.OrderItemVo">
             <id column="did" property="id" jdbcType="BIGINT" />
 		    <result column="order_report_id" property="orderReportId" jdbcType="BIGINT" />
@@ -211,7 +212,8 @@
 			act_type,
 			service_charge,
 			voucher,
-			coupon_id
+			coupon_id,
+			support_pay_type
         ) VALUES (
 	       	#{id},
 			#{orderId},
@@ -248,7 +250,8 @@
 			#{actType},
 			#{serviceCharge},
 			#{voucher},
-			#{couponId}
+			#{couponId},
+			#{supportPayType}
         )
     </insert>
 

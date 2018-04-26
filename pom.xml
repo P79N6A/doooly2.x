@@ -37,6 +37,12 @@
 		<downloadSources>true</downloadSources>
 	</properties>
 	<dependencies>
+		<!-- xml与json互转 -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180130</version>
+		</dependency>
 		<!-- 引入项目lib下jar -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>
@@ -80,14 +86,14 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/taobao-sdk-java-auto_1455552377940-20160524.jar</systemPath>
 		</dependency>
-        <!--商户对接-->
-        <dependency>
-            <groupId>businessConnector</groupId>
-            <artifactId>businessConnector</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/businessConnector-0.0.1-SNAPSHOT.jar</systemPath>
-        </dependency>
+		<!--商户对接 -->
+		<dependency>
+			<groupId>businessConnector</groupId>
+			<artifactId>businessConnector</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/businessConnector-0.0.1-SNAPSHOT.jar</systemPath>
+		</dependency>
 
 
 		<dependency>

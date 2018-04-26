@@ -1,16 +1,10 @@
 package com.doooly.common.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -32,6 +26,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -147,7 +142,62 @@ public class HttpClientUtil {
         }
         return null;
     }
-    
+
+    public static String httsRequestCert(String url,String mchId, String certSslPath,String requestXML){
+        SSLConnectionSocketFactory sslsf = null;
+        try {
+            InputStream  inputStream = new FileInputStream(certSslPath);
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(inputStream, mchId.toCharArray());
+            SSLContext sslcontext = SSLContexts.custom().loadKeyMaterial(keyStore, mchId.toCharArray()).build();
+            sslsf = new SSLConnectionSocketFactory(
+                    sslcontext,
+                    new String[]{"TLSv1"},
+                    null,
+                    SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+        } catch (Exception e) {
+            log.info("httsRequestCert e = {}",e);
+            e.printStackTrace();
+        }
+
+        CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        CloseableHttpResponse response =  null;
+        String result = "";
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            StringEntity reqEntity = new StringEntity(requestXML, "UTF-8");
+            // 设置类型
+            reqEntity.setContentType("application/x-www-form-urlencoded");
+            httpPost.setEntity(reqEntity);
+            response = httpclient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent(), "UTF-8"));
+                String text;
+                while ((text = bufferedReader.readLine()) != null) {
+                    result += text;
+                    System.out.println(text);
+                }
+            }
+            EntityUtils.consume(entity);
+        }catch (Exception e){
+            log.info("httsRequestCert HttpPost.e = {}",e);
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                httpclient.close();
+                response.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+
+
+
 //
 //    //请求方法
 //    public static String httpsRequest(String requestUrl, String outputStr) {

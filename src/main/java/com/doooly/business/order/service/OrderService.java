@@ -58,7 +58,8 @@ public interface OrderService {
 		MOBILE_RECHARGE(3, "话费充值"),
 		FLOW_RECHARGE(4, "流量充值"),
 		TOURIST_CARD_RECHARGE(5, "旅游卡充值"),
-		SELF_CARDPSW_RECHARGE(6, "自营卡券");
+		SELF_CARDPSW_RECHARGE(6, "自营卡券"),
+		MOBILE_RECHARGE_PREFERENCE(7, "兜礼话费特惠");
 
 		private int code;
 		private String productTypeName;

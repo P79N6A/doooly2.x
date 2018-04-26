@@ -1,0 +1,264 @@
+package com.doooly.business.wechat.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONObject;
+import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.business.common.constant.ConnectorConstants.WechatConstants;
+import com.doooly.business.common.service.ActivityCodeImageServiceI;
+import com.doooly.business.report.WechatEventPushService;
+import com.doooly.business.wechat.WechatDevCallbackServiceI;
+import com.doooly.dao.reachad.AdConfigDictDao;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.report.WechatEventPush;
+import com.wechat.ThirdPartyWechatUtil;
+import com.wechat.vo.Image;
+import com.wechat.vo.ImageMessage;
+
+/**
+ * 
+ * @ClassName: WechatDevServiceImpl
+ * @Description: 处理微信回调业务
+ * @author hutao
+ * @date 2018年4月12日
+ *
+ */
+@Service
+public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
+	private static Logger log = LoggerFactory.getLogger(WechatDevServiceImpl.class);
+	// 开发者模式-自行定义Token
+	public static final String token = "doooly";
+	public static final String WECHAT_MSG = "WECHAT_MSG";
+	// 开发者模式-活动标记名
+	public static final String RECHARGE_ACTIVITY = "recharge_activity";
+
+	/** 微信推送事件Service */
+	@Autowired
+	private WechatEventPushService wechatEventPushService;
+
+	/** 微信扫码推送推文/图片 */
+	@Autowired
+	private ActivityCodeImageServiceI activityCodeImageServiceI;
+
+	@Autowired
+	private AdConfigDictDao configDictDao;
+
+	/**
+	 * 方法名：checkSignature</br>
+	 * 详述：验证签名</br>
+	 * 
+	 * @param signature
+	 * @param timestamp
+	 * @param nonce
+	 * @return
+	 */
+	public boolean checkSignature(String signature, String timestamp, String nonce) {
+		// 1.将token、timestamp、nonce三个参数进行字典序排序
+		String[] arr = new String[] { token, timestamp, nonce };
+		Arrays.sort(arr);
+
+		// 2. 将三个参数字符串拼接成一个字符串进行sha1加密
+		StringBuilder content = new StringBuilder();
+		for (int i = 0; i < arr.length; i++) {
+			content.append(arr[i]);
+		}
+		String tmpStr = DigestUtils.sha1Hex(content.toString());
+		log.info("微信开发者模式签名验证：" + signature.toUpperCase() + "==" + tmpStr);
+		// 3.将sha1加密后的字符串可与signature对比，标识该请求来源于微信
+		return tmpStr != null ? tmpStr.equals(signature) : false;
+	}
+
+	/**
+	 * 微信回调处理（如扫描带参二维码、关注、取消关注等事件）
+	 */
+	@Override
+	public List<String> dealCallback(String reqStr, String channel) {
+		try {
+			JSONObject json = XML.toJSONObject(reqStr).getJSONObject("xml");
+			log.info("微信回调事件-请求参数xml转json：" + json.toString());
+			// 消息类型，event
+			String msgType = json.getString("MsgType");
+			// 开发者微信号
+			// String toUserName = json.getString("ToUserName");
+			// 发送方帐号（一个OpenID）
+			String fromUserName = json.getString("FromUserName");
+			// 二维码参数
+			String EventKey = "";
+
+			// 处理消息集合
+			List<String> messageList = new ArrayList<String>();
+			//回复文本消息
+			if (WechatConstants.MESSAGE_TYPE_TEXT.equals(msgType)) {
+				String conent = json.getString("Content");
+				//添加回复文本消息内容
+				messageList.add(createTextMessage(channel, fromUserName, conent));
+			// 推送事件
+			} else {
+				String event = json.getString("Event");
+				switch (event) {
+				// 用户已关注时的事件推送
+				case WechatConstants.EVENT_TYPE_SCAN:
+					EventKey = json.getString("EventKey");
+					// 话费充值活动
+					if (EventKey.contains(RECHARGE_ACTIVITY)) {
+						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
+						String[] paramArr = EventKey.split("~");
+						// 活动标记
+						String activityMark = paramArr[1];
+						// 获取分享人openId
+						String shareOpendId = paramArr[2];
+						log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
+								+ fromUserName);
+
+						if (!shareOpendId.equals(fromUserName)) {
+							MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
+									shareOpendId, channel, activityMark);
+							log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
+						} else {
+							log.info("====【dealCallback】扫自己二维码,不推送信息====");
+						}
+					}
+
+					break;
+				// 用户关注时的事件推送
+				case WechatConstants.EVENT_TYPE_SUBSCRIBE:
+					EventKey = json.getString("EventKey");
+					// 话费充值活动
+					if (EventKey.contains(RECHARGE_ACTIVITY)) {
+						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
+						String[] paramArr = EventKey.replace("qrscene_", "").split("~");
+						// 活动标记
+						String activityMark = paramArr[1];
+						// 获取分享人openId
+						String shareOpendId = paramArr[2];
+						log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
+								+ fromUserName);
+
+						if (!shareOpendId.equals(fromUserName)) {
+							MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
+									shareOpendId, channel, activityMark);
+							log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
+						} else {
+							log.info("====【dealCallback】扫自己二维码,不推送信息====");
+						}
+					} else {
+						//微信公众号关注回复信息
+						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
+						messageList.add(textMsg);
+						log.info("====【dealCallback】关注微信公众号后回复文本消息" + textMsg);
+					}
+
+					break;
+				// 用户点击事件推送
+				case WechatConstants.EVENT_TYPE_CLICK:
+					EventKey = json.getString("EventKey");
+					String textMsg = createTextMessage(channel, fromUserName, EventKey);
+					messageList.add(textMsg);
+					log.info("====【dealCallback】用户点击菜单事件回复文本消息" + textMsg);
+					break;
+				default:
+					break;
+				}
+
+				// 放入渠道
+				json.put("channel", channel);
+				// 存储微信推送信息
+				this.saveWechatEventPush(json);
+			}
+
+			return messageList;
+		} catch (Exception e) {
+			log.error("====【dealCallback】处理微信回调事件出错，error=" + e.getMessage(), e);
+		}
+		return null;
+	}
+
+	/**
+	 * 微信推送事件信息存储
+	 * 
+	 * @param json
+	 */
+	private WechatEventPush saveWechatEventPush(JSONObject jsonObject) throws Exception {
+		log.info("====【saveWechatEventPush】执行微信推送信息存储");
+		WechatEventPush wechatEventPush = new WechatEventPush();
+
+		try {
+			wechatEventPush.setToUserName(jsonObject.getString("ToUserName"));
+			wechatEventPush.setFromUserName(jsonObject.getString("FromUserName"));
+			wechatEventPush.setMsgType(jsonObject.getString("MsgType"));
+			wechatEventPush.setEvent(jsonObject.getString("Event"));
+			if (jsonObject.has("EventKey")) {
+				wechatEventPush.setEventKey(jsonObject.getString("EventKey"));
+			}
+			wechatEventPush.setChannel(jsonObject.getString("channel"));
+			Long CreateTime = jsonObject.getLong("CreateTime");
+			wechatEventPush.setCreateTime(new Date(CreateTime * 1000));
+			Long count = wechatEventPushService.insert(wechatEventPush);
+			log.info("====【saveWechatEventPush】生成的记录行数:" + count);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+
+		return wechatEventPush;
+	}
+
+	/**
+	 * 组装回复图片消息
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年4月12日 下午4:40:20
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	private String createImageMessage(String fromUserName, String toUserName) {
+		ImageMessage image = new ImageMessage();
+		image.setCreateTime(System.currentTimeMillis() / 1000);
+		image.setMsgType(WechatConstants.MESSAGE_TYPE_IMAGE);
+		Image ig = new Image();
+		// todo...生成图片文件通过微信素材文件接口上传到微信服务器
+		ig.setMediaId("hI3K44PcMYgrgzS18IHLfZkaU6leU3bL9cQ8fu1eXAxmiy04oH93sFyyTnm5pjBL");
+		image.setImage(ig);
+		image.setFromUserName(toUserName);
+		image.setToUserName(fromUserName);
+		String imageXml = ThirdPartyWechatUtil.messageBean2Xml(image);
+		log.info("微信回调事件-被动回复图片消息=" + imageXml);
+		return imageXml;
+	}
+
+	/**
+	 * 组装文本消息
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年4月12日 下午6:04:54
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	private String createTextMessage(String channel, String toUserName, String switchType) {
+		JSONObject textMsg = new JSONObject();
+		textMsg.put("touser", toUserName);
+		textMsg.put("msgtype", WechatConstants.MESSAGE_TYPE_TEXT);
+		JSONObject contentJson = new JSONObject();
+		String dictKey = channel + "_" + switchType;
+		String content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		contentJson.put("content", content);
+		textMsg.put("text", contentJson);
+		String result = textMsg.toString();
+		result = result.replaceAll("%s", "\n");
+		log.info("微信回调事件-被动回复文本消息=" + result);
+		return result;
+	}
+}

@@ -125,4 +125,18 @@ public class MyCouponsBusinessService implements MyCouponsBusinessServiceI {
 		return map;
 	}
 
+	@Override
+	public HashMap<String, Object> getRechargeCouponNum(String userId) {
+		logger.info(String.format("获取可用话费充值抵扣券数量   userId=%s", userId));
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		try {
+			//获取可用话费充值抵扣券数量
+			Integer couponNum = adCouponActivityConnDao.getRechargeCouponNum(userId);
+			map.put("couponNum", couponNum);
+		} catch (Exception e) {
+			logger.error(userId + "||获取可用话费充值抵扣券数量异常！！！e = {}",e);
+		}
+		return map;
+	}
+
 }

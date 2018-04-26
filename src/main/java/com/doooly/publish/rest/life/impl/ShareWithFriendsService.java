@@ -44,15 +44,16 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 	public String commonShareConfig(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		String client = request.getParameter("client");
 		String prefix = request.getParameter("prefix");
+		String channel = request.getParameter("channel");
+		log.info("commonShareConfig client = {},prefix = {},channel = {}", client, prefix, channel);
 		String[] params = request.getParameterValues("params");
 		if(params!= null && params.length > 0){
 			log.info("params = {}", Arrays.asList(params));
 		}
-
 		if (Constants.WECHAT.equals(client)) {
 			//微信分享配置
 			String url = request.getParameter("url");
-			Map<String,Object> config = WechatUtil.getWechatConfig(url);
+			Map<String,Object> config = WechatUtil.getWechatConfig(channel,url);
 			if(config != null){
 				Map<String,Object> shareConfig = AppShareUtil.getShareInfo(client,prefix,params);
 				config.put("shareConfig", shareConfig);

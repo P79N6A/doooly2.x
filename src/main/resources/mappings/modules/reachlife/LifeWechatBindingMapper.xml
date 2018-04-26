@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachlife.LifeWechatBindingDao">
+<select id="getDataByOpenId" resultType="com.doooly.entity.reachlife.LifeWechatBinding">
+	select 
+		open_id as "openId",
+	 	card_no  as "cardNo",
+		nick_name1  as "nickName1",
+		head_imgurl as "headImgurl"
+		from xx_wechat_binding a 
+		where a.open_id=#{openId}
+	</select>
+	
+</mapper>

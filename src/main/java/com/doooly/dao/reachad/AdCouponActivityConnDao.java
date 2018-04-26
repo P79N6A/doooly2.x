@@ -110,4 +110,6 @@ public interface AdCouponActivityConnDao extends BaseDaoI<AdCouponActivityConn> 
 
 	Integer getVoucherCouponNum(@Param("userId")String userId,@Param("amount")String amount);
 	
+	Integer getRechargeCouponNum(String userId);
+	
 }

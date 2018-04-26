@@ -84,6 +84,8 @@ public class OrderVo {
 	private String couponId;
 	//抵扣券金额
 	private BigDecimal voucher;
+	//支持支付方式 (1.微信;2.积分;3.支付宝;多个以逗号分割)
+	private String supportPayType;
 	// 订单扩展信息
 	private OrderExtVo orderExt;
 	// 商家商品
@@ -423,6 +425,14 @@ public class OrderVo {
 
 	public void setVoucher(BigDecimal voucher) {
 		this.voucher = voucher;
+	}
+
+	public String getSupportPayType() {
+		return supportPayType;
+	}
+
+	public void setSupportPayType(String supportPayType) {
+		this.supportPayType = supportPayType;
 	}
 
 	@Override

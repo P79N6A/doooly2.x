@@ -35,4 +35,12 @@ public interface MyCouponsBusinessServiceI {
 	 *            商品金额
 	 */
 	HashMap<String, Object> getVoucherCouponNum(String userId,String amount);
+	
+	/**
+	 * 获取可用话费充值抵扣券数量
+	 * 
+	 * @param userId
+	 *            会员id
+	 */
+	HashMap<String, Object> getRechargeCouponNum(String userId);
 }

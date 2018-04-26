@@ -218,6 +218,9 @@
 		a.activity_id = #{activityId} 
 		and a.user_id = #{userId} 
 		and a.coupon = #{coupon}
+		and a.coupon NOT IN(
+			SELECT c.id FROM ad_coupon c WHERE c.coupon_category = 19
+		)
 	</select>
 	
 	<select id="getCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode" >

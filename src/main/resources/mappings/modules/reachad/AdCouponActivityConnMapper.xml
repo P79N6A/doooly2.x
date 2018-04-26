@@ -229,7 +229,7 @@
 			AND cc.is_used = 0
 			AND cc.user_id = #{userId}
 		<choose>
-			<when test="couponCategory == 15">
+			<when test="couponCategory == 15 or couponCategory == 19">
 				AND cc.is_locked = 0
 				AND c.coupon_category = #{couponCategory}
 				ORDER BY c.coupon_value DESC
@@ -266,7 +266,7 @@
 			cc.is_used = 1
 			AND cc.user_id = #{userId}
 		<choose>
-			<when test="couponCategory == 15">
+			<when test="couponCategory == 15 or couponCategory == 19">
 				AND cc.is_locked = 0
 				AND c.coupon_category = #{couponCategory}
 				ORDER BY c.coupon_value DESC
@@ -305,7 +305,7 @@
 			AND cc.is_used = 0
 			AND cc.user_id = #{userId}
 		<choose>
-			<when test="couponCategory == 15">
+			<when test="couponCategory == 15 or couponCategory == 19">
 				AND cc.is_locked = 0
 				AND c.coupon_category = #{couponCategory}
 				ORDER BY c.coupon_value DESC
@@ -390,6 +390,7 @@
 		WHERE
 			cc.user_id = #{userId}
 			AND cac.id = #{actConnId}
+		LIMIT 1
 	</select>
 	<!-- add by yuelou.zhang end -->
 	<select id="getByActivityIdAndLevel" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
@@ -535,6 +536,28 @@
 			AND cc.is_locked = 0
 			AND c.coupon_category = 15
 			AND c.coupon_value &lt;=#{amount}
+	</select>
+	
+	<!-- 可使用 话费充值抵扣券数量-->
+	<select id="getRechargeCouponNum" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(1)
+		FROM 
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c
+			ON cac.coupon_id = c.id
+		LEFT JOIN ad_coupon_code cc
+			ON cc.coupon = c.id AND cac.activity_id = cc.activity_id
+		INNER JOIN ad_user u
+			ON u.id = cc.user_id
+		INNER JOIN ad_group_activity_conn gac 
+			ON u.group_num = gac.group_id AND gac.activity_id = cac.activity_id 
+		WHERE
+			NOW() &lt;= cac.end_date
+			AND cc.is_used = 0
+			AND cc.user_id = #{userId}
+			AND cc.is_locked = 0
+			AND c.coupon_category = 19
 	</select>
 	
 </mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdConfigDictDao">
+
+	<sql id="adConfigDictColumns">
+		a.dict_type AS "dictType",
+		a.dict_key AS "dictKey",
+		a.dict_value AS "dictValue"
+	</sql>
+
+	<select id="getValueByKey" resultType="java.lang.String">
+		SELECT
+		a.dict_value AS "dictValue"
+		FROM
+		ad_config_dict a
+		where a.dict_key = #{accessToken}
+
+	</select>
+	<select id="getValueByTypeAndKey" resultType="java.lang.String">
+		SELECT
+		a.dict_value AS "dictValue"
+		FROM
+		ad_config_dict a
+		where a.dict_type=#{type} and a.dict_key = #{key}
+
+	</select>
+</mapper>

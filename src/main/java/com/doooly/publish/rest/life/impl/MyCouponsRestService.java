@@ -102,5 +102,26 @@ public class MyCouponsRestService implements MyCouponsRestServiceI {
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();
 	}
+	
+	@POST
+	@Path(value = "/getRechargeCouponNum")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String getRechargeCouponNum(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			// 获取用户id
+			String userId = obj.getString("userId");
+			// 获取卡券数量
+			HashMap<String, Object> map = myCouponsBusinessService.getRechargeCouponNum(userId);
+			messageDataBean.setCode(MessageDataBean.success_code);
+			messageDataBean.setData(map);
+		} catch (Exception e) {
+			logger.error("获取可用话费充值抵扣券数量异常！",e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
 
 }

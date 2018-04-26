@@ -12,9 +12,11 @@ import java.util.concurrent.Executors;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.common.context.SpringContextHolder;
 import com.doooly.dao.reachad.AdGroupDao;
+import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,9 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	@Autowired
 	protected AdUserDao adUserDao;
 	@Autowired
-	private AdGroupDao adGroupDao;
+	protected AdGroupDao adGroupDao;
+	@Autowired
+	protected AdRechargeRecordDao adRechargeRecordDao;
 
 	protected abstract PayMsg buildPayParams(List<OrderVo> orders,PayFlow flow,JSONObject json) ;
 	protected abstract Map<String,Object> resolveAndVerifyResult(String retStr, String payType) ;
@@ -199,6 +203,13 @@ public abstract class AbstractPaymentService  implements PaymentService{
 				//手续费
 				if(PayFlowService.PAYTYPE_DOOOLY.equals(flow.getPayType()) && order.getServiceCharge() != null){
 					payMsg.data.put("serviceCharge", order.getServiceCharge());
+
+				}
+				//话费优惠活动- 分享需要的参数
+				if(OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()){
+					AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+					payMsg.data.put("openId", record.getOpenId());
+					payMsg.data.put("activityParam", record.getActivityParam());
 				}
 			}
 		}

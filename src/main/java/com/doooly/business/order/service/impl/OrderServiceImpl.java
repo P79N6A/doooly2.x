@@ -68,6 +68,8 @@ public class OrderServiceImpl implements OrderService {
 	private AdGroupDao adGroupDao;
 	@Autowired
 	private AdCouponCodeDao adCouponCodeDao;
+	@Autowired
+	AdRechargeRecordDao adRechargeRecordDao;
 
 
 	@Override
@@ -116,7 +118,9 @@ public class OrderServiceImpl implements OrderService {
 				}
 				BigDecimal sellPrice =  new BigDecimal(sku.getSellPrice());
 				//================= 活动信息 ==============================================================
-				if(orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode()){
+				//兜礼话费特惠订单不计算手续费
+				if((orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode())
+						&&orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()){
 					//手机话费充值和流量充值限制额度
 					//微信支付--> 都不收手续费
 					//积分支付--> 话费充值收手续费,流量充值不收手续费
@@ -182,10 +186,10 @@ public class OrderServiceImpl implements OrderService {
 				}
 				//=================商品库存===============================================================
 				Integer inventory = sku.getInventory();
-				logger.info("product.inventory = {}",inventory);
-				//校验库存
 				if(inventory != null) {
+					//校验库存
 					if (inventory <= 0) {
+						logger.error("product.inventory = {}", inventory);
 						return new OrderMsg(OrderMsg.lack_of_stock_code, OrderMsg.lack_of_stock_mess);
 					}
 					//扣减活动库存
@@ -202,7 +206,7 @@ public class OrderServiceImpl implements OrderService {
 				OrderItemVo orderItem = buildOrderItem(userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
 				orderItems.add(orderItem);
 			}
-			//优惠券
+			//================= 自营优惠券 ==============================================================
 			BigDecimal couponValue = null;
 			String couponId = orderVo.getCouponId();
 			if(StringUtils.isNotEmpty(couponId)){
@@ -235,7 +239,7 @@ public class OrderServiceImpl implements OrderService {
 			orderItems.get(0).setAmount(totalMount);
 			//订单主表信息
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
-			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType,serviceCharge, couponValue, couponId);
+			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, serviceCharge, couponValue, couponId);
 			//保存订单
 			int rows = saveOrder(order, orderExt, orderItems);
 			logger.info("Create order successfully. orderNumber = {} , orderId = {}, rows = {}", orderNum, rows);
@@ -379,9 +383,19 @@ public class OrderServiceImpl implements OrderService {
 		order.setConsigneeMobile(orderVo.getConsigneeMobile());
 		order.setProductType(orderVo.getProductType());
 		order.setActType(actType);
-		order.setServiceCharge(serviceCharge);
 		order.setVoucher(couponValue);
 		order.setCouponId(couponId);
+		String supportPayType = orderVo.getSupportPayType();
+		if(BigDecimal.ZERO.compareTo(totalMount) == 0) {
+			supportPayType = "0";
+			serviceCharge = BigDecimal.ZERO;
+		}else{
+			if (StringUtils.isEmpty(orderVo.getSupportPayType())) {
+				supportPayType = "all";
+			}
+		}
+		order.setServiceCharge(serviceCharge);
+		order.setSupportPayType(supportPayType);
 		return order;
 	}
 
@@ -550,7 +564,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	@Transactional
 	public OrderMsg cancleOrder(long userId, String orderNum) {
-		logger.info("cancleOrder() userId = {},orderNum = {}", userId, orderNum);
+		logger.info("cancleOrder() orderNum = {},userId = {}", orderNum, userId);
 		if (StringUtils.isEmpty(orderNum) || userId <= 0) {
 			return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
 		}
@@ -585,14 +599,16 @@ public class OrderServiceImpl implements OrderService {
 			logger.info("cancleOrder() orderNum={},incStock.rows = {}", orderNum, rows);
 		}
 		//恢复商品库存
-		int rows = productService.incInventory(skuId);
-		logger.info("cancleOrder() orderNum={},incInventory.rows = {}", orderNum, rows);
+		int incInventoryRows = productService.incInventory(skuId);
+		logger.info("cancleOrder() orderNum={},incInventoryRows = {}", orderNum, incInventoryRows);
 		//解锁券
 		String couponId = order.getCouponId();
-		int row = adCouponCodeDao.unlockCoupon(userId, couponId);
-		logger.info("unlockCoupon userId = {},couponId = {}", userId, couponId);
-		if (row == 0) {
-			logger.info("unlockCoupon.rows = {}");
+		int unlockCouponRows = adCouponCodeDao.unlockCoupon(userId, couponId);
+		logger.info("unlockCoupon userId = {},couponId = {},unlockCouponRows={}", userId, couponId, unlockCouponRows);
+		//如果是话费优惠订单参与修改记录
+		if(order.getProductType() == ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
+			int updateStateOrDelFlagRows = adRechargeRecordDao.updateStateOrDelFlag(order.getOrderNumber(), 1);
+			logger.info("updateStateOrDelFlag.rows = {}", updateStateOrDelFlagRows);
 		}
 		//返回取消结果
 		if (updateStatus > 0) {
@@ -663,9 +679,7 @@ public class OrderServiceImpl implements OrderService {
 
 	/**
 	 * 活动活动价格
-	 * @param userId
 	 * @param groupId
-	 * @param productId
 	 * @param skuId
 	 * @return
 	 */

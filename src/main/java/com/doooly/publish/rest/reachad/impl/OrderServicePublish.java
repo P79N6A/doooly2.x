@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.doooly.entity.reachad.Order;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,6 +125,7 @@ public class OrderServicePublish {
 		retJson.put("orderDesc", orderDesc);
 		retJson.put("orderId", o.getOrderId());
 		retJson.put("productImg", item.getProductImg());
+		retJson.put("supportPayType", o.getSupportPayType());
 		if(o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode() && o.getServiceCharge() != null)
 		{
 			retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());

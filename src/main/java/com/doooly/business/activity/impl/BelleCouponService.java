@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.doooly.business.common.service.impl.AdCouponActivityService;
+import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.entity.reachad.AdCoupon;
 import com.doooly.entity.reachad.AdCouponActivity;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +36,11 @@ public class BelleCouponService implements BelleCouponServiceI {
 
 	private static Logger logger = LoggerFactory.getLogger(BelleCouponService.class);
 
-	private int OLD_ACTIVITYID = 82;
-	private int OLD_COUPONID = 439;
+	private String OLD_ACTIVITYID = PropertiesConstants.dooolyBundle.getString("OLD_ACTIVITYID");
+	private String OLD_COUPONID = PropertiesConstants.dooolyBundle.getString("OLD_COUPONID");
+
+	private String OLD_ACTIVITYID2 = PropertiesConstants.dooolyBundle.getString("OLD_ACTIVITYID2");
+	private String OLD_COUPONID2 = PropertiesConstants.dooolyBundle.getString("OLD_COUPONID2");
 
 	// 已核销
 	private static final String IS_USED = "1";
@@ -76,34 +80,33 @@ public class BelleCouponService implements BelleCouponServiceI {
 			List<AdCouponActivityConn> list = adCouponActivityConnDao.getActivityConnByActivityId(String.valueOf(activityId));
 			AdCouponActivityConn activityConn = list.get(0);
 			AdCoupon adCoupon = activityConn.getCoupon();
-			//判断是否另个之前百丽活动的券
-			AdCouponCode couponCode1 = adCouponCodeDao.getCouponCode(Integer.valueOf(userId), OLD_ACTIVITYID, OLD_COUPONID);
-			AdCouponCode couponCode2 = adCouponCodeDao.getCouponCode(Integer.valueOf(userId), activityId, adCoupon.getId().intValue());
-			logger.info("couponCode1 = {},couponCode1 = {}", couponCode1, couponCode2);
-			if(couponCode1 != null){
-				return new MessageDataBean("1002","已领过该券1");
+			//之前是否领取过百丽
+			AdCouponCode couponCode1 = adCouponCodeDao.getCouponCode(Integer.valueOf(userId), Integer.valueOf(OLD_ACTIVITYID), Integer.valueOf(OLD_COUPONID));
+			AdCouponCode couponCode2 = adCouponCodeDao.getCouponCode(Integer.valueOf(userId), Integer.valueOf(OLD_ACTIVITYID2), Integer.valueOf(OLD_COUPONID2));
+			AdCouponCode couponCode3 = adCouponCodeDao.getCouponCode(Integer.valueOf(userId), activityId, adCoupon.getId().intValue());
+
+			logger.info("couponCode1 = {},couponCode2 = {},couponCode3 = {}", couponCode1, couponCode2,couponCode3);
+			if (couponCode1 != null || couponCode2 != null || couponCode3 != null) {
+				return new MessageDataBean("1002", "已领过该券");
 			}
-			if (couponCode2 != null) {
-				return new MessageDataBean("1002","已领过该券2");
+
+			AdCouponCode code = freeCouponBusinessServiceI.sendCoupon(adCoupon.getBusinessId(), activityId, Integer.valueOf(userId), adCoupon.getId().intValue());
+			logger.info("领取到的百丽优惠券券码 code = {}", code.getCode());
+			// 判断库存
+			if (StringUtils.isEmpty(code.getCode())) {
+				return new MessageDataBean("1003", "该券已领完");
 			} else {
-				AdCouponCode code = freeCouponBusinessServiceI.sendCoupon(adCoupon.getBusinessId(), activityId, Integer.valueOf(userId), adCoupon.getId().intValue());
-				logger.info("领取到的百丽2优惠券券码 code = {}" , code.getCode());
-				// 判断库存
-				if (StringUtils.isEmpty(code.getCode())) {
-					return new MessageDataBean("1003","该券已领完");
-				} else {
-					HashMap map = new HashMap<String,String>();
-					MessageDataBean bean =  new MessageDataBean("1000","成功领取");
-					map.put("actConnId",activityConn.getId());
-					bean.setData(map);
-					return bean;
-				}
+				HashMap map = new HashMap<String, String>();
+				MessageDataBean bean = new MessageDataBean("1000", "成功领取");
+				map.put("actConnId", activityConn.getId());
+				bean.setData(map);
+				return bean;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("userId = {},idFlag = {}, e = {}", userId, idFlag, e);
 		}
-		return new MessageDataBean("9999","出现异常");
+		return new MessageDataBean("1004","出现异常");
 	}
 
 	@Override

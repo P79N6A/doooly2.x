@@ -122,6 +122,7 @@ public class MobileRechargePreference implements ProductProcessor {
                     packRecord.setResult(result.getResult_code());
                     sendRedPackRecordDao.insert(packRecord);
                 }
+                Thread.sleep(2 * 1000);
                 //给分享人推送信息2
                 AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
                 JSONObject data2 = new JSONObject();

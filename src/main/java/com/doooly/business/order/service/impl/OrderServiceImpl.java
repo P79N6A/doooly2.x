@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
 					return new OrderMsg(OrderMsg.failure_code, "购买数量必须大于0");
 				}
 				BigDecimal sellPrice =  new BigDecimal(sku.getSellPrice());
-				//================= 活动信息 ==============================================================
+				//================= 活动信息 =============================================================
 				//兜礼话费特惠订单不计算手续费
 				if((orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode())
 						&&orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()){

@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -75,7 +76,8 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
            if (height == 0 ) {
         	   y = (big.getHeight() - small.getHeight())/2;
            }else if (height == 1){
-        	   y = (big.getHeight() - small.getHeight()) -130;
+        	   y = (big.getHeight() - small.getHeight()) -105;
+        	   x = 92;
            }else if (height == 2) {
         	   x = 25;
         	   y = 25;
@@ -164,7 +166,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			try {
 				big = ImageIO.read(new FileInputStream(WebService.getRootPath()+"/image/activityImage.jpg"));
 				String qrCodeUrl = this.getQRCodeUrl(accessToken, openId,channel,activityId);
-				small = CodeUtil.newQRCode(qrCodeUrl,270,270, "", "png");
+				small = CodeUtil.newQRCode(qrCodeUrl,297,297, "", "png");
 				big= this.overlapImage(big, small,1);
 				//进行微信头像和昵称的插入
 //			LifeWechatBinding wechatData = this.getWechatData(openId);
@@ -181,7 +183,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 					g.setFont(f); 
 					g.drawString(wechatUserByOpenId.get("nickname"), 90, 58);
 					g.dispose();
-//        		ImageIO.write((RenderedImage)big, "png", new File("C:/Users/80418/Desktop/datas/wechat.png"));
+        		ImageIO.write((RenderedImage)big, "png", new File("C:/Users/80418/Desktop/datas/wechat.png"));
 				}
 				String url = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token="+accessToken+"&type=image";
 				String mediaIdJson = CodeUtil.uploadFile(url, big,openId);

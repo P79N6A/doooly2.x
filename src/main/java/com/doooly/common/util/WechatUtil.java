@@ -348,7 +348,7 @@ public class WechatUtil {
 			String response = HttpClientUtil.httpsGet(URL,  null);
 			JSONObject jsonObject = JSON.parseObject(response);
 			String headimgurl = jsonObject.get("headimgurl") == null ? null : jsonObject.getString("headimgurl");
-			String nickname = jsonObject.get("nickname") == null ? null : jsonObject.getString("nickname");
+			String nickname = jsonObject.get("nickname") == null ? null : new String(new String(jsonObject.getString("nickname").getBytes("UTF-8"),"UTF-8").toCharArray());
 			map.put("nickname", nickname);
 			map.put("headimgurl", headimgurl);
 		} catch (Exception e) {

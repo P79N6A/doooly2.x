@@ -28,6 +28,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -46,10 +47,10 @@ public class MobileRechargePreference implements ProductProcessor {
     public final static String DOOOLY_WXJS_KEY = PropertiesHolder.getProperty("wxjs.key");
     public final static String DOOOLY_CERT_SSL_PATH = PropertiesHolder.getProperty("wxjs.certpath");
 
-    public final static String WUGANG_WXJS_APPID = PropertiesHolder.getProperty("wugang.certpath");
+    public final static String WUGANG_WXJS_APPID = PropertiesHolder.getProperty("wugang.appid");
     public final static String WUGANG_WXJS_MCH_ID = PropertiesHolder.getProperty("wugang.mch_id");
     public final static String WUGANG_WXJS_KEY = PropertiesHolder.getProperty("wugang.key");
-    public final static String WUGANG_CERT_SSL_PATH = PropertiesHolder.getProperty("wxjs.certpath");
+    public final static String WUGANG_CERT_SSL_PATH = PropertiesHolder.getProperty("wugang.certpath");
 
     public final static String REDPACK_AMOUNT = PropertiesHolder.getProperty("redpack.amount");
 
@@ -94,12 +95,16 @@ public class MobileRechargePreference implements ProductProcessor {
                 logger.info("channel={},sourceUserId={},sourceOpenId={}", channel, sourceUserId, sourceOpenId);
                 SendRedPackResult result = null;
                 if ("doooly".equals(record.getChannel())) {
-                    result =  sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
+                    result = sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
                 } else if ("wugang".equals(record.getChannel())) {
-                    result = sendRedPackToWugang(order.getOrderNumber(), sourceOpenId);
+                    result = sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
                 }
-                String sourceNickName = WechatUtil.getWechatUserByOpenId(record.getSourceOpenId(), record.getChannel()).get("nickname");
-                logger.info("channel={},sourceUserId={},sourceOpenId={},result={}", channel, sourceUserId,sourceOpenId, result);
+                Map<String, String> userMap =  WechatUtil.getWechatUserByOpenId(record.getSourceOpenId(), record.getChannel());
+                String sourceNickName = null;
+                if(userMap != null){
+                    sourceNickName = userMap.get("nickname");
+                }
+                logger.info("channel={},sourceUserId={},sourceOpenId={},result={},sourceNickName={}", channel, sourceUserId,sourceOpenId, result,sourceNickName);
                 if(result != null){
                     //给分享人推送信息1
                     if("SUCCESS".equals(result.getResult_code())) {
@@ -118,7 +123,7 @@ public class MobileRechargePreference implements ProductProcessor {
                     packRecord.setOpen_id(record.getOpenId());
                     packRecord.setSource_user_id(record.getSourceUserId());
                     packRecord.setSource_open_id(record.getSourceOpenId());
-                    packRecord.setSource_nike_name(sourceNickName.getBytes());
+                    packRecord.setSource_nike_name(sourceNickName != null ? sourceNickName.getBytes() : null);
                     packRecord.setResult(result.getResult_code());
                     sendRedPackRecordDao.insert(packRecord);
                 }

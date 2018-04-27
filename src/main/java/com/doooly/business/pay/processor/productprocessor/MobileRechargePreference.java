@@ -15,8 +15,10 @@ import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.WechatUtil;
 import com.doooly.dao.reachad.AdCouponActivityConnDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
+import com.doooly.dao.report.SendRedPackRecordDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.*;
+import com.doooly.entity.report.SendPackRecord;
 import com.wechat.ThirdPartyWechatUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -66,6 +68,8 @@ public class MobileRechargePreference implements ProductProcessor {
     private AdCouponActivityService adCouponActivityService;
     @Autowired
     private AdUserServiceI adUserServiceI;
+    @Autowired
+    private SendRedPackRecordDao sendRedPackRecordDao;
 
     @Override
     public int getProcessCode() {
@@ -82,36 +86,49 @@ public class MobileRechargePreference implements ProductProcessor {
             //2.====================发送红包给sourceId. 同时推送消息================
             AdRechargeRecord record = adRechargeRecordDao.getLastRecord(String.valueOf(order.getUserId()));
             logger.info("record = {}", record);
-            if (!record.getUserId().equals(record.getSourceUserId())) {
-
+            Long sourceUserId = record.getSourceUserId() ;
+            String channel = record.getChannel();
+            String sourceOpenId = record.getSourceOpenId();
+            if (!sourceOpenId.equals(record.getOpenId())) {
                 //发红包
-                logger.info("channel={},sourceUserId={},sourceOpenId={}", record.getChannel(), record.getSourceUserId(), record.getSourceOpenId());
+                logger.info("channel={},sourceUserId={},sourceOpenId={}", channel, sourceUserId, sourceOpenId);
                 SendRedPackResult result = null;
                 if ("doooly".equals(record.getChannel())) {
-                    result =  sendRedPackToDoooly(order.getOrderNumber(), record.getSourceOpenId());
+                    result =  sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
                 } else if ("wugang".equals(record.getChannel())) {
-                    result = sendRedPackToWugang(order.getOrderNumber(), record.getSourceOpenId());
+                    result = sendRedPackToWugang(order.getOrderNumber(), sourceOpenId);
                 }
-                logger.info("channel={},sourceUserId={},result={}", record.getChannel(), record.getSourceUserId(), result);
-                AdUser sourceUser = adUserServiceI.getById(String.valueOf(record.getSourceUserId()));
-                if(result != null && "SUCCESS".equals(result.getResult_code())) {
+                String sourceNickName = WechatUtil.getWechatUserByOpenId(record.getSourceOpenId(), record.getChannel()).get("nickname");
+                logger.info("channel={},sourceUserId={},sourceOpenId={},result={}", channel, sourceUserId,sourceOpenId, result);
+                if(result != null){
                     //给分享人推送信息1
-                    long sourceUserId = record.getSourceUserId();
-                    JSONObject data = new JSONObject();
-                    data.put("openId", record.getSourceOpenId());
-                    data.put("channel", record.getChannel());
-                    data.put("userId", record.getSourceUserId());
-                    data.put("telphone", sourceUser.getTelephone());
-                    redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL", data.toString());
-                    logger.info("SEND_REDPACK_CHANNEL end.");
+                    if("SUCCESS".equals(result.getResult_code())) {
+                        JSONObject data = new JSONObject();
+                        data.put("openId", sourceOpenId);
+                        data.put("channel", channel);
+                        data.put("userId", sourceUserId);
+                        data.put("telphone", sourceNickName);//改为昵称
+                        redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL", data.toString());
+                        logger.info("SEND_REDPACK_CHANNEL end.");
+                    }
+                    //保存发送记录
+                    SendPackRecord packRecord = new SendPackRecord();
+                    packRecord.setChannel(channel);
+                    packRecord.setUser_id(record.getUserId());
+                    packRecord.setOpen_id(record.getOpenId());
+                    packRecord.setSource_user_id(record.getSourceUserId());
+                    packRecord.setSource_open_id(record.getSourceOpenId());
+                    packRecord.setSource_nike_name(sourceNickName.getBytes());
+                    packRecord.setResult(result.getResult_code());
+                    sendRedPackRecordDao.insert(packRecord);
                 }
                 //给分享人推送信息2
                 AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
                 JSONObject data2 = new JSONObject();
-                data2.put("openId", record.getSourceOpenId());
-                data2.put("channel", record.getChannel());
-                data2.put("userId", record.getSourceUserId());
-                data2.put("telphone", sourceUser.getTelephone());
+                data2.put("openId", sourceOpenId);
+                data2.put("channel", channel);
+                data2.put("userId", sourceUserId);
+                data2.put("telphone",sourceNickName);//改为昵称
                 data2.put("userName", user.getName());
                 logger.info("data2 = {}", data2);
                 redisTemplate.convertAndSend("SEND_REDPACK_CHANNEL2", data2.toString());

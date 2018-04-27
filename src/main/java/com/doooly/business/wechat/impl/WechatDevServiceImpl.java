@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
@@ -254,6 +255,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		JSONObject contentJson = new JSONObject();
 		String dictKey = channel + "_" + switchType;
 		String content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		//若为空则默认返回客服中心统一消息
+		if(StringUtils.isBlank(content)){
+			content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
+		}
 		contentJson.put("content", content);
 		textMsg.put("text", contentJson);
 		String result = textMsg.toString();

@@ -183,7 +183,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 					g.setFont(f); 
 					g.drawString(wechatUserByOpenId.get("nickname"), 90, 58);
 					g.dispose();
-        		ImageIO.write((RenderedImage)big, "png", new File("C:/Users/80418/Desktop/datas/wechat.png"));
+//        		ImageIO.write((RenderedImage)big, "png", new File("C:/Users/80418/Desktop/datas/wechat.png"));
 				}
 				String url = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token="+accessToken+"&type=image";
 				String mediaIdJson = CodeUtil.uploadFile(url, big,openId);

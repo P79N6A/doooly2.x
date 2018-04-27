@@ -97,7 +97,7 @@ public class MobileRechargePreference implements ProductProcessor {
                 if ("doooly".equals(record.getChannel())) {
                     result = sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
                 } else if ("wugang".equals(record.getChannel())) {
-                    result = sendRedPackToDoooly(order.getOrderNumber(), sourceOpenId);
+                    result = sendRedPackToWugang(order.getOrderNumber(), sourceOpenId);
                 }
                 Map<String, String> userMap =  WechatUtil.getWechatUserByOpenId(record.getSourceOpenId(), record.getChannel());
                 String sourceNickName = null;

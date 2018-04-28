@@ -94,7 +94,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			String fromUserName = json.getString("FromUserName");
 			// 二维码参数
 			String EventKey = "";
-
+			// 放入渠道
+			json.put("channel", channel);
 			// 处理消息集合
 			List<String> messageList = new ArrayList<String>();
 			//回复文本消息
@@ -113,22 +114,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					if (EventKey.contains(RECHARGE_ACTIVITY)) {
 						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
 						String[] paramArr = EventKey.split("~");
-						// 活动标记
-						String activityMark = paramArr[1];
-						// 获取分享人openId
-						String shareOpendId = paramArr[2];
-						log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
-								+ fromUserName);
-
-						if (!shareOpendId.equals(fromUserName)) {
-							MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
-									shareOpendId, channel, activityMark);
-							log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
-						} else {
-							log.info("====【dealCallback】扫自己二维码,不推送信息====");
-						}
+						handleIsPush(channel, fromUserName, paramArr);
 					}
-
+					// 存储微信推送信息
+					this.saveWechatEventPush(json);
 					break;
 				// 用户关注时的事件推送
 				case WechatConstants.EVENT_TYPE_SUBSCRIBE:
@@ -137,27 +126,15 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					if (EventKey.contains(RECHARGE_ACTIVITY)) {
 						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
 						String[] paramArr = EventKey.replace("qrscene_", "").split("~");
-						// 活动标记
-						String activityMark = paramArr[1];
-						// 获取分享人openId
-						String shareOpendId = paramArr[2];
-						log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
-								+ fromUserName);
-
-						if (!shareOpendId.equals(fromUserName)) {
-							MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
-									shareOpendId, channel, activityMark);
-							log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
-						} else {
-							log.info("====【dealCallback】扫自己二维码,不推送信息====");
-						}
+						handleIsPush(channel, fromUserName, paramArr);
 					} else {
 						//微信公众号关注回复信息
 						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
 						messageList.add(textMsg);
 						log.info("====【dealCallback】关注微信公众号后回复文本消息" + textMsg);
 					}
-
+					// 存储微信推送信息
+					this.saveWechatEventPush(json);
 					break;
 				// 用户点击事件推送
 				case WechatConstants.EVENT_TYPE_CLICK:
@@ -165,15 +142,15 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					String textMsg = createTextMessage(channel, fromUserName, EventKey);
 					messageList.add(textMsg);
 					log.info("====【dealCallback】用户点击菜单事件回复文本消息" + textMsg);
+					// 存储微信推送信息
+					this.saveWechatEventPush(json);
 					break;
 				default:
 					break;
 				}
-
-				// 放入渠道
-				json.put("channel", channel);
-				// 存储微信推送信息
-				this.saveWechatEventPush(json);
+				
+				
+				
 			}
 
 			return messageList;
@@ -181,6 +158,26 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			log.error("====【dealCallback】处理微信回调事件出错，error=" + e.getMessage(), e);
 		}
 		return null;
+	}
+
+	private void handleIsPush(String channel, String fromUserName, String[] paramArr) throws Exception {
+		// 活动标记
+		String activityMark = paramArr[1];
+		// 获取分享人openId
+		String shareOpendId = null;
+		if (paramArr.length ==3) {
+			shareOpendId = paramArr[2];
+		}
+		log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
+				+ fromUserName);
+
+		if (StringUtils.isBlank(shareOpendId)||!shareOpendId.equals(fromUserName)) {
+			MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
+					shareOpendId, channel, activityMark);
+			log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
+		} else {
+			log.info("====【dealCallback】扫自己二维码,不推送信息====");
+		}
 	}
 
 	/**

@@ -55,7 +55,7 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 			String url = request.getParameter("url");
 			Map<String,Object> config = WechatUtil.getWechatConfig(channel,url);
 			if(config != null){
-				Map<String,Object> shareConfig = AppShareUtil.getShareInfo(client,prefix,params);
+				Map<String, Object> shareConfig = AppShareUtil.getShareInfo(channel, client, prefix, params);
 				config.put("shareConfig", shareConfig);
 				log.info("config = {}",config);
 				return new ShareRetMsg(ShareRetMsg.WECHAT_APP_CODE, ShareRetMsg.WECHAT_APP_MSG,config).toJsonString();
@@ -64,7 +64,7 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 		} else if (Constants.DOOOLY.equals(client)) {
 			//兜礼分享配置
 			JSONObject jsonObject = new JSONObject();
-			Map<String,Object> shareConfig = AppShareUtil.getShareInfo(client,prefix,params);
+			Map<String,Object> shareConfig = AppShareUtil.getShareInfo(channel,client,prefix,params);
 			jsonObject.put("shareConfig", shareConfig);
 			log.info("shareConfig = {}",jsonObject);
 			return  new ShareRetMsg(ShareRetMsg.DOOOLY_APP_CODE, ShareRetMsg.DOOOLY_APP_MSG,jsonObject).toJsonString();

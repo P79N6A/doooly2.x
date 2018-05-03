@@ -4,6 +4,7 @@ import com.doooly.common.constants.PropertiesHolder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -31,16 +32,12 @@ public class AppShareUtil {
 	 * @param params
 	 * @return
 	 */
-	public static Map<String, Object> getShareInfo(String appType, String prefix, String[] params) {
-		log.info("appType = {},prefix = {}, params = {}", appType, prefix, params);
+	public static Map<String, Object> getShareInfo(String channel,String appType, String prefix, String[] params) {
+		log.info("channel = {},appType = {},prefix = {}, params = {}",channel ,appType, prefix, params);
 		// 判断APP类型
-//		String title = PropertiesConstants.shareBundle.getString(prefix + ".title");
-//		String desc = PropertiesConstants.shareBundle.getString(prefix + ".desc");
-//		String link = PropertiesConstants.shareBundle.getString(prefix + ".link");
-//		String imgUrl = PropertiesConstants.shareBundle.getString(prefix + ".imgUrl");
-//		String type = PropertiesConstants.shareBundle.getString(prefix + ".type");
-//		String dataUrl = PropertiesConstants.shareBundle.getString(prefix + ".dataUrl");
-		
+		if(!StringUtils.isEmpty(channel) && !"doooly".equals(channel)){
+			prefix =  prefix + "." + channel;
+		}
 		String title = PropertiesHolder.getProperty(prefix + ".title");
 		String desc = PropertiesHolder.getProperty(prefix + ".desc");
 		String link = PropertiesHolder.getProperty(prefix + ".link");

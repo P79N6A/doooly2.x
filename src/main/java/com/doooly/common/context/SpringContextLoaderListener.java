@@ -1,18 +1,14 @@
 package com.doooly.common.context;
 
-import javax.servlet.ServletContextEvent;
-
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.smallz.smallz_jedis.JClient;
-import org.smallz.smallz_jedis.JPoolConfigWrapper;
-import org.springframework.web.context.ContextLoaderListener;
-
 import com.doooly.business.activity.impl.ActivityService;
 import com.doooly.common.queue.ArrayBlockQueue;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dto.activity.ActivityOrderReq;
 import com.doooly.dto.activity.ActivityOrderRes;
-import com.doooly.listener.JedisSubscribeListener;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.springframework.web.context.ContextLoaderListener;
+
+import javax.servlet.ServletContextEvent;
 
 /**
  * 
@@ -48,7 +44,7 @@ public class SpringContextLoaderListener extends ContextLoaderListener{
 			}
 		})).start();
 		
-		((new BasicThreadFactory.Builder().namingPattern("cps daemon thread").daemon(true).build()).newThread(new Runnable() {
+		/*((new BasicThreadFactory.Builder().namingPattern("cps daemon thread").daemon(true).build()).newThread(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -56,7 +52,7 @@ public class SpringContextLoaderListener extends ContextLoaderListener{
 				JClient.register(getJedisSubscribeListener());
 				JClient.subcribe("ORDER_CPS_MSG_CHANNEL");
 			}
-		})).start();
+		})).start();*/
 	}
 	
 	@Override
@@ -75,11 +71,11 @@ public class SpringContextLoaderListener extends ContextLoaderListener{
 		return getCurrentWebApplicationContext().getBean(ActivityService.class);
 	}
 	
-	private JPoolConfigWrapper getJPoolConfigWrapper(){
+/*	private JPoolConfigWrapper getJPoolConfigWrapper(){
 		return getCurrentWebApplicationContext().getBean(JPoolConfigWrapper.class);
 	}
 	
 	private JedisSubscribeListener getJedisSubscribeListener(){
 		return getCurrentWebApplicationContext().getBean(JedisSubscribeListener.class);
-	}
+	}*/
 }

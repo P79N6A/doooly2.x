@@ -24,11 +24,11 @@ public class JedisSubscribeListener implements JPubSubListener {
 
 	@Override
 	public void onConsume(String channel, String message) {
-		System.err.println("channel: " + channel + "\nmessage: " + message);
+		/*System.err.println("channel: " + channel + "\nmessage: " + message);
 
 		if (channel.equals(ORDER_CPS_MSG_CHANNEL)) {
 			cpsSummaryService.updateCpsFee(message);
-		}
+		}*/
 	}
 
 	@Override

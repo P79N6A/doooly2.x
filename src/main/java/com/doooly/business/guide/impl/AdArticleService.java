@@ -121,20 +121,13 @@ public class AdArticleService implements AdArticleServiceI {
                 BigDecimal marketPrice = (BigDecimal) map1.get("marketPrice");
                 String maxUserRebate = String.valueOf(map1.get("maxUserRebate"));
                 BigDecimal discount = (BigDecimal) map1.get("discount");
-                BigDecimal factPrice = marketPrice.multiply(discount).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
-               /* Double rebate;
-                BigDecimal bussinesRebate = (BigDecimal) map1.get("bussinesRebate");
-                BigDecimal userRebate = (BigDecimal) map1.get("userRebate");
-                BigDecimal businessUserRebate = (BigDecimal) map1.get("businessUserRebate");
-                if(map1.get("userRebate") !=null){
-                    //京东开普勒订单实际分层比例
-                    rebate = factPrice.multiply(bussinesRebate).multiply(userRebate).multiply(businessUserRebate)
-                            .divide(new BigDecimal("1000000"), 2, BigDecimal.ROUND_DOWN).doubleValue();
+                BigDecimal factPrice;
+                //如果价格算出来为0
+                if(discount.equals(BigDecimal.ZERO)){
+                    factPrice = marketPrice;
                 }else {
-                    rebate = factPrice.multiply(bussinesRebate).multiply(businessUserRebate)
-                            .divide(new BigDecimal("10000"), 2, BigDecimal.ROUND_DOWN).doubleValue();
-                }*/
-                //map1.put("rebate", rebate);
+                    factPrice = marketPrice.multiply(discount).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
+                }
                 if(StringUtils.isBlank(maxUserRebate)){
                     maxUserRebate = "0";
                 }
@@ -182,8 +175,12 @@ public class AdArticleService implements AdArticleServiceI {
         if(adBusiness != null){
             if ( adBusiness.getBussinessRebate() != null && adBusiness.getUserRebate() != null) {
                 BigDecimal userRebate = new BigDecimal(adBusiness.getUserRebate());
-                //前折计算兜礼价
-                factPrice = adProduct.getMarketPrice().multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
+                //前折计算兜礼价 折扣0保持原价
+                if(new BigDecimal(adProduct.getDiscount()).equals(BigDecimal.ZERO)){
+                    factPrice = adProduct.getMarketPrice();
+                }else {
+                    factPrice = adProduct.getMarketPrice().multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
+                }
                 if(adProduct.getUserRebate() !=null){
                     //京东开普勒订单实际分层比例
                     rebate = factPrice.multiply(adProduct.getBussinesRebate()).multiply(userRebate).multiply(adProduct.getUserRebate())

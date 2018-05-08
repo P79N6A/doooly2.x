@@ -155,7 +155,7 @@
             a.link_url_wechat AS "linkUrlWechat",
             a.user_rebate AS "userRebate",
             ab.id AS "businessId",
-            ab.discount AS "discount",
+            IFNULL(ab.discount,0) AS "discount",
             ab.logo AS "businessLogo",
             ab.company AS "businessName",
             IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",

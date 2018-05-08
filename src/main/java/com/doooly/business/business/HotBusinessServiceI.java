@@ -10,9 +10,9 @@ import com.doooly.dto.common.MessageDataBean;
 public interface HotBusinessServiceI {
 
 	MessageDataBean getIndexData(Integer userId, Integer type);
-	MessageDataBean getHotMerchatData(Integer userId, String address, Integer type);
+	MessageDataBean getHotMerchatData(Integer userId, String address, Integer type, Integer shopType);
 
-	MessageDataBean getHotDatas(Integer userId, String address, Integer currentPage, Integer pageSize, String type);
+	MessageDataBean getHotDatas(Integer userId, String address, Integer currentPage, Integer pageSize, String type, Integer shopType);
 
 	MessageDataBean getBusinessInfo(Long userId);
 	MessageDataBean getDictDatas(Integer userId, String address);

@@ -1,26 +1,22 @@
 package com.doooly.publish.rest.life.impl;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.business.HotBusinessServiceI;
+import com.doooly.common.constants.ConstantsV2.SystemCode;
+import com.doooly.common.dto.BaseReq;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.publish.rest.life.HotBusinessRestServiceI;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.business.HotBusinessServiceI;
-import com.doooly.business.vipWeal.VipWealNewBusinessServiceI;
-import com.doooly.common.constants.ConstantsV2.SystemCode;
-import com.doooly.common.context.SpringContextUtils;
-import com.doooly.common.constants.ResponseCode;
-import com.doooly.common.dto.BaseReq;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.publish.rest.life.HotBusinessRestServiceI;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  * @Description: 商家
@@ -63,8 +59,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		Integer userId = obj.getInteger("userId");
 		String address = obj.getString("address");
 		Integer type = obj.getInteger("type");
+        Integer shopType = obj.getInteger("shopType");
 		logger.info("热门商家的地域信息为============="+address);
-		MessageDataBean messageDataBean = hotBusinessServiceI.getHotMerchatData(userId,address,type);
+		MessageDataBean messageDataBean = hotBusinessServiceI.getHotMerchatData(userId,address,type,shopType);
 		
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();
@@ -84,8 +81,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		Integer currentPage = obj.getInteger("currentPage");
 		Integer pageSize = obj.getInteger("pageSize");
 		String type = obj.getString("type");
+        Integer shopType = obj.getInteger("shopType");
 		logger.info("ajax查询商家的地域信息为============="+address);
-		MessageDataBean messageDataBean = hotBusinessServiceI.getHotDatas(userId,address,currentPage,pageSize,type);
+		MessageDataBean messageDataBean = hotBusinessServiceI.getHotDatas(userId,address,currentPage,pageSize,type,shopType);
 		
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();

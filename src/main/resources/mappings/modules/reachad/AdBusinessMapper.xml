@@ -327,7 +327,14 @@
 			join ad_area aa on aa.id = abac.area_id 
 			join ad_business_group abg on a.id = abg.business_id 
 		where a.is_hot=1 and a.deal_type !=2 and a.is_active=2 and a.del_flag=0 and (aa.name =#{address} or aa.name ="全国")
-		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId}) GROUP BY a.id) ct
+		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
+            <if test="type != null and type != ''">
+                AND a.type = #{type}
+            </if>
+            <if test="shopType != null and shopType != '' and shopType ==1">
+                AND a.max_user_rebate is NOT NULL AND max_user_rebate != '' AND max_user_rebate >0
+            </if>
+		  GROUP BY a.id) ct
     </select>
 	<select id="findHotMerchantByPage" resultType="com.doooly.entity.reachad.AdBusiness">
         SELECT
@@ -352,7 +359,10 @@
 		 and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
 		 <if test="type != null and type != ''">
 				AND a.type = #{type}
-		</if>  
+		</if>
+		 <if test="shopType != null and shopType != '' and shopType ==1">
+				AND a.max_user_rebate is NOT NULL AND max_user_rebate != '' AND max_user_rebate >0
+		</if>
 		GROUP BY a.id
 		  order by a.sort desc LIMIT #{startIndex},#{pageSize}
     </select>

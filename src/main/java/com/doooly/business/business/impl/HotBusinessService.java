@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
-import com.doooly.common.constants.ResponseCode;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessPrivilegeActivityDao;
 import com.doooly.dao.reachad.AdBusinessServicePJDao;
@@ -100,15 +99,15 @@ public class HotBusinessService implements HotBusinessServiceI{
 		return messageDataBean;
 	}
 	@Override
-	public MessageDataBean getHotMerchatData(Integer userId, String address,Integer type) {
+	public MessageDataBean getHotMerchatData(Integer userId, String address, Integer type, Integer shopType) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		if (!StringUtils.isBlank(address)) {
 			Pagelab pagelab = new Pagelab(1, 10);
 			// 查询总数
-			int totalNum = adBusinessDao.getHotTotalNum(userId,address);
+			int totalNum = adBusinessDao.getHotTotalNum(userId,address, String.valueOf(type), shopType);
 			pagelab.setTotalNum(totalNum);
-			List<AdBusiness> merchants = adBusinessDao.findHotMerchantByPage(userId,address,"",pagelab.getStartIndex(), pagelab.getPageSize());
+			List<AdBusiness> merchants = adBusinessDao.findHotMerchantByPage(userId,address,"",pagelab.getStartIndex(), pagelab.getPageSize(), shopType);
 			if (!merchants.isEmpty()) {
 				map.put("hotMerchantList", merchants);
 				map.put("countPage", pagelab.getCountPage());
@@ -144,15 +143,15 @@ public class HotBusinessService implements HotBusinessServiceI{
 	}
 
 	@Override
-	public MessageDataBean getHotDatas(Integer userId, String address, Integer currentPage, Integer pageSize,String type) {
+	public MessageDataBean getHotDatas(Integer userId, String address, Integer currentPage, Integer pageSize, String type, Integer shopType) {
 		// TODO Auto-generated method stub
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		Pagelab pagelab = new Pagelab(currentPage,pageSize);
 		// 查询总数
-		int totalNum = adBusinessDao.getHotTotalNum(userId,address);
+		int totalNum = adBusinessDao.getHotTotalNum(userId,address,type,shopType);
 		pagelab.setTotalNum(totalNum);
-		List<AdBusiness> merchants = adBusinessDao.findHotMerchantByPage(userId,address,type,pagelab.getStartIndex(), pageSize);
+		List<AdBusiness> merchants = adBusinessDao.findHotMerchantByPage(userId,address,type,pagelab.getStartIndex(), pageSize,shopType);
 		if (!merchants.isEmpty()) {
 			map.put("hotMerchantList", merchants);
 			map.put("countPage", pagelab.getCountPage());

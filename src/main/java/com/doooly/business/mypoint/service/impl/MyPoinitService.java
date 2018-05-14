@@ -3,11 +3,14 @@ package com.doooly.business.mypoint.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.didi.constants.DiDiConstants;
 import com.doooly.business.mypoint.service.MyPointServiceI;
+import com.doooly.business.order.vo.OrderItemVo;
+import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.dao.reachad.AdAvailablePointsDao;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdIntegralAcquireRecordDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdRechargeDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdUserDao;
@@ -19,6 +22,10 @@ import com.doooly.entity.reachad.AdIntegralAcquireRecord;
 import com.doooly.entity.reachad.AdRecharge;
 import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.Order;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +44,8 @@ import java.util.List;
  */
 @Service
 public class MyPoinitService implements MyPointServiceI {
-
+	private static final Logger logger = LoggerFactory.getLogger(MyPoinitService.class);
+	
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -52,6 +60,9 @@ public class MyPoinitService implements MyPointServiceI {
 	private AdRechargeDao adRechargeDao;
 	@Autowired
 	private AdIntegralAcquireRecordDao adIntegralAcquireRecordDao;
+	@Autowired
+	private AdOrderReportDao adOrderReportDao;
+	
 	/**
 	 * 通过家属邀请的所有id查询到返利的列表和积分的总和
 	 * 
@@ -277,6 +288,18 @@ public class MyPoinitService implements MyPointServiceI {
 	 * @param order
 	 */
 	private void getTotalAmountAndTotalPrice(HashMap<String, Object> map, Order order) {
+		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 begin -----------------------
+		List<OrderVo> adOrderReportList = adOrderReportDao.getByOrderNum(order.getOrderNumber());
+		if (CollectionUtils.isNotEmpty(adOrderReportList)) {
+			OrderVo orderVo = adOrderReportList.get(0);
+			if(CollectionUtils.isNotEmpty(orderVo.getItems())){
+				OrderItemVo orderItemVo = orderVo.getItems().get(0);
+				logger.info("积分关联订单商品类型={},商品名称={}", orderVo.getProductType(), orderItemVo.getGoods());
+				map.put("productType", orderVo.getProductType());
+				map.put("productName", orderItemVo.getGoods());
+			}
+		}
+		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 end -------------------------
 		// 根据商家编号获取商家名称
 		AdBusiness adBusiness = adBusinessDao.getByBusinessId(order.getBussinessId());
 		Order totalOrder = null;

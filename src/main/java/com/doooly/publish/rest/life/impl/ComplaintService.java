@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.myaccount.service.ComplaintBusinessServiceI;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.ComplaintServiceI;
 
 /**
@@ -45,6 +46,28 @@ public class ComplaintService implements ComplaintServiceI {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.info("保存申述异常：" + e);
+			result.put("code", 1002);
+			result.put("msg", "保存申述信息失败！");
+			return result.toJSONString();
+		}
+
+		result.put("code", 1000);
+		result.put("msg", "保存申述信息成功！");
+		return result.toJSONString();
+	}
+
+	@POST
+	@Path(value = "/saveForAppTwo")
+	@Produces("text/plain;charset=utf-8")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public String complaintSaveForAppTwo(@Context HttpServletRequest request) {
+		log.info("保存申诉app2.0开始。。。。");
+		JSONObject result = new JSONObject();
+		try {
+		complaintBusinessServiceI.complaintSaveForAppTwo(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.info("保存申述app2.0异常：" + e);
 			result.put("code", 1002);
 			result.put("msg", "保存申述信息失败！");
 			return result.toJSONString();

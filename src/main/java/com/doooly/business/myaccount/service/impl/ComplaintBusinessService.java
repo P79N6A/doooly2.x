@@ -27,6 +27,7 @@ import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.FileUtils;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachlife.LifeComplaintDao;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUserConn;
 import com.doooly.entity.reachlife.LifeComplaint;
 
@@ -93,6 +94,80 @@ public class ComplaintBusinessService implements ComplaintBusinessServiceI {
 							fileItem.write(f);
 							imagePaths.append(IMAGE_VIEW_URL + date + "/" + fileName + ";");
 						}
+					}
+				}
+				
+				LifeComplaint complaint = JSONObject.toJavaObject(jsonData, LifeComplaint.class);
+				
+				complaint.setCreateIp(request.getRemoteAddr());
+				
+				if(StringUtils.isNotBlank(complaint.getUserId()) ){
+					//获取用户信息
+					AdUserConn user = adUserDao.findAdUserConnByUserId(complaint.getUserId());
+					if(user != null){
+						complaint.setGroupName(user.getGroupName());
+						complaint.setGroupNum(user.getGroupNum());
+						complaint.setMemberNum(user.getCardNumber());
+						complaint.setCreateBy(user.getName());
+						complaint.setUpdateBy(user.getName());
+					}else{
+						complaint.setCreateBy("");
+						complaint.setUpdateBy("");
+					}
+				}
+				
+				if(StringUtils.isNotBlank(imagePaths) && imagePaths.length() > 0){
+					String imagePath = imagePaths.substring(0, imagePaths.lastIndexOf(";"));
+					log.info("图片保存路径  imagePath:" + imagePath);
+					complaint.setImagePaths(imagePath);
+				}
+				
+				complaint.setCreateDate(new Date());
+				complaint.setUpdateDate(new Date());
+				complaint.setModifyDate(new Date());
+				complaint.setStatus(LifeComplaint.COMPLAINT_STATUS_COMPLAINTING);
+				complaint.setDelFlag(LifeComplaint.DEL_FLAG_NORMAL);
+				
+				Random rand = new Random();
+				// 产生一个 10到99之间（均包含）（两位整数）的随机数
+				int randNum = rand.nextInt(90) + 10;
+				complaint.setComplaintSn(new Date().getTime() + "" + randNum);
+				
+				LifeComplaintDao.insert(complaint);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.info("保存申诉错误" + e);
+		}
+	}
+
+	@Override
+	public void complaintSaveForAppTwo(HttpServletRequest request) {
+		try {
+			if (ServletFileUpload.isMultipartContent(request)) {
+				FileItemFactory factory = new DiskFileItemFactory();
+				ServletFileUpload upload = new ServletFileUpload(factory);
+				upload.setHeaderEncoding("UTF-8");
+				List<FileItem> items = null;
+				try {
+					//解析request
+					items = upload.parseRequest(request);
+					log.info("解析的字段条数：" + items.size());
+				} catch (FileUploadException e) {
+					e.printStackTrace();
+					log.info(e);
+				}
+				StringBuffer imagePaths = new StringBuffer(); 
+				JSONObject jsonData = new JSONObject();
+				if (items != null && items.size() > 0) {
+					for (FileItem fileItem : items) {
+						//普通字段
+						String fieldName = fileItem.getFieldName();
+						String value = fileItem.getString("UTF-8");
+						//value = URLDecoder.decode(value, "utf-8");
+						log.info(fieldName + "==" + value);
+						jsonData.put(fieldName, value);
+						
 					}
 				}
 				

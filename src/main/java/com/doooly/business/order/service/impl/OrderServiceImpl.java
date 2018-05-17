@@ -396,6 +396,9 @@ public class OrderServiceImpl implements OrderService {
 		}
 		order.setServiceCharge(serviceCharge);
 		order.setSupportPayType(supportPayType);
+		if(orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()){
+			order.setCommission(totalMount.multiply(new BigDecimal("0.0015")));
+		}
 		return order;
 	}
 

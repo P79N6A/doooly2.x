@@ -86,15 +86,13 @@ public class OrderVo {
 	private BigDecimal voucher;
 	//支持支付方式 (1.微信;2.积分;3.支付宝;多个以逗号分割)
 	private String supportPayType;
-	//旅游卡佣金
-	private BigDecimal commission;
 	// 订单扩展信息
 	private OrderExtVo orderExt;
 	// 商家商品
 	private List<MerchantProdcutVo> merchantProduct;
 	//商品详情
 	private List<OrderItemVo> items;
-	
+
 	public OrderVo() {
 		super();
 	}
@@ -332,7 +330,7 @@ public class OrderVo {
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
 	}
-	
+
 	public OrderExtVo getOrderExt() {
 		return orderExt;
 	}
@@ -348,7 +346,7 @@ public class OrderVo {
 	public void setMerchantProduct(List<MerchantProdcutVo> merchantProduct) {
 		this.merchantProduct = merchantProduct;
 	}
-	
+
 	public String getConsigneeName() {
 		return consigneeName;
 	}
@@ -435,14 +433,6 @@ public class OrderVo {
 
 	public void setSupportPayType(String supportPayType) {
 		this.supportPayType = supportPayType;
-	}
-
-	public BigDecimal getCommission() {
-		return commission;
-	}
-
-	public void setCommission(BigDecimal commission) {
-		this.commission = commission;
 	}
 
 	@Override

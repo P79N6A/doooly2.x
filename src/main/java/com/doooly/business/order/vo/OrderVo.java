@@ -86,6 +86,8 @@ public class OrderVo {
 	private BigDecimal voucher;
 	//支持支付方式 (1.微信;2.积分;3.支付宝;多个以逗号分割)
 	private String supportPayType;
+	//旅游卡佣金
+	private BigDecimal commission;
 	// 订单扩展信息
 	private OrderExtVo orderExt;
 	// 商家商品
@@ -433,6 +435,14 @@ public class OrderVo {
 
 	public void setSupportPayType(String supportPayType) {
 		this.supportPayType = supportPayType;
+	}
+
+	public BigDecimal getCommission() {
+		return commission;
+	}
+
+	public void setCommission(BigDecimal commission) {
+		this.commission = commission;
 	}
 
 	@Override

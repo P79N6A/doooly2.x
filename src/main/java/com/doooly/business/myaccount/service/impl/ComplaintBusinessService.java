@@ -144,7 +144,7 @@ public class ComplaintBusinessService implements ComplaintBusinessServiceI {
 	@Override
 	public void complaintSaveForAppTwo(HttpServletRequest request,JSONObject jsonObject) {
 		try {
-			
+				log.info("请求参数:"+jsonObject.toJSONString());
 				
 				LifeComplaint complaint = JSONObject.toJavaObject(jsonObject, LifeComplaint.class);
 				

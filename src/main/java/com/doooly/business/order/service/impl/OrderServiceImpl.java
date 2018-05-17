@@ -265,12 +265,12 @@ public class OrderServiceImpl implements OrderService {
 //			boolean locked = lock.tryLock();
 //			if (locked)
 //			{
-			//扣减活动库存
-			int rows = productService.decStock(number, skuId);
-			logger.info("decStock() skuId={},inventor={},rows = {}", skuId,oldNum, rows);
-			if (rows == 0) {
-				return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
-			}
+		//扣减活动库存
+		int rows = productService.decStock(number, skuId);
+		logger.info("decStock() skuId={},inventor={},rows = {}", skuId,oldNum, rows);
+		if (rows == 0) {
+			return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+		}
 
 //			} else {
 //				return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
@@ -396,9 +396,6 @@ public class OrderServiceImpl implements OrderService {
 		}
 		order.setServiceCharge(serviceCharge);
 		order.setSupportPayType(supportPayType);
-		if(orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()){
-			order.setCommission(totalMount.multiply(new BigDecimal("0.0015")));
-		}
 		return order;
 	}
 
@@ -437,10 +434,10 @@ public class OrderServiceImpl implements OrderService {
 		rows += saveOrderItem(order.getId(), orderItem);
 		return rows;
 	}
-	
+
 	/***
 	 * 因为要和_order主键一致,这里要先生成_order,然后使用_order的主键.
-	 * 
+	 *
 	 * @param order
 	 * @return
 	 */
@@ -461,25 +458,25 @@ public class OrderServiceImpl implements OrderService {
 	public long saveOrder(OrderVo order) {
 		return adOrderReportDao.insert(order);
 	}
-	
+
 	@Transactional
 	@Override
 	public int saveOrderExt(long orderId,OrderExtVo orderExt) {
 		return adOrderDeliveryDao.insert(orderId,orderExt);
 	}
-	
+
 	@Transactional
 	@Override
 	public int saveOrderItem(long orderId,List<OrderItemVo> orderItem) {
 		return adOrderDetailDao.bantchInsert(orderId,orderItem);
 	}
-	
-	
+
+
 	@Override
 	public OrderVo getByOrderNum(String orderNum) {
 		return adOrderReportDao.getByOrderNum(orderNum).get(0);
 	}
-	
+
 	/**
 	 * 为了兼容以后多个订单一起支付的情况
 	 */
@@ -513,7 +510,7 @@ public class OrderServiceImpl implements OrderService {
 		List<OrderVo> orders = this.getByOrdersNum(orderNum);
 		return getPayAmount(orders);
 	}
-	
+
 	/**
 	 * 查询订单
 	 */
@@ -528,7 +525,7 @@ public class OrderServiceImpl implements OrderService {
 	public int updateOrderItem(OrderItemVo orderItem) {
 		return adOrderDetailDao.update(orderItem);
 	}
-	
+
 	/**
 	 * 修改订单
 	 */
@@ -536,7 +533,7 @@ public class OrderServiceImpl implements OrderService {
 	public int updateOrder(OrderVo order) {
 		return adOrderReportDao.update(order);
 	}
-	
+
 	/**
 	 * 订单里存储分类格式为 "1级_2级_3级"
 	 * @param product
@@ -560,7 +557,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 		return category.toString();
 	}
-	
+
 	/***
 	 * 取消订单
 	 */
@@ -623,7 +620,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 		return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
 	}
-	
+
 	/**
 	 * 更新订单状态-成功
 	 * @param orders
@@ -643,7 +640,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 		return rows;
 	}
-	
+
 	/**
 	 * 更新订单状态-退款
 	 * @param order
@@ -689,5 +686,5 @@ public class OrderServiceImpl implements OrderService {
 	public ActivityInfo getActivityInfo(String groupId, int skuId){
 		return productService.getActivityInfo(groupId, skuId);
 	}
-	
+
 }

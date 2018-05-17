@@ -16,74 +16,73 @@
     <result column="error_code" property="errorCode" jdbcType="VARCHAR" />
     <result column="error_reason" property="errorReason" jdbcType="VARCHAR" />
     <result column="is_delete" property="isDelete" jdbcType="VARCHAR" />
-    <result column="channel" property="channel" jdbcType="VARCHAR" />
   </resultMap>
-  
+
   <sql id="Base_Column_List" >
-    id, order_number, pay_type, user_id, amount, pay_count, trans_no, pay_status, pay_sumbit_time, 
+    id, order_number, pay_type, user_id, amount, pay_count, trans_no, pay_status, pay_sumbit_time,
     pay_callback_time, error_code, error_reason, is_delete
   </sql>
-  
+
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
-    		<include refid="Base_Column_List" />
-    from 
-    		ad_pay_flow
-    where 
-    		id = #{id,jdbcType=BIGINT}
+    select
+    <include refid="Base_Column_List" />
+    from
+    ad_pay_flow
+    where
+    id = #{id,jdbcType=BIGINT}
   </select>
-  
+
   <select id="getByOrderNum" resultMap="BaseResultMap">
-    select 
-    		<include refid="Base_Column_List" />
-    from 
-    		ad_pay_flow
-    <where> 
-    		order_number = #{orderNum}
-    		<if test="payType != null and payType != ''" >
-    			and pay_type = #{payType}
-    		</if>
-    		<if test="payStatus != null and payStatus != ''" >
-    			and pay_status = #{payStatus}
-    		</if>
-    	</where>	
+    select
+    <include refid="Base_Column_List" />
+    from
+    ad_pay_flow
+    <where>
+      order_number = #{orderNum}
+      <if test="payType != null and payType != ''" >
+        and pay_type = #{payType}
+      </if>
+      <if test="payStatus != null and payStatus != ''" >
+        and pay_status = #{payStatus}
+      </if>
+    </where>
   </select>
-  
+
   <select id="getById" resultMap="BaseResultMap">
-    select 
-    		<include refid="Base_Column_List" />
-    from 
-    		ad_pay_flow
-    where 
-    		id = #{id}
+    select
+    <include refid="Base_Column_List" />
+    from
+    ad_pay_flow
+    where
+    id = #{id}
   </select>
-  
+
   <!-- 根据支付平台订单号查询 -->
   <select id="getByTransNo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
-    		<include refid="Base_Column_List" />
-    from 
-    		ad_pay_flow
-    where 
-    		trans_no = #{transNo}
-    		and pay_type = #{payType}
+    select
+    <include refid="Base_Column_List" />
+    from
+    ad_pay_flow
+    where
+    trans_no = #{transNo}
+    and pay_type = #{payType}
   </select>
-  
+
   <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.business.pay.bean.PayFlow" >
-    insert into ad_pay_flow 
-    	 (id, order_number, pay_type, 
-      user_id, amount, pay_count, 
-      trans_no, pay_status, pay_sumbit_time, 
-      pay_callback_time, error_code, error_reason, 
-      is_delete,channel)
-    values 
-    	 (#{id,jdbcType=BIGINT}, #{orderNumber,jdbcType=VARCHAR}, #{payType,jdbcType=VARCHAR}, 
-      #{userId,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{payCount,jdbcType=INTEGER}, 
-      #{transNo,jdbcType=VARCHAR}, #{payStatus,jdbcType=VARCHAR}, #{paySumbitTime,jdbcType=TIMESTAMP}, 
-      #{payCallbackTime,jdbcType=TIMESTAMP}, #{errorCode,jdbcType=VARCHAR}, #{errorReason,jdbcType=VARCHAR}, 
-      #{isDelete,jdbcType=VARCHAR},#{channel,jdbcType=VARCHAR})
+    insert into ad_pay_flow
+    	 (id, order_number, pay_type,
+      user_id, amount, pay_count,
+      trans_no, pay_status, pay_sumbit_time,
+      pay_callback_time, error_code, error_reason,
+      is_delete)
+    values
+    	 (#{id,jdbcType=BIGINT}, #{orderNumber,jdbcType=VARCHAR}, #{payType,jdbcType=VARCHAR},
+      #{userId,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{payCount,jdbcType=INTEGER},
+      #{transNo,jdbcType=VARCHAR}, #{payStatus,jdbcType=VARCHAR}, #{paySumbitTime,jdbcType=TIMESTAMP},
+      #{payCallbackTime,jdbcType=TIMESTAMP}, #{errorCode,jdbcType=VARCHAR}, #{errorReason,jdbcType=VARCHAR},
+      #{isDelete,jdbcType=VARCHAR})
   </insert>
- 
+
   <update id="updateByPrimaryKeySelective" parameterType="com.doooly.business.pay.bean.PayFlow" >
     update ad_pay_flow
     <set >
@@ -126,5 +125,5 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  
+
 </mapper>

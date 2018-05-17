@@ -234,8 +234,8 @@ public class DiDiIntegralService implements DiDiIntegralServiceI {
                     } else {
                         //积分退款
                         refundIntegral(amount, orderNumber, serialNumber, adUser);
-                        messageDataBean.setCode(MessageDataBean.failure_code);
-                        messageDataBean.setMess("修改配额失败");
+                        messageDataBean.setCode(JSONObject.parseObject(memberEdit).getString("errno"));
+                        messageDataBean.setMess(JSONObject.parseObject(memberEdit).getString("errmsg"));
                         logger.error("滴滴修改用户接口失败");
                     }
                 }else {

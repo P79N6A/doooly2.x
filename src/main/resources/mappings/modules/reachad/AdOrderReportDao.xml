@@ -3,68 +3,67 @@
 <mapper namespace="com.doooly.dao.reachad.AdOrderReportDao">
 
 	<resultMap id="orderMap" type="com.doooly.business.order.vo.OrderVo">
-       	<id column="id" property="id" jdbcType="BIGINT" />
-	    <result column="order_id" property="orderId" jdbcType="BIGINT" />
-	    <result column="bussiness_id" property="bussinessId" jdbcType="BIGINT" />
-	    <result column="user_id" property="userId" jdbcType="BIGINT" />
-	    <result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
-	    <result column="stores_id" property="storesId" jdbcType="VARCHAR" />
-	    <result column="total_mount" property="totalMount" jdbcType="DECIMAL" />
-	    <result column="total_price" property="totalPrice" jdbcType="DECIMAL" />
-	    <result column="order_date" property="orderDate" jdbcType="TIMESTAMP" />
-	    <result column="state" property="state" jdbcType="CHAR" />
-	    <result column="type" property="type" jdbcType="SMALLINT" />
-	    <result column="product_type" property="productType" jdbcType="SMALLINT" />
-	    <result column="is_user_rebate" property="isUserRebate" jdbcType="CHAR" />
-	    <result column="user_rebate" property="userRebate" jdbcType="DECIMAL" />
-	    <result column="user_return_amount" property="userReturnAmount" jdbcType="DECIMAL" />
-	    <result column="is_business_rebate" property="isBusinessRebate" jdbcType="CHAR" />
-	    <result column="business_rebate_amount" property="businessRebateAmount" jdbcType="DECIMAL" />
-	    <result column="billing_state" property="billingState" jdbcType="CHAR" />
-	    <result column="del_flag_user" property="delFlagUser" jdbcType="CHAR" />
-	    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
-	    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
-	    <result column="is_first" property="isFirst" jdbcType="INTEGER" />
-	    <result column="is_source" property="isSource" jdbcType="INTEGER" />
-	    <result column="first_count" property="firstCount" jdbcType="INTEGER" />
-	    <result column="air_settle_accounts" property="airSettleAccounts" jdbcType="DECIMAL" />
-	    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
-	    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
-	    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
-	    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
-	    <result column="consignee_name" property="consigneeName" jdbcType="VARCHAR" />
-	    <result column="consignee_mobile" property="consigneeMobile" jdbcType="VARCHAR" />
-	    <result column="consignee_addr" property="consigneeAddr" jdbcType="VARCHAR" />
-	    <result column="product_type" property="productType" jdbcType="INTEGER" />
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_id" property="orderId" jdbcType="BIGINT" />
+		<result column="bussiness_id" property="bussinessId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
+		<result column="stores_id" property="storesId" jdbcType="VARCHAR" />
+		<result column="total_mount" property="totalMount" jdbcType="DECIMAL" />
+		<result column="total_price" property="totalPrice" jdbcType="DECIMAL" />
+		<result column="order_date" property="orderDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+		<result column="type" property="type" jdbcType="SMALLINT" />
+		<result column="product_type" property="productType" jdbcType="SMALLINT" />
+		<result column="is_user_rebate" property="isUserRebate" jdbcType="CHAR" />
+		<result column="user_rebate" property="userRebate" jdbcType="DECIMAL" />
+		<result column="user_return_amount" property="userReturnAmount" jdbcType="DECIMAL" />
+		<result column="is_business_rebate" property="isBusinessRebate" jdbcType="CHAR" />
+		<result column="business_rebate_amount" property="businessRebateAmount" jdbcType="DECIMAL" />
+		<result column="billing_state" property="billingState" jdbcType="CHAR" />
+		<result column="del_flag_user" property="delFlagUser" jdbcType="CHAR" />
+		<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+		<result column="del_flag" property="delFlag" jdbcType="CHAR" />
+		<result column="is_first" property="isFirst" jdbcType="INTEGER" />
+		<result column="is_source" property="isSource" jdbcType="INTEGER" />
+		<result column="first_count" property="firstCount" jdbcType="INTEGER" />
+		<result column="air_settle_accounts" property="airSettleAccounts" jdbcType="DECIMAL" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="consignee_name" property="consigneeName" jdbcType="VARCHAR" />
+		<result column="consignee_mobile" property="consigneeMobile" jdbcType="VARCHAR" />
+		<result column="consignee_addr" property="consigneeAddr" jdbcType="VARCHAR" />
+		<result column="product_type" property="productType" jdbcType="INTEGER" />
 		<result column="act_type" property="actType" jdbcType="VARCHAR" />
 		<result column="service_charge" property="serviceCharge" jdbcType="DECIMAL" />
 		<result column="voucher" property="voucher" jdbcType="DECIMAL" />
 		<result column="coupon_id" property="couponId" jdbcType="VARCHAR" />
 		<result column="support_pay_type" property="supportPayType" jdbcType="VARCHAR" />
-		<result column="commission" property="commission" jdbcType="DECIMAL" />
-        <collection property="items" column="id" ofType="com.doooly.business.order.vo.OrderItemVo">
-            <id column="did" property="id" jdbcType="BIGINT" />
-		    <result column="order_report_id" property="orderReportId" jdbcType="BIGINT" />
-		    <result column="category_id" property="categoryId" jdbcType="VARCHAR" />
-		    <result column="code" property="code" jdbcType="VARCHAR" />
-		    <result column="goods" property="goods" jdbcType="VARCHAR" />
-		    <result column="amount" property="amount" jdbcType="DECIMAL" />
-		    <result column="price" property="price" jdbcType="DECIMAL" />
-		    <result column="number" property="number" jdbcType="DECIMAL" />
-		    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
-		    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
-		    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
-		    <result column="tax" property="tax" jdbcType="DECIMAL" />
-		    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
-		    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
-		    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />   
-		    <result column="sku" property="sku" jdbcType="VARCHAR" />   
-		    <result column="product_sku_id" property="productSkuId" jdbcType="VARCHAR" />   
-		    <result column="product_img" property="productImg" jdbcType="VARCHAR" />   
-		    <result column="external_number" property="externalNumber" jdbcType="VARCHAR" />   
-        </collection>
-     </resultMap>
-		
+		<collection property="items" column="id" ofType="com.doooly.business.order.vo.OrderItemVo">
+			<id column="did" property="id" jdbcType="BIGINT" />
+			<result column="order_report_id" property="orderReportId" jdbcType="BIGINT" />
+			<result column="category_id" property="categoryId" jdbcType="VARCHAR" />
+			<result column="code" property="code" jdbcType="VARCHAR" />
+			<result column="goods" property="goods" jdbcType="VARCHAR" />
+			<result column="amount" property="amount" jdbcType="DECIMAL" />
+			<result column="price" property="price" jdbcType="DECIMAL" />
+			<result column="number" property="number" jdbcType="DECIMAL" />
+			<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+			<result column="del_flag" property="delFlag" jdbcType="CHAR" />
+			<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+			<result column="tax" property="tax" jdbcType="DECIMAL" />
+			<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+			<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+			<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+			<result column="sku" property="sku" jdbcType="VARCHAR" />
+			<result column="product_sku_id" property="productSkuId" jdbcType="VARCHAR" />
+			<result column="product_img" property="productImg" jdbcType="VARCHAR" />
+			<result column="external_number" property="externalNumber" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
 	<!-- 注意:以下最好不要使用星号,暂时没有时间调整 -->
 
 	<!--获得用户每天话费和流量充值的消费金额-->
@@ -83,100 +82,100 @@
 	<!-- 获得用户未完成订单和完成订单的购买数量-->
 	<select id="getByNum" resultType="java.lang.Integer" >
 		select
-			count(1)
+		count(1)
 		from
-			ad_order_report r,
-			ad_order_detail d
+		ad_order_report r,
+		ad_order_detail d
 		where
-			r.id = d.order_report_id
+		r.id = d.order_report_id
 		and d.product_sku_id like concat('%',#{skuId})
 		and	r.user_id = #{userId}
 		and r.act_type= #{actType}
 		and r.type = '1'
 	</select>
 
-    <select id="getByOrderNum" resultMap="orderMap" >  
-        select 
-        		o.*,
-        		d.*,
-        		d.id did
-        from 
-        		ad_order_report o,ad_order_detail d 
-        where
-        		o.id = d.order_report_id 
-        		and o.order_number = #{orderNumber}
-        		and o.del_flag = '0'
-    	</select>
-    	 
-	<select id="getById" resultMap="orderMap" >  
-        select 
-        		o.*,
-        		d.*,
-        		d.id did 
-        from 
-        		ad_order_report o,ad_order_detail d 
-        where
-        		o.id = d.order_report_id 
-        		and o.id = #{orderId}
-        		and o.del_flag = '0'
-    	</select> 
-    	
-    	<select id="getOrder" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">  
-        select 
-        		o.*,
-        		d.*,
-        		d.id did
-        from 
-        		ad_order_report o,ad_order_detail d
-       	<where>
-        	  and o.id = d.order_report_id 
-	      <if test="orderId != null and orderId != ''" >
-	       and o.order_id = #{orderId,jdbcType=BIGINT}
-	      </if>
-	      <if test="bussinessId != null and bussinessId != ''" >
-	        and o.bussiness_id = #{bussinessId,jdbcType=BIGINT}
-	      </if>
-	      <if test="userId != null and userId != ''" >
-	        and o.user_id = #{userId,jdbcType=BIGINT}
-	      </if>
-	      <if test="orderNumber != null and orderNumber != ''" >
-	        and o.order_number = #{orderNumber,jdbcType=VARCHAR}
-	      </if>
-	      <if test="storesId != null and storesId != ''" >
-	        and o.stores_id = #{storesId,jdbcType=VARCHAR}
-	      </if>
-	      <if test="state != null and state != ''" >
-	        and o.state = #{state,jdbcType=CHAR}
-	      </if>
-	      <if test="type != null and type != ''" >
-	        and o.type = #{type,jdbcType=SMALLINT}
-	      </if>
-	      <if test="productType != null and productType != ''" >
-	        and o.product_type = #{productType,jdbcType=SMALLINT}
-	      </if>
-	      <if test="createBy != null and createBy != ''" >
-	        and o.create_by = #{createBy,jdbcType=VARCHAR}
-	      </if>
-	      <if test="isSource != null and isSource != ''" >
-	        and o.is_source = #{isSource,jdbcType=INTEGER}
-	      </if>
-	      <if test="updateBy != null and updateBy != ''" >
-	        and o.update_by = #{updateBy,jdbcType=VARCHAR}
-	      </if>
-	      <if test="consigneeName != null and consigneeName != ''" >
-	        and o.consignee_name = #{consigneeName,jdbcType=VARCHAR}
-	      </if>
-	      <if test="consigneeMobile != null and consigneeMobile != ''" >
-	        and o.consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR}
-	      </if>
-	      <if test="consigneeAddr != null and consigneeAddr != ''" >
-	        and o.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
-	      </if>
-	    </where>
-        		
-    	</select>  
-	
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.business.order.vo.OrderVo">
+	<select id="getByOrderNum" resultMap="orderMap" >
+		select
+		o.*,
+		d.*,
+		d.id did
+		from
+		ad_order_report o,ad_order_detail d
+		where
+		o.id = d.order_report_id
+		and o.order_number = #{orderNumber}
+		and o.del_flag = '0'
+	</select>
+
+	<select id="getById" resultMap="orderMap" >
+		select
+		o.*,
+		d.*,
+		d.id did
+		from
+		ad_order_report o,ad_order_detail d
+		where
+		o.id = d.order_report_id
+		and o.id = #{orderId}
+		and o.del_flag = '0'
+	</select>
+
+	<select id="getOrder" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">
+		select
+		o.*,
+		d.*,
+		d.id did
+		from
+		ad_order_report o,ad_order_detail d
+		<where>
+			and o.id = d.order_report_id
+			<if test="orderId != null and orderId != ''" >
+				and o.order_id = #{orderId,jdbcType=BIGINT}
+			</if>
+			<if test="bussinessId != null and bussinessId != ''" >
+				and o.bussiness_id = #{bussinessId,jdbcType=BIGINT}
+			</if>
+			<if test="userId != null and userId != ''" >
+				and o.user_id = #{userId,jdbcType=BIGINT}
+			</if>
+			<if test="orderNumber != null and orderNumber != ''" >
+				and o.order_number = #{orderNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="storesId != null and storesId != ''" >
+				and o.stores_id = #{storesId,jdbcType=VARCHAR}
+			</if>
+			<if test="state != null and state != ''" >
+				and o.state = #{state,jdbcType=CHAR}
+			</if>
+			<if test="type != null and type != ''" >
+				and o.type = #{type,jdbcType=SMALLINT}
+			</if>
+			<if test="productType != null and productType != ''" >
+				and o.product_type = #{productType,jdbcType=SMALLINT}
+			</if>
+			<if test="createBy != null and createBy != ''" >
+				and o.create_by = #{createBy,jdbcType=VARCHAR}
+			</if>
+			<if test="isSource != null and isSource != ''" >
+				and o.is_source = #{isSource,jdbcType=INTEGER}
+			</if>
+			<if test="updateBy != null and updateBy != ''" >
+				and o.update_by = #{updateBy,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeName != null and consigneeName != ''" >
+				and o.consignee_name = #{consigneeName,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeMobile != null and consigneeMobile != ''" >
+				and o.consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeAddr != null and consigneeAddr != ''" >
+				and o.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
+			</if>
+		</where>
+
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.business.order.vo.OrderVo">
         INSERT INTO ad_order_report(
 	        id,
 			order_id,
@@ -214,8 +213,7 @@
 			service_charge,
 			voucher,
 			coupon_id,
-			support_pay_type,
-			commission
+			support_pay_type
         ) VALUES (
 	       	#{id},
 			#{orderId},
@@ -253,236 +251,235 @@
 			#{serviceCharge},
 			#{voucher},
 			#{couponId},
-			#{supportPayType},
-			#{commission}
+			#{supportPayType}
         )
     </insert>
 
 	<!-- 取消订单 -->
-	 <update id="cancleOrder" parameterType="com.doooly.business.order.vo.OrderVo">
-        update ad_order_report
-	    <set >
-	      <if test="type != null and type != ''" >
-	        type = #{type,jdbcType=BIGINT},
-	      </if>
-	      <if test="state != null and state != ''" >
-	        state = #{state,jdbcType=BIGINT},
-	      </if>
+	<update id="cancleOrder" parameterType="com.doooly.business.order.vo.OrderVo">
+		update ad_order_report
+		<set >
+			<if test="type != null and type != ''" >
+				type = #{type,jdbcType=BIGINT},
+			</if>
+			<if test="state != null and state != ''" >
+				state = #{state,jdbcType=BIGINT},
+			</if>
 			update_date = now(),
 		</set>
-	    where order_number = #{orderNumber} and user_id = #{userId} and del_flag = '0'
-	  </update>
+		where order_number = #{orderNumber} and user_id = #{userId} and del_flag = '0'
+	</update>
 
-    <update id="update" parameterType="com.doooly.business.order.vo.OrderVo">
-        update ad_order_report
-	    <set >
+	<update id="update" parameterType="com.doooly.business.order.vo.OrderVo">
+		update ad_order_report
+		<set >
 			update_date = now(),
 			<if test="orderId != null and orderId != ''" >
-	        order_id = #{orderId,jdbcType=BIGINT},
-	      </if>
-	      <if test="bussinessId != null and bussinessId != ''" >
-	        bussiness_id = #{bussinessId,jdbcType=BIGINT},
-	      </if>
-	      <if test="userId != null and userId != ''" >
-	        user_id = #{userId,jdbcType=BIGINT},
-	      </if>
-	      <if test="orderNumber != null and orderNumber != ''" >
-	        order_number = #{orderNumber,jdbcType=VARCHAR},
-	      </if>
-	      <if test="storesId != null and storesId != ''" >
-	        stores_id = #{storesId,jdbcType=VARCHAR},
-	      </if>
-	      <if test="totalMount != null and totalMount != ''" >
-	        total_mount = #{totalMount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="totalPrice != null and totalPrice != ''" >
-	        total_price = #{totalPrice,jdbcType=DECIMAL},
-	      </if>
-	      <if test="orderDate != null and orderDate != ''" >
-	        order_date = #{orderDate,jdbcType=TIMESTAMP},
-	      </if>
-	      <if test="state != null and state != ''" >
-	        state = #{state,jdbcType=CHAR},
-	      </if>
-	      <if test="type != null and type != ''" >
-	        type = #{type,jdbcType=SMALLINT},
-	      </if>
-	      <if test="productType != null and productType != ''" >
-	        product_type = #{productType,jdbcType=SMALLINT},
-	      </if>
-	      <if test="isUserRebate != null and isUserRebate != ''" >
-	        is_user_rebate = #{isUserRebate,jdbcType=CHAR},
-	      </if>
-	      <if test="userRebate != null and userRebate != ''" >
-	        user_rebate = #{userRebate,jdbcType=DECIMAL},
-	      </if>
-	      <if test="userReturnAmount != null and userReturnAmount != ''" >
-	        user_return_amount = #{userReturnAmount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="isBusinessRebate != null and isBusinessRebate != ''" >
-	        is_business_rebate = #{isBusinessRebate,jdbcType=CHAR},
-	      </if>
-	      <if test="businessRebateAmount != null and businessRebateAmount != ''" >
-	        business_rebate_amount = #{businessRebateAmount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="billingState != null and billingState != ''" >
-	        billing_state = #{billingState,jdbcType=CHAR},
-	      </if>
-	      <if test="delFlagUser != null and delFlagUser != ''" >
-	        del_flag_user = #{delFlagUser,jdbcType=CHAR},
-	      </if>
-	      <if test="createBy != null and createBy != ''" >
-	        create_by = #{createBy,jdbcType=VARCHAR},
-	      </if>
-	      <if test="delFlag != null and delFlag != ''" >
-	        del_flag = #{delFlag,jdbcType=CHAR},
-	      </if>
-	      <if test="isFirst != null and isFirst != ''" >
-	        is_first = #{isFirst,jdbcType=INTEGER},
-	      </if>
-	      <if test="isSource != null and isSource != ''" >
-	        is_source = #{isSource,jdbcType=INTEGER},
-	      </if>
-	      <if test="firstCount != null and firstCount != ''" >
-	        first_count = #{firstCount,jdbcType=INTEGER},
-	      </if>
-	      <if test="airSettleAccounts != null and airSettleAccounts != ''" >
-	        air_settle_accounts = #{airSettleAccounts,jdbcType=DECIMAL},
-	      </if>
-	      <if test="remarks != null and remarks != ''" >
-	        remarks = #{remarks,jdbcType=VARCHAR},
-	      </if>
-	      <if test="updateBy != null and updateBy != ''" >
-	        update_by = #{updateBy,jdbcType=VARCHAR},
-	      </if>
-	      <if test="createDate != null and createDate != ''" >
-	        create_date = #{createDate,jdbcType=TIMESTAMP},
-	      </if>
-	      <if test="consigneeName != null and consigneeName != ''" >
-	        consignee_name = #{consigneeName,jdbcType=VARCHAR},
-	      </if>
-	      <if test="consigneeMobile != null and consigneeMobile != ''" >
-	        consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR},
-	      </if>
-	      <if test="consigneeAddr != null and consigneeAddr != ''" >
-	        consignee_addr = #{consigneeAddr,jdbcType=VARCHAR},
-	      </if>
-	      <if test="productType != null and productType != ''" >
-	        product_type = #{productType,jdbcType=VARCHAR},
-	      </if>
+				order_id = #{orderId,jdbcType=BIGINT},
+			</if>
+			<if test="bussinessId != null and bussinessId != ''" >
+				bussiness_id = #{bussinessId,jdbcType=BIGINT},
+			</if>
+			<if test="userId != null and userId != ''" >
+				user_id = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="orderNumber != null and orderNumber != ''" >
+				order_number = #{orderNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="storesId != null and storesId != ''" >
+				stores_id = #{storesId,jdbcType=VARCHAR},
+			</if>
+			<if test="totalMount != null and totalMount != ''" >
+				total_mount = #{totalMount,jdbcType=DECIMAL},
+			</if>
+			<if test="totalPrice != null and totalPrice != ''" >
+				total_price = #{totalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="orderDate != null and orderDate != ''" >
+				order_date = #{orderDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null and state != ''" >
+				state = #{state,jdbcType=CHAR},
+			</if>
+			<if test="type != null and type != ''" >
+				type = #{type,jdbcType=SMALLINT},
+			</if>
+			<if test="productType != null and productType != ''" >
+				product_type = #{productType,jdbcType=SMALLINT},
+			</if>
+			<if test="isUserRebate != null and isUserRebate != ''" >
+				is_user_rebate = #{isUserRebate,jdbcType=CHAR},
+			</if>
+			<if test="userRebate != null and userRebate != ''" >
+				user_rebate = #{userRebate,jdbcType=DECIMAL},
+			</if>
+			<if test="userReturnAmount != null and userReturnAmount != ''" >
+				user_return_amount = #{userReturnAmount,jdbcType=DECIMAL},
+			</if>
+			<if test="isBusinessRebate != null and isBusinessRebate != ''" >
+				is_business_rebate = #{isBusinessRebate,jdbcType=CHAR},
+			</if>
+			<if test="businessRebateAmount != null and businessRebateAmount != ''" >
+				business_rebate_amount = #{businessRebateAmount,jdbcType=DECIMAL},
+			</if>
+			<if test="billingState != null and billingState != ''" >
+				billing_state = #{billingState,jdbcType=CHAR},
+			</if>
+			<if test="delFlagUser != null and delFlagUser != ''" >
+				del_flag_user = #{delFlagUser,jdbcType=CHAR},
+			</if>
+			<if test="createBy != null and createBy != ''" >
+				create_by = #{createBy,jdbcType=VARCHAR},
+			</if>
+			<if test="delFlag != null and delFlag != ''" >
+				del_flag = #{delFlag,jdbcType=CHAR},
+			</if>
+			<if test="isFirst != null and isFirst != ''" >
+				is_first = #{isFirst,jdbcType=INTEGER},
+			</if>
+			<if test="isSource != null and isSource != ''" >
+				is_source = #{isSource,jdbcType=INTEGER},
+			</if>
+			<if test="firstCount != null and firstCount != ''" >
+				first_count = #{firstCount,jdbcType=INTEGER},
+			</if>
+			<if test="airSettleAccounts != null and airSettleAccounts != ''" >
+				air_settle_accounts = #{airSettleAccounts,jdbcType=DECIMAL},
+			</if>
+			<if test="remarks != null and remarks != ''" >
+				remarks = #{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="updateBy != null and updateBy != ''" >
+				update_by = #{updateBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null and createDate != ''" >
+				create_date = #{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="consigneeName != null and consigneeName != ''" >
+				consignee_name = #{consigneeName,jdbcType=VARCHAR},
+			</if>
+			<if test="consigneeMobile != null and consigneeMobile != ''" >
+				consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR},
+			</if>
+			<if test="consigneeAddr != null and consigneeAddr != ''" >
+				consignee_addr = #{consigneeAddr,jdbcType=VARCHAR},
+			</if>
+			<if test="productType != null and productType != ''" >
+				product_type = #{productType,jdbcType=VARCHAR},
+			</if>
 			<if test="actType != null and actType != ''" >
 				act_type = #{actType,jdbcType=VARCHAR},
 			</if>
-	    </set>
-	    where id = #{id,jdbcType=BIGINT}
-    </update>
-    
-    <update id="updateByNum" parameterType="com.doooly.business.order.vo.OrderVo">
-        update ad_order_report
-	    <set >
-		  update_date = now(),
-	      <if test="orderId != null and orderId != ''" >
-	        order_id = #{orderId,jdbcType=BIGINT},
-	      </if>
-	      <if test="bussinessId != null and bussinessId != ''" >
-	        bussiness_id = #{bussinessId,jdbcType=BIGINT},
-	      </if>
-	      <if test="userId != null and userId != ''" >
-	        user_id = #{userId,jdbcType=BIGINT},
-	      </if>
-	      <if test="orderNumber != null and orderNumber != ''" >
-	        order_number = #{orderNumber,jdbcType=VARCHAR},
-	      </if>
-	      <if test="storesId != null and storesId != ''" >
-	        stores_id = #{storesId,jdbcType=VARCHAR},
-	      </if>
-	      <if test="totalMount != null and totalMount != ''" >
-	        total_mount = #{totalMount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="totalPrice != null and totalPrice != ''" >
-	        total_price = #{totalPrice,jdbcType=DECIMAL},
-	      </if>
-	      <if test="orderDate != null and orderDate != ''" >
-	        order_date = #{orderDate,jdbcType=TIMESTAMP},
-	      </if>
-	      <if test="state != null and state != ''" >
-	        state = #{state,jdbcType=CHAR},
-	      </if>
-	      <if test="type != null and type != ''" >
-	        type = #{type,jdbcType=SMALLINT},
-	      </if>
-	      <if test="productType != null and productType != ''" >
-	        product_type = #{productType,jdbcType=SMALLINT},
-	      </if>
-	      <if test="isUserRebate != null and isUserRebate != ''" >
-	        is_user_rebate = #{isUserRebate,jdbcType=CHAR},
-	      </if>
-	      <if test="userRebate != null and userRebate != ''" >
-	        user_rebate = #{userRebate,jdbcType=DECIMAL},
-	      </if>
-	      <if test="userReturnAmount != null and userReturnAmount != ''" >
-	        user_return_amount = #{userReturnAmount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="isBusinessRebate != null and isBusinessRebate != ''" >
-	        is_business_rebate = #{isBusinessRebate,jdbcType=CHAR},
-	      </if>
-	      <if test="businessRebateAmount != null and businessRebateAmount != ''" >
-	        business_rebate_amount = #{businessRebateAmount,jdbcType=DECIMAL},
-	      </if>
-	      <if test="billingState != null and billingState != ''" >
-	        billing_state = #{billingState,jdbcType=CHAR},
-	      </if>
-	      <if test="delFlagUser != null and delFlagUser != ''" >
-	        del_flag_user = #{delFlagUser,jdbcType=CHAR},
-	      </if>
-	      <if test="createBy != null and createBy != ''" >
-	        create_by = #{createBy,jdbcType=VARCHAR},
-	      </if>
-	      <if test="delFlag != null and delFlag != ''" >
-	        del_flag = #{delFlag,jdbcType=CHAR},
-	      </if>
-	      <if test="isFirst != null and isFirst != ''" >
-	        is_first = #{isFirst,jdbcType=INTEGER},
-	      </if>
-	      <if test="isSource != null and isSource != ''" >
-	        is_source = #{isSource,jdbcType=INTEGER},
-	      </if>
-	      <if test="firstCount != null and firstCount != ''" >
-	        first_count = #{firstCount,jdbcType=INTEGER},
-	      </if>
-	      <if test="airSettleAccounts != null and airSettleAccounts != ''" >
-	        air_settle_accounts = #{airSettleAccounts,jdbcType=DECIMAL},
-	      </if>
-	      <if test="remarks != null and remarks != ''" >
-	        remarks = #{remarks,jdbcType=VARCHAR},
-	      </if>
-	      <if test="updateBy != null and updateBy != ''" >
-	        update_by = #{updateBy,jdbcType=VARCHAR},
-	      </if>
-	      <if test="createDate != null and createDate != ''" >
-	        create_date = #{createDate,jdbcType=TIMESTAMP},
-	      </if>
-	      <if test="consigneeName != null and consigneeName != ''" >
-	        consignee_name = #{consigneeName,jdbcType=VARCHAR},
-	      </if>
-	      <if test="consigneeMobile != null and consigneeMobile != ''" >
-	        consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR},
-	      </if>
-	      <if test="consigneeAddr != null and consigneeAddr != ''" >
-	        consignee_addr = #{consigneeAddr,jdbcType=VARCHAR},
-	      </if>
-	      <if test="productType != null and productType != ''" >
-	        product_type = #{productType,jdbcType=VARCHAR},
-	      </if>
-			<if test="actType != null and actType != ''" >
-			act_type = #{actType,jdbcType=VARCHAR},
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateByNum" parameterType="com.doooly.business.order.vo.OrderVo">
+		update ad_order_report
+		<set >
+			update_date = now(),
+			<if test="orderId != null and orderId != ''" >
+				order_id = #{orderId,jdbcType=BIGINT},
 			</if>
-	    </set>
-	    where order_number = #{orderNumber,jdbcType=BIGINT}
-    </update>
-    
-     <!--获得用户某种sku的订单 -->
-    <select id="getByUserSku" resultType="java.util.Map">
+			<if test="bussinessId != null and bussinessId != ''" >
+				bussiness_id = #{bussinessId,jdbcType=BIGINT},
+			</if>
+			<if test="userId != null and userId != ''" >
+				user_id = #{userId,jdbcType=BIGINT},
+			</if>
+			<if test="orderNumber != null and orderNumber != ''" >
+				order_number = #{orderNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="storesId != null and storesId != ''" >
+				stores_id = #{storesId,jdbcType=VARCHAR},
+			</if>
+			<if test="totalMount != null and totalMount != ''" >
+				total_mount = #{totalMount,jdbcType=DECIMAL},
+			</if>
+			<if test="totalPrice != null and totalPrice != ''" >
+				total_price = #{totalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test="orderDate != null and orderDate != ''" >
+				order_date = #{orderDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null and state != ''" >
+				state = #{state,jdbcType=CHAR},
+			</if>
+			<if test="type != null and type != ''" >
+				type = #{type,jdbcType=SMALLINT},
+			</if>
+			<if test="productType != null and productType != ''" >
+				product_type = #{productType,jdbcType=SMALLINT},
+			</if>
+			<if test="isUserRebate != null and isUserRebate != ''" >
+				is_user_rebate = #{isUserRebate,jdbcType=CHAR},
+			</if>
+			<if test="userRebate != null and userRebate != ''" >
+				user_rebate = #{userRebate,jdbcType=DECIMAL},
+			</if>
+			<if test="userReturnAmount != null and userReturnAmount != ''" >
+				user_return_amount = #{userReturnAmount,jdbcType=DECIMAL},
+			</if>
+			<if test="isBusinessRebate != null and isBusinessRebate != ''" >
+				is_business_rebate = #{isBusinessRebate,jdbcType=CHAR},
+			</if>
+			<if test="businessRebateAmount != null and businessRebateAmount != ''" >
+				business_rebate_amount = #{businessRebateAmount,jdbcType=DECIMAL},
+			</if>
+			<if test="billingState != null and billingState != ''" >
+				billing_state = #{billingState,jdbcType=CHAR},
+			</if>
+			<if test="delFlagUser != null and delFlagUser != ''" >
+				del_flag_user = #{delFlagUser,jdbcType=CHAR},
+			</if>
+			<if test="createBy != null and createBy != ''" >
+				create_by = #{createBy,jdbcType=VARCHAR},
+			</if>
+			<if test="delFlag != null and delFlag != ''" >
+				del_flag = #{delFlag,jdbcType=CHAR},
+			</if>
+			<if test="isFirst != null and isFirst != ''" >
+				is_first = #{isFirst,jdbcType=INTEGER},
+			</if>
+			<if test="isSource != null and isSource != ''" >
+				is_source = #{isSource,jdbcType=INTEGER},
+			</if>
+			<if test="firstCount != null and firstCount != ''" >
+				first_count = #{firstCount,jdbcType=INTEGER},
+			</if>
+			<if test="airSettleAccounts != null and airSettleAccounts != ''" >
+				air_settle_accounts = #{airSettleAccounts,jdbcType=DECIMAL},
+			</if>
+			<if test="remarks != null and remarks != ''" >
+				remarks = #{remarks,jdbcType=VARCHAR},
+			</if>
+			<if test="updateBy != null and updateBy != ''" >
+				update_by = #{updateBy,jdbcType=VARCHAR},
+			</if>
+			<if test="createDate != null and createDate != ''" >
+				create_date = #{createDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="consigneeName != null and consigneeName != ''" >
+				consignee_name = #{consigneeName,jdbcType=VARCHAR},
+			</if>
+			<if test="consigneeMobile != null and consigneeMobile != ''" >
+				consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR},
+			</if>
+			<if test="consigneeAddr != null and consigneeAddr != ''" >
+				consignee_addr = #{consigneeAddr,jdbcType=VARCHAR},
+			</if>
+			<if test="productType != null and productType != ''" >
+				product_type = #{productType,jdbcType=VARCHAR},
+			</if>
+			<if test="actType != null and actType != ''" >
+				act_type = #{actType,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where order_number = #{orderNumber,jdbcType=BIGINT}
+	</update>
+
+	<!--获得用户某种sku的订单 -->
+	<select id="getByUserSku" resultType="java.util.Map">
     		select 
 			o.type,o.consignee_mobile consigneeMobile,d.identity_card identityCard,d.apply_card_area1 applyCardArea1,d.apply_card_store1 applyCardStore1
 		from 
@@ -493,6 +490,6 @@
 			ad_order_delivery d on o.id = d.order_report_id
 		WHERE 
 			i.product_sku_id = #{productSku} and o.user_id= #{userId} and o.del_flag='0';
-    </select> 
+    </select>
 
 </mapper>

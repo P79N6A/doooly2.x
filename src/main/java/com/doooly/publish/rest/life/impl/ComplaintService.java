@@ -58,13 +58,13 @@ public class ComplaintService implements ComplaintServiceI {
 
 	@POST
 	@Path(value = "/saveForAppTwo")
-	@Produces("text/plain;charset=utf-8")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public String complaintSaveForAppTwo(@Context HttpServletRequest request) {
+	@Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+	public String complaintSaveForAppTwo(HttpServletRequest request,JSONObject json) {
 		log.info("保存申诉app2.0开始。。。。");
 		JSONObject result = new JSONObject();
 		try {
-		complaintBusinessServiceI.complaintSaveForAppTwo(request);
+		complaintBusinessServiceI.complaintSaveForAppTwo(request,json);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.info("保存申述app2.0异常：" + e);

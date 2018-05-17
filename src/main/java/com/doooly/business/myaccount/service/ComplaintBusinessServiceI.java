@@ -9,6 +9,6 @@ public interface ComplaintBusinessServiceI {
 
 	void complaintSave(HttpServletRequest request);
 
-	void complaintSaveForAppTwo(HttpServletRequest request);
+	void complaintSaveForAppTwo(HttpServletRequest request, JSONObject json);
 
 }

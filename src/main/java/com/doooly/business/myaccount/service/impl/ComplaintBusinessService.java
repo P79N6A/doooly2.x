@@ -142,36 +142,11 @@ public class ComplaintBusinessService implements ComplaintBusinessServiceI {
 	}
 
 	@Override
-	public void complaintSaveForAppTwo(HttpServletRequest request) {
+	public void complaintSaveForAppTwo(HttpServletRequest request,JSONObject jsonObject) {
 		try {
-			if (ServletFileUpload.isMultipartContent(request)) {
-				FileItemFactory factory = new DiskFileItemFactory();
-				ServletFileUpload upload = new ServletFileUpload(factory);
-				upload.setHeaderEncoding("UTF-8");
-				List<FileItem> items = null;
-				try {
-					//解析request
-					items = upload.parseRequest(request);
-					log.info("解析的字段条数：" + items.size());
-				} catch (FileUploadException e) {
-					e.printStackTrace();
-					log.info(e);
-				}
-				StringBuffer imagePaths = new StringBuffer(); 
-				JSONObject jsonData = new JSONObject();
-				if (items != null && items.size() > 0) {
-					for (FileItem fileItem : items) {
-						//普通字段
-						String fieldName = fileItem.getFieldName();
-						String value = fileItem.getString("UTF-8");
-						//value = URLDecoder.decode(value, "utf-8");
-						log.info(fieldName + "==" + value);
-						jsonData.put(fieldName, value);
-						
-					}
-				}
+			
 				
-				LifeComplaint complaint = JSONObject.toJavaObject(jsonData, LifeComplaint.class);
+				LifeComplaint complaint = JSONObject.toJavaObject(jsonObject, LifeComplaint.class);
 				
 				complaint.setCreateIp(request.getRemoteAddr());
 				
@@ -189,7 +164,7 @@ public class ComplaintBusinessService implements ComplaintBusinessServiceI {
 						complaint.setUpdateBy("");
 					}
 				}
-				
+				String imagePaths = jsonObject.getString("img");
 				if(StringUtils.isNotBlank(imagePaths) && imagePaths.length() > 0){
 					String imagePath = imagePaths.substring(0, imagePaths.lastIndexOf(";"));
 					log.info("图片保存路径  imagePath:" + imagePath);
@@ -208,7 +183,6 @@ public class ComplaintBusinessService implements ComplaintBusinessServiceI {
 				complaint.setComplaintSn(new Date().getTime() + "" + randNum);
 				
 				LifeComplaintDao.insert(complaint);
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.info("保存申诉错误" + e);

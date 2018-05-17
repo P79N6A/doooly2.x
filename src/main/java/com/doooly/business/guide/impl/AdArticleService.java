@@ -169,25 +169,26 @@ public class AdArticleService implements AdArticleServiceI {
             adProduct.setMaxUserRebate("0");
         }
         Double rebate;
-        BigDecimal factPrice;//实付
+        BigDecimal factPrice;//前台根据折扣计算价格
+        BigDecimal marketPrice = adProduct.getMarketPrice();//后台商品配置导购价
         BigDecimal chu = new BigDecimal("10000");
         AdBusiness adBusiness = adBusinessDao.get(adProduct.getBusinessId());
         if(adBusiness != null){
             if ( adBusiness.getBussinessRebate() != null && adBusiness.getUserRebate() != null) {
-                BigDecimal userRebate = new BigDecimal(adBusiness.getUserRebate());
+                BigDecimal userRebate = adProduct.getUserRebate();
                 //前折计算兜礼价 折扣0保持原价
                 if(new BigDecimal(adProduct.getDiscount()).equals(BigDecimal.ZERO)){
-                    factPrice = adProduct.getMarketPrice();
+                    factPrice = marketPrice;
                 }else {
-                    factPrice = adProduct.getMarketPrice().multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
+                    factPrice = marketPrice.multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
                 }
-                if(adProduct.getUserRebate() !=null){
+                if("京东返利".equals(adBusiness.getCompany())){
                     //京东开普勒订单实际分层比例
-                    rebate = factPrice.multiply(adProduct.getBussinesRebate()).multiply(userRebate).multiply(adProduct.getUserRebate())
-                            .divide(new BigDecimal("1000000"), 2, BigDecimal.ROUND_DOWN).doubleValue();
-                }else {
-                    rebate = factPrice.multiply(adProduct.getBussinesRebate()).multiply(userRebate)
+                    rebate = marketPrice.multiply(adProduct.getBussinesRebate()).multiply(adProduct.getLayeredRebate())
                             .divide(chu, 2, BigDecimal.ROUND_DOWN).doubleValue();
+                }else {
+                    rebate = marketPrice.multiply(userRebate)
+                            .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN).doubleValue();
                 }
                 //前折计算兜礼价
                 adProduct.setPrice(factPrice);
@@ -195,7 +196,7 @@ public class AdArticleService implements AdArticleServiceI {
                 adProduct.setRebate(String.valueOf(rebate));
             }
         }else{
-            adProduct.setPrice(adProduct.getMarketPrice());
+            adProduct.setPrice(marketPrice);
             adProduct.setRebate("0.00");
         }
     }

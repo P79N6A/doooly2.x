@@ -77,7 +77,8 @@ public class AdProduct {
 
 	private Integer hitsCount;
     private BigDecimal bussinesRebate;//商户返佣比例
-    private BigDecimal userRebate;//实际分层比例
+    private BigDecimal userRebate;//用户返利比例
+    private BigDecimal layeredRebate;//实际分成比例
     private Integer sellCount;//已售多少件
     private String imagePath;//文章主图
     private String content;//文章内容
@@ -391,6 +392,14 @@ public class AdProduct {
 
     public void setUserRebate(BigDecimal userRebate) {
         this.userRebate = userRebate;
+    }
+
+    public BigDecimal getLayeredRebate() {
+        return layeredRebate;
+    }
+
+    public void setLayeredRebate(BigDecimal layeredRebate) {
+        this.layeredRebate = layeredRebate;
     }
 
     public Integer getSellCount() {

@@ -153,7 +153,7 @@
             a.user_rebate AS "userRebate",
             a.bussiness_rebate AS "bussinesRebate",
             a.link_url_wechat AS "linkUrlWechat",
-            a.user_rebate AS "userRebate",
+            a.layered_rebate AS "layeredRebate",
             ab.id AS "businessId",
             IFNULL(ab.discount,0) AS "discount",
             ab.logo AS "businessLogo",

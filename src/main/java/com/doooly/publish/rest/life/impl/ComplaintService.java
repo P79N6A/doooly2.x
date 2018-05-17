@@ -60,7 +60,7 @@ public class ComplaintService implements ComplaintServiceI {
 	@Path(value = "/saveForAppTwo")
 	@Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-	public String complaintSaveForAppTwo(HttpServletRequest request,JSONObject json) {
+	public String complaintSaveForAppTwo(@Context HttpServletRequest request,JSONObject json) {
 		log.info("保存申诉app2.0开始。。。。");
 		JSONObject result = new JSONObject();
 		try {

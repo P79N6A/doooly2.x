@@ -8,5 +8,5 @@ import com.alibaba.fastjson.JSONObject;
 public interface ComplaintServiceI {
 	
 	String complaintSave(@Context HttpServletRequest request);
-	String complaintSaveForAppTwo(HttpServletRequest request,JSONObject jsonObject);
+	String complaintSaveForAppTwo(@Context HttpServletRequest request,JSONObject jsonObject);
 }

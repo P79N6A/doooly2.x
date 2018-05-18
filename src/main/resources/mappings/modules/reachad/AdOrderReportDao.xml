@@ -176,84 +176,84 @@
 	</select>
 
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.business.order.vo.OrderVo">
-        INSERT INTO ad_order_report(
-	        id,
-			order_id,
-			bussiness_id,
-			user_id,
-			order_number,
-			stores_id,
-			total_mount,
-			total_price,
-			order_date,
-			state,
-			type,
-			is_user_rebate,
-			user_rebate,
-			user_return_amount,
-			is_business_rebate,
-			business_rebate_amount,
-			billing_state,
-			del_flag_user,
-			create_by,
-			del_flag,
-			is_first,
-			is_source,
-			first_count,
-			air_settle_accounts,
-			remarks,
-			update_date,
-			update_by,
-			create_date,
-			consignee_name,
-			consignee_mobile,
-			consignee_addr,
-			product_type,
-			act_type,
-			service_charge,
-			voucher,
-			coupon_id,
-			support_pay_type
-        ) VALUES (
-	       	#{id},
-			#{orderId},
-			#{bussinessId},
-			#{userId},
-			#{orderNumber},
-			#{storesId},
-			#{totalMount},
-			#{totalPrice},
-			#{orderDate},
-			#{state},
-			#{type},
-			#{isUserRebate},
-			#{userRebate},
-			#{userReturnAmount},
-			#{isBusinessRebate},
-			#{businessRebateAmount},
-			#{billingState},
-			#{delFlagUser},
-			#{createBy},
-			#{delFlag},
-			#{isFirst},
-			#{isSource},
-			#{firstCount},
-			#{airSettleAccounts},
-			#{remarks},
-			#{updateDate},
-			#{updateBy},
-			#{createDate},
-			#{consigneeName},
-			#{consigneeMobile},
-			#{consigneeAddr},
-			#{productType},
-			#{actType},
-			#{serviceCharge},
-			#{voucher},
-			#{couponId},
-			#{supportPayType}
-        )
-    </insert>
+		INSERT INTO ad_order_report(
+		id,
+		order_id,
+		bussiness_id,
+		user_id,
+		order_number,
+		stores_id,
+		total_mount,
+		total_price,
+		order_date,
+		state,
+		type,
+		is_user_rebate,
+		user_rebate,
+		user_return_amount,
+		is_business_rebate,
+		business_rebate_amount,
+		billing_state,
+		del_flag_user,
+		create_by,
+		del_flag,
+		is_first,
+		is_source,
+		first_count,
+		air_settle_accounts,
+		remarks,
+		update_date,
+		update_by,
+		create_date,
+		consignee_name,
+		consignee_mobile,
+		consignee_addr,
+		product_type,
+		act_type,
+		service_charge,
+		voucher,
+		coupon_id,
+		support_pay_type
+		) VALUES (
+		#{id},
+		#{orderId},
+		#{bussinessId},
+		#{userId},
+		#{orderNumber},
+		#{storesId},
+		#{totalMount},
+		#{totalPrice},
+		#{orderDate},
+		#{state},
+		#{type},
+		#{isUserRebate},
+		#{userRebate},
+		#{userReturnAmount},
+		#{isBusinessRebate},
+		#{businessRebateAmount},
+		#{billingState},
+		#{delFlagUser},
+		#{createBy},
+		#{delFlag},
+		#{isFirst},
+		#{isSource},
+		#{firstCount},
+		#{airSettleAccounts},
+		#{remarks},
+		#{updateDate},
+		#{updateBy},
+		#{createDate},
+		#{consigneeName},
+		#{consigneeMobile},
+		#{consigneeAddr},
+		#{productType},
+		#{actType},
+		#{serviceCharge},
+		#{voucher},
+		#{couponId},
+		#{supportPayType}
+		)
+	</insert>
 
 	<!-- 取消订单 -->
 	<update id="cancleOrder" parameterType="com.doooly.business.order.vo.OrderVo">
@@ -480,16 +480,16 @@
 
 	<!--获得用户某种sku的订单 -->
 	<select id="getByUserSku" resultType="java.util.Map">
-    		select 
-			o.type,o.consignee_mobile consigneeMobile,d.identity_card identityCard,d.apply_card_area1 applyCardArea1,d.apply_card_store1 applyCardStore1
-		from 
-			ad_order_report o 
-		inner join 
-			ad_order_detail i on o.id = i.order_report_id
-		left join 
-			ad_order_delivery d on o.id = d.order_report_id
-		WHERE 
-			i.product_sku_id = #{productSku} and o.user_id= #{userId} and o.del_flag='0';
-    </select>
+		select
+		o.type,o.consignee_mobile consigneeMobile,d.identity_card identityCard,d.apply_card_area1 applyCardArea1,d.apply_card_store1 applyCardStore1
+		from
+		ad_order_report o
+		inner join
+		ad_order_detail i on o.id = i.order_report_id
+		left join
+		ad_order_delivery d on o.id = d.order_report_id
+		WHERE
+		i.product_sku_id = #{productSku} and o.user_id= #{userId} and o.del_flag='0';
+	</select>
 
 </mapper>

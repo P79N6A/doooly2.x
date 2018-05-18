@@ -7,6 +7,7 @@ public class PropertiesConstants {
 	public static ResourceBundle smsBundle = ResourceBundle.getBundle("prop/sms");
 	public static ResourceBundle dooolyBundle = ResourceBundle.getBundle("doooly");
 	public static ResourceBundle sctcdBundle = ResourceBundle.getBundle("prop/sctcd");
+	public static ResourceBundle wechatPushBundle = ResourceBundle.getBundle("prop/wechatPush");
 
 	 /**
 	  * 处理中文乱码

@@ -35,6 +35,8 @@ public class PaidRefillService implements PaidRefillServiceI {
 	private static Logger logger = Logger.getLogger(PaidRefillService.class);
 	private static final String PRODUCT_ID  = PropertiesConstants.dooolyBundle.getString("paid_refill_product_id");
 	private static final String SKU_ID  = PropertiesConstants.dooolyBundle.getString("paid_refill_sku_id");
+	private static final String WUGANG_PRODUCT_ID  = PropertiesConstants.dooolyBundle.getString("paid_refill_wugang_product_id");
+	private static final String WUGANG_SKU_ID  = PropertiesConstants.dooolyBundle.getString("paid_refill_wugang_sku_id");
 	@Autowired
 	private OrderService orderService;
 	@Autowired
@@ -71,13 +73,20 @@ public class PaidRefillService implements PaidRefillServiceI {
 			
 			List<JSONObject> productSkus = new ArrayList<JSONObject>();
 			JSONObject productSku = new JSONObject();
-			productSku.put("productId", PRODUCT_ID);
-			productSku.put("skuId", SKU_ID);
+			AdSelfProduct product = null;
+			if (channel.equals("wugang")) {
+				productSku.put("productId", WUGANG_PRODUCT_ID);
+				productSku.put("skuId", WUGANG_SKU_ID);
+				product = productService.getProduct(Integer.valueOf(WUGANG_PRODUCT_ID));
+			} else {
+				productSku.put("productId", PRODUCT_ID);
+				productSku.put("skuId", SKU_ID);
+				product = productService.getProduct(Integer.valueOf(PRODUCT_ID));
+			}
 			productSku.put("buyNum", Integer.valueOf(1));
 			productSkus.add(productSku);
 			List<JSONObject> merchantProducts = new ArrayList<JSONObject>();
 			JSONObject merchantProduct = new JSONObject();
-			AdSelfProduct product = productService.getProduct(Integer.valueOf(PRODUCT_ID));
 			merchantProduct.put("merchantId", product.getBusinessId());
 			merchantProduct.put("remarks", "话费充值");
 			merchantProduct.put("productSku", productSkus);

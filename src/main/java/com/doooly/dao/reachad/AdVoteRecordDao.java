@@ -2,6 +2,9 @@ package com.doooly.dao.reachad;
 
 import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachad.AdVoteRecord;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -20,5 +23,13 @@ public interface AdVoteRecordDao extends BaseDaoI<AdVoteRecord> {
 	String getByUserId(@Param("userId")String userId,@Param("activityId")String activityId);
 
 	void updateState(@Param("state")char state, @Param("userId")String userId ,@Param("activityId")String activityId);
+
+	List<AdVoteRecord> findByTelephoneAndActivityId(@Param("telephone")String telephone,@Param("activityId")String activityId);
+
+	List<AdVoteRecord> findUsedRecordByTelephoneAndActivityId(@Param("telephone")String telephone,@Param("activityId")String activityId, @Param("state")String state);
+
+	int getByUserIdAndActivityId(@Param("userId")String userId, @Param("activityId")String activityId,@Param("state")String state);
+
+	void updateShareRecord(@Param("userId")String userId, @Param("telephone")String telephone);
 
  }

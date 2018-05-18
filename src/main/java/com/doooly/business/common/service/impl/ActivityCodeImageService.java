@@ -17,7 +17,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -33,8 +35,10 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.constant.ConnectorConstants.WechatConstants;
+import com.business.common.util.HttpClientUtil;
 import com.doooly.business.common.service.ActivityCodeImageServiceI;
 import com.doooly.business.common.utils.CodeUtil;
+import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.common.util.WechatUtil;
 import com.doooly.common.webservice.WebService;
@@ -57,7 +61,30 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	
 	private static Logger logger = Logger.getLogger(ActivityCodeImageService.class);
 //	private static StringRedisTemplate redisTemplate = (StringRedisTemplate)SpringContextHolder.getBean("redisTemplate");
-
+	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
+	public static final String BRING_COLLNESS_ACTIVITY = "bring_coolness_activity";
+	private static final String WUGANG_SCAN_NEWS_URL  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_url");
+	private static final String WUGANG_SCAN_NEWS_PIC_URL  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_pic_url");
+	private static final String WUGANG_SCAN_NEWS_TITLE  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_title");
+	private static final String WUGANG_SCAN_NEWS_DESCRIPTION  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_description");
+	
+	private static final String BRING_COLLNESS_NEWS_URL1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_url1");
+	private static final String BRING_COLLNESS_NEWS_PIC_URL1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_pic_url1");
+	private static final String BRING_COLLNESS_NEWS_TITLE1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_title1");
+	private static final String BRING_COLLNESS_NEWS_DESCRIPTION1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_description1");
+	
+	private static final String BRING_COLLNESS_NEWS_URL2  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_url2");
+	private static final String BRING_COLLNESS_NEWS_PIC_URL2  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_pic_url2");
+	private static final String BRING_COLLNESS_NEWS_TITLE2  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_title2");
+	private static final String BRING_COLLNESS_NEWS_DESCRIPTION2  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_description2");
+	
+	private static final String BRING_COLLNESS_NEWS_URL3  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_url3");
+	private static final String BRING_COLLNESS_NEWS_PIC_URL3  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_pic_url3");
+	private static final String BRING_COLLNESS_NEWS_TITLE3  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_title3");
+	private static final String BRING_COLLNESS_NEWS_DESCRIPTION3  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_description3");
+	
+	private String PHONE_FEE="PHONE_FEE";
+	private String PHONE_FEE_WUGANG="PHONE_FEE_WUGANG";
 	@Autowired
 	private AdConfigDictDao dictDao;
 	@Autowired
@@ -129,7 +156,11 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 		}
 		@Override
 		public String sendActivityText(String accessToken, String openId,String sourceOpenId) {
-			return this.sendText(accessToken, openId, this.getPhoneFee(),sourceOpenId);
+			String channel = sourceOpenId.substring(0, sourceOpenId.indexOf("~"));
+			if (channel.equals("wugang")) {
+				return this.sendText(accessToken, openId, this.getPhoneFee(PHONE_FEE_WUGANG),sourceOpenId);
+			}
+			return this.sendText(accessToken, openId, this.getPhoneFee(PHONE_FEE),sourceOpenId);
 			
 		}
 		@Override
@@ -164,7 +195,12 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			BufferedImage small = null;
 			BufferedImage headImageAndNiceName = null;
 			try {
-				big = ImageIO.read(new FileInputStream(WebService.getRootPath()+"/image/activityImage.jpg"));
+				if (channel.equals("wugang")) {
+//					big = ImageIO.read(new FileInputStream(WebService.getRootPath()+"/image/wugangActivityImage.jpg"));
+					big = ImageIO.read(new FileInputStream(WebService.getRootPath()+"/image/activityImage.jpg"));
+				}else {
+					big = ImageIO.read(new FileInputStream(WebService.getRootPath()+"/image/activityImage.jpg"));
+				}
 				String qrCodeUrl = this.getQRCodeUrl(accessToken, openId,channel,activityId);
 				small = CodeUtil.newQRCode(qrCodeUrl,297,297, "", "png");
 				big= this.overlapImage(big, small,1);
@@ -213,6 +249,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			return messageDataBean;
 		}
 		
+		
 		private BufferedImage downLoadHeadImage(String url) {
 			// TODO Auto-generated method stub
 			byte[] btImg = getImageFromNetByUrl(url);    
@@ -243,15 +280,15 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 		 * 
 		 * @return
 		 */
-		public JSONObject getPhoneFee(){
-			String phoneFee = redisTemplate.opsForValue().get("PHONE_FEE");
+		public JSONObject getPhoneFee(String key){
+			String phoneFee = redisTemplate.opsForValue().get(key);
 			if (StringUtils.isBlank(phoneFee)) {
 				JSONObject wehcatJson = new JSONObject();
-				phoneFee = dictDao.getValueByKey("PHONE_FEE");
-				String phoneFeeUrl = dictDao.getValueByKey("PHONE_FEE_URL");
+				phoneFee = dictDao.getValueByKey(key);
+				String phoneFeeUrl = dictDao.getValueByKey(key+"_URL");
 				wehcatJson.put("phoneFee", phoneFee);
 				wehcatJson.put("phoneFeeUrl",phoneFeeUrl);
-				redisTemplate.opsForValue().set("PHONE_FEE", wehcatJson.toJSONString(), 24*60*60L,TimeUnit.SECONDS);
+				redisTemplate.opsForValue().set(key, wehcatJson.toJSONString(), 24*60*60L,TimeUnit.SECONDS);
 				return wehcatJson;
 			} else {
 				return JSON.parseObject(phoneFee);
@@ -261,6 +298,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 		@Override
 		public void deleteTextInRedis() {
 			redisTemplate.delete("PHONE_FEE");
+			redisTemplate.delete("PHONE_FEE_WUGANG");
 		}
 		@Override
 		public LifeWechatBinding getWechatData(String openId) {
@@ -400,4 +438,60 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	        g2.dispose();  
 	        return bi2;  
 	    }  
+	    @Override
+		public MessageDataBean pushNews(String openId, String channel,String key){
+			MessageDataBean messageDataBean = new MessageDataBean();
+			HashMap<String, Object> data = new HashMap<String, Object>();
+			JSONObject accessToken = WechatUtil.getNewAccessTokenTicketByChannel(channel);
+			List<JSONObject> articles = new ArrayList<JSONObject>();
+			if (key.equals(WUGANG_SCAN_ACTIVITY)) {
+				JSONObject article = new JSONObject();
+				article.put("url", WUGANG_SCAN_NEWS_URL);
+				article.put("picurl", WUGANG_SCAN_NEWS_PIC_URL);
+				article.put("title", WUGANG_SCAN_NEWS_TITLE);
+				article.put("description", WUGANG_SCAN_NEWS_DESCRIPTION);
+				articles.add(article);
+			}else if (key.equals(BRING_COLLNESS_ACTIVITY)) {
+				JSONObject article1 = new JSONObject();
+				article1.put("url", BRING_COLLNESS_NEWS_URL1);
+				article1.put("picurl", BRING_COLLNESS_NEWS_PIC_URL1);
+				article1.put("title", BRING_COLLNESS_NEWS_TITLE1);
+				article1.put("description", BRING_COLLNESS_NEWS_DESCRIPTION1);
+				articles.add(article1);
+				JSONObject article2 = new JSONObject();
+				article2.put("url", BRING_COLLNESS_NEWS_URL2);
+				article2.put("picurl", BRING_COLLNESS_NEWS_PIC_URL2);
+				article2.put("title", BRING_COLLNESS_NEWS_TITLE2);
+				article2.put("description", BRING_COLLNESS_NEWS_DESCRIPTION2);
+				articles.add(article2);
+				JSONObject article3 = new JSONObject();
+				article3.put("url", BRING_COLLNESS_NEWS_URL3);
+				article3.put("picurl", BRING_COLLNESS_NEWS_PIC_URL3);
+				article3.put("title", BRING_COLLNESS_NEWS_TITLE3);
+				article3.put("description", BRING_COLLNESS_NEWS_DESCRIPTION3);
+				articles.add(article3);
+			}
+			logger.info(articles);
+			String sendNews = this.sendNews(accessToken.getString("accessToken"), openId,articles);
+//			String sendNews = this.sendNews("9_9f8PrYFiBk_SxxrDlA857xcgAPcGfIVEcqCtOglM2gjUSecEI2dyD6W7jV3M2QSVPznsKBus7acBgPeB91Brp2JKw2d78_NCInvpJg-1e73CndqFPKFZliGVUZoUDEjADAGPQ", openId,articles);
+			data.put("newsCode", sendNews);
+			messageDataBean.setData(data);
+			messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+			messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
+			return messageDataBean;
+		}
+	    @Override
+		public String sendNews(String accessToken,String openId,List<JSONObject>articles){
+	    	JSONObject newsMsg = new JSONObject();
+			newsMsg.put("touser", openId);
+			newsMsg.put("msgtype", "news");
+			JSONObject news = new JSONObject();
+			
+			news.put("articles", articles);
+			newsMsg.put("news", news);
+			logger.info(newsMsg.toJSONString());
+			String result = ThirdPartyWechatUtil.sendCustomMessage(newsMsg.toJSONString(), accessToken);
+			logger.info("调用微信客服接口推图文返回结果"+result);
+			return result;
+		}
 }

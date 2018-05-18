@@ -3,6 +3,8 @@
  */
 package com.doooly.dao.reachlife;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.doooly.entity.reachlife.LifeWechatBinding;
@@ -15,5 +17,5 @@ import com.doooly.entity.reachlife.LifeWechatBinding;
  */
 public interface LifeWechatBindingDao{
 	LifeWechatBinding getDataByOpenId(@Param("openId") String openId);
-
+	List<LifeWechatBinding> getWechatBindingListByCardNum(@Param("memberCardNums")String memberCardNums, @Param("memberMobiles")String memberMobiles);
 }

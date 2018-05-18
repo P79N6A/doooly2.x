@@ -1,6 +1,7 @@
 package com.doooly.business.common.service;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
@@ -24,11 +25,15 @@ public interface ActivityCodeImageServiceI {
 	public String getQRCodeUrl(String accessToken, String openId, String channel, String activityId);
 
 	public MessageDataBean pushImageAndText(String openId, String sourceOpenId, String channel, String activityId) throws Exception;
+	
+	public MessageDataBean pushNews(String openId, String channel, String activityKey) throws Exception;
 
-	public JSONObject getPhoneFee();
+	public JSONObject getPhoneFee(String key);
 
 	public void deleteTextInRedis();
 	
 	public LifeWechatBinding getWechatData(String openId);
+
+	String sendNews(String accessToken, String openId,List<JSONObject>articles);
 
 }

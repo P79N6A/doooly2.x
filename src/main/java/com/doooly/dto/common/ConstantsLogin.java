@@ -5,13 +5,14 @@ public class ConstantsLogin {
 	public static final String TOKEN = "token";
 
 	/**
-	 * channel-终端渠道key 终端类型: wechat-微信端，app-兜礼移动app端，h5-浏览器，wiscoapp-武钢APP
+	 * channel-终端渠道key 终端类型: wechat-微信端，app-兜礼移动app端，h5-浏览器，wiscoapp-武钢APP,wiscowechat-武钢wechat
 	 */
 	public static final String CHANNEL = "channel";
 	public static final String CHANNEL_WECHAT = "wechat";
 	public static final String CHANNEL_APP = "app";
 	public static final String CHANNEL_H5 = "h5";
 	public static final String CHANNEL_WISCOAPP = "wiscoapp";
+	public static final String CHANNEL_WISCOWECHAT = "wiscowechat";
 
 	/** code名称 */
 	public static final String CODE = "code";

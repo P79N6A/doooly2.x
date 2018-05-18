@@ -170,7 +170,7 @@ public class WxJsapiPayServiceImpl extends AbstractPaymentService {
 	 * @return
 	 */
 	@Override
-	protected Map<String, Object> resolveAndVerifyResult(String retStr, String payType) {
+	protected Map<String, Object> resolveAndVerifyResult(String retStr, String payType,String channel) {
 		try {
 			WxQueryResult result = (WxQueryResult) WxUtil.fromXML(retStr, WxQueryResult.class);
 			// 验证签名结果
@@ -242,7 +242,7 @@ public class WxJsapiPayServiceImpl extends AbstractPaymentService {
 				return new PayMsg(PayMsg.failure_code, "支付平台处理订单状态失败.");
 			}
 			//处理查询结果
-			return super.handlePayResult(retXml);
+			return super.handlePayResult(retXml,flow.getChannel());
 		} catch (Exception e) {
 			logger.error("queryPayResult() e = {}",  e);
 		}

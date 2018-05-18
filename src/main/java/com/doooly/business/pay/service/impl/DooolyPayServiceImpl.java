@@ -58,7 +58,7 @@ public class DooolyPayServiceImpl extends AbstractPaymentService {
 	}
 
 	@Override
-	protected Map<String, Object> resolveAndVerifyResult(String retStr, String payType) {
+	protected Map<String, Object> resolveAndVerifyResult(String retStr, String payType, String channel) {
 		try {
 			JSONObject json = JSONObject.parseObject(retStr);
 			String code = json.getString("code");

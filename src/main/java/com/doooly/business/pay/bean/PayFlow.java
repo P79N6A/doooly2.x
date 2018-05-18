@@ -35,6 +35,9 @@ public class PayFlow {
 
 	private String isDelete;
 
+	private String channel;
+
+
 	public Long getId() {
 		return id;
 	}
@@ -137,6 +140,14 @@ public class PayFlow {
 
 	public void setIsDelete(String isDelete) {
 		this.isDelete = isDelete;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
 	}
 
 	@Override

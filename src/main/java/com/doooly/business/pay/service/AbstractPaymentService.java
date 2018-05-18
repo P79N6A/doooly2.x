@@ -45,7 +45,9 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();  
+	private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+
+
 	
 	@Autowired
 	protected OrderService orderService;
@@ -59,7 +61,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	protected AdRechargeRecordDao adRechargeRecordDao;
 
 	protected abstract PayMsg buildPayParams(List<OrderVo> orders,PayFlow flow,JSONObject json) ;
-	protected abstract Map<String,Object> resolveAndVerifyResult(String retStr, String payType) ;
+	protected abstract Map<String,Object> resolveAndVerifyResult(String retStr, String payType,String channel) ;
 	protected abstract PayMsg queryPayResult(PayFlow flow) ;
 
 	/***
@@ -71,6 +73,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 		logger.info("prePay()  payType={},json = {}", payType, json);
 		String orderNum = json.getString("orderNum");
 		String userId = json.getString("userId");
+		String channel = json.getString("channel");
 		// 校验订单
 		List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
 		if (CollectionUtils.isEmpty(orders)) {
@@ -93,7 +96,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 			return msg;
 		}
 		// 保存支付记录
-		PayFlow flow = savePayFlow(orderNum, userId, payType,paidRecord,order);
+		PayFlow flow = savePayFlow(orderNum, userId, payType,paidRecord,order,channel);
 		if (flow == null) {
 			return new PayMsg(PayMsg.failure_code, "保存支付记录失败.");
 		}
@@ -110,10 +113,10 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	 * 2.修改支付和订单状态<br>
 	 * 3.调用处理器,充值,卡密,订单同步等操作.<br>
 	 */
-	public PayMsg handlePayResult(String retStr) {
+	public PayMsg handlePayResult(String retStr, String channel) {
 		String payType = this.getPayType();
-		logger.info("handlePayResult() payType = {},retStr = {}", payType,retStr);
-		Map<String,Object> resultMap = resolveAndVerifyResult(retStr, payType);
+		logger.info("handlePayResult() payType = {},retStr = {},channel = {}", payType, retStr, channel);
+		Map<String, Object> resultMap = resolveAndVerifyResult(retStr, payType, channel);
 		try {
 			if (resultMap != null) {
 				logger.info("handlePayResult() 支付结果验证通过.payType = {}", payType);
@@ -234,12 +237,12 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	 * @param order
 	 * @return
 	 */
-	private PayFlow savePayFlow(String orderNum, String userId,String payType,PayFlow payFlow,OrderVo order) {
+	private PayFlow savePayFlow(String orderNum, String userId,String payType,PayFlow payFlow,OrderVo order,String channel) {
 		try {
 			if (payFlow == null) {
 				//支付金额
 				BigDecimal payAmount = order.getTotalMount();
-				//话费充值使用积分支付计算手续费
+				//话费充值使用积分支付计算手续费s
 				BigDecimal serviceCharge = order.getServiceCharge();
 				if(PayFlowService.PAYTYPE_DOOOLY.equals(payType) && serviceCharge != null && OrderService.ProductType.MOBILE_RECHARGE.getCode() == order.getProductType()){
 					payAmount = payAmount.add(order.getServiceCharge());
@@ -253,6 +256,8 @@ public abstract class AbstractPaymentService  implements PaymentService{
 				flow.setPayStatus(PayFlowService.TRADING);
 				flow.setPaySumbitTime(new Date());
 				flow.setPayCount(1);
+				flow.setChannel(channel);
+				logger.info("flow = {}", flow);
 				int rows = payFlowService.insert(flow);
 				return rows == 0 ? null : flow;
 			} else {

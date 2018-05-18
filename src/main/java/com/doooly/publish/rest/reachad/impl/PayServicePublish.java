@@ -48,7 +48,7 @@ public class PayServicePublish {
 
 	private static final String RET_CODE_SUCCESS = "SUCCESS";
 	private static final String RET_CODE_FAIL = "FAIL";
-	
+
 	@Autowired
 	private RefundService refundService;
 
@@ -102,7 +102,7 @@ public class PayServicePublish {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String dooolyCallback(JSONObject json) {
-		return payCallback(PayFlowService.PAYTYPE_DOOOLY,json.toJSONString()).toJsonString();
+		return payCallback(PayFlowService.PAYTYPE_DOOOLY,PaymentService.CHANNEL_WECHAT,json.toJSONString()).toJsonString();
 	}
 	
 
@@ -119,7 +119,7 @@ public class PayServicePublish {
 	public String wxJsapiCallback(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		logger.info("wxJsapiCallback() start...");
 		String resultXml = getResultXml(request);
-		PayMsg msg = payCallback(PayFlowService.PAYTYPE_WEIXIN_JSAPI,resultXml);
+		PayMsg msg = payCallback(PayFlowService.PAYTYPE_WEIXIN_JSAPI, PaymentService.CHANNEL_WECHAT, resultXml);
 		logger.info("wxJsapiCallback() msg = {}",msg);
 		if(MessageDataBean.success_code.equals(msg.getCode())){
 			return new RetWxBean(RET_CODE_SUCCESS, RET_CODE_SUCCESS).toXmlString();
@@ -127,7 +127,32 @@ public class PayServicePublish {
 			return new RetWxBean(RET_CODE_FAIL, RET_CODE_FAIL).toXmlString();
 		}
 	}
-	
+
+
+	/***
+	 * 武钢 APP回调
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@POST
+	@Path(value = "/wiscoAppCallback")
+	@Consumes(MediaType.TEXT_XML)
+	@Produces(MediaType.TEXT_PLAIN)
+	public String wiscoAppCallback(@Context HttpServletRequest request,@Context HttpServletResponse response) {
+		logger.info("wiscoAppCallback() start.");
+		String resultXml = getResultXml(request);
+		PayMsg msg = payCallback(PayFlowService.PAYTYPE_WEIXIN,PaymentService.CHANNEL_WISCOAPP,resultXml);
+		logger.info("wiscoAppCallback() msg = {}",msg);
+		if(MessageDataBean.success_code.equals(msg.getCode())){
+			String retXml =  new RetWxBean(RET_CODE_SUCCESS, RET_CODE_SUCCESS).toXmlString();
+			logger.info("retXml = {}", retXml);
+			return retXml;
+		}else{
+			return new RetWxBean(RET_CODE_FAIL, RET_CODE_FAIL).toXmlString();
+		}
+	}
+
 	/***
 	 * 微信APP回调
 	 * @param request
@@ -139,9 +164,9 @@ public class PayServicePublish {
 	@Consumes(MediaType.TEXT_XML)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String wxAppCallback(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-		logger.info("wxAppCallback() start...");
+		logger.info("wxAppCallback() start.");
 		String resultXml = getResultXml(request);
-		PayMsg msg = payCallback(PayFlowService.PAYTYPE_WEIXIN,resultXml);
+		PayMsg msg = payCallback(PayFlowService.PAYTYPE_WEIXIN, PaymentService.CHANNEL_APP, resultXml);
 		logger.info("wxAppCallback() msg = {}",msg);
 		if(MessageDataBean.success_code.equals(msg.getCode())){
 			String retXml =  new RetWxBean(RET_CODE_SUCCESS, RET_CODE_SUCCESS).toXmlString();
@@ -180,10 +205,11 @@ public class PayServicePublish {
 	 * @param retStr
 	 * @return
 	 */
-	private PayMsg payCallback(String payType,String retStr){
+	private PayMsg payCallback(String payType,String channel,String retStr){
 		PaymentService paymentService = PaymentServiceFactory.getPayService(payType);
+		logger.info("paymentService = {}",paymentService);
 		if (paymentService != null) {
-			return paymentService.handlePayResult(retStr);
+			return paymentService.handlePayResult(retStr,channel);
 		}
 		return new PayMsg(PayMsg.failure_code, "invalied payType=" + payType);
 	}

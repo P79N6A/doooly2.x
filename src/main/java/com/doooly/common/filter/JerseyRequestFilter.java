@@ -56,7 +56,6 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 
 		if (request.getRequestHeaders() != null && request.getRequestHeaders().containsKey(Constants.TOKEN_NAME)
 				&& request.getRequestHeaders().containsKey(Constants.CHANNEL)) {
-
 			String userToken = request.getRequestHeader(Constants.TOKEN_NAME).get(0);
 			// String uid = request.getRequestHeader("uid").get(0);
 			String userId = redisTemplate.opsForValue().get(userToken);

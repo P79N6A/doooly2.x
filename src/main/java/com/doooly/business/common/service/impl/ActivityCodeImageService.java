@@ -473,7 +473,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			}
 			logger.info(articles);
 			String sendNews = this.sendNews(accessToken.getString("accessToken"), openId,articles);
-//			String sendNews = this.sendNews("9_9f8PrYFiBk_SxxrDlA857xcgAPcGfIVEcqCtOglM2gjUSecEI2dyD6W7jV3M2QSVPznsKBus7acBgPeB91Brp2JKw2d78_NCInvpJg-1e73CndqFPKFZliGVUZoUDEjADAGPQ", openId,articles);
+//			String sendNews = this.sendNews("9_u9RZlxaC2lmIdbM8U5eq9Q3_gAzAVG0yT3kscUZ4NDdZv0vE_beXjZpLH_gEUwHNwMMV6LFwkJP2guTA8pJsXPRlhSZgs8l8Y_2geUa8UJGTaYfXFEavMucxbeUZEKiACADIO", openId,articles);
 			data.put("newsCode", sendNews);
 			messageDataBean.setData(data);
 			messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");

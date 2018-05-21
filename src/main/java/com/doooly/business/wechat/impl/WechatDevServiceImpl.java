@@ -136,6 +136,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPush(channel, fromUserName, paramArr);
 					}else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
 						handleIsPushNews(channel,fromUserName,WUGANG_SCAN_ACTIVITY);
+					}else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
+						handleIsPushNews(channel,fromUserName,BRING_COLLNESS_ACTIVITY);
 					} else {
 						//微信公众号关注回复信息
 						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);

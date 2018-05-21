@@ -15,6 +15,9 @@ public interface DoubleElevenActivityServiceI {
 	MessageDataBean getActivityIndexForJoiner(String superUserId, String userId);
 
 	MessageDataBean helpInitiator(String superUserId, String userId);
-;
+	
+	MessageDataBean receiveGift(String userId);
+	
+	MessageDataBean isReceiveGift(String userId);
 	
 }

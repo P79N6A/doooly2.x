@@ -177,6 +177,44 @@ public class DoubleElevenActivityService implements DoubleElevenActivityServiceI
 		return messageDataBean;
 	}
 	
-	
+	@Override
+	public MessageDataBean receiveGift(String userId) {
+		logger.info("送清凉活动 领取饮料用户id=" + userId);
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			// 判断该用户是否领取过送清凉活动礼品
+			AdDoubleElevenRecord historyRecord = adDoubleElevenRecordDao.findDataByUserIdAndType(userId, 2);
+			if(historyRecord != null){
+				// 已经领取过
+				messageDataBean.setCode(MessageDataBean.already_receive_code);
+			}else{
+				// 未领取则新增领取记录
+				AdDoubleElevenRecord record = new AdDoubleElevenRecord();
+				record.setUserId(userId);
+				record.setType("2");
+				record.setPointCount(new BigDecimal("0"));
+				adDoubleElevenRecordDao.insert(record);
+				messageDataBean.setCode(MessageDataBean.success_code);
+			}
+		} catch (Exception e) {
+			logger.error("送清凉活动立即领取异常！", e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		return messageDataBean;
+	}
+	@Override
+	public MessageDataBean isReceiveGift(String userId) {
+		logger.info("进入送清凉活动页面 用户id=" + userId);
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			// 判断该用户是否领取过送清凉活动礼品
+			AdDoubleElevenRecord historyRecord = adDoubleElevenRecordDao.findDataByUserIdAndType(userId, 2);
+			messageDataBean.setCode(historyRecord != null ? MessageDataBean.already_receive_code : MessageDataBean.success_code);
+		} catch (Exception e) {
+			logger.error("进入送清凉活动页面异常！", e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		return messageDataBean;
+	}
 
 }

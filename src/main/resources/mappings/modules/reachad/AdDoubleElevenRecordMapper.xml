@@ -54,4 +54,13 @@
 		)
 	</insert>
 	
+	<select id="findDataByUserIdAndType" resultType="com.doooly.entity.reachad.AdDoubleElevenRecord">
+		SELECT 
+			<include refid="adColumns" />
+		FROM 
+			ad_double_eleven_record a 
+		WHERE a.user_id = #{userId} and a.type = #{type}
+		LIMIT 1
+	</select>
+	
 </mapper>

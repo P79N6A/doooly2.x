@@ -16,4 +16,8 @@ public interface DoubleElevenActivityRestServiceI {
 	String indexForJoiner(JSONObject json);
 	// 点击帮他加分
 	String help(JSONObject json);
+	// 送清凉活动领取饮料
+	String receiveGift(JSONObject json);
+	// 判断是否领取过饮料
+	String isReceiveGift(JSONObject json);
 }

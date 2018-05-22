@@ -160,6 +160,13 @@ public class OrderServiceImpl implements OrderService {
 						if(actPrice != null && actPrice.compareTo(BigDecimal.ZERO) == 1){
 							sellPrice =  actPrice;
 						}
+						//用户限购数量
+						Integer actLimitNum = actInfo.getBuyNumberLimit();
+						int buyNum = getBuyNum(userId, skuId, activityName);
+						logger.info("actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, buyNum + buyQuantity);
+						if (actLimitNum != null && actLimitNum < buyNum + buyQuantity) {
+							return new OrderMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
+						}
 						//活动库存校验
 						Integer inventory = actInfo.getInventory();
 						if(inventory != null) {
@@ -174,13 +181,7 @@ public class OrderServiceImpl implements OrderService {
 								return msg;
 							}
 						}
-						//用户限购数量
-						Integer actLimitNum = actInfo.getBuyNumberLimit();
-						int buyNum = getBuyNum(userId, skuId, activityName);
-						logger.info("actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, buyNum + buyQuantity);
-						if (actLimitNum != null && actLimitNum < buyNum + buyQuantity) {
-							return new OrderMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
-						}
+
 						actType = activityName;
 					}
 				}

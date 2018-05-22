@@ -651,7 +651,7 @@ public class AdUserService implements AdUserServiceI {
 					}
 				} else if (isUsed.equals("1")) {
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_USED.getCode());
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_USED.getMsg());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.IS_USED.getMsg());
 				} else {
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());

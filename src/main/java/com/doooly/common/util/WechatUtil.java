@@ -71,6 +71,11 @@ public class WechatUtil {
 	public static Map<String, Object> getWechatConfig(String channel, String url) {
 		Map<String, Object> ret = new HashMap<String, Object>();
 		try {
+			if (!StringUtils.isEmpty(channel) && channel.startsWith("wisco")) {
+				channel = "wugang";
+			} else {
+				channel = "doooly";
+			}
 			JSONObject redisAccessTokenTicketJson = getAccessTokenTicketRedisByChannel(channel);
 			String accessToken = redisAccessTokenTicketJson.getString(ACCESS_TOKEN);
 			String jsApiTicket = redisAccessTokenTicketJson.getString(TICKET);
@@ -79,9 +84,7 @@ public class WechatUtil {
 				log.info("accessToken = {},jsApiTicket = {}", accessToken, jsApiTicket);
 				return null;
 			}
-			if("undefined".equals(channel) || StringUtils.isEmpty(channel) || "doooly".equals(channel)) {
-				channel = "doooly";
-			}
+
 			String nonce_str = create_nonce_str();
 			String timestamp = create_timestamp();
 			ret.put("url", url);

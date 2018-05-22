@@ -35,10 +35,8 @@ public class AppShareUtil {
 	public static Map<String, Object> getShareInfo(String channel,String appType, String prefix, String[] params) {
 		log.info("channel = {},appType = {},prefix = {}, params = {}",channel ,appType, prefix, params);
 		// 判断APP类型
-		if(!StringUtils.isEmpty(channel) && !"doooly".equals(channel)){
-			if(channel.startsWith("wisco")) {
+		if(!StringUtils.isEmpty(channel) && channel.startsWith("wisco")){
 				prefix = prefix + "." + "wisco";
-			}
 		}
 		String title = PropertiesHolder.getProperty(prefix + ".title");
 		String desc = PropertiesHolder.getProperty(prefix + ".desc");

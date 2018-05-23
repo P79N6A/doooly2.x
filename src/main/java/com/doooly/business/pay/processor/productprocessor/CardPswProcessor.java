@@ -85,6 +85,7 @@ public class CardPswProcessor implements ProductProcessor{
 						// =================微信消息推送==================
 						JSONObject data = new JSONObject();
 						data.put("userId", order.getUserId());
+						data.put("orderId", order.getId());
 						data.put("goods", item.getGoods());
 						data.put("sku", item.getSku());
 						data.put("cardNo", cardno);

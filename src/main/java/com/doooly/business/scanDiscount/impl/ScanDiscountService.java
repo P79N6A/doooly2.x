@@ -35,12 +35,12 @@ public class ScanDiscountService implements ScanDiscountServiceI{
 		
 		HashMap<String, Object> res = new HashMap<>();
 		String userId = data.getString("userId");
-		Integer i = adUserDao.isDongHang(Integer.valueOf(userId));
-		if (i ==null) {
+//		Integer i = adUserDao.isDongHang(Integer.valueOf(userId));
+//		if (i ==null) {
 			res.put("isDongHang", 0);
-		}else {
-			res.put("isDongHang", 1);
-		}
+//		}else {
+//			res.put("isDongHang", 1);
+//		}
 		List<AdBusiness> list = adBusinessDao.findBusinessList(userId);
 		AdGroup adGroup = adGroupDao.getGroupLogoByUserId(Integer.valueOf(userId));
 		if(list != null && list.size() > 0){

@@ -10,7 +10,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  *
  */
 public class WxQueryResult {
-	
+
 	private String return_code;
 	private String return_msg;
 	private String appid;
@@ -33,8 +33,21 @@ public class WxQueryResult {
 	private String settlement_total_fee;
 	private String coupon_fee;
 	private String coupon_count;
+
 	private String coupon_id_$n;
 	private String coupon_fee_$n;
+
+	private String coupon_id_0;
+	private String coupon_fee_0;
+	private String coupon_id_1;
+	private String coupon_fee_1;
+	private String coupon_id_2;
+	private String coupon_fee_2;
+	private String coupon_id_3;
+	private String coupon_fee_3;
+	private String coupon_id_4;
+	private String coupon_fee_4;
+
 	private String transaction_id;
 	private String out_trade_no;
 	private String attach;
@@ -214,6 +227,87 @@ public class WxQueryResult {
 	public void setErr_code_des(String err_code_des) {
 		this.err_code_des = err_code_des;
 	}
+
+	public String getCoupon_id_0() {
+		return coupon_id_0;
+	}
+
+	public void setCoupon_id_0(String coupon_id_0) {
+		this.coupon_id_0 = coupon_id_0;
+	}
+
+	public String getCoupon_fee_0() {
+		return coupon_fee_0;
+	}
+
+	public void setCoupon_fee_0(String coupon_fee_0) {
+		this.coupon_fee_0 = coupon_fee_0;
+	}
+
+	public String getCoupon_id_1() {
+		return coupon_id_1;
+	}
+
+	public void setCoupon_id_1(String coupon_id_1) {
+		this.coupon_id_1 = coupon_id_1;
+	}
+
+	public String getCoupon_fee_1() {
+		return coupon_fee_1;
+	}
+
+	public void setCoupon_fee_1(String coupon_fee_1) {
+		this.coupon_fee_1 = coupon_fee_1;
+	}
+
+	public String getCoupon_id_2() {
+		return coupon_id_2;
+	}
+
+	public void setCoupon_id_2(String coupon_id_2) {
+		this.coupon_id_2 = coupon_id_2;
+	}
+
+	public String getCoupon_fee_2() {
+		return coupon_fee_2;
+	}
+
+	public void setCoupon_fee_2(String coupon_fee_2) {
+		this.coupon_fee_2 = coupon_fee_2;
+	}
+
+	public String getCoupon_id_3() {
+		return coupon_id_3;
+	}
+
+	public void setCoupon_id_3(String coupon_id_3) {
+		this.coupon_id_3 = coupon_id_3;
+	}
+
+	public String getCoupon_fee_3() {
+		return coupon_fee_3;
+	}
+
+	public void setCoupon_fee_3(String coupon_fee_3) {
+		this.coupon_fee_3 = coupon_fee_3;
+	}
+
+	public String getCoupon_id_4() {
+		return coupon_id_4;
+	}
+
+	public void setCoupon_id_4(String coupon_id_4) {
+		this.coupon_id_4 = coupon_id_4;
+	}
+
+	public String getCoupon_fee_4() {
+		return coupon_fee_4;
+	}
+
+	public void setCoupon_fee_4(String coupon_fee_4) {
+		this.coupon_fee_4 = coupon_fee_4;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);

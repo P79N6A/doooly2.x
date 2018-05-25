@@ -491,5 +491,11 @@
 		WHERE
 		i.product_sku_id = #{productSku} and o.user_id= #{userId} and o.del_flag='0';
 	</select>
+	<!--获得用户某种sku的订单 -->
+	<select id="findUserIsBuyByProductAndSkuId" resultType="java.lang.String">
+		select r.id from ad_order_report r INNER JOIN ad_order_detail d on r.id = d.order_report_id where r.user_id=#{userId} and (d.product_sku_id =#{productSkuId} or d.product_sku_id =#{productSku})
+		and r.type=1 limit 1
+
+	</select>
 
 </mapper>

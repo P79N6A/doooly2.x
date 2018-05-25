@@ -38,4 +38,6 @@ public interface AdOrderReportDao {
 	 * 获得用户某种sku的订单
 	 */
 	public List<Map<String,Object>> getByUserSku(@Param("userId") String userId,@Param("productSku") String productSku);
+
+	public String findUserIsBuyByProductAndSkuId(@Param("userId")String userId, @Param("productSkuId")String productSkuId, @Param("productSku")String productSku);
 }

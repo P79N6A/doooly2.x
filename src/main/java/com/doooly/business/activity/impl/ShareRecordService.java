@@ -17,6 +17,7 @@ import com.doooly.business.activity.ShareRecordServiceI;
 import com.doooly.business.common.service.AdSendGiftServiceI;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.freeCoupon.service.Impl.FreeCouponBusinessService;
+import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.ConstantsV2.ActivityCode;
@@ -28,6 +29,7 @@ import com.doooly.dao.reachad.AdBasicTypeDao;
 import com.doooly.dao.reachad.AdBusinessActivityOrderDao;
 import com.doooly.dao.reachad.AdBusinessActivityRuleDao;
 import com.doooly.dao.reachad.AdCouponActivityDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdVoteRecordDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.activity.ActivityOrderReq;
@@ -48,13 +50,17 @@ public class ShareRecordService implements ShareRecordServiceI {
 	
 	private static Logger logger = Logger.getLogger(ShareRecordService.class);
 	private static final String ACTIVITY_ID1  = PropertiesConstants.dooolyBundle.getString("bring_coolness_activity_id1");
-	private static final String ACTIVITY_ID2  = PropertiesConstants.dooolyBundle.getString("bring_coolness_activity_id2");
-	private static final String ACTIVITY_ID3  = PropertiesConstants.dooolyBundle.getString("bring_coolness_activity_id3");
+//	private static final String ACTIVITY_ID2  = PropertiesConstants.dooolyBundle.getString("bring_coolness_activity_id2");
+//	private static final String ACTIVITY_ID3  = PropertiesConstants.dooolyBundle.getString("bring_coolness_activity_id3");
 	private static final String ACTIVITY_COUPON_ID  = PropertiesConstants.dooolyBundle.getString("bring_coolness_coupon_id");
+	private static final String ACTIVITY_PRODUCT_AND_SKU_ID1  = PropertiesConstants.dooolyBundle.getString("bring_coolness_product_and_sku_id1");
+	private static final String ACTIVITY_PRODUCT_AND_SKU_ID2  = PropertiesConstants.dooolyBundle.getString("bring_coolness_product_and_sku_id2");
 	@Autowired
 	private AdVoteRecordDao adVoteRecordDao;
 	@Autowired
 	private AdUserService adUserService;
+	@Autowired
+	private AdOrderReportDao adOrderReportDao;
 	@Autowired
 	private FreeCouponBusinessService freeCouponBusinessService;
 	
@@ -64,6 +70,13 @@ public class ShareRecordService implements ShareRecordServiceI {
 		// TODO Auto-generated method stub
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
+			String detailId= adOrderReportDao.findUserIsBuyByProductAndSkuId(userId,ACTIVITY_PRODUCT_AND_SKU_ID1,ACTIVITY_PRODUCT_AND_SKU_ID2);
+			if (StringUtils.isBlank(detailId)) {
+				//当前进入用户未进行下单
+				logger.info("当前用户为:"+userId+"未下单");
+				messageDataBean.setCode(SystemCode.SUCCESS_NULL.getCode()+"");
+				return messageDataBean;
+			}
 			//判断该telephone是否在数据库中
 			AdUser adUser = adUserService.get(telephone, null);
 			if (adUser!=null) {
@@ -130,15 +143,31 @@ public class ShareRecordService implements ShareRecordServiceI {
 	public MessageDataBean sendByShareRecord(String userId, String telephone, String telephoneUserId) {
 		// TODO Auto-generated method stub
 		MessageDataBean messageDataBean= new MessageDataBean();
+		HashMap<String, Object> data = new HashMap<String, Object>();
+		Integer isShow = 0;
 		try {
+			String detailId= adOrderReportDao.findUserIsBuyByProductAndSkuId(telephoneUserId,ACTIVITY_PRODUCT_AND_SKU_ID1,ACTIVITY_PRODUCT_AND_SKU_ID2);
+			if (StringUtils.isNotBlank(detailId)) {
+				//当前进入用户未进行下单
+				isShow=1;
+			}
+			if (userId.equals("-1")||userId.equals("0")) {
+				logger.info("当前用户为:"+userId+"不是分享进入");
+				messageDataBean.setCode(SystemCode.SUCCESS_NULL.getCode()+"");
+				data.put("isShow", isShow);
+				messageDataBean.setData(data);
+				return messageDataBean;
+			}
 			AdUser adUser = adUserService.getById(telephoneUserId);
 			if (adUser!=null) {
 				//ad_vote_record表中,state为0代表未被使用,1代表已被使用过,activity_id使用3
 				//获取所有telephone的记录,遍历,判断是否有该userId,或者state为1的数据
 				if (StringUtils.isNotBlank(adUser.getTelephone())&&!adUser.getTelephone().equals(telephone)) {
 					//当前进入用户并不是邀请输入的手机号
-					logger.info("当前用户为:"+adUser.getTelephone()+",分享手机号为:"+telephone);
+					logger.info("当前用户为:"+adUser.getTelephone()+",分享手机号为:"+telephone+",并不是分享的手机号");
 					messageDataBean.setCode(ActivityCode.NOT_STARTED.getCode()+"");
+					data.put("isShow", isShow);
+					messageDataBean.setData(data);
 					return messageDataBean;
 				}
 			}
@@ -147,42 +176,22 @@ public class ShareRecordService implements ShareRecordServiceI {
 			if (records.isEmpty()) {
 				//判断该userId是否已经获取三次
 				int userRecordsSize = adVoteRecordDao.getByUserIdAndActivityId(userId, "3","1");
-				if (userRecordsSize < 3) {
+				if (userRecordsSize == 2) {
 					//发券
-					switch (userRecordsSize) {
-					case 0:
-						messageDataBean = freeCouponBusinessService.receiveCoupon(Integer.valueOf(userId), 
-								Integer.valueOf(ACTIVITY_COUPON_ID), 
-								Integer.valueOf(ACTIVITY_ID1), null);
-						break;
-					case 1:
-						messageDataBean = freeCouponBusinessService.receiveCoupon(Integer.valueOf(userId), 
-								Integer.valueOf(ACTIVITY_COUPON_ID), 
-								Integer.valueOf(ACTIVITY_ID2), null);
-						break;
-					case 2:
-						messageDataBean = freeCouponBusinessService.receiveCoupon(Integer.valueOf(userId), 
-								Integer.valueOf(ACTIVITY_COUPON_ID), 
-								Integer.valueOf(ACTIVITY_ID3), null);
-						break;
-					default:
-						break;
+					messageDataBean = freeCouponBusinessService.receiveCoupon(Integer.valueOf(userId), 
+							Integer.valueOf(ACTIVITY_COUPON_ID), 
+							Integer.valueOf(ACTIVITY_ID1), null);
 					}
-					if (messageDataBean.getCode().equals(MessageDataBean.success_code)) {
-						//更新记录状态
-						adVoteRecordDao.updateShareRecord(userId, telephone);
-					}
-//					messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+				adVoteRecordDao.updateShareRecord(userId, telephone);
 				}else {
 					messageDataBean.setCode(OrderCode.SELL_OUT.getCode()+"");
 				}
-			}else{
-				messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode()+"");
 		}
+		data.put("isShow", isShow);
+		messageDataBean.setData(data);
 		return messageDataBean;
 	}
 

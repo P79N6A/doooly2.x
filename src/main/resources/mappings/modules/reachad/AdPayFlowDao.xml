@@ -21,7 +21,7 @@
 
   <sql id="Base_Column_List" >
     id, order_number, pay_type, user_id, amount, pay_count, trans_no, pay_status, pay_sumbit_time,
-    pay_callback_time, error_code, error_reason, is_delete
+    pay_callback_time, error_code, error_reason, is_delete, channel
   </sql>
 
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >

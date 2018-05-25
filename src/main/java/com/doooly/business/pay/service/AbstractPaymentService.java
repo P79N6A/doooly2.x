@@ -266,7 +266,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 				flow.setPayCount(payFlow.getPayCount() + 1);
 				flow.setId(payFlow.getId());
 				int rows = payFlowService.update(flow);
-				return rows <= 0 ? null : flow;
+				return rows > 0 ? payFlowService.getById(String.valueOf(payFlow.getId())) : null;
 			}
 		} catch (Exception e) {
 			logger.error("savePayFlow e = {}", e);

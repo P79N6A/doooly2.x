@@ -23,6 +23,7 @@ import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.springframework.util.StringUtils;
 
 /***
  * 同步订单到_order
@@ -39,6 +40,8 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 	
 	@Autowired
 	private MallBusinessService mallBusinessService;
+
+
 	
 	@Override
 	public PayMsg process(OrderVo order,PayFlow payFlow) {
@@ -69,8 +72,9 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 			o.setIsPayPassword(0);
 			o.setOrderDetail(null);
 			o.setIsRebate(0);
-			o.setBusinessRebate(new BigDecimal("0"));
-			o.setUserRebate(new BigDecimal("0"));
+			//旅游卡计算返佣返利
+			o.setBusinessRebate(order.getBusinessRebateAmount());
+			o.setUserRebate(order.getUserReturnAmount());
 			o.setCreateDateTime(new Date());
 			o.setCheckState(0);
 			int rows = orderDao.updateById(o);

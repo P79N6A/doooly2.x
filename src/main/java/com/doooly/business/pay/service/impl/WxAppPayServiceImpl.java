@@ -53,7 +53,7 @@ public class WxAppPayServiceImpl extends AbstractPaymentService {
 		BigDecimal payAmount = super.getTotalAmount(orders);
 		String orderNum = json.getString("orderNum");
 		String clientIp = json.getString("clientIp");
-		String channel = json.getString("channel");
+		String channel = flow.getChannel();
 		WxPrePayParams payParams = prePayParams(orderNum, payAmount, goodsDesc, clientIp, flow);
 		WxPrePayResult retVo = unifiedOrder(payParams,channel);
 		if (retVo == null) {
@@ -283,8 +283,12 @@ public class WxAppPayServiceImpl extends AbstractPaymentService {
 
 	public String getPropByChannel(String channel,String key){
 		String prefix = "wx";
-		if(!StringUtils.isEmpty(channel) && channel.equals("wiscoapp")){
-			prefix = channel;
+		if ("wiscoapp".equals(channel)) {
+			//武钢app配置
+			prefix = "wiscoapp";
+		} else {
+			//微信app配置
+			prefix = "wx";
 		}
 		return PropertiesHolder.getProperty(prefix + "." + key);
 	}

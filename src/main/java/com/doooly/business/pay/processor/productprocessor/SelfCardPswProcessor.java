@@ -96,7 +96,7 @@ public class SelfCardPswProcessor implements ProductProcessor {
             logger.error("活动自营卡券失败. coupon = {}",coupon);
             Map<String, String> retMap = new HashMap<String,String>();
             retMap.put("retcode","9");
-            retMap.put("err_msg","自营卡券失败.");
+            retMap.put("err_msg","自营卡券失败,未取到卡券");
             int rows = updateOrderItemSuccesss(item, retMap);
             logger.info("updateOrderItem  rows = {}",  rows);
         }

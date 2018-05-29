@@ -162,6 +162,8 @@ public class WxJsapiPayServiceImpl extends AbstractPaymentService {
 		return signMap;
 	}
 
+
+
 	/**
 	 * 解析返回结果并验证
 	 * 

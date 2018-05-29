@@ -1,6 +1,7 @@
 package com.doooly.business.order.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
 import com.doooly.business.product.entity.ActivityInfo;
@@ -70,6 +71,8 @@ public class OrderServiceImpl implements OrderService {
 	private AdCouponCodeDao adCouponCodeDao;
 	@Autowired
 	AdRechargeRecordDao adRechargeRecordDao;
+	@Autowired
+	private MallBusinessService mallBusinessService;
 
 
 	@Override
@@ -363,11 +366,39 @@ public class OrderServiceImpl implements OrderService {
 		order.setOrderDate(orderDate);
 		order.setState(PayState.UNPAID.getCode());
 		order.setType(OrderStatus.NEED_TO_PAY.getCode());
-		order.setIsUserRebate('0');
-		order.setUserRebate(orderVo.getUserRebate());
-		order.setUserReturnAmount(new BigDecimal("0"));
-		order.setIsBusinessRebate(orderVo.getIsBusinessRebate());
-		order.setBusinessRebateAmount(new BigDecimal("0"));
+		if(orderVo.getProductType() == OrderService.ProductType.TOURIST_CARD_RECHARGE.getCode()){
+			//旅游卡计算返佣返利
+			AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
+			//企业返佣
+			BigDecimal businessRebateAmount = null;
+			if(!StringUtils.isEmpty(business.getBussinessRebate())) {
+				BigDecimal businessRebate = new BigDecimal(business.getBussinessRebate()).divide(new BigDecimal("100"));
+				businessRebateAmount = totalMount.multiply(businessRebate);
+				order.setIsBusinessRebate('1');
+				order.setBusinessRebateAmount(businessRebateAmount);
+			}
+			logger.info("bussinessRebate = {}，businessRebateAmount={}", business.getBussinessRebate(), businessRebateAmount);
+			//用户返利
+			//BigDecimal userReturnAmount = null;
+			//if(businessRebateAmount != null && !StringUtils.isEmpty(business.getUserRebate())) {
+			//	order.setIsUserRebate('1');
+			//	order.setUserRebate(new BigDecimal(business.getUserRebate()).intValue());
+			//	userReturnAmount = businessRebateAmount.multiply(new BigDecimal(business.getUserRebate()).divide(new BigDecimal("100")));
+			//	order.setUserReturnAmount(userReturnAmount);
+			//  logger.info("userRebate = {}，userReturnAmount={}",  business.getUserRebate(), userReturnAmount);
+			//}
+			//暂时只算返佣
+			order.setIsUserRebate('0');
+			order.setUserReturnAmount(new BigDecimal("0"));
+
+		}else{
+			//未返佣返利
+			order.setIsUserRebate('0');
+			order.setUserRebate(orderVo.getUserRebate());
+			order.setUserReturnAmount(new BigDecimal("0"));
+			order.setIsBusinessRebate('0');
+			order.setBusinessRebateAmount(new BigDecimal("0"));
+		}
 		order.setBillingState('0');
 		order.setDelFlag('0');
 		order.setDelFlagUser('0');

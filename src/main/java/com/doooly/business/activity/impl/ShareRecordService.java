@@ -148,7 +148,7 @@ public class ShareRecordService implements ShareRecordServiceI {
 		try {
 			String detailId= adOrderReportDao.findUserIsBuyByProductAndSkuId(telephoneUserId,ACTIVITY_PRODUCT_AND_SKU_ID1,ACTIVITY_PRODUCT_AND_SKU_ID2);
 			if (StringUtils.isNotBlank(detailId)) {
-				//当前进入用户未进行下单
+				//当前进入用户已下单
 				isShow=1;
 			}
 			if (userId.equals("-1")||userId.equals("0")) {

@@ -4,13 +4,16 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
+import com.alibaba.druid.util.StringUtils;
+import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
+import com.doooly.business.utils.DateUtils;
+import com.doooly.common.util.WechatUtil;
+import com.doooly.entity.reachlife.LifeWechatBinding;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +45,8 @@ import com.doooly.entity.reachlife.LifeMember;
  */
 @Service
 public class AdUserService implements AdUserServiceI {
+
+	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 
 	private Logger logger = Logger.getLogger(this.getClass());
 
@@ -80,6 +85,12 @@ public class AdUserService implements AdUserServiceI {
 	/** A库企业DAO */
 	@Autowired
 	private LifeGroupDao lifeGroupDao;
+
+	@Autowired
+	private AdSystemNoitceService adSystemNoitceService;
+
+	@Autowired
+	private StringRedisTemplate redisTemplate;
 
 	public AdUser getById(String id) {
 		return adUserDao.getById(id);
@@ -227,8 +238,8 @@ public class AdUserService implements AdUserServiceI {
 	 */
 	@Override
 	public JSONObject validateUserInfo(JSONObject param) throws Exception {
+        logger.info("validateUserInfo() param = " + param);
 		JSONObject jsonResult = new JSONObject();
-		AdUser loginUser = new AdUser();
 		// 登录成功,返回数据库加密密码
 		String dataBasePassword = "";
 		try {
@@ -243,7 +254,7 @@ public class AdUserService implements AdUserServiceI {
 			String inputPassword = param.getString("password");
 			// 终端渠道
 			String channel = param.getString(ConstantsLogin.CHANNEL);
-			loginUser = adUserDao.getUserInfo(userParam);
+			final AdUser loginUser = adUserDao.getUserInfo(userParam);
 			logger.info("====【validateUserInfo】登录名获取用户信息：" + JSONObject.toJSONString(loginUser));
 			if (loginUser == null) {
 				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_EXIST.getCode());
@@ -337,6 +348,12 @@ public class AdUserService implements AdUserServiceI {
 						jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.FAIL.getMsg());
 						return jsonResult;
 					} else {
+						//如果家属激活，给邀请人发消息推送
+						if(loginUser.getType() == AdUser.TYPE_FAMILY) {
+							logger.info("===开始给邀请人发送消息 开始");
+							new Thread(new SendMsgJob(loginUser)).start();
+							logger.info("===开始给邀请人发送消息 结束");
+						}
 						jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
 						jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
 						jsonResult.put("password", dataBasePassword);
@@ -346,6 +363,7 @@ public class AdUserService implements AdUserServiceI {
 				}
 			}
 		} catch (Exception e) {
+			logger.info("=== e = {}",e);
 			e.printStackTrace();
 			jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
 			jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
@@ -848,15 +866,11 @@ public class AdUserService implements AdUserServiceI {
 		JSONObject res = new JSONObject();
 		String telephone = data.getString("telephone");
 		String userId = data.getString("userId");
+		String channel = data.getString("channel");
 		try {
 			AdUser user = adUserDao.findByMobile(telephone);
-			if (user != null && (user.getDelFlag().equals("1"))) {
-				res.put("code", "1001");
-				res.put("msg", "该手机已被删除");
-				return res;
-			}
 			// 手机号已是会员
-			else if (user != null && user.getType() == 0) {
+			if (user != null && user.getType() == 0) {
 				res.put("code", "1001");
 				res.put("msg", "该手机已是会员");
 				return res;
@@ -864,18 +878,28 @@ public class AdUserService implements AdUserServiceI {
 			// 手机号存在并且是家属
 			else if (user != null && user.getType() == 1) {
 				// 查询该家属去记录表中查询是否存在
-				AdInvitationRecord adInvitationRecord = adInvitationRecordDao
-						.findRecodByInviteeId(user.getId().toString());
+				AdInvitationRecord adInvitationRecord = adInvitationRecordDao.findRecodByInviteeId(user.getId().toString());
 				if (adInvitationRecord != null) {
 					if (!userId.equals(adInvitationRecord.getInviterId() + "")) {
 						res.put("code", "1001");
 						res.put("msg", "该手机已经不是您的家属，不能邀请！");
 						return res;
-					} else if (userId.equals(adInvitationRecord.getInviterId() + "")
-							&& user.getIsActive().equals("1")) {
-						res.put("code", "1002");
-						// res.put("msg", "该手机已经是您的家属！");
-						return res;
+					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
+						if(user.getDelFlag().equals("1")){
+							AdUser record = new AdUser();
+							record.setId(user.getId());
+							record.setDelFlag("0");
+							adUserDao.updateByPrimaryKeySelective(record);
+
+							res.put("code", "1004");
+							res.put("msg", "该手机已被标记邀请失败！");
+							return res;
+						}
+						if(user.getIsActive().equals("1")) {
+							res.put("code", "1002");
+							res.put("msg", "该手机已经是您的家属！");
+							return res;
+						}
 					} else {
 						res.put("code", "1001");
 						res.put("msg", "该手机已经是您的家属！");
@@ -893,6 +917,7 @@ public class AdUserService implements AdUserServiceI {
 						adInvitationRecord1.setUpdateDate(new Date());// 更新时间
 						// adInvitationRecord1.setIsNewRecord(true);
 						adInvitationRecord1.setFlag("2");
+						adInvitationRecord1.setChannel(channel);
 						adInvitationRecordDao.insert(adInvitationRecord1);
 						// 更新邀请记录表信息
 						// adInvitationDao.updateByUserId(adUser.getId().intValue());
@@ -983,6 +1008,52 @@ public class AdUserService implements AdUserServiceI {
 	public void addIntegral(Long userId, BigDecimal integralForEach) {
 		// TODO Auto-generated method stub
 		adUserDao.addIntegral(userId, integralForEach);
+	}
+
+	class SendMsgJob implements Runnable{
+
+		private AdUser loginUser;
+
+		public SendMsgJob(){
+		}
+
+		public SendMsgJob(AdUser user){
+			this.loginUser = user;
+		}
+
+		@Override
+		public void run() {
+			String userId = String.valueOf(loginUser.getId());
+			try {
+				AdInvitationRecord record = adInvitationRecordDao.findRecodByInviteeId(userId);
+				logger.info("SendMsgJob userId=" + userId + ",record.id=" + (record != null ? record.getId() : "null"));
+				if(record != null) {
+                    String from = record.getChannel();
+                    if (!StringUtils.isEmpty(from)) {
+						AdUser user = adUserDao.getById(String.valueOf(record.getInviterId()));
+                        String dateStr = DateUtils.formatDate(new Date(), "yyyy年MM月dd日 HH:mm");
+						String telephone = loginUser.getTelephone();
+                        if (from.endsWith("app")) {
+                            String content = "您邀请的亲友(手机尾号"+ telephone.substring(7,11) +")已成功开通兜礼会员。";
+                            adSystemNoitceService.sendMessage(String.valueOf(user.getId()), "invitation", content);
+                        } else {
+                            //公众号推送
+                            LifeWechatBinding wechatBind = WechatUtil.getLifeWechatBinding(user.getTelephone(), user.getCardNumber());
+                            JSONObject data = new JSONObject();
+                            data.put("dateStr", dateStr);
+                            data.put("telphone", telephone);
+                            data.put("openId", wechatBind.getOpenId());
+                            data.put("url", invite_url);
+                            data.put("channel", from.startsWith("wisco") ? "wugang" : "doooly");
+                            redisTemplate.convertAndSend("FAMILY_INVITE", data.toString());
+                        }
+                    }
+                }
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("SendMsgJob userId=" + userId + ", e = +", e);
+			}
+		}
 	}
 
 }

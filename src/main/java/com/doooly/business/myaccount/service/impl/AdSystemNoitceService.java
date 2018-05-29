@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ResourceBundle;
 
 @Service
 @Transactional
@@ -107,6 +108,19 @@ public class AdSystemNoitceService implements AdSystemNoticeServiceI {
         if(num == 0 && num1 ==0){
             messageDataBean.setCode(MessageDataBean.failure_code);
         }else {
+            //家属邀请的推送要入库
+            if("invitation".equals(target)){
+                AdSystemNotice adSystemNotice = new AdSystemNotice();
+                adSystemNotice.setTitle("账户开通提醒通知");
+                adSystemNotice.setContent(content);
+                adSystemNotice.setReceiveUser(userId);
+                adSystemNotice.setNoticeType("0");
+                adSystemNotice.setTarget("2");
+                adSystemNotice.setTargetUrl(ResourceBundle.getBundle("doooly").getString("invite_url"));
+                adSystemNotice.setNewTargetUrl(ResourceBundle.getBundle("doooly").getString("invite_url"));
+                int i = adSystemNoticeDao.insert(adSystemNotice);
+                logger.info("adSystemNoticeDao.insert rows = " + i);
+            }
             messageDataBean.setCode(MessageDataBean.success_code);
         }
         return messageDataBean;

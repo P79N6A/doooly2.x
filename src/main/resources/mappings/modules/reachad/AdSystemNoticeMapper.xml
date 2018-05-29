@@ -75,6 +75,8 @@
             create_date,
             notice_type,
             receive_user,
+            target_url,
+            new_target_url
         )
         VALUES
             (
@@ -83,7 +85,9 @@
                 #{target},
                 now(),
                 #{noticeType},
-                #{receiveUser}
+                #{receiveUser},
+                #{targetUrl},
+                #{newTargetUrl}
 	        )
     </insert>
     

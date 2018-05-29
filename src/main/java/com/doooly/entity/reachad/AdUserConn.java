@@ -58,6 +58,8 @@ public class AdUserConn {
 	private boolean hasNewCoupon;
 	/** 是否激活 */
 	private String isActive;
+
+	private String delFlag;
 	/** 企业简称 */
 	private String groupShortName;
 	/** 认证标志,默认为认证会员(0-非认证会员,1-认证会员) */
@@ -347,4 +349,11 @@ public class AdUserConn {
 		this.cancelTotal = cancelTotal;
 	}
 
+	public String getDelFlag() {
+		return delFlag;
+	}
+
+	public void setDelFlag(String delFlag) {
+		this.delFlag = delFlag;
+	}
 }

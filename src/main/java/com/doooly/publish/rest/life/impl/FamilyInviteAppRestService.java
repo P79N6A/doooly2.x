@@ -115,7 +115,7 @@ public class FamilyInviteAppRestService implements FamilyInviteAppRestServiceI {
 			String famPassword = jsonObj.getString("password");
 			String name = jsonObj.getString("name");
 			resultJson = adInvitationService.saveUserNotActive(famMobile,
-					invitationCode, invitationType, famPassword, name);
+					invitationCode, invitationType, famPassword, name,null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultJson.put("code", -1);

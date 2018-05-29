@@ -9,7 +9,7 @@ public interface AdInvitationService {
 	JSONObject getGroupInfo(String userId);
 
 	JSONObject saveUserNotActive(String famMobile, String invitationCode,
-			Integer invitationType, String famPassword, String name);
+			Integer invitationType, String famPassword, String name,String channel);
 
 	JSONObject getMyFamilyInfo(String userId);
 

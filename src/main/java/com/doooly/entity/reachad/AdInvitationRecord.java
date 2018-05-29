@@ -21,6 +21,7 @@ public class AdInvitationRecord {
 	private Date createDate;	// 创建日期
 	private Date updateDate;	// 更新日期
 	private String delFlag; 	// 删除标记（0：正常；1：删除；2：审核）
+	private String channel; // channel
 
 	private Boolean isNewRecord;
 	/**
@@ -68,7 +69,7 @@ public class AdInvitationRecord {
 	private String userId;
 	
 	private String isActive;
-	
+
 	
 	public String getIsActive() {
 		return isActive;
@@ -214,6 +215,11 @@ public class AdInvitationRecord {
 		this.delFlag = delFlag;
 	}
 
-	
+	public String getChannel() {
+		return channel;
+	}
 
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
 }

@@ -245,7 +245,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 
 	public JSONObject saveUserNotActive(String famMobile,
 			String invitationCode, Integer invitationType, String famPassword,
-			String name) {
+			String name,String channel) {
 		JSONObject resJson = new JSONObject();
 		try {
 			// 激活家属前获取invitation，判断是否有礼品
@@ -331,7 +331,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 			adUserPersonalInfo.setAuthFlag("0");;
 			adUserPersonalInfoDao.insert(adUserPersonalInfo);
 			//邀请记录表新增记录
-			int result = this.sendCodeAndSaveRecord(famUser,invitation);
+			int result = this.sendCodeAndSaveRecord(famUser, invitation, channel);
 			if(result==1){
 				resJson.put("code", 9);
 				resJson.put("desc", "账号激活异常");
@@ -356,7 +356,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 	 * @param invitation
 	 */
 	private int sendCodeAndSaveRecord(AdUser famUser,
-			AdInvitation invitation) {
+			AdInvitation invitation,String channel) {
 		Integer userId = invitation.getUserId();
 		//获取家属邀请的最新的活动卡券
 //		AdCouponActivityConn adCouponActivityConn= adCouponActivityConnService.findNewFamilyActivity();
@@ -389,6 +389,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 		adInvitationRecord.setUpdateDate(new Date());// 更新时间
 		adInvitationRecord.setIsNewRecord(true);
 		adInvitationRecord.setFlag(invitation.getFlag());
+		adInvitationRecord.setChannel(channel);
 		adInvitationRecordDao.insert(adInvitationRecord);
 		return 0;
 		

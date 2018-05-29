@@ -246,14 +246,18 @@ public class MyAccountService implements MyAccountServiceI {
             // 获取消费积分
             BigDecimal consumerPoints = adAvailablePointsDao.getConsumerPoints(userId);
             //总积分
-            String totalIntegral = availablePoint.add(returnPoint).add(consumerPoints).toString();
-            String appHeadImageUrl = adUserConn.getAppHeadImageUrl();
-            if(StringUtils.isBlank(appHeadImageUrl)){
-                appHeadImageUrl = "";
-            }
+			String totalIntegral = "0.0";
+			if(availablePoint != null) {
+				totalIntegral = availablePoint.add(returnPoint).add(consumerPoints).toString();
+			}
+			String appHeadImageUrl = adUserConn.getAppHeadImageUrl();
+			if (StringUtils.isBlank(appHeadImageUrl)) {
+				appHeadImageUrl = "";
+			}
             map.put("appHeadImageUrl", appHeadImageUrl);
-            map.put("name", adUserConn.getName());
+            map.put("name", adUserConn.getTelephone());
             map.put("totalIntegral",totalIntegral);
+            map.put("delFlag",adUserConn.getDelFlag());
         } catch (Exception e) {
             logger.error("获取家属头像姓名累计积分出错userId为:"+userId,e);
         }

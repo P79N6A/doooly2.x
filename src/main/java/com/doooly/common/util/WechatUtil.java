@@ -1,14 +1,13 @@
 package com.doooly.common.util;
 
 import java.security.MessageDigest;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.doooly.dao.reachlife.LifeWechatBindingDao;
+import com.doooly.entity.reachlife.LifeWechatBinding;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +61,18 @@ public class WechatUtil {
 	public static Long EXPIRE_IN = 5400L;
 
 	/**
+	 *  根据手机号或者卡号获得微信绑定信息
+	 * @param telephone
+	 * @param cardNumber
+	 * @return
+	 */
+	public static LifeWechatBinding getLifeWechatBinding(String telephone, String cardNumber) {
+		LifeWechatBindingDao lifeWechatBindingDao = (LifeWechatBindingDao) SpringContextHolder.getBean("lifeWechatBindingDao");
+		List<LifeWechatBinding> binds = lifeWechatBindingDao.getWechatBindingListByCardNum(telephone, cardNumber);
+		return (binds == null || binds.size() == 0) ? null : binds.get(0);
+	}
+
+	/**
 	 * 获得签名信息
 	 * 
 	 * @param url
@@ -69,45 +80,39 @@ public class WechatUtil {
 	 * @return
 	 */
 	public static Map<String, Object> getWechatConfig(String channel, String url) {
-		Map<String, Object> ret = new HashMap<String, Object>();
-		try {
-			if (!StringUtils.isEmpty(channel) && channel.startsWith("wisco")) {
-				channel = "wugang";
-			} else {
-				channel = "doooly";
-			}
-			JSONObject redisAccessTokenTicketJson = getAccessTokenTicketRedisByChannel(channel);
-			String accessToken = redisAccessTokenTicketJson.getString(ACCESS_TOKEN);
-			String jsApiTicket = redisAccessTokenTicketJson.getString(TICKET);
-
-			if (StringUtils.isEmpty(accessToken) || StringUtils.isEmpty(jsApiTicket)) {
-				log.info("accessToken = {},jsApiTicket = {}", accessToken, jsApiTicket);
-				return null;
-			}
-
-			String nonce_str = create_nonce_str();
-			String timestamp = create_timestamp();
-			ret.put("url", url);
-			ret.put("jsapi_ticket", jsApiTicket);
-			ret.put("nonceStr", nonce_str);
-			ret.put("timestamp", timestamp);
-			ret.put("appid", getPropertiesValue(channel, "appid"));
-			ret.put("accessToken", accessToken);
-			String signature = "";
-			// 注意这里参数名必须全部小写，且必须有序
-			String acess_url = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonce_str + "&timestamp=" + timestamp + "&url=" + url;
-			ret.put("acess_url", acess_url);
-			log.info("accessToken = {},jsApiTicket = {}", accessToken, jsApiTicket);
-			MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-			crypt.reset();
-			crypt.update(acess_url.getBytes("UTF-8"));
-			signature = byteToHex(crypt.digest()).toUpperCase();
-			ret.put("signature", signature);
-			log.info("signature = {}", signature);
-		} catch (Exception e) {
-			log.info("e = {}, ret = {}", e, ret);
-		}
-		return ret;
+        Map<String, Object> ret = new HashMap<String, Object>();
+        try {
+            if (!StringUtils.isEmpty(channel) && channel.startsWith("wisco")) {
+                channel = "wugang";
+            } else {
+                channel = "doooly";
+            }
+            JSONObject redisAccessTokenTicketJson = getAccessTokenTicketRedisByChannel(channel);
+            String accessToken = redisAccessTokenTicketJson.getString(ACCESS_TOKEN);
+            String jsApiTicket = redisAccessTokenTicketJson.getString(TICKET);
+            String nonce_str = create_nonce_str();
+            String timestamp = create_timestamp();
+            ret.put("url", url);
+            ret.put("jsapi_ticket", jsApiTicket);
+            ret.put("nonceStr", nonce_str);
+            ret.put("timestamp", timestamp);
+            ret.put("appid", getPropertiesValue(channel, "appid"));
+            ret.put("accessToken", accessToken);
+            String signature = "";
+            // 注意这里参数名必须全部小写，且必须有序
+            String acess_url = "jsapi_ticket=" + jsApiTicket + "&noncestr=" + nonce_str + "&timestamp=" + timestamp + "&url=" + url;
+            ret.put("acess_url", acess_url);
+            log.info("accessToken = {},jsApiTicket = {}", accessToken, jsApiTicket);
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(acess_url.getBytes("UTF-8"));
+            signature = byteToHex(crypt.digest()).toUpperCase();
+            ret.put("signature", signature);
+            log.info("signature = {}", signature);
+        } catch (Exception e) {
+            log.info("e = {}, ret = {}", e, ret);
+        }
+        return ret;
 	}
 
 	/**

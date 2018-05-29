@@ -10,22 +10,23 @@
 		from xx_wechat_binding a 
 		where a.open_id=#{openId} and channel = "doooly"
 	</select>
-	<select id="getWechatBindingListByCardNum" resultType="com.doooly.entity.reachlife.LifeWechatBinding">
-   select
-   card_no cardNo,
-   open_id openId,
-   password password,
-   status status,
-   head_imgurl headImgurl,
-   nick_name1 nickName1,
-   last_open_id lastOpenId,
-   channel channel
-   from
-   xx_wechat_binding bind
-   where
-   (bind.card_no in (#{memberCardNums}) or bind.card_no in (#{memberMobiles}))
-   and bind.nick_name1 is not null
-   and bind.nick_name1 !=''
-   and bind.nick_name1 !='null'
-</select>
+
+    <select id="getWechatBindingListByCardNum" resultType="com.doooly.entity.reachlife.LifeWechatBinding">
+        select
+        card_no cardNo,
+        open_id openId,
+        password password,
+        status status,
+        head_imgurl headImgurl,
+        nick_name1 nickName1,
+        last_open_id lastOpenId,
+        channel channel
+        from
+        xx_wechat_binding bind
+        where
+        (bind.card_no in (#{memberCardNums}) or bind.card_no in (#{memberMobiles}))
+        and bind.nick_name1 is not null
+        and bind.nick_name1 !=''
+        and bind.nick_name1 !='null'
+    </select>
 </mapper>

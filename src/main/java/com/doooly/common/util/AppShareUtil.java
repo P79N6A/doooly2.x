@@ -36,7 +36,7 @@ public class AppShareUtil {
 		log.info("channel = {},appType = {},prefix = {}, params = {}",channel ,appType, prefix, params);
 		// 判断APP类型
 		if(!StringUtils.isEmpty(channel) && channel.startsWith("wisco")){
-				prefix = prefix + "." + "wisco";
+			prefix = prefix + "." + "wisco";
 		}
 		String title = PropertiesHolder.getProperty(prefix + ".title");
 		String desc = PropertiesHolder.getProperty(prefix + ".desc");

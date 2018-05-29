@@ -18,7 +18,8 @@
 			create_date,
 			update_date,
 			del_flag,
-			flag
+			flag,
+			channel
 		) VALUES (
 			#{inviterId},
 			#{inviteeId},
@@ -27,7 +28,8 @@
 			#{createDate},
 			#{updateDate},
 			#{delFlag},
-			#{flag}
+			#{flag},
+			#{channel}
 		)
 	</insert>
 
@@ -143,9 +145,16 @@
 
 	<select id="findRecodByInviteeId" resultType="AdInvitationRecord">
 		SELECT 
-			 a.type,
-			 a.flag,
-			 a.inviter_id
+			a.id id,
+			a.inviter_id inviterId,
+			a.invitee_id inviteeId,
+			a.code code,
+			a.point point,
+			a.del_flag delFlag,
+			a.create_date createDate,
+			a.update_date updateDate,
+			a.type type,
+			a.channel channel
 		FROM
 			  ad_invitation_record a 
 		WHERE 

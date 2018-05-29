@@ -68,7 +68,6 @@
   	From ad_user
   	<where>
   		id = #{id}
-  		and del_flag = 0
   	</where>
   </select>
   
@@ -542,6 +541,7 @@
 			a.del_flag delFlag,
 			a.is_active as isActive,
 			a.password,
+			a.type type,
 			a.update_date as updateDate,
 			up.data_sources as dataSources,
   			up.is_audit as isAudit
@@ -656,7 +656,8 @@
 			a.card_number as "cardNumber",
 			c.logo_url as "logoUrl",
 			a.telephone as "telephone",
-			a.is_active as "isActive"
+			a.is_active as "isActive",
+			a.del_flag as "delFlag"
 		from ad_user a
 			left join ad_user_personal_info b on b.id = a.id
 			left join ad_group c on c.id = a.group_num
@@ -664,7 +665,7 @@
     </select>
     
     <select id="getAvailablePoint" resultType="java.math.BigDecimal">
-	    select integral from ad_user where id = #{userId} and del_flag=0   
+	    select integral from ad_user where id = #{userId} and del_flag=0
 	</select>
 	
 	<select id="getReturnPoint" resultType="java.math.BigDecimal">

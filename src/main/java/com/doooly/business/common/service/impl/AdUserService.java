@@ -871,14 +871,16 @@ public class AdUserService implements AdUserServiceI {
 		String channel = data.getString("channel");
 		try {
 			AdUser user = adUserDao.findByMobile(telephone);
-			// 手机号已是会员
-			if (user != null && user.getType() == 0) {
+			if (user == null) {
+				res.put("code", "1000");
+				return res;
+			}
+			if (user.getType() == 0) {
+				//改手机已经是会员
 				res.put("code", "1001");
 				res.put("msg", "该手机已是会员");
 				return res;
-			}
-			// 手机号存在并且是家属
-			else if (user != null && user.getType() == 1) {
+			} else if (user.getType() == 1) {
 				// 查询该家属去记录表中查询是否存在
 				AdInvitationRecord adInvitationRecord = adInvitationRecordDao.findRecodByInviteeId(user.getId().toString());
 				if (adInvitationRecord != null) {
@@ -887,7 +889,7 @@ public class AdUserService implements AdUserServiceI {
 						res.put("msg", "该手机已经不是您的家属，不能邀请！");
 						return res;
 					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
-						if(user.getDelFlag().equals("1")){
+						if (user.getDelFlag().equals("1")) {
 							//修改用户状态
 							AdUser record = new AdUser();
 							record.setId(user.getId());
@@ -903,12 +905,12 @@ public class AdUserService implements AdUserServiceI {
 							res.put("msg", "该手机号再次被邀请！");
 							return res;
 						}
-						if(user.getIsActive().equals("2")) {
+						if (user.getIsActive().equals("2")) {
 							res.put("code", "1011");
 							res.put("msg", "该手机已经是您的家属！");
 							return res;
 						}
-						if(user.getIsActive().equals("1")) {
+						if (user.getIsActive().equals("1")) {
 							res.put("code", "1002");
 							res.put("msg", "该手机已经是您的家属，但未激活！");
 							return res;
@@ -939,13 +941,8 @@ public class AdUserService implements AdUserServiceI {
 						return res;
 					}
 				}
+			}
 
-			}
-			// 手机号不存在
-			else if (user == null) {
-				res.put("code", "1000");
-				return res;
-			}
 		} catch (Exception e) {
 			res.put("code", "4000");
 			res.put("msg", "服务器异常");

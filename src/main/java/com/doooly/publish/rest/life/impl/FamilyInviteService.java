@@ -186,6 +186,11 @@ public class FamilyInviteService {
             String telephone = json.getString("telephone");
             logger.info("channel={},userToken={},userId={},telephone={}", channel, userToken, userId, telephone);
             // 判断的登录人是否为会员还是家属
+            if(user != null && user.getTelephone().equals(telephone)){
+                res.put("code", "1001");
+                res.put("msg", "该手机已经是会员！");
+                return res;
+            }
             if (user != null && MEMBER_TYPE == user.getType()) {
                 res.put("code", "1003");
                 res.put("msg", "您为家属,不可以邀请家属！");

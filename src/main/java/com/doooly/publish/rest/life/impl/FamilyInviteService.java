@@ -107,11 +107,7 @@ public class FamilyInviteService {
             List<HashMap<String, Object>> invitationFamilyList = invitationRes.getInvitationFamilyList();
             List<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
             if (invitationFamilyList != null) {
-                int loopsize = invitationFamilyList.size();
-                if (loopsize > 3) {
-                    loopsize = FAMILY_PHONE_LIST.contains(user.getTelephone()) ? loopsize : 3;
-                }
-                for (int i = 0; i < loopsize; i++) {
+                for (int i = 0; i < invitationFamilyList.size(); i++) {
                     HashMap<String, Object> inviteeMap = invitationFamilyList.get(i);
                     if (!StringUtils.isEmpty(channel) && channel.endsWith("app")) {
                         //app
@@ -235,11 +231,11 @@ public class FamilyInviteService {
                 // res.put("shareConfig", shareConfig);
                 // LogWriter.info("shareConfig================"+ shareConfig +" ===========");
                 logger.info("家属邀请邀请手机调用接口耗时"+ (System.currentTimeMillis() - start) + " ms");
-            }else if ("1003".equals(res.get("code")) || "1004".equals(res.get("code"))) {
+            }else if ("1000".equals(result.get("code")) ||"1003".equals(result.get("code")) || "1004".equals(result.get("code"))) {
                 // 1003表示手机号在库中存在并且为家属，无需创建账号直接分享，让用户登录
-                res.put("code", 1000);
+                res.put("code", "1000");
                 res.put("userId", userId);
-                res.put("msg", "恭喜，您的账户激活成功");
+                res.put("msg", "邀请成功！");
             } else {
                 res.put("code", result.get("code"));
                 res.put("userId", userId);

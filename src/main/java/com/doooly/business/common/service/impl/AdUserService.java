@@ -901,7 +901,7 @@ public class AdUserService implements AdUserServiceI {
 							return res;
 						}
 						if(user.getIsActive().equals("2")) {
-							res.put("code", "1002");
+							res.put("code", "1005");
 							res.put("msg", "该手机已经是您的家属！");
 							return res;
 						}

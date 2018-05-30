@@ -68,4 +68,6 @@ public interface LifeMemberDao extends BaseDaoI<LifeMember> {
 	 * 保存会员信息-返回主键
 	 */
 	public int saveMember(LifeMember lifeMember);
+
+	public int updateFlgByAdId(@Param("adId") String adId,@Param("flg") String flg);
 }

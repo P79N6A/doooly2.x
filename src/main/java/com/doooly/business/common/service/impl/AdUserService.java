@@ -888,14 +888,17 @@ public class AdUserService implements AdUserServiceI {
 						return res;
 					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
 						if(user.getDelFlag().equals("1")){
-							//再次邀请改用户
+							//修改用户状态
 							AdUser record = new AdUser();
 							record.setId(user.getId());
 							record.setDelFlag("0");
-							int u1 = adUserDao.updateByPrimaryKeySelective(record);
+							adUserDao.updateByPrimaryKeySelective(record);
+							lifeMemberDao.updateFlgByAdId(userId, "0");
 							//减少邀请机会
 							int u2 = adInvitationRecordDao.reduceInvitationAvail(userId);
-							logger.info("checkTelephone  u1 = {},u2 = {}", u1, u2);
+							//修改邀请记录
+							adInvitationRecordDao.updateDateById(adInvitationRecord.getId());
+
 							res.put("code", "1004");
 							res.put("msg", "该手机号再次被邀请！");
 							return res;

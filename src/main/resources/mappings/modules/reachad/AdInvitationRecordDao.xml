@@ -41,6 +41,14 @@
 		WHERE id = #{id}
 	</update>
 
+	<update id="updateDateById">
+		UPDATE ad_invitation_record
+		SET
+		create_date = now(),
+		update_date = now()
+		WHERE id = #{id}
+	</update>
+
 	<select id="findCodeByUserIdAndSn" resultType="String">
 		SELECT a.code 
 		FROM ad_coupon_code a,ad_coupon b,ad_user c

@@ -51,5 +51,7 @@ public interface AdInvitationRecordDao extends CrudDao<AdInvitationRecord> {
 
 	void updateType(@Param("userId")String id);
 
+	int updateDateById(@Param("id")String id);
+
 	int reduceInvitationAvail(@Param("userId")String userId);
 }

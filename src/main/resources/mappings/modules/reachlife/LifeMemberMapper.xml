@@ -143,6 +143,15 @@
 			delete_flg = "1"
 		where id = #{id}
 	</delete>
+
+	<!-- 根据adid修改用户删除状态 -->
+	<delete id="updateFlgByAdId">
+		update
+		xx_member
+		set
+		delete_flg = #{flg}
+		where ad_id = #{adId}
+	</delete>
 	
 	<insert id="insert">
 		INSERT INTO xx_member(

@@ -50,4 +50,6 @@ public interface AdInvitationRecordDao extends CrudDao<AdInvitationRecord> {
 	AdInvitationRecord findRecodByInviteeId(@Param("userId")String id);
 
 	void updateType(@Param("userId")String id);
+
+	int reduceInvitationAvail(@Param("userId")String userId);
 }

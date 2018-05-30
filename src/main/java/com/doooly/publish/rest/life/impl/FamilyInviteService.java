@@ -106,36 +106,40 @@ public class FamilyInviteService {
             //2.获取被邀请家属的头像昵称
             List<HashMap<String, Object>> invitationFamilyList = invitationRes.getInvitationFamilyList();
             List<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
-            if(invitationFamilyList!=null){
-                for (int i = 0; i < (FAMILY_PHONE_LIST.contains(user.getTelephone()) ? invitationFamilyList.size() : 3) ; i++) {
+            if (invitationFamilyList != null) {
+                int loopsize = invitationFamilyList.size();
+                if (loopsize > 3) {
+                    loopsize = FAMILY_PHONE_LIST.contains(user.getTelephone()) ? loopsize : 3;
+                }
+                for (int i = 0; i < loopsize; i++) {
                     HashMap<String, Object> inviteeMap = invitationFamilyList.get(i);
-                    if(!StringUtils.isEmpty(channel) && channel.endsWith("app")){
+                    if (!StringUtils.isEmpty(channel) && channel.endsWith("app")) {
                         //app
-                        String inviteeId =inviteeMap.get("inviteeId").toString();
+                        String inviteeId = inviteeMap.get("inviteeId").toString();
                         HashMap<String, String> map = new HashMap<String, String>();
                         HashMap<String, Object> infoMap = myAccountService.getFamilyUserInfo(inviteeId);
                         if (infoMap != null) {
                             map.put("isActive", getActiveStatus((String) inviteeMap.get("isActive"), (String) infoMap.get("delFlag")));
                             map.put("headImgurl", (String) infoMap.get("appHeadImageUrl"));
                             map.put("name", (String) infoMap.get("name"));
-                        }else{
+                        } else {
                             map.put("isActive", getActiveStatus((String) inviteeMap.get("isActive"), (String) infoMap.get("delFlag")));
                             map.put("headImgurl", "");
                             map.put("name", "");
                         }
                         list.add(map);
-                    }else{
+                    } else {
                         //wechat
-                        HashMap<String,String> hashMap = new HashMap<String, String>();
-                        String inviteeId =inviteeMap.get("inviteeId").toString();
+                        HashMap<String, String> hashMap = new HashMap<String, String>();
+                        String inviteeId = inviteeMap.get("inviteeId").toString();
                         AdUser invitee = adUserServiceI.getById(inviteeId);
                         String ivTelephone = invitee.getTelephone();
                         String cardNumber = invitee.getCardNumber();
                         LifeWechatBinding wechatHead = WechatUtil.getLifeWechatBinding(ivTelephone, cardNumber);
                         logger.info("===============wechatHead:" + wechatHead);
-                        if(wechatHead!=null){
+                        if (wechatHead != null) {
                             String headImgurl = wechatHead.getHeadImgurl();
-                            hashMap.put("name", (String)inviteeMap.get("name"));
+                            hashMap.put("name", (String) inviteeMap.get("name"));
                             hashMap.put("headImgurl", headImgurl);
                             hashMap.put("isActive", getActiveStatus(invitee.getIsActive(), invitee.getDelFlag()));
                         } else {

@@ -46,7 +46,7 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 	@Override
 	public PayMsg process(OrderVo order,PayFlow payFlow) {
 		try {
-			logger.info("同步订单到_order开始. order ={} ===> payFlow = {}", order, payFlow);
+			logger.info("同步订单到_order开始. orderNum = {}", order.getOrderNumber());
 			AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
 			Order o = new Order();
 			o.setId(order.getId());
@@ -73,8 +73,19 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 			o.setOrderDetail(null);
 			o.setIsRebate(0);
 			//旅游卡计算返佣返利
-			o.setBusinessRebate(order.getBusinessRebateAmount());
+			if (order.getProductType() == OrderService.ProductType.TOURIST_CARD_RECHARGE.getCode()) {
+				BigDecimal businessRebateAmount = null;
+				if (!StringUtils.isEmpty(business.getBussinessRebate())) {
+					BigDecimal businessRebate = new BigDecimal(business.getBussinessRebate()).divide(new BigDecimal("100"));
+					businessRebateAmount = order.getTotalMount().multiply(businessRebate);
+					o.setBusinessRebate(businessRebateAmount);
+				}
+				logger.info(" businessRebateAmount = {}", businessRebateAmount);
+			} else {
+				o.setBusinessRebate(order.getBusinessRebateAmount());
+			}
 			o.setUserRebate(order.getUserReturnAmount());
+
 			o.setCreateDateTime(new Date());
 			o.setCheckState(0);
 			int rows = orderDao.updateById(o);

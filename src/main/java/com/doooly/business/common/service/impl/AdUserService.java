@@ -11,7 +11,9 @@ import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.util.WechatUtil;
 import com.doooly.entity.reachlife.LifeWechatBinding;
-import org.apache.log4j.Logger;
+import com.doooly.publish.rest.life.impl.FamilyInviteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,7 @@ public class AdUserService implements AdUserServiceI {
 
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 
-	private Logger logger = Logger.getLogger(this.getClass());
+	private static final Logger logger = LoggerFactory.getLogger(FamilyInviteService.class);
 
 	/** B库用户DAO */
 	@Autowired
@@ -886,18 +888,26 @@ public class AdUserService implements AdUserServiceI {
 						return res;
 					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
 						if(user.getDelFlag().equals("1")){
+							//再次邀请改用户
 							AdUser record = new AdUser();
 							record.setId(user.getId());
 							record.setDelFlag("0");
-							adUserDao.updateByPrimaryKeySelective(record);
-
+							int u1 = adUserDao.updateByPrimaryKeySelective(record);
+							//减少邀请机会
+							int u2 = adInvitationRecordDao.reduceInvitationAvail(userId);
+							logger.info("checkTelephone  u1 = {},u2 = {}", u1, u2);
 							res.put("code", "1004");
-							res.put("msg", "该手机已被标记邀请失败！");
+							res.put("msg", "该手机号再次被邀请！");
+							return res;
+						}
+						if(user.getIsActive().equals("2")) {
+							res.put("code", "1002");
+							res.put("msg", "该手机已经是您的家属！");
 							return res;
 						}
 						if(user.getIsActive().equals("1")) {
 							res.put("code", "1002");
-							res.put("msg", "该手机已经是您的家属！");
+							res.put("msg", "该手机已经是您的家属，但未激活！");
 							return res;
 						}
 					} else {

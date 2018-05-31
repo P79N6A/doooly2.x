@@ -894,12 +894,13 @@ public class AdUserService implements AdUserServiceI {
 							AdUser record = new AdUser();
 							record.setId(user.getId());
 							record.setDelFlag("0");
-							adUserDao.updateByPrimaryKeySelective(record);
-							lifeMemberDao.updateFlgByAdId(userId, "0");
+							int u1 = adUserDao.updateByPrimaryKeySelective(record);
+							int u2 = lifeMemberDao.updateFlgByAdId(userId, "0");
 							//减少邀请机会
-							int u2 = adInvitationRecordDao.reduceInvitationAvail(userId);
+							int u3 = adInvitationRecordDao.reduceInvitationAvail(userId);
 							//修改邀请记录
-							adInvitationRecordDao.updateDateById(adInvitationRecord.getId());
+							int u4 = adInvitationRecordDao.updateDateById(adInvitationRecord.getId());
+							logger.info("updateByPrimaryKeySelective={}  updateFlgByAdId={}  reduceInvitationAvail={} updateDateById={}",u1,u2,u3,u4);
 
 							res.put("code", "1004");
 							res.put("msg", "该手机号再次被邀请！");

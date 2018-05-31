@@ -216,7 +216,7 @@ public class FamilyInviteService {
             data.put("telephone", telephone);
             data.put("channel", channel);
             JSONObject result = adUserService.checkTelephone(data);
-
+            logger.info("telephone={},result = {}",telephone,result);
             if ("1000".equals(result.get("code"))) {
                 // 1000表示手机号在库中不存在可以创建账号
                 JSONObject saveRes = adInvitationService.saveUserNotActive(telephone, invitationRes.getInvitationCode(), FAM_INVITATION_TYPE, "111111", telephone,channel);

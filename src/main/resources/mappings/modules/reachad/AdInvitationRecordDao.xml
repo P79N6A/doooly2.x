@@ -182,7 +182,7 @@
 	<update id="reduceInvitationAvail" parameterType="java.lang.String">
 		update ad_invitation
 		set invitation_avail=invitation_avail-1,update_date=now()
-		where user_id=#{userId} and flag=2 and invitation_avail > 0
+		where user_id=#{userId} and flag in (1,2) and invitation_avail > 0
 	</update>
 
 </mapper>

@@ -38,7 +38,7 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 
 		// 对于登录请求不拦截、设置专属优惠券id的请求不拦截
 		if (reqUrl.contains("/login") || reqUrl.contains("/exclusiveCoupon/setActivityId")
-				|| reqUrl.contains("/token/validateUserToken")) {
+				|| reqUrl.contains("/token/validateUserToken") || reqUrl.contains("/share/getFamilyInviteInfoRestFul")) {
 			return request;
 		}
 

@@ -3,7 +3,7 @@
 <mapper namespace="com.doooly.dao.report.WechatEventPushDao">
 	<!-- 微信推送事件信息存储 -->
 	<insert id="insert" parameterType="com.doooly.entity.report.WechatEventPush" >
-		INSERT INTO t_wechat_push_record(
+		INSERT ignore INTO t_wechat_push_record(
 			to_user_name,
  			from_user_name,
   			create_time,

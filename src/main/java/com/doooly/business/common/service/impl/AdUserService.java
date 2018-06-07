@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.druid.util.StringUtils;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
@@ -21,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.reachLife.LifeGroupService;
+import com.doooly.common.constants.ConstantsV2;
 import com.doooly.common.util.MD5Utils;
 import com.doooly.common.util.ThirdPartySMSUtil;
+import com.doooly.dao.payment.VoucherCardRecordDao;
 import com.doooly.dao.reachad.AdActiveCodeDao;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdInvitationRecordDao;
@@ -32,6 +35,7 @@ import com.doooly.dao.reachlife.LifeGroupDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.payment.VoucherCardRecord;
 import com.doooly.entity.reachad.AdActiveCode;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.AdInvitationRecord;
@@ -51,7 +55,7 @@ public class AdUserService implements AdUserServiceI {
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 
 	private static final Logger logger = LoggerFactory.getLogger(FamilyInviteService.class);
-
+	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
 	/** B库用户DAO */
 	@Autowired
 	private AdUserDao adUserDao;
@@ -87,6 +91,9 @@ public class AdUserService implements AdUserServiceI {
 	/** A库企业DAO */
 	@Autowired
 	private LifeGroupDao lifeGroupDao;
+	/** payment库积分卡DAO */
+	@Autowired
+	private VoucherCardRecordDao voucherCardRecordDao;
 
 	@Autowired
 	private AdSystemNoitceService adSystemNoitceService;
@@ -981,7 +988,9 @@ public class AdUserService implements AdUserServiceI {
 				lifemember.setMobile(adUser.getTelephone()); // TODO
 				lifemember.setName(adUser.getName());
 				lifemember.setEmail(adUser.getMailbox());
+				if (org.apache.commons.lang3.StringUtils.isNotBlank(adUser.getSex())) {
 				lifemember.setGender(Integer.valueOf(adUser.getSex()));
+				}
 				lifemember.setIdentityCard(adUser.getIdentityCard());
 				lifemember.setIsEnabled(Integer.parseInt(userdata.getIsActive()));
 				lifemember.setIsLocked(false);
@@ -1020,7 +1029,234 @@ public class AdUserService implements AdUserServiceI {
 		// TODO Auto-generated method stub
 		adUserDao.addIntegral(userId, integralForEach);
 	}
+	/**
+	 * 验证企业口令是否存在,专属码是否可用,激活码是否可用并激活
+	 * 
+	 */
+	@Override
+	@Transactional
+	public JSONObject verifyCodeAndActivation(JSONObject paramData) throws Exception {
+		// 返回数据
+		JSONObject resultData = new JSONObject();
+		boolean isFailed = true;
+		String code =paramData.getString("code");
+		String telephone =paramData.getString("mobile");
+		try {
+			Long startTime = System.currentTimeMillis();
+			if (code.length()==6) {
+				//个人专属码
+				JSONObject validateResult = this.validateCode(code);
+				if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
+//					resultData = this.doActive(validateResult);
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+					isFailed=false;
+					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+				}else {
+					resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
+					resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
+					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时：" + (System.currentTimeMillis() - startTime));
+				}
+			}else if (code.length()==8) {
+				//企业口令
+				HashMap<String, Object> paramMap = new HashMap<String, Object>();
+				paramMap.put("groupCommand", code);
+				paramMap.put("groupId", null);
+				List<AdGroup> groupList = adGroupDao.getGroupListByCommand(paramMap);
+				if (groupList != null && groupList.size() > 0) {
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+					isFailed=false;
+					logger.info("====【verifyCodeAndActivation】-验证企业口令成功,参入参数：" + code);
+				}else {
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CommandActive.GROUP_NO_DATA.getCode());
+					resultData.put(ConstantsLogin.MSG, ConstantsLogin.CommandActive.GROUP_NO_DATA.getMsg());
+					logger.info("====【verifyCodeAndActivation】-验证企业口令不成功,参入参数：" + code);
+				}
+				logger.info("====【verifyCodeAndActivation】-【企业口令】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+			}else if (code.length()==12) {
+				//激活码,验证并激活
+				//判断激活码是否被使用
+				VoucherCardRecord voucherCardRecord =voucherCardRecordDao.findByActivationCode(code);
+				if (voucherCardRecord!=null) {
+					Date now =new Date();
+					if (voucherCardRecord.getCardActivationStatus()==0
+							||voucherCardRecord.getApplicationStatus()!=1
+							||now.getTime() <voucherCardRecord.getBeginTime().getTime()) {
+						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.NOT_ACTIVATE.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.NOT_ACTIVATE.getCode());
+						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+						return resultData;
+					}
+					if (voucherCardRecord.getCardActivationStatus()==2) {
+						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.IS_FREEZE.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.IS_FREEZE.getCode());
+						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+						return resultData;
+					}
+					if (now.getTime()>voucherCardRecord.getEndTime().getTime()) {
+						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.WRONG_TIME.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.WRONG_TIME.getCode());
+						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+						return resultData;
+					}
+					if (voucherCardRecord.getActivationCodeUseStatus() != 0||voucherCardRecord.getCardUseStatus()!=0) {
+						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_USED.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.IS_USED.getMsg());
+						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+						return resultData;
+					}
+					//进行激活操作
+					AdGroup group = adGroupDao.findGroupByID(voucherCardRecord.getGroupId());
+					AdUser user = adUserDao.findByMobile(telephone);
+					String password = "";
+					Random random = new Random();
+					for (int i = 0; i < 6; i++) {
+						password += String.valueOf(random.nextInt(9) + 1);
+					}
+					String md5Pwd = MD5Utils.encode(password);
+					if (user!=null) {
+						//存在手机号(A库是否存在手机号)
+						//将b库数据还原正常,del_flag=0,is_active=2
+						user.setGroupNum(Long.valueOf(group.getId()));
+						user.setPassword(md5Pwd);
+						user.setPayPassword(md5Pwd);
+						adUserDao.updateActiveAndDelFlagById(user);
+						
+						dealLifeMemberDataForActive(user);
+						voucherCardRecord.setActivationCodeUseUid(user.getId()+"");
+					}else {
+						//不存在手机号(A库是否存在手机号)
+						AdUser u = newAdUser(telephone, group, md5Pwd);
+						adUserDao.insert(u);
+						//插入数据
+						AdUser findByMobile = adUserDao.findByMobile(telephone);
+						dealLifeMemberDataForActive(u);
+						voucherCardRecord.setActivationCodeUseUid(findByMobile.getId()+"");
+					}
+					LifeMember memberdata = lifeMemberDao.findMemberByTelephone(telephone);
+					resultData.put("memberId", memberdata.getId());
+					resultData.put("password", password);
+					//修改激活码状态activation_code_use_status activation_code_use_uid activation_code_use_time
+					voucherCardRecord.setActivationCodeUseStatus(1);
+					voucherCardRecord.setActivationCodeUseTime(new Date());
+					voucherCardRecordDao.updateActiveData(voucherCardRecord);
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+					isFailed=false;
+					logger.info("====【verifyCodeAndActivation】-激活码激活成功,参入参数：" + code);
+				}else{
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getCode());
+					resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getMsg());
+				}
+				logger.info("====【verifyCodeAndActivation】-【激活码】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+			}else {
+				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+				resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());
+				logger.info("====【verifyCodeAndActivation】-参数位数不合理,参数为：" + code);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.FAIL.getMsg());
+			logger.info("====【verifyCodeAndActivation】-系统异常-error：" + e.getMessage());
+			throw new RuntimeException();
+		}
+		String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
+		if (isFailed) {
+			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+				redisTemplate.opsForValue().set(ACTIVATE_CODE_FAIL_COUNT+telephone,"1", 5*60*1000, TimeUnit.MILLISECONDS);
+				resultData.put("failCount", 1);
+			}else {
+				if (Integer.valueOf(old) >4) {
+					redisTemplate.delete(ACTIVATE_CODE_FAIL_COUNT+telephone);
+					resultData.put("failCount", 1);
+				}else{
+				redisTemplate.boundValueOps(ACTIVATE_CODE_FAIL_COUNT+telephone).increment(1);
+				resultData.put("failCount", Integer.valueOf(old)+1);
+				}
+			}
+		}else{
+//			String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
+			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+				resultData.put("failCount", 0);
+			}else {
+				resultData.put("failCount", Integer.valueOf(old));
+			}
+		}
+		logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+		return resultData;
+	}
 
+	private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
+		AdUser u = new AdUser();
+		u.setTelephone(telephone);
+		u.setGroupNum(Long.valueOf(group.getId()));
+		u.setName(telephone);
+		String countUser = adUserDao.find12NumberCountByGroupId(group.getId()+"", group.getGroupNum());
+		if (!countUser.equals("0000000") && countUser.length() > 7) {
+			countUser = countUser.substring(countUser.length() - 7);
+		}
+		countUser = (Integer.valueOf(countUser) + 1) + "";
+		if (countUser.length() < 7) {
+			int length = countUser.length();
+			String wPrefix = "";
+			for (int j = 0; j < 7 - length; j++) {
+				wPrefix += "0";
+			}
+			countUser = wPrefix + countUser;
+		}
+		u.setCardNumber(group.getGroupNum() + countUser);
+		u.setPassword(md5Pwd);
+		u.setPayPassword(md5Pwd);
+		Date nowDate = new Date();
+		u.setDataSyn(AdUser.DATA_SYN_ON);
+		u.setCreateBy("0");
+		u.setUpdateBy("0");
+		u.setCreateDate(nowDate);
+		u.setUpdateDate(nowDate);
+		u.setActiveDate(nowDate);
+//		user.setCardRange(2);
+		u.setIsActive(AdUser.USER_ACTIVATION_ON);
+		u.setDelFlag(0+"");
+		u.setIntegral(new BigDecimal(0));
+		u.setLineCredit(new BigDecimal(0));
+		u.setType((short) 0);
+		u.setSourceCardNumber("0");
+		u.setState(0);
+		return u;
+	}
+
+	private void dealLifeMemberDataForActive(AdUser user) {
+		LifeMember member = lifeMemberDao.findMemberByTelephone(user.getTelephone());
+		if (member == null) {
+			//执行A库数据插入
+			this.syncUserASystem(user);
+		}else {
+			//将a库数据还原正常,del_flag=0,is_enable=2
+			AdUser userdata = this.findByCardNumber(user.getCardNumber());
+			user.setId(userdata.getId());
+			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(user.getGroupNum() + "");
+			member.setAdId(userdata.getId()+"");
+			member.setName(userdata.getName());
+			if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+				member.setGender(Integer.valueOf(userdata.getSex()));
+				}
+			member.setIdentityCard(userdata.getIdentityCard());
+			member.setIsEnabled(Integer.parseInt(userdata.getIsActive()));
+			member.setIsLocked(false);
+			member.setGroupId(Long.valueOf(lifegroup.getId())); // 获取groupId
+			member.setMemberType(userdata.getType().intValue());
+			member.setCreateDate(userdata.getCreateDate());
+			member.setModifyDate(userdata.getUpdateDate());
+			member.setDeleteFlg(userdata.getDelFlag());
+			member.setAdId(userdata.getId() + "");
+			member.setSourceCardNumber(userdata.getSourceCardNumber());
+			lifeMemberDao.updateActiveAndDelFlagById(member);
+		}
+		
+		
+	}
 	class SendMsgJob implements Runnable{
 
 		private AdUser loginUser;
@@ -1067,4 +1303,66 @@ public class AdUserService implements AdUserServiceI {
 		}
 	}
 
+	/**
+	 * 激活码验证会员信息
+	 */
+	public JSONObject validateCode(String code) throws Exception {
+		// 返回数据
+		JSONObject resultData = new JSONObject();
+		try {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+			resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+
+			// 获取激活码用户信息
+			AdActiveCode adActiveCode = adActiveCodeDao.findCodeStatusByCode(code);
+			if (adActiveCode != null) {
+				if (adActiveCode.getAdUser() == null || adActiveCode.getAdUser().getAdGroup() == null) {
+					logger.info("====【validateActiveCode】用户信息:" + adActiveCode.getAdUser() + "为空,或用户对应企业信息:"
+							+ adActiveCode.getAdUser().getAdGroup() + "为空=====");
+					// 根据姓名和工号没有匹配到会员
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.USER_NOT_EXIST.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.USER_NOT_EXIST.getMsg());
+					resultData.put("memberId", null);
+					return resultData;
+				}
+				logger.info("====【validateActiveCode】根据激活码获取用户信息-是否使用isUsed：" + adActiveCode.getIsUsed()
+						+ ",是否激活isActive:" + adActiveCode.getAdUser().getIsActive() + ",企业简称groupShortName:"
+						+ adActiveCode.getAdUser().getAdGroup().getGroupShortName() + ",员工姓名name:"
+						+ adActiveCode.getAdUser().getName() + ",企业主键groupNum:" + adActiveCode.getAdUser().getGroupNum()
+						+ ",激活码主键adActiveCodeId:" + adActiveCode.getId());
+				String isUsed = adActiveCode.getIsUsed();
+				String isActive = adActiveCode.getAdUser().getIsActive();
+				// 激活码使用状态
+				if (("0").equals(isUsed)) {
+					// 激活码对应用户激活状态
+					if ("2".equals(isActive)) {
+						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_ACTIVED.getCode());
+						resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.IS_ACTIVED.getMsg());
+					} else {
+						resultData.put("groupShortName", adActiveCode.getAdUser().getAdGroup().getGroupShortName());
+						resultData.put("name", adActiveCode.getAdUser().getName());
+						resultData.put("groupNum", adActiveCode.getAdUser().getGroupNum());
+						resultData.put("adActiveCodeId", adActiveCode.getId());
+					}
+				} else if (isUsed.equals("1")) {
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_USED.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.IS_USED.getMsg());
+				} else {
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());
+				}
+			} else {
+				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getCode());
+				resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getMsg());
+				logger.info("====【validateActiveCode】激活码信息-AdActiveCode：" + adActiveCode);
+			}
+		} catch (Exception e) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.FAIL.getMsg());
+			e.printStackTrace();
+			logger.info("====【validateActiveCode】service系统错误========");
+		}
+		logger.info("====【validateActiveCode】返回数据-resultData：" + resultData.toJSONString());
+		return resultData;
+	}
 }

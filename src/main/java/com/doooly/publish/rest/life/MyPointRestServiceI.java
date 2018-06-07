@@ -1,6 +1,7 @@
 package com.doooly.publish.rest.life;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.common.dto.BaseReq;
 
 /**
  * @Description: 我的积分
@@ -23,5 +24,9 @@ public interface MyPointRestServiceI {
 
 	// 获得某个用户的所有待返积分详细信息
 	String getReturnPointDetail(JSONObject obj);
+	// 积分卡充值
+	String integralRechargeDo(JSONObject json);
+	// 积分卡充值时获取充值记录
+	String integralRechargeList(JSONObject json);
 
 }

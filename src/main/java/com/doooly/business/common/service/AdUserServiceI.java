@@ -86,4 +86,6 @@ public interface AdUserServiceI {
 
 	public boolean syncUserASystem(AdUser adUser);
 	public void addIntegral(Long userId, BigDecimal integralForEach);
+
+	public JSONObject verifyCodeAndActivation(JSONObject param) throws Exception;
 }

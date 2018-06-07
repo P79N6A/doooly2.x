@@ -126,6 +126,13 @@
 		from xx_member a
 		where a.mobile = #{mobile} and a.delete_flg = "0" limit 1
 	</select>
+	<!-- 手机号获取会员信息 -->
+	<select id="findMemberByTelephone" resultType="LifeMember">
+		select 
+			<include refid="Base_Column_List"/>
+		from xx_member a
+		where a.mobile = #{telephone}  limit 1
+	</select>
 	
 	<!-- 查询会员信息 -->
 	<select id="findLifeMemberByAdId" resultType="LifeMember">
@@ -266,6 +273,36 @@
 			attribute_value9 = #{attributeValue9},
 			balance = #{balance},
 			birth = #{birth},
+			email = #{email},
+			gender = #{gender},
+			is_enabled = #{isEnabled},
+			is_locked = #{isLocked},
+			locked_date = #{lockedDate},
+			login_date = #{loginDate},
+			login_failure_count = #{loginFailureCount},
+			login_ip = #{loginIp},
+			mobile = #{mobile},
+			name = #{name},
+			password = #{password},
+			phone = #{phone},
+			register_ip = #{registerIp},
+			username = #{username},
+			zip_code = #{zipCode},
+			is_wechat_binding = #{isWechatBinding},
+			wechatid = #{wechatid},
+			create_user = #{createUser},
+			delete_flg = #{deleteFlg},
+			identity_card = #{identityCard},
+			member_type = #{memberType},
+			modify_user = #{modifyUser},
+			super_user_id = #{superUserId},
+			group_id = #{groupId},
+			ad_id = #{adId}
+		WHERE id = #{id}
+	</update>
+	<update id="updateActiveAndDelFlagById">
+		UPDATE xx_member SET 	
+			modify_date = #{modifyDate},
 			email = #{email},
 			gender = #{gender},
 			is_enabled = #{isEnabled},

@@ -92,6 +92,22 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 		}
 		return resultData;
 	}
+	@POST
+	@Path(value = "/verifyCodeToActive")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String verifyCodeAndActivation(JSONObject param) {
+		JSONObject resultData = new JSONObject();
+		try {
+			resultData = adUserService.verifyCodeAndActivation(param);
+		} catch (Exception e) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.FAIL.getMsg());
+			log.info("====【validateAndActive】系统异常=====");
+			e.printStackTrace();
+		}
+		return resultData.toJSONString();
+	}
 
 	@POST
 	@Path(value = "/getGroupCommandInfo")

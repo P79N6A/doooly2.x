@@ -298,4 +298,6 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 *            - 手机号
 	 */
 	public AdUser getUserByTelephoneBloc(@Param("telephone") String telephone);
+
+	void updateActiveAndDelFlagById(AdUser user);
 }

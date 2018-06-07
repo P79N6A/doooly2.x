@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.mypoint.service.MyPointServiceI;
+import com.doooly.common.constants.ConstantsV2;
+import com.doooly.common.dto.BaseReq;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.MyPointRestServiceI;
 
@@ -161,5 +164,49 @@ public class MyPointRestService implements MyPointRestServiceI {
 		}
 		return messageDataBean.toJsonString();
 	}
-
+	@POST
+	@Path(value = "/integralRechargeList")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String integralRechargeList(JSONObject json) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			long start = System.currentTimeMillis();
+            logger.info(JSON.toJSONString(json));
+//			JSONObject jsonObject  = json.getParams();
+			Long userId = json.getLong("userId");
+			Integer currentPage = json.getInteger("currentPage");
+			Integer pageSize = json.getInteger("pageSize");
+			messageDataBean = myPointServiceI.getIntegralRechargeListData(userId,currentPage,pageSize);
+			logger.info(messageDataBean.toJsonString());
+			logger.info("获取充值记录查询时间"+ (System.currentTimeMillis() - start) + " ms");
+		} catch (Exception e) {
+			e.printStackTrace();
+			messageDataBean.setCode(ConstantsV2.SystemCode.SYSTEM_ERROR.getCode()+"");
+			messageDataBean.setMess(ConstantsV2.SystemCode.SYSTEM_ERROR.getMsg());
+		}
+		return messageDataBean.toJsonString();
+	}
+	@POST
+	@Path(value = "/integralRechargeDo")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String integralRechargeDo(JSONObject json) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			long start = System.currentTimeMillis();
+            logger.info(JSON.toJSONString(json));
+//			JSONObject jsonObject  = json.getParams();
+			Long userId = json.getLong("userId");
+			String cardPassword = json.getString("cardPassword");
+			messageDataBean = myPointServiceI.doIntegralRecharge(userId,cardPassword);
+			logger.info(messageDataBean.toJsonString());
+			logger.info("积分卡充值操作时间"+ (System.currentTimeMillis() - start) + " ms");
+		} catch (Exception e) {
+			e.printStackTrace();
+			messageDataBean.setCode(ConstantsV2.SystemCode.SYSTEM_ERROR.getCode()+"");
+			messageDataBean.setMess(ConstantsV2.SystemCode.SYSTEM_ERROR.getMsg());
+		}
+		return messageDataBean.toJsonString();
+	}
 }

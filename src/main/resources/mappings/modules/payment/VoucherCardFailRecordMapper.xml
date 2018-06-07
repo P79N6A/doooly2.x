@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.payment.VoucherCardFailRecordDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.payment.VoucherCardFailRecord" >
+  </resultMap>
+  <sql id="column_list" >
+	  a.id ,
+	  a.telephone ,
+	  a.card_password as "cardPassword",
+	  a.reason ,
+	  a.del_flag as "delFlag",
+	  a.update_by as "updateBy",
+	  a.create_date as "createDate",
+	  a.update_date as "updateDate"
+  </sql>
+  	<select id="find24HourFailDataCount" resultType="java.lang.Integer">
+		select 
+		count(0) 
+		from ad_voucher_card_fail_record a 
+		where 
+		a.telephone=#{telephone} 
+		and a.del_flag=0
+		and to_days(a.create_date) = to_days(now())
+	</select>
+  <insert id="insert">
+		INSERT INTO ad_voucher_card_fail_record(
+			  telephone,
+			  card_password,
+			  reason ,
+			  del_flag,
+			  update_by,
+			  create_date,
+			  update_date
+		) VALUES (
+			  #{telephone} ,
+			  #{cardPassword} ,
+			  #{reason} ,
+			  0 ,
+			  #{updateBy} ,
+			  NOW() ,
+			  #{updateDate}
+		)
+	</insert>
+</mapper>

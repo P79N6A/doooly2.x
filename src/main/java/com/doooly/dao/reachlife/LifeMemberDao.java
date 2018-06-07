@@ -70,4 +70,7 @@ public interface LifeMemberDao extends BaseDaoI<LifeMember> {
 	public int saveMember(LifeMember lifeMember);
 
 	public int updateFlgByAdId(@Param("adId") String adId,@Param("flg") String flg);
+	public LifeMember findMemberByTelephone(@Param("telephone")String telephone);
+
+	public void updateActiveAndDelFlagById(LifeMember member);
 }

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.payment.VoucherCardRecordDao" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.payment.VoucherCardRecord" >
+  </resultMap>
+  <sql id="column_list" >
+   a.id ,
+  a.card_type_id as "cardTypeId",
+  a.card_id as "cardId",
+  a.card_name as "cardName",
+  a.card_serial_no as "cardSerialNo",
+  a.card_no as "cardNo",
+  a.card_password as "cardPassword",
+  a.card_money as "cardMoney",
+  a.activation_code as "activationCode",
+  a.activation_code_use_status as "activationCodeUseStatus",
+  a.activation_code_use_uid as "activationCodeUseUid",
+  a.activation_code_use_time as "activationCodeUseTime",
+  a.card_activation_status as "cardActivationStatus",
+  a.card_activation_time as "cardActivationTime",
+  a.card_use_status as "cardUseStatus",
+  a.card_use_uid as "cardUseUid",
+  a.card_use_time as "cardUseTime",
+  a.remark ,
+  a.begin_time as "beginTime",
+  a.end_time as "endTime",
+  a.batch_no as "batchNo",
+  a.application_id as "applicationId",
+  a.create_by as "createBy",
+  a.update_by as "updateBy",
+  a.create_time as "createTime",
+  a.update_time as "updateTime"
+  </sql>
+  
+  <select id="findByActivationCode" resultType="com.doooly.entity.payment.VoucherCardRecord">
+  		select 
+			<include refid="column_list" />,r.company_id as "groupId",r.application_status as "applicationStatus"
+			from ad_voucher_card_record a join ad_voucher_card_application_record r on a.application_id = r.id
+			where a.activation_code = #{code} 
+			and a.card_activation_status !=3
+  	</select>
+  	<select id="findRechargeRecordsByUserId" resultType="com.doooly.entity.payment.VoucherCardRecord">
+        SELECT
+			  a.id ,
+			  a.card_no as "cardNo",
+			  a.card_password as "cardPassword",
+			  a.card_money as "cardMoney",
+			  a.card_use_uid as "cardUseUid",
+			  a.card_use_time as "cardUseTime"
+			from ad_voucher_card_record a
+		where 
+		a.card_use_uid=#{userId} 
+		and a.card_use_status =1 
+		and a.activation_code_use_status=1 
+		  order by a.card_use_time desc LIMIT #{startIndex},#{pageSize}
+    </select>
+  	<select id="getTotalCountByUserId" resultType="java.lang.Integer">
+        SELECT
+		count(0)
+			from ad_voucher_card_record a
+		where 
+		a.card_use_uid=#{userId} 
+		and a.card_use_status =1 and card_activation_status=1
+		and a.activation_code_use_status=1 
+		  
+    </select>
+  	<select id="checkCardPasswordData" resultType="com.doooly.entity.payment.VoucherCardRecord">
+        SELECT
+		<include refid="column_list" />,r.company_id as "groupId",r.application_status as "applicationStatus"
+			from ad_voucher_card_record a join ad_voucher_card_application_record r on a.application_id = r.id
+		where 
+		a.card_password=#{cardPassword} 
+		
+		  
+    </select>
+  	<update id="updateActiveData" >
+		UPDATE ad_voucher_card_record 	
+		 set 
+		 activation_code_use_status = #{activationCodeUseStatus},
+		 activation_code_use_uid= #{activationCodeUseUid},
+		 activation_code_use_time= #{activationCodeUseTime}
+		WHERE id = #{id}
+  	</update>
+  	<update id="updateRechargeData" >
+		UPDATE ad_voucher_card_record 	
+		 set 
+		 activation_code_use_status = #{activationCodeUseStatus},
+		 card_use_uid= #{cardUseUid},
+		 card_use_mobile= #{cardUseMobile},
+		 card_use_status= #{cardUseStatus},
+		 card_use_time = NOW()
+		WHERE id = #{id}
+  	</update>
+</mapper>

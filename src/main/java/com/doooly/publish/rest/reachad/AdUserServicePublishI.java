@@ -35,6 +35,13 @@ public interface AdUserServicePublishI {
 	 * @return JSONObject groupQuestion-企业口令问题
 	 */
 	String getGroupCommandInfo(JSONObject param);
+	/**
+	 * 验证企业口令,专属码是否可用,激活码进行激活操作
+	 * 
+	 * @param
+	 * @return JSONObject 
+	 */
+	String verifyCodeAndActivation(JSONObject param);
 
 	/**
 	 * 企业口令获取企业集合

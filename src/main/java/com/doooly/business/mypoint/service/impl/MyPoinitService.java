@@ -1,12 +1,19 @@
 package com.doooly.business.mypoint.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.didi.constants.DiDiConstants;
 import com.doooly.business.mypoint.service.MyPointServiceI;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.Pagelab;
+import com.doooly.common.constants.ConstantsV2;
+import com.doooly.common.constants.ConstantsV2.ActivityCode;
+import com.doooly.common.constants.ConstantsV2.IntegralCode;
+import com.doooly.common.constants.ConstantsV2.SystemCode;
+import com.doooly.dao.payment.VoucherCardFailRecordDao;
+import com.doooly.dao.payment.VoucherCardRecordDao;
 import com.doooly.dao.reachad.AdAvailablePointsDao;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdIntegralAcquireRecordDao;
@@ -15,27 +22,36 @@ import com.doooly.dao.reachad.AdRechargeDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.payment.VoucherCardFailRecord;
+import com.doooly.entity.payment.VoucherCardRecord;
 import com.doooly.entity.reachad.AdAvailablePoints;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdIntegralAcquireRecord;
+import com.doooly.entity.reachad.AdIntegralActivityConn;
 import com.doooly.entity.reachad.AdRecharge;
 import com.doooly.entity.reachad.AdReturnPoints;
+import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: service实现
@@ -45,7 +61,7 @@ import java.util.List;
 @Service
 public class MyPoinitService implements MyPointServiceI {
 	private static final Logger logger = LoggerFactory.getLogger(MyPoinitService.class);
-	
+	private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -62,7 +78,14 @@ public class MyPoinitService implements MyPointServiceI {
 	private AdIntegralAcquireRecordDao adIntegralAcquireRecordDao;
 	@Autowired
 	private AdOrderReportDao adOrderReportDao;
-	
+	@Autowired
+	private VoucherCardRecordDao voucherCardRecordDao;
+	@Autowired
+	private VoucherCardFailRecordDao voucherCardFailRecordDao;
+	@Autowired
+	private AdUserService adUserService;
+	@Autowired
+	protected StringRedisTemplate redisTemplate;
 	/**
 	 * 通过家属邀请的所有id查询到返利的列表和积分的总和
 	 * 
@@ -324,4 +347,204 @@ public class MyPoinitService implements MyPointServiceI {
 		map.put("order", order);
 	}
 
+	@Override
+	public MessageDataBean getIntegralRechargeListData(Long userId, Integer currentPage, Integer pageSize) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		Pagelab pagelab = new Pagelab(currentPage,pageSize);
+		// 查询总数
+		int totalNum = voucherCardRecordDao.getTotalCountByUserId(userId);
+		AdUser user = adUserDao.getById(userId+"");
+		map.put("integral", user.getIntegral());
+		pagelab.setTotalNum(totalNum);
+		Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
+		map.put("failCount", count);
+		List<VoucherCardRecord> merchants = voucherCardRecordDao.findRechargeRecordsByUserId(userId,pagelab.getStartIndex(), pageSize);
+		if (!merchants.isEmpty()) {
+			for (VoucherCardRecord record : merchants) {
+				String formatDate = DateUtils.formatDate(record.getCardUseTime(), "yyyy.MM.dd HH:mm:ss");
+				record.setCardUseDate(formatDate.substring(0, formatDate.length()-3));
+			}
+			map.put("records", merchants);
+			map.put("countPage", pagelab.getCountPage());
+			messageDataBean.setCode(MessageDataBean.success_code);
+		} else {
+			map.put("records", null);
+			map.put("countPage", 0);
+			messageDataBean.setCode(MessageDataBean.no_data_code);
+		}
+		messageDataBean.setData(map);
+		return messageDataBean;
+	}
+
+	@Override
+	public MessageDataBean doIntegralRecharge(Long userId, String cardPassword)throws Exception {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		VoucherCardFailRecord failRecord = new VoucherCardFailRecord();
+		boolean isFailed = true;
+		// 判断充值码是否可用
+		cardPassword = this.exChange(cardPassword);
+		AdUser user = adUserDao.getById(userId+"");
+		VoucherCardRecord record = voucherCardRecordDao.checkCardPasswordData(cardPassword);
+		Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
+		if (count>19) {
+			map.put("failCount", count);
+            messageDataBean.setData(map);
+			messageDataBean.setCode(IntegralCode.MAX_FAIL_COUNT.getCode()+"");
+//			failRecord.setReason("卡密已使用");
+			return messageDataBean;
+		}
+//		String old = redisTemplate.opsForValue().get(INTEGRAL_FAIL_COUNT+userId);
+		if (record!=null) {
+			//判断卡密是否已被使用,卡密是否已激活
+			if (record.getCardUseStatus() != 0) {
+				//被使用
+				map.put("failCount", count);
+	            messageDataBean.setData(map);
+				messageDataBean.setCode(IntegralCode.IS_USED.getCode()+"");
+				failRecord.setReason("卡密已使用");
+				addFailRecord(cardPassword, failRecord, user);
+				return messageDataBean;
+			}
+			Date now =new Date();
+			if (record.getCardActivationStatus()==0
+					||record.getApplicationStatus()!=1
+					||now.getTime() <record.getBeginTime().getTime()) {
+				map.put("failCount", count);
+	            messageDataBean.setData(map);
+				messageDataBean.setCode(IntegralCode.NOT_ACTIVATE.getCode()+"");
+				failRecord.setReason("卡密未激活");
+				addFailRecord(cardPassword, failRecord, user);
+				return messageDataBean;
+			}
+			if (record.getCardActivationStatus()==2) {
+				map.put("failCount", count);
+	            messageDataBean.setData(map);
+				messageDataBean.setCode(IntegralCode.IS_FREEZE.getCode()+"");
+				failRecord.setReason("已冻结卡密");
+				addFailRecord(cardPassword, failRecord, user);
+				return messageDataBean;
+			}
+			if (now.getTime()>record.getEndTime().getTime()) {
+				map.put("failCount", count);
+	            messageDataBean.setData(map);
+				messageDataBean.setCode(IntegralCode.WRONG_TIME.getCode()+"");
+				failRecord.setReason("卡密已过期");
+				addFailRecord(cardPassword, failRecord, user);
+				return messageDataBean;
+			}
+			//判断userid是否和激活人一致
+			if (StringUtils.isBlank(record.getActivationCodeUseUid())) {
+				// 更新充值码状态,在激活码未使用时,同时更新掉激活码状态
+				// 新增充值记录
+				if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+cardPassword, String.valueOf(System.currentTimeMillis() + 5*60*1000))){
+		            dealUserIntegralData(userId, cardPassword, messageDataBean, record);
+//		            redisTemplate.delete(INTEGRAL_FAIL_COUNT+userId);
+//		            if (StringUtils.isBlank(old)) {
+//		            	map.put("failCount", 0);
+//					}else{
+//						map.put("failCount", old);
+//					}
+		            map.put("failCount", count);
+		            messageDataBean.setData(map);
+				}else {
+					messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
+//					isFailed=false;
+		        	logger.info("====当前用户二次请求,userId为==="+userId);
+				}
+				isFailed=false;
+			}else if (StringUtils.isNotBlank(record.getActivationCodeUseUid())&&record.getActivationCodeUseUid().equals(userId.toString())) {
+				if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+cardPassword, String.valueOf(System.currentTimeMillis() + 5*60*1000))){
+		            dealUserIntegralData(userId, cardPassword, messageDataBean, record);
+//		            redisTemplate.delete(INTEGRAL_FAIL_COUNT+userId);
+//		            if (StringUtils.isBlank(old)) {
+//		            	map.put("failCount", 0);
+//					}else{
+//						map.put("failCount", old);
+//					}
+		            map.put("failCount", count);
+		            messageDataBean.setData(map);
+//		            isFailed=false;
+				}else {
+					messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
+		        	logger.info("====当前用户二次请求,userId为==="+userId);
+				}
+				isFailed=false;
+			}else {
+				failRecord.setReason("充值人与激活人不符");
+				messageDataBean.setCode(IntegralCode.INCONFORMITY_USER.getCode()+"");
+			}
+		}else{
+			failRecord.setReason("卡密不存在或未分配或已过期");
+			messageDataBean.setCode(IntegralCode.NOT_EXIT.getCode()+"");
+		}
+		if (isFailed) {
+//			Integer newData = 0;
+//			if (StringUtils.isBlank(old)) {
+//				redisTemplate.opsForValue().set(INTEGRAL_FAIL_COUNT+userId,"1", 24*60*1000, TimeUnit.MILLISECONDS);
+//				map.put("failCount", 1);
+//				messageDataBean.setData(map);
+//			}else {
+////				newData = Integer.valueOf(old)+1;
+//				redisTemplate.boundValueOps(INTEGRAL_FAIL_COUNT+userId).increment(1);
+//				map.put("failCount", Integer.valueOf(old)+1);
+//				messageDataBean.setData(map);
+//			}
+			addFailRecord(cardPassword, failRecord, user);
+			map.put("failCount", count+1);
+			messageDataBean.setData(map);
+		}
+		return messageDataBean;
+	}
+
+	private void addFailRecord(String cardPassword, VoucherCardFailRecord failRecord, AdUser user) {
+		failRecord.setTelephone(user.getTelephone());
+		failRecord.setCardPassword(cardPassword);
+		voucherCardFailRecordDao.insert(failRecord);
+	}
+
+	private void dealUserIntegralData(Long userId, String cardPassword, MessageDataBean messageDataBean,
+			VoucherCardRecord record) {
+		logger.info("integral_activity_"+userId+cardPassword + " - tryLock success.");
+		// 设置锁的有效期，防止因异常情况无法释放锁而造成死锁情况的发生
+		redisTemplate.expire("voucher_card_"+userId+"_"+cardPassword, 5*60*1000, TimeUnit.MILLISECONDS);
+		
+		//更新available和user以及插入ad_integral_acquire_record表
+		AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
+		adAvailablePoints.setUserId(userId+"");
+		adAvailablePoints.setBusinessRebateAmount(new BigDecimal(record.getCardMoney()));
+		adAvailablePoints.setType(AdAvailablePoints.TYPE_RECHARGE_BY_SELF);
+		adAvailablePoints.setStatus(AdAvailablePoints.STATUS_OBTAINED);
+		adAvailablePointsDao.insert(adAvailablePoints);
+		adUserDao.addIntegral(userId, new BigDecimal(record.getCardMoney()));
+		//更新record充值状态
+		AdUser user = adUserDao.getById(userId+"");
+		record.setCardUseUid(userId+"");
+		record.setCardUseStatus(1);
+		record.setActivationCodeUseStatus(1);
+		record.setCardUseMobile(user.getTelephone());
+		voucherCardRecordDao.updateRechargeData(record);
+//            		AdIntegralAcquireRecord adIntegralAcquireRecord = new AdIntegralAcquireRecord();
+//            		adIntegralAcquireRecord.setUserId(userId);
+//            		adIntegralAcquireRecord.setIntegral(new BigDecimal(record.getCardMoney()));
+//            		adIntegralAcquireRecord.setIntegralActivityId(activityConn.getIntegralId());
+//            		adIntegralAcquireRecord.setCreateDate(new Date());
+//            		adIntegralAcquireRecordDao.insert(adIntegralAcquireRecord);
+		messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+	}
+	public String exChange(String str){  
+	    StringBuffer sb = new StringBuffer();  
+	    if(str!=null){  
+	        for(int i=0;i<str.length();i++){  
+	            char c = str.charAt(i);  
+	            if(Character.isLowerCase(c)){  
+	                sb.append(Character.toUpperCase(c));   
+	            }else {
+	            	sb.append(c); 
+				}  
+	        }  
+	    } 
+	    return sb.toString();
+	}
 }

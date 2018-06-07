@@ -72,8 +72,15 @@ public class ConstantsV2 {
 	    *
 	 */
 	public enum IntegralCode{
-		QUERY_ERROR(13001,"会员密码错误");
-		
+		QUERY_ERROR(13001,"会员密码错误"),
+		NOT_EXIT(13002,"卡密不存在"),
+		INCONFORMITY_USER(13003,"充值人与激活人不符"),
+		CAN_NOT_USE(13004,"卡密未激活"),
+		IS_USED(13005,"卡密已使用"),
+		MAX_FAIL_COUNT(13006,"超过最大失败次数"),
+		NOT_ACTIVATE(13007,"未激活"),
+		WRONG_TIME(13008,"未在使用期限内"),
+		IS_FREEZE(13009,"已冻结");
 		private Integer code;
 		private String msg;
 		

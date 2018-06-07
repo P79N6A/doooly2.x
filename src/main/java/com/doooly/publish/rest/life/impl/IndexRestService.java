@@ -74,7 +74,7 @@ public class IndexRestService {
             logger.info("index() userToken={},userId={},params={}", userToken, userId, params);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId);
             if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean(MessageDataBean.failure_code,"floors is null").toJsonString();
+                return new MessageDataBean("1002","floors is null").toJsonString();
             }
             Map data = new HashMap();
             List ls = new ArrayList();

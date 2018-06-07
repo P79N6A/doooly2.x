@@ -366,6 +366,42 @@
 		GROUP BY a.id
 		  order by a.sort desc LIMIT #{startIndex},#{pageSize}
     </select>
+
+
+	<select id="findHotMerchantsByDealType" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+		a.id AS "id",
+		a.company AS "company",
+		a.long_logo AS "logo",
+		a.url AS "url",
+		a.app_url AS "appUrl",
+		a.business_id AS "businessId",
+		a.discount AS "discount",
+		a.deal_type As "dealType",
+		a.is_support_integral as 'isSupportIntegral',
+		a.is_new_end_date AS "isNewEndTime",
+		a.is_new_begin_date AS "isNewBeginTime",
+		CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		FROM
+		ad_business a
+		join ad_business_area_conn abac on abac.business_id = a.id
+		join ad_area aa on aa.id = abac.area_id
+		join ad_business_group abg on a.id = abg.business_id
+		where
+		a.is_hot=1
+		and a.is_active=2
+		and a.del_flag=0
+		and (aa.name =#{address} or aa.name ="全国")
+		AND a.deal_type = #{dealType}
+		and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
+		<if test="type != null and type != ''">
+			AND a.type = #{type}
+		</if>
+		GROUP BY a.id
+		order by a.sort desc
+	</select>
+
+
 	<select id="findDongHangMerchantByPage" resultType="com.doooly.entity.reachad.AdBusiness">
         SELECT
 		a.id AS "id",

@@ -14,5 +14,24 @@
   	where
   		a.type = 3
   </select>
+
+	<!--首页楼层配置-->
+	<select id="getFloors" resultType="com.doooly.entity.reachad.AdBasicType">
+		select
+			b.id,
+			b.name,
+			b.code,
+			b.sort,
+			fg.floor_id floorId
+		from
+			ad_user u
+		INNER JOIN
+			ad_floor_group fg
+			on u.group_num = fg.group_id
+		INNER JOIN
+			ad_basic_type b
+			on fg.floor_id = b.id
+		where b.type=3 and b.state=1 and u.id = #{userId} ORDER BY sort
+	</select>
   
 </mapper>

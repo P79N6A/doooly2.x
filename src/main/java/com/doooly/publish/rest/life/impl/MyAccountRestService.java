@@ -1,8 +1,12 @@
 package com.doooly.publish.rest.life.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.myaccount.service.MyAccountServiceI;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.publish.rest.life.MyAccountRestServiceI;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -11,15 +15,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.myaccount.service.MyAccountServiceI;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.publish.rest.life.MyAccountRestServiceI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 个人中心
@@ -33,7 +31,6 @@ import com.doooly.publish.rest.life.MyAccountRestServiceI;
 public class MyAccountRestService implements MyAccountRestServiceI {
 
 	private static Logger logger = Logger.getLogger(MyAccountRestService.class);
-
 	@Autowired
 	private MyAccountServiceI myAccountService;
 

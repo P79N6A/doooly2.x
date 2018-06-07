@@ -1,11 +1,10 @@
 package com.doooly.dao.reachad;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachad.AdBusinessServicePJ;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * ad_business_service商户服务表DAO
@@ -15,6 +14,6 @@ import com.doooly.entity.reachad.AdBusinessServicePJ;
  */
 public interface AdBusinessServicePJDao extends BaseDaoI<AdBusinessServicePJ> {
 
-	List<AdBusinessServicePJ> getDataByUserId(@Param("userId")Long userId);
+	List<AdBusinessServicePJ> getDataByUserId(@Param("userId") Long userId, @Param("serviceType") String serviceType);
 
 }

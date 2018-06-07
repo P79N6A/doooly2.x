@@ -6,6 +6,7 @@ import com.doooly.business.home.v2.servcie.HomePageDataServcie;
 import com.doooly.common.DooolyResponseStatus;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdAppHomePageDao;
+import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.base.BaseResponse;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.coupon.FindExclusiveCouponResponse;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -45,10 +47,13 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	@Autowired
 	private AdAppHomePageDao adAppHomePageDao;
 	@Autowired
+	private AdUserDao adUserDao;
+	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
 
 	@Override
 	public GetHomePageDataV2Response getHomePageDataV2(GetHomePageDataV2Request request, GetHomePageDataV2Response response) {
+		Integer userId = request.getUserId();
 		HomePageDataV2 homePageData = new HomePageDataV2();
 		BigDecimal zeroBigDecimal = new BigDecimal(0.00).setScale(2, BigDecimal.ROUND_DOWN);
 		//查询会员名字、会员所属企业、会员头像、会员可用积分、是否为认证会员
@@ -77,6 +82,37 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		homePageData.setThriftTotal(adAppUserShoppingThrift.getThriftTotal());
 		homePageData.setThriftAmount(adAppUserShoppingThrift.getThriftAmount() == null ?
 				zeroBigDecimal : adAppUserShoppingThrift.getThriftAmount().setScale(2, BigDecimal.ROUND_DOWN));
+
+
+
+		// 1.Redis获取用户各个状态订单数
+		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+		String orderTotal = opsForValue.get("ordertotal:"+userId+":0");//已下单
+		String finishTotal = opsForValue.get("ordertotal:"+userId+":1");//已完成
+		String cancelTotal = opsForValue.get("ordertotal:"+userId+":2");//已取消
+		log.info(String.format("用户 %s redis中已下单数:%s,已完成数:%s,已取消数:%s", userId,orderTotal,finishTotal,cancelTotal));
+		// 2.DB获取用户各个状态订单数
+		AdUserConn adUser = adUserDao.getOrderTotal(String.valueOf(userId));
+		int orderTotalMap = adUser.getOrderTotal();
+		int finishTotalMap = adUser.getFinishTotal();
+		int cancelTotalMap = adUser.getCancelTotal();
+		log.info(String.format("用户 %s DB中已下单数:%s,已完成数:%s,已取消数:%s", userId,orderTotalMap,finishTotalMap,cancelTotalMap));
+		// 3.有新订单 设置flag
+		if(StringUtils.isNotEmpty(orderTotal) && orderTotalMap>Integer.valueOf(orderTotal)){
+			homePageData.setNewOrderFlag(true);
+		}else{
+			homePageData.setNewOrderFlag(false);
+		}
+		if(StringUtils.isNotEmpty(finishTotal) && finishTotalMap>Integer.valueOf(finishTotal)){
+			homePageData.setNewFinishFlag(true);
+		}else{
+			homePageData.setNewFinishFlag(false);
+		}
+		if(StringUtils.isNotEmpty(cancelTotal) && cancelTotalMap>Integer.valueOf(cancelTotal)){
+			homePageData.setNewCancelFlag(true);
+		}else{
+			homePageData.setNewCancelFlag(false);
+		}
 
 		response.setData(homePageData);
 		response.setStatus(DooolyResponseStatus.SUCCESS);

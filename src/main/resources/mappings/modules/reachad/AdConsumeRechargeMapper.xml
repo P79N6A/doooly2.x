@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdConsumeRechargeDao" >
+
+
+	<!--首页楼层配置-->
+	<select id="getConsumeRecharges" resultType="com.doooly.entity.reachad.AdConsumeRecharge">
+		SELECT
+			id id,
+			main_title mainTitle,
+			sub_title subTitle,
+			icon_url iconUrl,
+			sort sort,
+			state state,
+			link_url linkUrl,
+			data_type dataType,
+			floor_id floorId,
+			create_by createBy,
+			create_date createDate,
+			update_by updateBy,
+			update_date updateDate
+ 		FROM
+ 			ad_consume_recharge r
+ 		where r.state = 1 and r.floor_id = #{floorId} ORDER BY r.sort
+	</select>
+  
+</mapper>

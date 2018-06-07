@@ -296,21 +296,21 @@ public class FamilyInviteService {
             }
             logger.info("headMap = {}", headMap);
             // 获取用户的企业信息
-            JSONObject groupInfo = adInvitationService.getGroupInfo(userId);
-            responseJson.put("adGroup", groupInfo.get("adGroup"));
-            logger.info("groupInfo = {}", groupInfo);
+//            JSONObject groupInfo = adInvitationService.getGroupInfo(userId);
+//            responseJson.put("adGroup", groupInfo.get("adGroup"));
+//            logger.info("groupInfo = {}", groupInfo);
             // 获取所有商户
-            JSONObject pram = new JSONObject();
-            pram.put("userId", userId);
-            pram.put("flag", 1);
-            JSONObject result = adLightenBusinessService.getAllBusiness(pram);
-            if (MessageDataBean.success_code.equals(result.get("code"))) {
-                responseJson.put("adBusinessList", result.get("adBusniessList"));
-                responseJson.put("wechatBinding", headMap);
-            } else {
-                responseJson.put("adBusinessList", null);
-                responseJson.put("wechatBinding", headMap);
-            }
+//            JSONObject pram = new JSONObject();
+//            pram.put("userId", userId);
+//            pram.put("flag", 1);
+            //JSONObject result = adLightenBusinessService.getAllBusiness(pram);
+//            if (MessageDataBean.success_code.equals(result.get("code"))) {
+//                responseJson.put("adBusinessList", result.get("adBusniessList"));
+//                responseJson.put("wechatBinding", headMap);
+//            } else {
+//                responseJson.put("adBusinessList", null);
+//            }
+            responseJson.put("wechatBinding", headMap);
             responseJson.put("channel", channel);
             responseJson.put("code", MessageDataBean.success_code);
             logger.info("getFamilyInviteInfoRestFul() execution time = {}", System.currentTimeMillis() - start);

@@ -27,6 +27,13 @@ public class HomePageDataV2 {
 	private BigDecimal availablePoints;
 	/** 会员认证标识，(0-非认证会员,1-认证会员) **/
 	private Integer authFlag;
+
+	private boolean newOrderFlag;
+	private boolean newFinishFlag;
+	private boolean newCancelFlag;
+
+
+
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
 //	private Integer noviceGuideFinished;
 //	/**  兜礼APP_v2.0.0，积分新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -106,7 +113,32 @@ public class HomePageDataV2 {
 		this.authFlag = authFlag;
 	}
 
-//	public Integer getNoviceGuideFinished() {
+	public boolean isNewOrderFlag() {
+		return newOrderFlag;
+	}
+
+	public void setNewOrderFlag(boolean newOrderFlag) {
+		this.newOrderFlag = newOrderFlag;
+	}
+
+	public boolean isNewFinishFlag() {
+		return newFinishFlag;
+	}
+
+	public void setNewFinishFlag(boolean newFinishFlag) {
+		this.newFinishFlag = newFinishFlag;
+	}
+
+	public boolean isNewCancelFlag() {
+		return newCancelFlag;
+	}
+
+	public void setNewCancelFlag(boolean newCancelFlag) {
+		this.newCancelFlag = newCancelFlag;
+	}
+
+
+	//	public Integer getNoviceGuideFinished() {
 //		return noviceGuideFinished;
 //	}
 //

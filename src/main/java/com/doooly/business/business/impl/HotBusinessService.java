@@ -1,29 +1,18 @@
 package com.doooly.business.business.impl;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdBusinessPrivilegeActivityDao;
-import com.doooly.dao.reachad.AdBusinessServicePJDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdadDao;
-import com.doooly.dao.reachad.SysDictDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdAd;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdBusinessServicePJ;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.SysDict;
+import com.doooly.entity.reachad.*;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @Description: 首页活动
@@ -214,18 +203,22 @@ public class HotBusinessService implements HotBusinessServiceI{
 	public MessageDataBean getBusinessServiceData(Long userId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		List<AdBusinessServicePJ> adBusinessServicePJs = adBusinessServicePJDao.getDataByUserId(userId );
-		if (!adBusinessServicePJs.isEmpty()) {
-			map.put("adBusinessServices", adBusinessServicePJs);
+		List<AdBusinessServicePJ> list1 = adBusinessServicePJDao.getDataByUserId(userId, "1");
+		List<AdBusinessServicePJ> list2 = adBusinessServicePJDao.getDataByUserId(userId, "2");
+		if(!CollectionUtils.isEmpty(list1) || !CollectionUtils.isEmpty(list2)){
+			map.put("list1", list1);
+			map.put("list2", list2);
 			messageDataBean.setData(map);
 			messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
 			messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
-		} else {
-			map.put("adBusinessServices", null);
+		}else{
+			map.put("list1", null);
+			map.put("list2", null);
 			messageDataBean.setData(map);
 			messageDataBean.setCode(SystemCode.SUCCESS_NULL.getCode()+"");
 			messageDataBean.setMess(SystemCode.SUCCESS_NULL.getMsg());
 		}
+
 		return messageDataBean;
 	}
 

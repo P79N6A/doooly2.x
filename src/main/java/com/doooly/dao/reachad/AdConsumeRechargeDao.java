@@ -2,6 +2,7 @@ package com.doooly.dao.reachad;
 
 import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachad.AdBasicType;
+import com.doooly.entity.reachad.AdConsumeRecharge;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,10 +12,8 @@ import java.util.List;
  * @author: zhaoyipeng
  * 
  */
-public interface AdBasicTypeDao extends BaseDaoI<AdBasicType> {
+public interface AdConsumeRechargeDao extends BaseDaoI<AdConsumeRecharge> {
 
-	List<AdBasicType> getActivityCategoryList();
-
-    List<AdBasicType> getFloors(@Param("userId")String userId);
+    List<AdConsumeRecharge> getConsumeRecharges(@Param("floorId") int floorId);
 
  }

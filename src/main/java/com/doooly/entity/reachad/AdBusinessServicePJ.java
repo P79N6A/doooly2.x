@@ -18,6 +18,7 @@ public class AdBusinessServicePJ  {
 	private String sort;
 	private String logo;
 	private String dealType;
+	private String serviceType;
 	public String getId() {
 		return id;
 	}
@@ -66,6 +67,12 @@ public class AdBusinessServicePJ  {
 	public void setDealType(String dealType) {
 		this.dealType = dealType;
 	}
-	
-	
+
+	public String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(String serviceType) {
+		this.serviceType = serviceType;
+	}
 }

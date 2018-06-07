@@ -16,14 +16,14 @@
 		  a.update_by as "updateBy"
   </sql>
   
-  <select id="getDataByUserId" resultType="com.doooly.entity.reachad.AdBusinessServicePJ" parameterType="com.doooly.entity.reachad.AdBusinessServicePJ">
+  <select id="getDataByUserId" resultType="com.doooly.entity.reachad.AdBusinessServicePJ">
   	Select <include refid="adBusinessServicePJColumns"/>,b.deal_type as "dealType"
   	From ad_business_service a
   	LEFT JOIN ad_business b on a.business_id = b.id
 		LEFT JOIN ad_business_group bg on b.id = bg.business_id
 		LEFT JOIN ad_group g on bg.group_id = g.id
 		join ad_user u on u.group_num = g.id
-	where u.id = #{userId} GROUP BY a.id order by a.sort desc 
+	where u.id = #{userId} and a.service_type = #{serviceType} GROUP BY a.id order by a.sort desc
   </select>
   
  

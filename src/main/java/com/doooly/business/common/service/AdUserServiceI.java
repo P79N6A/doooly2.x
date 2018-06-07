@@ -2,7 +2,7 @@ package com.doooly.business.common.service;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-
+import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
@@ -13,6 +13,16 @@ import com.doooly.entity.reachad.AdUser;
  *
  */
 public interface AdUserServiceI {
+
+	/**
+	 * 获取当前用户信息
+	 * 
+	 * @param HttpServletRequest(接口注解参数-@Context
+	 *            HttpServletRequest request) request token-登录验证参数 ,channel-请求来源
+	 * @return AdUser
+	 * @throws Exception
+	 */
+	public AdUser getCurrentUser(HttpServletRequest request) throws Exception;
 
 	public long getID(AdUser user);
 
@@ -85,6 +95,7 @@ public interface AdUserServiceI {
 	public MessageDataBean groupCommandActive(JSONObject param) throws Exception;
 
 	public boolean syncUserASystem(AdUser adUser);
+
 	public void addIntegral(Long userId, BigDecimal integralForEach);
 
 	public JSONObject verifyCodeAndActivation(JSONObject param) throws Exception;

@@ -12,6 +12,15 @@ import com.doooly.entity.reachad.AdUserConn;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
 
 public interface AdUserDao extends BaseDaoI<AdUser> {
+	/**
+	 * token获取当前用户信息
+	 * 
+	 * @param HttpServletRequest
+	 *            request token-登录验证参数 ,channel-请求来源
+	 * @return AdUser
+	 */
+	public AdUser getCurrentUser(@Param("userId") String userId);
+
 	int deleteByPrimaryKey(Long id);
 
 	int insert(AdUser record);

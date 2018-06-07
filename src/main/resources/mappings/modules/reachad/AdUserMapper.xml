@@ -36,6 +36,22 @@
     update_date, update_by, create_date
   </sql>
   
+  <!-- token-用户id获取当前用户信息 -->
+  <select id="getCurrentUser" parameterType="java.lang.String" resultType="com.doooly.entity.reachad.AdUser">
+  	SELECT
+		a.id,
+		a.card_number AS "cardNumber",
+		a.telephone,
+		b.id AS "adGroup.id",
+		b.group_name AS "adGroup.groupName",
+		b.group_short_name AS "adGroup.groupShortName"
+	FROM
+		ad_user a
+	LEFT JOIN ad_group b ON a.group_num = b.id
+	WHERE
+		a.id = #{userId}
+  </select>
+  
   <select id="get" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
   	Select *
   	From ad_user

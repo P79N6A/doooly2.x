@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.druid.util.StringUtils;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.utils.DateUtils;
@@ -105,6 +107,31 @@ public class AdUserService implements AdUserServiceI {
 		return adUserDao.getById(id);
 	}
 
+	@Override
+	public AdUser getCurrentUser(HttpServletRequest request) throws Exception {
+		AdUser adUser = new AdUser();
+		try {
+			if (request != null) {
+				String token = request.getHeader(ConstantsLogin.TOKEN);
+				String channel = request.getHeader(ConstantsLogin.CHANNEL);
+				logger.info("====【getCurrentUser】-token：" + token + ",==channel：" + channel);
+
+				if (!StringUtils.isEmpty(token)) {
+					String userId = redisTemplate.opsForValue().get(token);
+					adUser = adUserDao.getCurrentUser(userId);
+					if (adUser != null) {
+						return adUser;
+					}
+				}
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	
 	/**
 	 * 得到用户id
 	 */

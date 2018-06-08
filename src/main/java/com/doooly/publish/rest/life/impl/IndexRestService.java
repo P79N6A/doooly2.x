@@ -66,9 +66,6 @@ public class IndexRestService {
         String userToken = request.getHeader(Constants.TOKEN_NAME);
         String userId = redisTemplate.opsForValue().get(userToken);
         String address = params.getString("address");
-        if (StringUtils.isEmpty(address)) {
-            return new MessageDataBean(MessageDataBean.failure_code,"address is null").toJsonString();
-        }
         //取有返佣金额的商户
         try {
             logger.info("index() userToken={},userId={},params={}", userToken, userId, params);

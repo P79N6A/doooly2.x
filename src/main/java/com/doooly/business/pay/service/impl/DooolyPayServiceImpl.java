@@ -1,13 +1,5 @@
 package com.doooly.business.pay.service.impl;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
@@ -15,10 +7,16 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.service.AbstractPaymentService;
 import com.doooly.business.pay.service.PayFlowService;
-import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 兜礼积分支付
@@ -48,6 +46,7 @@ public class DooolyPayServiceImpl extends AbstractPaymentService {
 			payAmount = payAmount.add(order.getServiceCharge());
 		}
 		msg.data.put("orderNumber", order.getOrderNumber());
+		msg.data.put("productType", order.getProductType());
 		msg.data.put("totalMount", payAmount.toString());
 		msg.data.put("consigneeMobile", order.getConsigneeMobile());
 		msg.data.put("payFlowId", flow.getId());

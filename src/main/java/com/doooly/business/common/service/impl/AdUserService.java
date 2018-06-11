@@ -1111,19 +1111,19 @@ public class AdUserService implements AdUserServiceI {
 							||voucherCardRecord.getApplicationStatus()!=1
 							||now.getTime() <voucherCardRecord.getBeginTime().getTime()) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.NOT_ACTIVATE.getCode());
-						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.NOT_ACTIVATE.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.NOT_ACTIVATE.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
 					if (voucherCardRecord.getCardActivationStatus()==2) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.IS_FREEZE.getCode());
-						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.IS_FREEZE.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.IS_FREEZE.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
 					if (now.getTime()>voucherCardRecord.getEndTime().getTime()) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.WRONG_TIME.getCode());
-						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.WRONG_TIME.getCode());
+						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.WRONG_TIME.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}

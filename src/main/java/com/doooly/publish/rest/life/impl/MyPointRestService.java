@@ -195,8 +195,7 @@ public class MyPointRestService implements MyPointRestServiceI {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			long start = System.currentTimeMillis();
-            logger.info(JSON.toJSONString(json));
-//			JSONObject jsonObject  = json.getParams();
+            logger.info("积分卡充值开始");
 			Long userId = json.getLong("userId");
 			String cardPassword = json.getString("cardPassword");
 			messageDataBean = myPointServiceI.doIntegralRecharge(userId,cardPassword);

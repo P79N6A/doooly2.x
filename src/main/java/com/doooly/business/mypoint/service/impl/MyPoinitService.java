@@ -375,10 +375,8 @@ public class MyPoinitService implements MyPointServiceI {
 				map.put("failCount", count);
 			    messageDataBean.setData(map);
 				messageDataBean.setCode(IntegralCode.MAX_FAIL_COUNT.getCode()+"");
-//			failRecord.setReason("卡密已使用");
 				return messageDataBean;
 			}
-//		String old = redisTemplate.opsForValue().get(INTEGRAL_FAIL_COUNT+userId);
 			if (record!=null) {
 				//判断卡密是否已被使用,卡密是否已激活
 				if (record.getCardUseStatus() != 0) {
@@ -423,34 +421,20 @@ public class MyPoinitService implements MyPointServiceI {
 					// 新增充值记录
 					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+record.getId(), String.valueOf(System.currentTimeMillis() + 5*60*1000))){
 						redisTemplate.expire("voucher_card_"+userId+record.getId(), 5*60*1000, TimeUnit.MILLISECONDS);
-			            dealUserIntegralData(userId, cardPassword, messageDataBean, record);
-//		            redisTemplate.delete(INTEGRAL_FAIL_COUNT+userId);
-//		            if (StringUtils.isBlank(old)) {
-//		            	map.put("failCount", 0);
-//					}else{
-//						map.put("failCount", old);
-//					}
+			            dealUserIntegralData(userId, messageDataBean, record);
 			            map.put("failCount", count);
 			            messageDataBean.setData(map);
 					}else {
 						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-//					isFailed=false;
 			        	logger.info("====当前用户二次请求,userId为==="+userId);
 					}
 					isFailed=false;
 				}else if (StringUtils.isNotBlank(record.getActivationCodeUseUid())&&record.getActivationCodeUseUid().equals(userId.toString())) {
 					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+record.getId(), String.valueOf(System.currentTimeMillis() + 5*60*1000))){
 						redisTemplate.expire("voucher_card_"+userId+record.getId(), 5*60*1000, TimeUnit.MILLISECONDS);
-			            dealUserIntegralData(userId, cardPassword, messageDataBean, record);
-//		            redisTemplate.delete(INTEGRAL_FAIL_COUNT+userId);
-//		            if (StringUtils.isBlank(old)) {
-//		            	map.put("failCount", 0);
-//					}else{
-//						map.put("failCount", old);
-//					}
+			            dealUserIntegralData(userId, messageDataBean, record);
 			            map.put("failCount", count);
 			            messageDataBean.setData(map);
-//		            isFailed=false;
 					}else {
 						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
 			        	logger.info("====当前用户二次请求,userId为==="+userId);
@@ -465,23 +449,11 @@ public class MyPoinitService implements MyPointServiceI {
 				messageDataBean.setCode(IntegralCode.NOT_EXIT.getCode()+"");
 			}
 			if (isFailed) {
-//			Integer newData = 0;
-//			if (StringUtils.isBlank(old)) {
-//				redisTemplate.opsForValue().set(INTEGRAL_FAIL_COUNT+userId,"1", 24*60*1000, TimeUnit.MILLISECONDS);
-//				map.put("failCount", 1);
-//				messageDataBean.setData(map);
-//			}else {
-////				newData = Integer.valueOf(old)+1;
-//				redisTemplate.boundValueOps(INTEGRAL_FAIL_COUNT+userId).increment(1);
-//				map.put("failCount", Integer.valueOf(old)+1);
-//				messageDataBean.setData(map);
-//			}
 				addFailRecord(cardPassword, failRecord, user);
 				map.put("failCount", count+1);
 				messageDataBean.setData(map);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			redisTemplate.delete("voucher_card_"+userId+record.getId());
 		}
@@ -494,10 +466,8 @@ public class MyPoinitService implements MyPointServiceI {
 		voucherCardFailRecordDao.insert(failRecord);
 	}
 
-	private void dealUserIntegralData(Long userId, String cardPassword, MessageDataBean messageDataBean,
+	private void dealUserIntegralData(Long userId, MessageDataBean messageDataBean,
 			VoucherCardRecord record) {
-		// 设置锁的有效期，防止因异常情况无法释放锁而造成死锁情况的发生
-//		redisTemplate.expire("voucher_card_"+userId+"_"+cardPassword, 5*60*1000, TimeUnit.MILLISECONDS);
 		
 		//更新available和user以及插入ad_integral_acquire_record表
 		AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
@@ -514,12 +484,6 @@ public class MyPoinitService implements MyPointServiceI {
 		record.setActivationCodeUseStatus(1);
 		record.setCardUseMobile(user.getTelephone());
 		voucherCardRecordDao.updateRechargeData(record);
-//            		AdIntegralAcquireRecord adIntegralAcquireRecord = new AdIntegralAcquireRecord();
-//            		adIntegralAcquireRecord.setUserId(userId);
-//            		adIntegralAcquireRecord.setIntegral(new BigDecimal(record.getCardMoney()));
-//            		adIntegralAcquireRecord.setIntegralActivityId(activityConn.getIntegralId());
-//            		adIntegralAcquireRecord.setCreateDate(new Date());
-//            		adIntegralAcquireRecordDao.insert(adIntegralAcquireRecord);
 		messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
 	}
 	public String exChange(String str){  

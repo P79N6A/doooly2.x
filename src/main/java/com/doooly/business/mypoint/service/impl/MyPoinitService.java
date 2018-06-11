@@ -496,9 +496,8 @@ public class MyPoinitService implements MyPointServiceI {
 
 	private void dealUserIntegralData(Long userId, String cardPassword, MessageDataBean messageDataBean,
 			VoucherCardRecord record) {
-		logger.info("integral_activity_"+userId+cardPassword + " - tryLock success.");
 		// 设置锁的有效期，防止因异常情况无法释放锁而造成死锁情况的发生
-		redisTemplate.expire("voucher_card_"+userId+"_"+cardPassword, 5*60*1000, TimeUnit.MILLISECONDS);
+//		redisTemplate.expire("voucher_card_"+userId+"_"+cardPassword, 5*60*1000, TimeUnit.MILLISECONDS);
 		
 		//更新available和user以及插入ad_integral_acquire_record表
 		AdAvailablePoints adAvailablePoints = new AdAvailablePoints();

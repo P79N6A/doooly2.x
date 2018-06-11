@@ -173,24 +173,4 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
-	@POST
-	@Path(value = "/businessServiceData1")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public String businessServiceData1(JSONObject json) {
-		MessageDataBean messageDataBean = new MessageDataBean();
-		try {
-			long start = System.currentTimeMillis();
-			logger.info(JSON.toJSONString(json));
-			Long userId = json.getLong("userId");
-			messageDataBean = hotBusinessServiceI.getBusinessServiceData(userId);
-			logger.info(messageDataBean.toJsonString());
-			logger.info("商家服务列表时间"+ (System.currentTimeMillis() - start) + " ms");
-		} catch (Exception e) {
-			e.printStackTrace();
-			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode()+"");
-			messageDataBean.setMess(SystemCode.SYSTEM_ERROR.getMsg());
-		}
-		return messageDataBean.toJsonString();
-	}
 }

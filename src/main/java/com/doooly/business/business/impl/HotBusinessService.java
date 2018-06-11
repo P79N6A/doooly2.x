@@ -222,4 +222,28 @@ public class HotBusinessService implements HotBusinessServiceI{
 		return messageDataBean;
 	}
 
+	/**
+	 * 保留2.0  老的接口
+	 * @param userId
+	 * @return
+	 */
+	@Override
+	public MessageDataBean getBusinessServiceData2(Long userId) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		List<AdBusinessServicePJ> adBusinessServicePJs = adBusinessServicePJDao.getDataByUserId(userId, null);
+		if (!adBusinessServicePJs.isEmpty()) {
+			map.put("adBusinessServices", adBusinessServicePJs);
+			messageDataBean.setData(map);
+			messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+			messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
+		} else {
+			map.put("adBusinessServices", null);
+			messageDataBean.setData(map);
+			messageDataBean.setCode(SystemCode.SUCCESS_NULL.getCode()+"");
+			messageDataBean.setMess(SystemCode.SUCCESS_NULL.getMsg());
+		}
+		return messageDataBean;
+	}
+
 }

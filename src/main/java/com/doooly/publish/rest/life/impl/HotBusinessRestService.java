@@ -145,6 +145,34 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
+
+	/***
+	 * 保留原来老的接口
+	 * @param json
+	 * @return
+	 */
+	@POST
+	@Path(value = "/businessServiceData2")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String businessServiceData2(BaseReq<JSONObject> json) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			long start = System.currentTimeMillis();
+			logger.info(JSON.toJSONString(json));
+			JSONObject jsonObject  = json.getParams();
+			Long userId = jsonObject.getLong("userId");
+			messageDataBean = hotBusinessServiceI.getBusinessServiceData2(userId);
+			logger.info(messageDataBean.toJsonString());
+			logger.info("商家服务列表时间"+ (System.currentTimeMillis() - start) + " ms");
+		} catch (Exception e) {
+			e.printStackTrace();
+			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode()+"");
+			messageDataBean.setMess(SystemCode.SYSTEM_ERROR.getMsg());
+		}
+		return messageDataBean.toJsonString();
+	}
+
 	@POST
 	@Path(value = "/businessServiceData1")
 	@Produces(MediaType.APPLICATION_JSON)

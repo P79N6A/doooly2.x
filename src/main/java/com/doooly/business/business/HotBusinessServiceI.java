@@ -17,5 +17,6 @@ public interface HotBusinessServiceI {
 	MessageDataBean getBusinessInfo(Long userId);
 	MessageDataBean getDictDatas(Integer userId, String address);
 	MessageDataBean getBusinessServiceData(Long userId);
+	MessageDataBean getBusinessServiceData2(Long userId);
 
 }

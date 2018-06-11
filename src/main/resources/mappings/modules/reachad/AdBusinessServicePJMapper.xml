@@ -23,7 +23,11 @@
 		LEFT JOIN ad_business_group bg on b.id = bg.business_id
 		LEFT JOIN ad_group g on bg.group_id = g.id
 		join ad_user u on u.group_num = g.id
-	where u.id = #{userId} and a.service_type = #{serviceType} GROUP BY a.id order by a.sort desc
+	where u.id = #{userId}
+	  <if test="serviceType != null and serviceType !=''">
+	  	and a.service_type = #{serviceType}
+	  </if>
+	  GROUP BY a.id order by a.sort desc
   </select>
   
  

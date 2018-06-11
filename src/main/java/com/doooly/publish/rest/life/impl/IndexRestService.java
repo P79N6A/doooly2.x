@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,9 +127,8 @@ public class IndexRestService {
                 if (merchant.getDiscount() != null && merchant.getDiscount() > 0) {
                     sb.append(merchant.getDiscount() + "折 ");
                 }
-                if (merchant.getMaxUserRebate() != null) {
+                if (!StringUtils.isEmpty(merchant.getMaxUserRebate()) && new BigDecimal(merchant.getMaxUserRebate()).compareTo(BigDecimal.ZERO) == 1) {
                     sb.append("返" + merchant.getMaxUserRebate() + "%");
-
                 }
                 bean.setSubTitle(sb.toString());
                 bean.setIconUrl(merchant.getLogo());

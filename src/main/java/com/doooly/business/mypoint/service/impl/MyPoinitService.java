@@ -337,7 +337,8 @@ public class MyPoinitService implements MyPointServiceI {
 		// 查询总数
 		int totalNum = voucherCardRecordDao.getTotalCountByUserId(userId);
 		AdUser user = adUserDao.getById(userId+"");
-		map.put("integral", user.getIntegral());
+		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId+"");
+		map.put("integral", availablePoint!=null ? availablePoint : new BigDecimal("0"));
 		pagelab.setTotalNum(totalNum);
 		Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
 		map.put("failCount", count);

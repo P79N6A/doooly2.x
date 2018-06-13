@@ -73,13 +73,13 @@ public class IndexRestService {
         String address = params.getString("address");
         //取有返佣金额的商户
         try {
-            Map data = new HashMap();
-            List ls = new ArrayList();
             logger.info("index() userToken={},userId={},params={}", userToken, userId, params);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId);
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000","floors is null").toJsonString();
             }
+            Map data = new HashMap();
+            List ls = new ArrayList();
             for (AdBasicType floor : floors) {
                 Map item = new HashMap();
                 item.put("title",floor.getName());
@@ -95,7 +95,7 @@ public class IndexRestService {
                     item.put("list", this.getBussiness(userId, address, DEAL_TYPE_OFFLINE));
                 } else {
                     //消费卡券/充值缴费数据表
-                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(), floor.getFloorId());
+                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getFloorId());
                     for (AdConsumeRecharge bean : beans) {
                         String linkUrl = bean.getLinkUrl();
                         if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {

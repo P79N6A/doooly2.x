@@ -70,7 +70,7 @@
 			from ad_voucher_card_record a join ad_voucher_card_application_record r on a.application_id = r.id
 		where 
 		a.card_password=#{cardPassword} 
-		
+		and a.card_activation_status !=3
 		  
     </select>
   	<update id="updateActiveData" >

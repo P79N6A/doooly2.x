@@ -1,25 +1,8 @@
 package com.doooly.business.user.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.HashMap;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.common.service.AdActiveCodeServiceI;
-import com.doooly.business.common.service.AdGroupServiceI;
-import com.doooly.business.common.service.AdUserServiceI;
-import com.doooly.business.common.service.AppClientServiceI;
-import com.doooly.business.common.service.AppTokenServiceI;
-import com.doooly.business.common.service.LifeMemberServiceI;
-import com.doooly.business.common.service.WSServiceI;
+import com.doooly.business.common.service.*;
 import com.doooly.business.common.utils.GenerateImageCodeUtil;
 import com.doooly.business.common.utils.ReqTransFormatUtils;
 import com.doooly.business.myaccount.service.MyAccountServiceI;
@@ -38,32 +21,23 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.dto.user.CheckActiveCodeReq;
-import com.doooly.dto.user.CheckActiveCodeRes;
-import com.doooly.dto.user.CheckVerifyCodeReq;
-import com.doooly.dto.user.CheckVerifyCodeRes;
-import com.doooly.dto.user.GetVerifyCodeReq;
-import com.doooly.dto.user.GetVerifyCodeRes;
-import com.doooly.dto.user.LoginReq;
-import com.doooly.dto.user.LoginRes;
-import com.doooly.dto.user.LogoutReq;
-import com.doooly.dto.user.LogoutRes;
-import com.doooly.dto.user.ModifyMobileReq;
-import com.doooly.dto.user.ModifyMobileRes;
-import com.doooly.dto.user.ModifyPwdReq;
-import com.doooly.dto.user.ModifyPwdRes;
-import com.doooly.dto.user.UserActiveNewReq;
-import com.doooly.dto.user.UserActiveReq;
-import com.doooly.dto.user.UserActiveRes;
-import com.doooly.entity.reachad.AdBlocBlackUser;
-import com.doooly.entity.reachad.AdBlocGroupLogin;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AppClient;
-import com.doooly.entity.reachad.AppToken;
+import com.doooly.dto.user.*;
+import com.doooly.entity.reachad.*;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.pay.dto.BasePayRes;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * 会员服务类(主)
@@ -505,7 +479,7 @@ public class UserService implements UserServiceI {
 			// 用户当前使用token
 			String token = "";
 			// 验证是否已存在token,如果存在则刷新
-			String userToken = redisTemplate.opsForValue().get(String.format(TOKEN_KEY, userId));
+			String userToken = redisTemplate.opsForValue().get(String.format(channel + ":" + TOKEN_KEY, userId));
 			logger.info("====【userLogin】用户已存在的token-userToken：" + userToken);
 			if (StringUtils.isNotBlank(userToken)) {
 				// 删除原token用户ID
@@ -515,6 +489,7 @@ public class UserService implements UserServiceI {
 			} else {
 				token = TokenUtil.getUserToken(channel, userId);
 			}
+			logger.info("====【userLogin】userToken=" + userToken + ",token=" + token);
 			// 获取用户个人信息
 			HashMap<String, Object> userInfomMap = myAccountService.getAccountListById(userId);
 			if (userInfomMap != null) {

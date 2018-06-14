@@ -6,22 +6,25 @@
 	<!--首页楼层配置-->
 	<select id="getConsumeRecharges" resultType="com.doooly.entity.reachad.AdConsumeRecharge">
 		SELECT
-			id id,
-			main_title mainTitle,
-			sub_title subTitle,
-			icon_url iconUrl,
-			sort sort,
-			state state,
-			link_url linkUrl,
-			data_type dataType,
-			floor_id floorId,
-			create_by createBy,
-			create_date createDate,
-			update_by updateBy,
-			update_date updateDate
- 		FROM
- 			ad_consume_recharge r
- 		where r.state = 1 and r.floor_id = #{floorId} ORDER BY r.sort
+			c.id id,
+			c.main_title mainTitle,
+			c.sub_title subTitle,
+			c.icon_url iconUrl,
+			c.sort sort,
+			c.state state,
+			c.link_url linkUrl,
+			c.data_type dataType,
+			c.floor_id floorId,
+			c.create_by createBy,
+			c.create_date createDate,
+			c.update_by updateBy,
+			c.update_date updateDate
+		FROM
+			ad_home_template_item it
+		INNER JOIN ad_consume_recharge c ON it.item_id = c.id
+		WHERE it.template_id = #{templateId} and it.floor_id= #{floorId}
+		ORDER BY c.sort
+
 	</select>
   
 </mapper>

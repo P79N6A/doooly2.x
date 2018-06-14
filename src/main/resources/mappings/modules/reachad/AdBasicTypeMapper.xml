@@ -17,21 +17,20 @@
 
 	<!--首页楼层配置-->
 	<select id="getFloors" resultType="com.doooly.entity.reachad.AdBasicType">
-		select
-			b.id,
-			b.name,
-			b.code,
-			b.sort,
-			fg.floor_id floorId
-		from
+		SELECT
+			it.floor_id floorId,
+			b.`name`,
+			b.`code`,
+			b.sort sort,
+			tg.template_id templateId
+		FROM
 			ad_user u
-		INNER JOIN
-			ad_floor_group fg
-			on u.group_num = fg.group_id
-		INNER JOIN
-			ad_basic_type b
-			on fg.floor_id = b.id
-		where b.type=3 and b.state=1 and u.id = #{userId} ORDER BY sort
+		INNER JOIN ad_home_template_group tg ON u.group_num = tg.group_id
+		INNER JOIN ad_home_template_item it ON it.template_id = tg.template_id
+		INNER JOIN ad_basic_type b ON it.floor_id = b.id
+		where u.id = #{userId} and b.type = 3
+		GROUP BY it.floor_id ORDER BY b.sort;
+
 	</select>
   
 </mapper>

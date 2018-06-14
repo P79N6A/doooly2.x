@@ -95,7 +95,7 @@ public class IndexRestService {
                     item.put("list", this.getBussiness(userId, address, DEAL_TYPE_OFFLINE));
                 } else {
                     //消费卡券/充值缴费数据表
-                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getFloorId());
+                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),floor.getFloorId());
                     for (AdConsumeRecharge bean : beans) {
                         String linkUrl = bean.getLinkUrl();
                         if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {

@@ -489,7 +489,7 @@ public class UserService implements UserServiceI {
 			} else {
 				token = TokenUtil.getUserToken(channel, userId);
 			}
-			logger.info("====【userLogin】userToken=" + userToken + ",token=" + token);
+			logger.info("====【userLogin】oldToken=" + userToken + ",newToken=" + token);
 			// 获取用户个人信息
 			HashMap<String, Object> userInfomMap = myAccountService.getAccountListById(userId);
 			if (userInfomMap != null) {

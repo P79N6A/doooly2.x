@@ -1,8 +1,5 @@
 package com.doooly.entity.reachad;
 
-import java.util.Date;
-
-
 /**
  * 活动类目，类型
  * @author zhaoyipeng
@@ -21,6 +18,8 @@ import java.util.Date;
 	private String sort;
 
 	private int floorId;
+
+	private int templateId;
 
 
 	public Long getId() {
@@ -69,5 +68,13 @@ import java.util.Date;
 
 	public void setFloorId(int floorId) {
 		this.floorId = floorId;
+	}
+
+	public int getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(int templateId) {
+		this.templateId = templateId;
 	}
 }

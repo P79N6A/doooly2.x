@@ -919,7 +919,7 @@ public class AdUserService implements AdUserServiceI {
 				AdInvitationRecord adInvitationRecord = adInvitationRecordDao.findRecodByInviteeId(user.getId().toString());
 				if (adInvitationRecord != null) {
 					if (!userId.equals(adInvitationRecord.getInviterId() + "")) {
-						res.put("code", "1001");
+						res.put("code", "1007");
 						res.put("msg", "该手机已经不是您的家属，不能邀请！");
 						return res;
 					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
@@ -951,7 +951,7 @@ public class AdUserService implements AdUserServiceI {
 							return res;
 						}
 					} else {
-						res.put("code", "1001");
+						res.put("code", "1008");
 						res.put("msg", "该手机已经是您的家属！");
 						return res;
 					}

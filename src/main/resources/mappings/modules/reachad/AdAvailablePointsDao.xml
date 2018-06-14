@@ -79,7 +79,7 @@
                 AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
             </if>
             <if test="income != null and income == 1">
-                AND (a.type NOT IN (1,7,9) AND a.business_rebate_amount &gt; 0)
+                AND (a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0)
             </if>
              and a.status=1
         </where>

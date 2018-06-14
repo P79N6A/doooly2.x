@@ -248,6 +248,11 @@ public class MyPoinitService implements MyPointServiceI {
 				}else {
 					messageDataBean.setMess("查无积分活动明细");
 				}
+			}else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_RECHARGE_BY_SELF)) {
+				map.put("showType", "integralRecharge");
+				map.put("integral", adAvailablePoint.getBusinessRebateAmount());
+				map.put("date", DateUtils.formatDate(adAvailablePoint.getCreateDate(), "yyyy.MM.dd HH:mm"));
+				messageDataBean.setCode(MessageDataBean.success_code);
 			} else {
 				messageDataBean.setMess("查无积分明细");
 			}

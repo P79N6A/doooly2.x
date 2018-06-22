@@ -211,17 +211,30 @@ public class DiDiIntegralService implements DiDiIntegralServiceI {
                     JSONObject object = jsonObject.getJSONObject("data").getJSONArray("records").getJSONObject(0);
                     totalQuotaStr = object.getString("total_quota");
                     //构建修改用户参数 滴滴用滴滴接口配额添加额度
+                    BigDecimal oldBusinessIntegral = businessUserIntegral.getBusinessIntegral();
+                    BigDecimal businessIntegral = oldBusinessIntegral.add(amount);
                     BigDecimal totalQuota = new BigDecimal(totalQuotaStr).add(amount);
+                    Integer userCompanyMoney ;
                     JSONObject params1 = new JSONObject();
+                    if(businessIntegral.compareTo(BigDecimal.ONE)<0){
+                        //最后积分小于0 关闭企业积分支付
+                        userCompanyMoney=0;
+                    }else {
+                        userCompanyMoney=1;
+                        if(oldBusinessIntegral.compareTo(BigDecimal.ZERO)<0){
+                            //说明之前是负数了, 先加上负的配额
+                            totalQuota = totalQuota.add(oldBusinessIntegral);
+                        }
+                        params1.put("total_quota", String.valueOf(totalQuota));
+                    }
                     params1.put("phone", adUser.getTelephone());
                     params1.put("realname", adUser.getName());
-                    params1.put("use_company_money", 1);
-                    params1.put("total_quota", String.valueOf(totalQuota));
+                    params1.put("use_company_money", userCompanyMoney);
                     params1.put("regulation_id", stringBuilder.substring(0, stringBuilder.length() - 1));
                     String memberEdit = DiDiConnector.didiMemberEdit(params1.toJSONString(), businessUserIntegral.getBusinessMemberId(),didiEnterpriseApiUtil.getDidiAccessToken());
                     if (memberEdit != null && JSONObject.parseObject(memberEdit).getInteger("errno") == 0) {
                         //修改兜礼记录表 自己记录
-                        businessUserIntegral.setBusinessIntegral(businessUserIntegral.getBusinessIntegral().add(amount));
+                        businessUserIntegral.setBusinessIntegral(businessIntegral);
                         businessUserIntegralDao.update(businessUserIntegral);
                         //1,插入积分兑换记录表
                         BusinessUserIntegral businessUserIntegral1 = new BusinessUserIntegral();
@@ -235,7 +248,7 @@ public class DiDiIntegralService implements DiDiIntegralServiceI {
                         //积分退款
                         refundIntegral(amount, orderNumber, serialNumber, adUser);
                         messageDataBean.setCode(JSONObject.parseObject(memberEdit).getString("errno"));
-                        messageDataBean.setMess(JSONObject.parseObject(memberEdit).getString("errmsg"));
+                        messageDataBean.setMess("可能存在未支付的订单,请至“我的行程”中查看行程状态或联系滴滴客服：400-000-0999");
                         logger.error("滴滴修改用户接口失败");
                     }
                 }else {

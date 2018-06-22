@@ -69,7 +69,7 @@ public class DiDiIntegralRestService implements DiDiIntegralRestServiceI{
             BigDecimal amount = json.getBigDecimal("amount");//兑换积分数量
             String orderNumber = json.getString("orderNumber");//订单号
             Integer code = json.getInteger("code");// 验证码
-            if("1000061".equals(String.valueOf(userId))){
+            if("1000551".equals(String.valueOf(userId))){
                 messageDataBean = diDiIntegralServiceI.exchangeIntegral(businessId, userId,amount,code,orderNumber);
             }else {
                 messageDataBean.setCode(MessageDataBean.failure_code);

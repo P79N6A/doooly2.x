@@ -67,6 +67,10 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	private static final String WUGANG_SCAN_NEWS_PIC_URL  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_pic_url");
 	private static final String WUGANG_SCAN_NEWS_TITLE  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_title");
 	private static final String WUGANG_SCAN_NEWS_DESCRIPTION  = PropertiesConstants.wechatPushBundle.getString("wugang_scan_news_description");
+	private static final String DOOOLY_SCAN_NEWS_URL  = PropertiesConstants.wechatPushBundle.getString("doooly_scan_news_url");
+	private static final String DOOOLY_SCAN_NEWS_PIC_URL  = PropertiesConstants.wechatPushBundle.getString("doooly_scan_news_pic_url");
+	private static final String DOOOLY_SCAN_NEWS_TITLE  = PropertiesConstants.wechatPushBundle.getString("doooly_scan_news_title");
+	private static final String DOOOLY_SCAN_NEWS_DESCRIPTION  = PropertiesConstants.wechatPushBundle.getString("doooly_scan_news_description");
 	
 	private static final String BRING_COLLNESS_NEWS_URL1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_url1");
 	private static final String BRING_COLLNESS_NEWS_PIC_URL1  = PropertiesConstants.wechatPushBundle.getString("bring_coolness_news_pic_url1");
@@ -446,10 +450,17 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			List<JSONObject> articles = new ArrayList<JSONObject>();
 			if (key.equals(WUGANG_SCAN_ACTIVITY)) {
 				JSONObject article = new JSONObject();
-				article.put("url", WUGANG_SCAN_NEWS_URL);
-				article.put("picurl", WUGANG_SCAN_NEWS_PIC_URL);
-				article.put("title", WUGANG_SCAN_NEWS_TITLE);
-				article.put("description", WUGANG_SCAN_NEWS_DESCRIPTION);
+				if ("doooly".equals(channel)) {
+					article.put("url", DOOOLY_SCAN_NEWS_URL);
+					article.put("picurl", DOOOLY_SCAN_NEWS_PIC_URL);
+					article.put("title", DOOOLY_SCAN_NEWS_TITLE);
+					article.put("description", DOOOLY_SCAN_NEWS_DESCRIPTION);
+				}else{
+					article.put("url", WUGANG_SCAN_NEWS_URL);
+					article.put("picurl", WUGANG_SCAN_NEWS_PIC_URL);
+					article.put("title", WUGANG_SCAN_NEWS_TITLE);
+					article.put("description", WUGANG_SCAN_NEWS_DESCRIPTION);
+				}
 				articles.add(article);
 			}else if (key.equals(BRING_COLLNESS_ACTIVITY)) {
 				JSONObject article1 = new JSONObject();
@@ -473,7 +484,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			}
 			logger.info(articles);
 			String sendNews = this.sendNews(accessToken.getString("accessToken"), openId,articles);
-//			String sendNews = this.sendNews("9_u9RZlxaC2lmIdbM8U5eq9Q3_gAzAVG0yT3kscUZ4NDdZv0vE_beXjZpLH_gEUwHNwMMV6LFwkJP2guTA8pJsXPRlhSZgs8l8Y_2geUa8UJGTaYfXFEavMucxbeUZEKiACADIO", openId,articles);
+//			String sendNews = this.sendNews("10_F-NprKbCoXPkyRTkJrzIGYfMUaKkbFOZDPbxdLN8WSjW-Z7YGm-8wXlP_akwh3t5oPw_5vwgaDozFpKyYjWYFBVaZwbv71i8ggY0ONSLXXe3wpXokCwSPjCVr80MgiQ5JmBUYvJSNwOa-kBzAPMiAEANCZ", openId,articles);
 			data.put("newsCode", sendNews);
 			messageDataBean.setData(data);
 			messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");

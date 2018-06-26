@@ -6,7 +6,6 @@ import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.entity.reachad.AdGroup;
 import org.slf4j.Logger;
@@ -53,6 +52,7 @@ public class ProductServicePublish {
 	@Path(value = "/virProducts")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String virProducts(JSONObject params) {
+		long s = System.currentTimeMillis();
 		logger.info("virProducts start.MOBILE_ID = {},FLOW_ID={},MERCHANT_ID={}", MOBILE_ID, FLOW_ID, MERCHANT_ID);
 		JSONObject retJson = new JSONObject(true);
 
@@ -77,6 +77,7 @@ public class ProductServicePublish {
 		retJson.put("mobile_list", array);
 		retJson.put("mobile_default_product_id", mobilePro.getId());
 		retJson.put("mobile_default_sku_id", default_sku_id);
+		logger.info("virProducts() cost1={}", System.currentTimeMillis() - s);
 
 		// ==================== 流量商品信息 ====================
 		AdSelfProduct  flowPro = productService.getProductSku(Integer.valueOf(MERCHANT_ID), Integer.valueOf(FLOW_ID), null);
@@ -99,6 +100,7 @@ public class ProductServicePublish {
 		retJson.put("flow_list", array);
 		retJson.put("flow_default_product_id", flowPro.getId());
 		retJson.put("flow_default_sku_id", default_sku_id);
+		logger.info("virProducts() cost2={}", System.currentTimeMillis() - s);
 
 		// ==================== 旅游卡商品信息 ====================
 		AdSelfProduct  sctcdPro = productService.getProductSku(Integer.valueOf(SCTCD_MERCHANT_ID), Integer.valueOf(SCTCD_PRODUCT_ID), null);
@@ -120,13 +122,15 @@ public class ProductServicePublish {
 		retJson.put("sctcd_list", array);
 		retJson.put("sctcd_default_product_id", flowPro.getId());
 		retJson.put("sctcd_default_sku_id", default_sku_id);
-
+		logger.info("virProducts() cost2={}", System.currentTimeMillis() - s);
 		//限额和手续费百分比
 		String groupId  = params.getString("groupId");
 		AdGroup adGroup = adGroupDao.findGroupByID(groupId);
 		logger.info("getDailyLimit={},getCharges={}",adGroup.getDailyLimit(),adGroup.getCharges());
 		retJson.put("daily_limit", adGroup.getDailyLimit());
 		retJson.put("charges", adGroup.getCharges());
+		logger.info("virProducts() cost3={}", System.currentTimeMillis() - s);
+
 		return retJson.toJSONString();
 	}
 	

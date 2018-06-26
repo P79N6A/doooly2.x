@@ -15,6 +15,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 
 /**
  * @Description: 上海银行相关接口控制器
@@ -69,7 +70,7 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
             String eAcctNo = json.getString("eAcctNo");
-            String amount = json.getString("amount");
+            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
             String usage = json.getString("usage");
             String channelFlowNo = IdGeneratorUtil.getOrderNumber(3);
             messageDataBean = shangHaiBankService.c19VirWithDrawalsInq(channelFlowNo, eAcctNo, amount, usage);
@@ -95,9 +96,9 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
         try {
             String businessId = json.getString("businessId");
             String eAcctNo = json.getString("eAcctNo");
-            String amount = json.getString("amount");
+            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
             String sign = json.getString("sign");
-            shangHaiBankService.c19SingleCharge(businessId, eAcctNo, amount,sign);
+            messageDataBean = shangHaiBankService.c19SingleCharge(businessId, eAcctNo, amount,sign);
         } catch (Exception e) {
             logger.error("上海银行虚账户代缴失败", e);
             messageDataBean.setCode(MessageDataBean.failure_code);
@@ -119,11 +120,11 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     public String c19VirSReTrigSer(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
-            String amount = json.getString("amount");
+            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
             String businessId = json.getString("businessId");
             String groupId = json.getString("groupId");
             String type = json.getString("type");
-            shangHaiBankService.c19VirSReTrigSer(amount,businessId,groupId,type);
+            messageDataBean = shangHaiBankService.c19VirSReTrigSer(amount,businessId,groupId,type);
         } catch (Exception e) {
             logger.error("上海银行虚账户代发失败", e);
             messageDataBean.setCode(MessageDataBean.failure_code);

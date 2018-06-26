@@ -23,7 +23,8 @@
     <sql id="joinTables">
         LEFT JOIN ad_user u2 ON u2.id = a.user_id
         LEFT JOIN ad_recharge ar ON ar.id = a.recharge_id
-        LEFT JOIN ad_group agold ON ar.group_id = agold.id
+        LEFT JOIN ad_group_integral_bill agib ON ar.integral_bill_id = agib.id
+        LEFT JOIN ad_group agold ON agib.ad_group_id = agold.id
         LEFT JOIN _order o ON a.order_id = o.id
         LEFT JOIN ad_business ab ON o.bussinessId = ab.business_id
 		LEFT JOIN ad_business_store abs ON o.storesId = abs.store_number AND ab.id = abs.business_id

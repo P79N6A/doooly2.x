@@ -123,6 +123,12 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		}
 		return messageDataBean.toJsonString();
 	}
+
+	/***
+	 * 原来老的2.0可以用积分服务
+	 * @param json
+	 * @return
+	 */
 	@POST
 	@Path(value = "/businessServiceData")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -145,24 +151,23 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
-
-	/***
-	 * 保留原来老的接口
+	/**
+	 * 新的2.1可以用积分服务
 	 * @param json
 	 * @return
 	 */
 	@POST
-	@Path(value = "/businessServiceData2")
+	@Path(value = "/businessServiceDataV21")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String businessServiceData2(BaseReq<JSONObject> json) {
+	public String businessServiceDataV21(BaseReq<JSONObject> json) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			long start = System.currentTimeMillis();
 			logger.info(JSON.toJSONString(json));
 			JSONObject jsonObject  = json.getParams();
 			Long userId = jsonObject.getLong("userId");
-			messageDataBean = hotBusinessServiceI.getBusinessServiceData2(userId);
+			messageDataBean = hotBusinessServiceI.getBusinessServiceDataV21(userId);
 			logger.info(messageDataBean.toJsonString());
 			logger.info("商家服务列表时间"+ (System.currentTimeMillis() - start) + " ms");
 		} catch (Exception e) {

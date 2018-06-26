@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.payment.AdShanghaiBankDao">
+    
+	<sql id="adShanghaiBankColumns">
+		a.id AS "id",
+		a.account_bank AS "accountBank",
+		a.account_name AS "accountName",
+		a.account_short_name AS "accountShortName"
+	</sql>
+	
+	<sql id="adShanghaiBankJoins">
+	</sql>
+    
+	<select id="findByAccountBank" resultType="com.doooly.entity.payment.AdShanghaiBank">
+		SELECT 
+			<include refid="adShanghaiBankColumns"/>
+		FROM ad_shanghai_bank a
+		<include refid="adShanghaiBankJoins"/>
+		WHERE a.account_bank = #{subBranchNo}
+	</select>
+
+</mapper>

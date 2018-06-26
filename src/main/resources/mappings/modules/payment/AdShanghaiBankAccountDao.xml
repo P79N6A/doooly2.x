@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.payment.AdShanghaiBankAccountDao">
+    
+	<sql id="adShanghaiBankAccountColumns">
+		a.id AS "id",
+		a.eacct_no AS "eacctNo",
+		a.eacct_name AS "eacctName",
+		a.sub_branch_no AS "subBranchNo",
+		a.sub_branch_name AS "subBranchName",
+		a.amount AS "amount",
+		a.frozen_amount AS "frozenAmount",
+		a.type AS "type",
+		a.business_id AS "businessId",
+		a.group_id AS "groupId",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="adShanghaiBankAccountJoins">
+	</sql>
+    
+	<select id="getAccount" parameterType="java.lang.String" resultType="com.doooly.entity.payment.AdShanghaiBankAccount">
+		SELECT 
+			<include refid="adShanghaiBankAccountColumns"/>
+		FROM ad_shanghai_bank_account a
+		<include refid="adShanghaiBankAccountJoins"/>
+		WHERE a.eacct_name = #{cNName}
+	</select>
+
+	<select id="getBankAccount" parameterType="com.doooly.entity.payment.AdShanghaiBankAccount" resultType="com.doooly.entity.payment.AdShanghaiBankAccount">
+		SELECT
+			<include refid="adShanghaiBankAccountColumns"/>
+		FROM ad_shanghai_bank_account a
+		<include refid="adShanghaiBankAccountJoins"/>
+		<where>
+            <if test="type != null and type ==1">
+                AND a.type=#{type} AND a.business_id=#{businessId}
+            </if>
+            <if test="type != null and type ==2">
+                AND a.type=#{type} AND a.group_id=#{groupId}
+            </if>
+            <if test="type != null and type ==3">
+                AND a.type=#{type}
+            </if>
+        </where>
+	</select>
+
+	<select id="findList" resultType="com.doooly.entity.payment.AdShanghaiBankAccount">
+		SELECT 
+			<include refid="adShanghaiBankAccountColumns"/>
+		FROM ad_shanghai_bank_account a
+		<include refid="adShanghaiBankAccountJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO ad_shanghai_bank_account(
+			eacct_no,
+			eacct_name,
+			sub_branch_no,
+			sub_branch_name,
+			amount,
+			frozen_amount,
+			type,
+			business_id,
+			group_id,
+			update_date,
+			create_date
+		) VALUES (
+			#{eacctNo},
+			#{eacctName},
+			#{subBranchNo},
+			#{subBranchName},
+			#{amount},
+			#{frozenAmount},
+			#{type},
+			#{businessId},
+			#{groupId},
+			now(),
+			now()
+		)
+	</insert>
+
+    <update id="updateAmount" parameterType="com.doooly.entity.payment.AdShanghaiBankAccount">
+        UPDATE ad_shanghai_bank_account SET amount = #{amount},frozen_amount =#{frozenAmount} WHERE eacct_no =#{eacctNo}
+    </update>
+
+    <update id="updateAmountByNotice" parameterType="com.doooly.entity.payment.AdShanghaiBankAccount">
+        UPDATE ad_shanghai_bank_account SET amount = amount +#{amount} WHERE eacct_no =#{eacctNo}
+    </update>
+
+    <update id="updateAmountByEAcctNo" >
+        UPDATE ad_shanghai_bank_account SET
+        <if test="type == 1">
+            amount = amount + #{amount}
+        </if>
+        <if test="type == 2">
+            amount = amount - #{amount}
+        </if>
+        WHERE eacct_no =#{eacctNo}
+    </update>
+
+</mapper>

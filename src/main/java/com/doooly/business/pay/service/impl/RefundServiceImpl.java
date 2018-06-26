@@ -1,16 +1,9 @@
 package com.doooly.business.pay.service.impl;
 
-import java.util.HashMap;
-
 import com.alibaba.fastjson.JSON;
-import com.doooly.business.mall.service.Impl.MallBusinessService;
-import com.doooly.business.utils.DateUtils;
-import com.doooly.common.util.HTTPSClientUtils;
-import com.doooly.entity.reachad.AdBusiness;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
@@ -18,11 +11,17 @@ import com.doooly.business.pay.bean.WxRefundParams;
 import com.doooly.business.pay.service.AbstractRefundService;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.pay.utils.WxUtil;
+import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
 
 /**
  * 退款接口
@@ -139,15 +138,19 @@ public class RefundServiceImpl extends AbstractRefundService {
 		params.put("password", WebService.PASSWORD);
 		//订单子项
 		OrderItemVo item = order.getItems().get(0);
+        JSONObject orderDetail = new JSONObject();
+        orderDetail.put("orderNumber", order.getOrderNumber());
+        orderDetail.put("serialNumber", order.getOrderNumber());
+        JSONArray jsonArray = new JSONArray();
 		JSONObject jsonDetail = new JSONObject();
 		jsonDetail.put("code", item.getId());
 		jsonDetail.put("goods", item.getGoods() + item.getSku());
 		jsonDetail.put("number", item.getNumber());
 		jsonDetail.put("price", item.getPrice().toString());
 		jsonDetail.put("category", item.getCategoryId());
-		//jsonDetail.put("orderNumber", order.getOrderNumber());
-		//jsonDetail.put("serialNumber", order.getOrderNumber());
-		params.put("orderDetail", jsonDetail);
+        jsonArray.add(jsonDetail);
+        orderDetail.put("orderDetail",jsonArray);
+		params.put("orderDetail", orderDetail);
 
 		String ret = HTTPSClientUtils.sendPostNew(params.toJSONString(), url);
 		logger.info("result = {}",ret);

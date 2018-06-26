@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.payment.AdShanghaiBankDrawNoticeRecordDao">
+
+    <insert id="insert">
+		INSERT INTO ad_shanghai_bank_draw_notice_record(
+			notice_id,
+			vir_acc_no,
+			vir_acc_name,
+			detail_id,
+			other_acc_no,
+			other_acc_name,
+			amt,
+			tran_direction,
+			purpose,
+			memo,
+			remark,
+			tran_time,
+			create_date
+		) VALUES (
+			#{noticeId},
+			#{virAccNo},
+			#{virAccName},
+			#{detailId},
+			#{otherAccNo},
+			#{otherAccName},
+			#{amt},
+			#{tranDirection},
+			#{purpose},
+			#{memo},
+			#{remark},
+			#{tranTime},
+			now()
+		)
+	</insert>
+
+</mapper>

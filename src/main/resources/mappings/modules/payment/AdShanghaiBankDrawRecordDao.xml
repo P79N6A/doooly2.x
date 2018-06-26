@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.payment.AdShanghaiBankDrawRecordDao">
+    
+	<sql id="adShanghaiBankDrawRecordColumns">
+		a.id AS "id",
+		a.eacct_no AS "eacctNo",
+		a.amount AS "amount",
+		a.channel_flow_no AS "channelFlowNo",
+		a.usage AS "usage",
+		a.platform_summary AS "platformSummary",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="adShanghaiBankDrawRecordJoins">
+	</sql>
+    
+	<select id="get" resultType="com.doooly.entity.payment.AdShanghaiBankDrawRecord">
+		SELECT 
+			<include refid="adShanghaiBankDrawRecordColumns"/>
+		FROM ad_shanghai_bank_draw_record a
+		<include refid="adShanghaiBankDrawRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+
+	<insert id="insert">
+		INSERT INTO ad_shanghai_bank_draw_record(
+			eacct_no,
+			amount,
+			channel_flow_no,
+			usage,
+			platform_summary,
+			update_date,
+			create_date
+		) VALUES (
+			#{eacctNo},
+			#{amount},
+			#{channelFlowNo},
+			#{usage},
+			#{platformSummary},
+			now(),
+			now()
+		)
+	</insert>
+
+</mapper>

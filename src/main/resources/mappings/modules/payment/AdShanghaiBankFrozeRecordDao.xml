@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.payment.AdShanghaiBankFrozeRecordDao">
+    
+	<sql id="adShanghaiBankFrozeRecordColumns">
+		a.id AS "id",
+		a.eacct_no AS "eacctNo",
+		a.channel_flow_no AS "channelFlowNo",
+		a.txn_type AS "txnType",
+		a.apply_amount AS "applyAmount",
+		a.notes AS "notes",
+		a.platform_summary AS "platformSummary",
+		a.update_date AS "updateDate",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="adShanghaiBankFrozeRecordJoins">
+	</sql>
+    
+	<select id="get" resultType="AdShanghaiBankFrozeRecord">
+		SELECT 
+			<include refid="adShanghaiBankFrozeRecordColumns"/>
+		FROM ad_shanghai_bank_froze_record a
+		<include refid="adShanghaiBankFrozeRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="AdShanghaiBankFrozeRecord">
+		SELECT 
+			<include refid="adShanghaiBankFrozeRecordColumns"/>
+		FROM ad_shanghai_bank_froze_record a
+		<include refid="adShanghaiBankFrozeRecordJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="AdShanghaiBankFrozeRecord">
+		SELECT 
+			<include refid="adShanghaiBankFrozeRecordColumns"/>
+		FROM ad_shanghai_bank_froze_record a
+		<include refid="adShanghaiBankFrozeRecordJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ad_shanghai_bank_froze_record(
+			id,
+			eacct_no,
+			channel_flow_no,
+			txn_type,
+			apply_amount,
+			notes,
+			platform_summary,
+			update_date,
+			create_date
+		) VALUES (
+			#{id},
+			#{eacctNo},
+			#{channelFlowNo},
+			#{txnType},
+			#{applyAmount},
+			#{notes},
+			#{platformSummary},
+			#{updateDate},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ad_shanghai_bank_froze_record SET 	
+			eacct_no = #{eacctNo},
+			channel_flow_no = #{channelFlowNo},
+			txn_type = #{txnType},
+			apply_amount = #{applyAmount},
+			notes = #{notes},
+			platform_summary = #{platformSummary},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ad_shanghai_bank_froze_record
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

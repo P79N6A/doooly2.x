@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper
+	namespace="com.doooly.dao.payment.AdBankBusinessOpenAccountDao">
+	<resultMap id="BaseResultMap"
+		type="com.doooly.entity.payment.AdBankBusinessOpenAccount">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="business_no" property="businessNo" jdbcType="INTEGER" />
+		<result column="business_name" property="businessName"
+			jdbcType="VARCHAR" />
+		<result column="eAcct_name" property="eacctName" jdbcType="VARCHAR" />
+		<result column="eAcct_no" property="eacctNo" jdbcType="VARCHAR" />
+		<result column="sub_branch_no" property="subBranchNo" jdbcType="VARCHAR" />
+		<result column="sub_Branch_name" property="subBranchName"
+			jdbcType="VARCHAR" />
+		<result column="eAcct_status" property="eacctStatus" jdbcType="TINYINT" />
+		<result column="business_entity_card" property="businessEntityCard"
+			jdbcType="VARCHAR" />
+		<result column="business_entity_card_status" property="businessEntityCardStatus"
+			jdbcType="TINYINT" />
+		<result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+		<result column="open_account_bank_name" property="openAccountBankName"
+			jdbcType="VARCHAR" />
+		<result column="cardholder_name" property="cardholderName"
+			jdbcType="VARCHAR" />
+		<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, business_no, business_name, eAcct_name, eAcct_no,
+		sub_branch_no,
+		sub_Branch_name,
+		eAcct_status, business_entity_card,
+		business_entity_card_status, bank_name, open_account_bank_name,
+		cardholder_name, create_by,
+		create_date
+	</sql>
+	<select id="findByBusinessId" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from ad_bank_business_open_account
+		where business_no = #{businessId,jdbcType=INTEGER}
+	</select>
+
+</mapper>

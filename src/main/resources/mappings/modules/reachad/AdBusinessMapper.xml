@@ -223,7 +223,7 @@
 			b.wechat_jump_url as "sWechatJumpUrl",
 			b.app_jump_url as "sAppJumpUrl"
 		from ad_business a
-		inner join ad_business_service b on a.id=b.business_id
+		left join ad_business_service b on a.id=b.business_id
 		where a.id=#{id}
 	</select>
 	<select id="findHotMerchant" resultType="com.doooly.entity.reachad.AdBusiness">

@@ -180,7 +180,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             adShanghaiBankDrawRecord.setChannelFlowNo(channelFlowNo);
             adShanghaiBankDrawRecord.setEacctNo(bankAccount.getEacctNo());
             adShanghaiBankDrawRecord.setAmount(new BigDecimal(amount));
-            adShanghaiBankDrawRecord.setUsage(usage);
+            adShanghaiBankDrawRecord.setUseage(usage);
             //插入提款记录表
             adShanghaiBankDrawRecordDao.insert(adShanghaiBankDrawRecord);
             //减少轧差账户徐账号余额
@@ -245,7 +245,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             adShanghaiBankChargeRecord.setRecvAccount(recvAccount);
             adShanghaiBankChargeRecord.setRecvAccountName(recvAccountName);
             adShanghaiBankChargeRecord.setRecvAccountBank(recvAccountBank);
-            adShanghaiBankChargeRecord.setUsage(usage);
+            adShanghaiBankChargeRecord.setUseage(usage);
             adShanghaiBankChargeRecord.setPlatformSummary(platformSummary);
             //插入代缴记录
             adShanghaiBankChargeRecordDao.insert(adShanghaiBankChargeRecord);
@@ -359,7 +359,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             adShanghaiBankTrigserRecord.setAmount(new BigDecimal(amount));
             adShanghaiBankTrigserRecord.setPayAccount(payAccount);
             adShanghaiBankTrigserRecord.setPayAccountName(payAccountName);
-            adShanghaiBankTrigserRecord.setUsage(usage);
+            adShanghaiBankTrigserRecord.setUseage(usage);
             adShanghaiBankTrigserRecord.setPlatformSummary(platformSummary);
             //插入代发记录
             adShanghaiBankTrigserRecordDao.insert(adShanghaiBankTrigserRecord);
@@ -373,7 +373,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
         } catch (Exception e) {
             LOGGER.error("虚账户单笔代发失败,失败原因", e);
             messageDataBean.setCode(MessageDataBean.failure_code);
-            messageDataBean.setMess(e.getMessage());
+            messageDataBean.setMess("虚账户单笔代发失败");
         }
         return messageDataBean;
     }

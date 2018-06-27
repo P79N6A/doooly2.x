@@ -11,7 +11,7 @@
 		a.recv_account AS "recvAccount",
 		a.recv_account_name AS "recvAccountName",
 		a.recv_account_bank AS "recvAccountBank",
-		a.usage AS "usage",
+		a.useage AS "useage",
 		a.platform_summary AS "platformSummary",
 		a.update_date AS "updateDate",
 		a.create_date AS "createDate"
@@ -38,7 +38,7 @@
 			recv_account,
 			recv_account_name,
 			recv_account_bank,
-			usage,
+			useage,
 			platform_summary,
 			update_date,
 			create_date
@@ -50,7 +50,7 @@
 			#{recvAccount},
 			#{recvAccountName},
 			#{recvAccountBank},
-			#{usage},
+			#{useage},
 			#{platformSummary},
 			now(),
 			now()

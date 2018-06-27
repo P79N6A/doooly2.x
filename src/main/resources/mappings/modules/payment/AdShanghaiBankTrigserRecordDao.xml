@@ -10,13 +10,13 @@
 		a.amount AS "amount",
 		a.channel_flow_no AS "channelFlowNo",
 		a.bank_flow_no AS "bankFlowNo",
-		a.usage AS "usage",
+		a.useage AS "useage",
 		a.platform_summary AS "platformSummary",
 		a.update_date AS "updateDate",
 		a.create_date AS "createDate"
 	</sql>
 
-	<insert id="insert">
+	<insert id="insert" parameterType="com.doooly.entity.payment.AdShanghaiBankTrigserRecord">
 		INSERT INTO ad_shanghai_bank_trigser_record(
 			eacct_no,
 			pay_account,
@@ -24,7 +24,7 @@
 			amount,
 			channel_flow_no,
 			bank_flow_no,
-			usage,
+			useage,
 			platform_summary,
 			update_date,
 			create_date
@@ -35,7 +35,7 @@
 			#{amount},
 			#{channelFlowNo},
 			#{bankFlowNo},
-			#{usage},
+			#{useage},
 			#{platformSummary},
 			now(),
 			now()

@@ -108,7 +108,7 @@
         <if test="type == 2">
             amount = amount - #{amount}
         </if>
-        WHERE eacct_no =#{eacctNo}
+        WHERE eacct_no =#{eAcctNo}
     </update>
 
 </mapper>

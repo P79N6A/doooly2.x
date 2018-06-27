@@ -7,7 +7,7 @@
 		a.eacct_no AS "eacctNo",
 		a.amount AS "amount",
 		a.channel_flow_no AS "channelFlowNo",
-		a.usage AS "usage",
+		a.useage AS "useage",
 		a.platform_summary AS "platformSummary",
 		a.update_date AS "updateDate",
 		a.create_date AS "createDate"
@@ -30,7 +30,7 @@
 			eacct_no,
 			amount,
 			channel_flow_no,
-			usage,
+			useage,
 			platform_summary,
 			update_date,
 			create_date
@@ -38,7 +38,7 @@
 			#{eacctNo},
 			#{amount},
 			#{channelFlowNo},
-			#{usage},
+			#{useage},
 			#{platformSummary},
 			now(),
 			now()

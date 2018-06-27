@@ -13,7 +13,7 @@ public class AdShanghaiBankDrawRecord {
 	private String eacctNo;		// 虚账户账号
 	private BigDecimal amount;		// 代缴金额
 	private String channelFlowNo;		// 兜礼代发流水号
-	private String usage;		// 用途
+	private String useage;		// 用途
 	private String platformSummary;		// 平台摘要
     private Date createDate;//创建时间
     private Date updateDate;//更新时间
@@ -50,12 +50,12 @@ public class AdShanghaiBankDrawRecord {
         this.channelFlowNo = channelFlowNo;
     }
 
-    public String getUsage() {
-        return usage;
+    public String getUseage() {
+        return useage;
     }
 
-    public void setUsage(String usage) {
-        this.usage = usage;
+    public void setUseage(String useage) {
+        this.useage = useage;
     }
 
     public String getPlatformSummary() {

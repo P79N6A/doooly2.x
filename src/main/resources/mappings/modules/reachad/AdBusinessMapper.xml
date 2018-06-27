@@ -225,6 +225,7 @@
 		from ad_business a
 		left join ad_business_service b on a.id=b.business_id
 		where a.id=#{id}
+		limit 1
 	</select>
 	<select id="findHotMerchant" resultType="com.doooly.entity.reachad.AdBusiness">
 		select <include refid="adBusinessHColumns" />

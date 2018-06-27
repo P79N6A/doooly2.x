@@ -15,7 +15,7 @@ public class AdBusiness {
 	private String logo; // 商户图标
 	private String miniLogo;// 地图小图标
 	private String url; // 链接地址
-	private String appUrl; //app 链接地址
+	private String appUrl; // app 链接地址
 	private String businessId; // 商户编号
 	private String userName; // 权限帐号
 	private String password; // 权限密码
@@ -39,19 +39,24 @@ public class AdBusiness {
 	private Date serverStartTime; // 服务起始时间
 	private Date serverEndTime; // 服务结束时间
 	private String listImageWechat;// 商户微信列表图
-	private String lightenType;//是否点亮,0未点亮,1已点亮
-	private String businessIntroduce;//商家介绍（卡券详情，商家介绍）
-	private String remarks;//商家介绍（卡券详情，商家介绍）
+	private String lightenType;// 是否点亮,0未点亮,1已点亮
+	private String businessIntroduce;// 商家介绍（卡券详情，商家介绍）
+	private String remarks;// 商家介绍（卡券详情，商家介绍）
 	private String maxUserRebate;
 	private Integer openOffLineScan;// 是否开启线下扫码优惠(0，未开启；1，已开启)
-	private String scanImageUrl;//扫描优惠商家图片
-    private Integer openOneNnumber;// 商户是否开通1号通 0， 未开通 1，已开通
-    private Integer isRebateApply;// 商户是否开通1号通 0， 未开通 1，已开通
-	private String wechatJumpStyle;//微信端跳转样式(0:H5,1:APP) 默认为0
-	private String appJumpStyle;//APP端跳转样式(0:H5,1:APP) 默认为1
-    private String isSupportIntegral;//是否支持积分(0.不支持,1支持)
-    private Date isNewEndTime; // 上新结束时间
+	private String scanImageUrl;// 扫描优惠商家图片
+	private Integer openOneNnumber;// 商户是否开通1号通 0， 未开通 1，已开通
+	private Integer isRebateApply;// 商户是否开通1号通 0， 未开通 1，已开通
+	private String wechatJumpStyle;// 微信端跳转样式(0:H5,1:APP) 默认为0
+	private String appJumpStyle;// APP端跳转样式(0:H5,1:APP) 默认为1
+	private String isSupportIntegral;// 是否支持积分(0.不支持,1支持)
+	private Date isNewEndTime; // 上新结束时间
 	private Date isNewBeginTime; // 上新开始时间
+	private String sWechatJumpStyle;// 可用积分服务-微信端跳转样式(0:H5,1:APP) 默认为0
+	private String sAppJumpStyle;// 可用积分服务-APP端跳转样式(0:H5,1:APP) 默认为1
+	private String sWechatJumpUrl;// 可用积分服务-微信端跳转地址
+	private String sAppJumpUrl;// 可用积分服务-APP端跳转地址
+
 	public AdBusiness() {
 
 	}
@@ -295,6 +300,7 @@ public class AdBusiness {
 	public void setLightenType(String lightenType) {
 		this.lightenType = lightenType;
 	}
+
 	public String getBusinessIntroduce() {
 		return businessIntroduce;
 	}
@@ -302,7 +308,6 @@ public class AdBusiness {
 	public void setBusinessIntroduce(String businessIntroduce) {
 		this.businessIntroduce = businessIntroduce;
 	}
-
 
 	public String getMaxUserRebate() {
 		return maxUserRebate;
@@ -344,21 +349,21 @@ public class AdBusiness {
 		this.scanImageUrl = scanImageUrl;
 	}
 
-    public Integer getOpenOneNnumber() {
-        return openOneNnumber;
-    }
+	public Integer getOpenOneNnumber() {
+		return openOneNnumber;
+	}
 
-    public void setOpenOneNnumber(Integer openOneNnumber) {
-        this.openOneNnumber = openOneNnumber;
-    }
+	public void setOpenOneNnumber(Integer openOneNnumber) {
+		this.openOneNnumber = openOneNnumber;
+	}
 
-    public Integer getIsRebateApply() {
-        return isRebateApply;
-    }
+	public Integer getIsRebateApply() {
+		return isRebateApply;
+	}
 
-    public void setIsRebateApply(Integer isRebateApply) {
-        this.isRebateApply = isRebateApply;
-    }
+	public void setIsRebateApply(Integer isRebateApply) {
+		this.isRebateApply = isRebateApply;
+	}
 
 	public String getWechatJumpStyle() {
 		return wechatJumpStyle;
@@ -399,5 +404,37 @@ public class AdBusiness {
 	public void setIsNewBeginTime(Date isNewBeginTime) {
 		this.isNewBeginTime = isNewBeginTime;
 	}
-	
+
+	public String getsWechatJumpStyle() {
+		return sWechatJumpStyle;
+	}
+
+	public void setsWechatJumpStyle(String sWechatJumpStyle) {
+		this.sWechatJumpStyle = sWechatJumpStyle;
+	}
+
+	public String getsAppJumpStyle() {
+		return sAppJumpStyle;
+	}
+
+	public void setsAppJumpStyle(String sAppJumpStyle) {
+		this.sAppJumpStyle = sAppJumpStyle;
+	}
+
+	public String getsWechatJumpUrl() {
+		return sWechatJumpUrl;
+	}
+
+	public void setsWechatJumpUrl(String sWechatJumpUrl) {
+		this.sWechatJumpUrl = sWechatJumpUrl;
+	}
+
+	public String getsAppJumpUrl() {
+		return sAppJumpUrl;
+	}
+
+	public void setsAppJumpUrl(String sAppJumpUrl) {
+		this.sAppJumpUrl = sAppJumpUrl;
+	}
+
 }

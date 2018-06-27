@@ -16,6 +16,9 @@ public class MessageDataBean {
 	// 返回数据
 	public Map<String, Object> data;
 
+	// 返回数据
+	public JSONObject jsonData;
+
 	public MessageDataBean() {
 	}
 
@@ -23,6 +26,12 @@ public class MessageDataBean {
 		this.code = code;
 		this.mess = mess;
 		this.data = data;
+	}
+
+	public MessageDataBean(String code, String mess, JSONObject jsonData) {
+		this.code = code;
+		this.mess = mess;
+		this.jsonData = jsonData;
 	}
 
 	public MessageDataBean(String success_code, String success_mess) {
@@ -39,7 +48,6 @@ public class MessageDataBean {
 	public static String failure_code = "1001";
 	// 操作失败返回信息
 	public static String failure_mess = "操作失败";
-
 
 	// 已领取返回码
 	public static String already_receive_code = "1002";
@@ -87,11 +95,29 @@ public class MessageDataBean {
 		this.data = data;
 	}
 
+	public JSONObject getJsonData() {
+		return jsonData;
+	}
+
+	public void setJsonData(JSONObject jsonData) {
+		this.jsonData = jsonData;
+	}
+
+	/** data-Map<String, Object> */
 	public String toJsonString() {
 		JSONObject json = new JSONObject();
 		json.put("code", this.getCode());
 		json.put("msg", this.getMess());
 		json.put("data", data);
+		return json.toJSONString();
+	}
+
+	/** data-JSONObject */
+	public String toJSONString() {
+		JSONObject json = new JSONObject();
+		json.put("code", this.getCode());
+		json.put("msg", this.getMess());
+		json.put("data", jsonData);
 		return json.toJSONString();
 	}
 }

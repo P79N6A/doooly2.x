@@ -215,8 +215,15 @@
 		where a.business_id=#{businessId}
 	</select>
 	<select id="get" resultType="com.doooly.entity.reachad.AdBusiness">
-		select <include refid="adBusinessHColumns" />,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+		select 
+			<include refid="adBusinessHColumns" />
+			,CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
+			,b.wechat_jump_style as "sWechatJumpStyle",
+			b.app_jump_style as "sAppJumpStyle",
+			b.wechat_jump_url as "sWechatJumpUrl",
+			b.app_jump_url as "sAppJumpUrl"
 		from ad_business a
+		inner join ad_business_service b on a.id=b.business_id
 		where a.id=#{id}
 	</select>
 	<select id="findHotMerchant" resultType="com.doooly.entity.reachad.AdBusiness">

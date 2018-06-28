@@ -389,7 +389,7 @@ public class OrderServiceImpl implements OrderService {
 				supportPayType = "all";
 			}
 			order.setSupportPayType(supportPayType);
-			order.setServiceCharge(order.getServiceCharge());
+			order.setServiceCharge(orderVo.getServiceCharge());
 		}
 		return order;
 	}

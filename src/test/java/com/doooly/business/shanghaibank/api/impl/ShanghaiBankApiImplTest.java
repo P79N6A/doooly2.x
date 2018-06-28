@@ -82,7 +82,7 @@ public class ShanghaiBankApiImplTest {
      */
     @Test
     public void c19VirSReTrigSer() throws Exception {
-        String res = shanghaiBankApi.c19VirSReTrigSer("fasdljfdskafasdf111","3111110300286719100051","1000.00","03002792221","测试客户122120","打款操作","虚账户代发");
+        String res = shanghaiBankApi.c19VirSReTrigSer("fasdljfdskafasdf111122","3111110300286719100051","1000.00","03002792221","测试客户122120","打款操作","虚账户代发");
         System.out.println(res);
     }
 

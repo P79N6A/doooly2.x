@@ -29,6 +29,8 @@ public class AdBankBusinessOpenAccount {
 
     private String bankName;
 
+    private String accountBank;//银行行号
+
     private String openAccountBankName;
 
     private String cardholderName;
@@ -83,6 +85,14 @@ public class AdBankBusinessOpenAccount {
 
     public void setSubBranchNo(String subBranchNo) {
         this.subBranchNo = subBranchNo;
+    }
+
+    public String getAccountBank() {
+        return accountBank;
+    }
+
+    public void setAccountBank(String accountBank) {
+        this.accountBank = accountBank;
     }
 
     public String getSubBranchName() {

@@ -116,7 +116,7 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     @POST
     @Path(value = "/c19VirSReTrigSer")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
     public String c19VirSReTrigSer(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
@@ -142,7 +142,7 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     @POST
     @Path(value = "/c19WithDrawalsNotice")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
     public String c19WithDrawalsNotice(JSONObject json) {
         String checkvalue = json.getString("checkvalue");
         String encmsg = json.getString("encmsg");

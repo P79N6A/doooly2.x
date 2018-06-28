@@ -19,6 +19,7 @@
 		<result column="business_entity_card_status" property="businessEntityCardStatus"
 			jdbcType="TINYINT" />
 		<result column="bank_name" property="bankName" jdbcType="VARCHAR" />
+		<result column="account_bank" property="accountBank" jdbcType="VARCHAR" />
 		<result column="open_account_bank_name" property="openAccountBankName"
 			jdbcType="VARCHAR" />
 		<result column="cardholder_name" property="cardholderName"
@@ -31,7 +32,7 @@
 		sub_branch_no,
 		sub_Branch_name,
 		eAcct_status, business_entity_card,
-		business_entity_card_status, bank_name, open_account_bank_name,
+		business_entity_card_status, bank_name,account_bank, open_account_bank_name,
 		cardholder_name, create_by,
 		create_date
 	</sql>

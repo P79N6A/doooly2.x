@@ -476,7 +476,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
         }
         //根据商户id获取商户绑定银行卡信息
         AdBankBusinessOpenAccount adBankBusinessOpenAccount = adBankBusinessOpenAccountDao.findByBusinessId(Integer.valueOf(businessId));
-        AdShanghaiBank adShanghaiBank = adShanghaiBankDao.findByAccountBank(adBankBusinessOpenAccount.getSubBranchNo());
+        AdShanghaiBank adShanghaiBank = adShanghaiBankDao.findByAccountBank(adBankBusinessOpenAccount.getAccountBank());
         if (adShanghaiBank == null) {
             //说明不支持改行号
             messageDataBean.setCode(MessageDataBean.failure_code);
@@ -484,13 +484,14 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             return messageDataBean;
         }
 
-        String recvAccount = adBankBusinessOpenAccount.getBusinessEntityCard();
+        String recvAccount = adBankBusinessOpenAccount.getBusinessEntityCard().replaceAll(" ", "");
         String recvAccountName = adBankBusinessOpenAccount.getCardholderName();
-        String recvAccountBank = adBankBusinessOpenAccount.getSubBranchNo();
+        String recvAccountBank = adBankBusinessOpenAccount.getAccountBank();
         String usage = "商户结算打款";
         String platformSummary = null;
         String channelFlowNo = IdGeneratorUtil.getOrderNumber(3);
         messageDataBean = c19SingleCharge(channelFlowNo, eAcctNo, amount, recvAccount, recvAccountName, recvAccountBank, usage, platformSummary);
         return messageDataBean;
     }
+
 }

@@ -17,7 +17,7 @@
         abs.store_name AS "storeName",
        	IFNULL(agold.group_name,ag.group_name) AS "groupName",
         IFNULL(agold.group_short_name,ag.group_name) AS "groupShortName",
-        IFNULL(agold.logo_url,ag.group_name) AS "groupLogo"
+        IFNULL(ag.logo_url,ag.group_name) AS "groupLogo"
 	</sql>
 
     <sql id="joinTables">

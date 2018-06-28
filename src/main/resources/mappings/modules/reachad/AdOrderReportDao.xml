@@ -76,7 +76,7 @@
 		r.type = '1'
 		and r.user_id = #{userId}
 		and r.product_type in (3,4)
-		and DATE_FORMAT(r.order_date,'%Y-%m-%d') = DATE_FORMAT(now(),'%Y-%m-%d')
+		and DATE_FORMAT(r.order_date,'%Y-%m') = DATE_FORMAT(now(),'%Y-%m')
 	</select>
 
 	<!-- 获得用户未完成订单和完成订单的购买数量-->

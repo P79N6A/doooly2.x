@@ -10,7 +10,7 @@ import com.doooly.dto.common.MessageDataBean;
  */
 public interface HotBusinessServiceI {
 
-	MessageDataBean getIndexData(Integer userId, Integer type);
+	MessageDataBean getIndexData(Integer userId, Integer type, Integer adType);
 
 	MessageDataBean getHotMerchatData(Integer userId, String address, Integer type, Integer shopType);
 

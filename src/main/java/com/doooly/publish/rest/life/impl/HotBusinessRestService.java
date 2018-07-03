@@ -47,8 +47,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		Integer userId = obj.getInteger("userId");
 		// String address = obj.getString("address");
 		Integer type = obj.getInteger("type");
+		Integer adType = obj.getInteger("adType");
 		// logger.info("App首页的地域信息为============="+address);
-		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(userId, type);
+		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(userId, type, adType);
 
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();

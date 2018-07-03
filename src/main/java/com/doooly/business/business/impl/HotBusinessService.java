@@ -42,7 +42,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 	@Override
-	public MessageDataBean getIndexData(Integer userId, Integer type) {
+	public MessageDataBean getIndexData(Integer userId, Integer type, Integer adType) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		// if (!StringUtils.isBlank(address)) {
@@ -67,6 +67,9 @@ public class HotBusinessService implements HotBusinessServiceI {
 		// map.put("hotMerchantList", null);
 		// messageDataBean.setCode(MessageDataBean.success_code);
 		// }
+		if(null != adType && adType == 1){
+			INDEXADS = 8;
+		}
 		List<AdAd> ads = adAdDao.findAllByType(INDEXADS, type, userId);
 		if (!ads.isEmpty()) {
 			map.put("ads", ads);

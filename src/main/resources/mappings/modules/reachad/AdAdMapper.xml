@@ -46,11 +46,17 @@
 			<if test="state == 0 and type ==3">
 			and a.type in (3,7)
 			</if>
+			<if test="state == 0 and type == 8">
+			and a.type in (8,10)
+			</if>
 			<if test="state == 1 and type ==2">
 			and a.type in (2,4)
 			</if>
 			<if test="state == 1 and type ==3">
 			and a.type in (3,6)
+			</if>
+			<if test="state == 1 and type ==8">
+			and a.type in (8,9)
 			</if>
 			and a.media_type = 0 and a.channel=2
 			and NOW() between begin_date and end_date 

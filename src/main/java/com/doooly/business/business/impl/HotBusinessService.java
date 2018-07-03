@@ -67,10 +67,11 @@ public class HotBusinessService implements HotBusinessServiceI {
 		// map.put("hotMerchantList", null);
 		// messageDataBean.setCode(MessageDataBean.success_code);
 		// }
+		int pageType = INDEXADS;
 		if(null != adType && adType == 1){
-			INDEXADS = 8;
+			pageType = 8;
 		}
-		List<AdAd> ads = adAdDao.findAllByType(INDEXADS, type, userId);
+		List<AdAd> ads = adAdDao.findAllByType(pageType, type, userId);
 		if (!ads.isEmpty()) {
 			map.put("ads", ads);
 			messageDataBean.setCode(MessageDataBean.success_code);

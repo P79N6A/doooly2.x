@@ -84,7 +84,7 @@ public class IndexRestService {
                 Map item = new HashMap();
                 if (floor.getCode() == 20) {
                     //线上商户
-                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address, DEAL_TYPE_OFFLINE);
+                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address, DEAL_TYPE_ONLINE);
                     if (!CollectionUtils.isEmpty(getBussiness)) {
                         item.put("title", floor.getName());
                         item.put("isOnline", DEAL_TYPE_ONLINE);

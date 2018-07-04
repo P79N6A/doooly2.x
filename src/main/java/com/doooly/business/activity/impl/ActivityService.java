@@ -149,7 +149,7 @@ public class ActivityService implements ActivityServiceI {
 			if (totalNum > 0) {
 				pagelab.setTotalNum(totalNum);
 				List<Map<String,String>> activityList = adCouponActivityDao.getHotActivity(client,groupId, pagelab.getStartIndex(), pagelab.getPageSize(), categoryId, isRecommendation);
-				logger.info("activityList=============" + activityList);
+//				logger.info("activityList=============" + activityList);
 				map.put("list", activityList);
 				map.put("countPage", pagelab.getCountPage());
 			}else{

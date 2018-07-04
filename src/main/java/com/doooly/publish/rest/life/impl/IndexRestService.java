@@ -104,7 +104,9 @@ public class IndexRestService {
                     }
                     item.put("isOnline", DEAL_TYPE_OFFLINE);
                     item.put("type", "2");
-                    item.put("list", beans);
+                    if(!CollectionUtils.isEmpty(beans)) {
+                        item.put("list", beans);
+                    }
                 }
                 ls.add(item);
             }

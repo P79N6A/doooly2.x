@@ -82,29 +82,37 @@ public class IndexRestService {
             List ls = new ArrayList();
             for (AdBasicType floor : floors) {
                 Map item = new HashMap();
-                item.put("title",floor.getName());
                 if (floor.getCode() == 20) {
                     //线上商户
-                    item.put("isOnline", DEAL_TYPE_ONLINE);
-                    item.put("type", "1");
-                    item.put("list", this.getBussiness(userId, address, DEAL_TYPE_ONLINE));
+                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address, DEAL_TYPE_OFFLINE);
+                    if (!CollectionUtils.isEmpty(getBussiness)) {
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_ONLINE);
+                        item.put("type", "1");
+                        item.put("list", getBussiness);
+                    }
                 } else if (floor.getCode() == 21) {
                     //线下商户
-                    item.put("isOnline", DEAL_TYPE_OFFLINE);
-                    item.put("type", "1");
-                    item.put("list", this.getBussiness(userId, address, DEAL_TYPE_OFFLINE));
+                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address, DEAL_TYPE_OFFLINE);
+                    if (!CollectionUtils.isEmpty(getBussiness)) {
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_OFFLINE);
+                        item.put("type", "1");
+                        item.put("list", getBussiness);
+                    }
                 } else {
                     //消费卡券/充值缴费数据表
-                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),floor.getFloorId());
-                    for (AdConsumeRecharge bean : beans) {
-                        String linkUrl = bean.getLinkUrl();
-                        if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-                            bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(), floor.getFloorId());
+                    if (!CollectionUtils.isEmpty(beans)) {
+                        for (AdConsumeRecharge bean : beans) {
+                            String linkUrl = bean.getLinkUrl();
+                            if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                            }
                         }
-                    }
-                    item.put("isOnline", DEAL_TYPE_OFFLINE);
-                    item.put("type", "2");
-                    if(!CollectionUtils.isEmpty(beans)) {
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_OFFLINE);
+                        item.put("type", "2");
                         item.put("list", beans);
                     }
                 }

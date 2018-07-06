@@ -1,28 +1,5 @@
 package com.doooly.business.pay.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.doooly.business.product.entity.ActivityInfo;
-import com.doooly.common.context.SpringContextHolder;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdRechargeRecordDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dto.common.OrderMsg;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdRechargeRecord;
-import com.doooly.entity.reachad.AdUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.service.OrderService.OrderStatus;
@@ -33,8 +10,29 @@ import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessor;
 import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessorFactory;
 import com.doooly.business.pay.processor.productprocessor.ProductProcessor;
 import com.doooly.business.pay.processor.productprocessor.ProductProcessorFactory;
+import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.dao.reachad.AdGroupDao;
+import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdRechargeRecordDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdRechargeRecord;
+import com.doooly.entity.reachad.AdUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 支付抽象类,完成主要支付工作<br>
@@ -59,6 +57,8 @@ public abstract class AbstractPaymentService  implements PaymentService{
 	protected AdGroupDao adGroupDao;
 	@Autowired
 	protected AdRechargeRecordDao adRechargeRecordDao;
+	@Autowired
+	private AdRechargeConfDao adRechargeConfDao;
 
 	protected abstract PayMsg buildPayParams(List<OrderVo> orders,PayFlow flow,JSONObject json) ;
 	protected abstract Map<String,Object> resolveAndVerifyResult(String retStr, String payType,String channel) ;
@@ -352,9 +352,10 @@ public abstract class AbstractPaymentService  implements PaymentService{
 			//手机话费充值和流量充值限制额度
 			//微信支付--> 都不收手续费
 			//积分支付--> 话费充值收手续费,流量充值不收手续费
-			AdGroup adGroup = adGroupDao.findGroupByID(String.valueOf(user.getGroupNum()));
+			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum().toString());
 			BigDecimal consumptionAmount = orderService.getConsumptionAmount(user.getId());
-			BigDecimal limit = adGroup.getDailyLimit();
+			BigDecimal limit = conf.getLimit();
+			logger.info("conf = {}", conf);
 			logger.info("consumptionAmount={},order.getTotalMount()={},limit={}", consumptionAmount,order.getTotalMount(),limit);
 			if (consumptionAmount != null && limit != null) {
 				if (consumptionAmount.add(order.getTotalMount()).compareTo(limit) > 0) {

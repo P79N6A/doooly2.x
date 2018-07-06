@@ -19,8 +19,10 @@ public class OrderMsg extends MessageDataBean {
 	public static String wills_order_code = "2002";
 	public static String wills_order_mess = "您的身份证已在该门店购买过，请勿重复下单";
 	//优惠商品库存不足
-	public static String lack_of_stock_code = "2004";
-	public static String lack_of_stock_mess = "商品库存不足.";
+	public static String out_of_stock_code1 = "2004";
+	public static String out_of_stock_mess1 = "商品库存不足.";
+	public static String out_of_stock_code2 = "2005";
+	public static String out_of_stock_mess2 = "活动商品库存不足.";
 	//活动结束
 	public static String end_activity_code = "2007";
 	public static String end_activity_mess = "活动已结束,订单不能支付.";

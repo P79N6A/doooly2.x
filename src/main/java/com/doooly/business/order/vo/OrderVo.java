@@ -1,11 +1,11 @@
 package com.doooly.business.order.vo;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 /***
  * 订单
@@ -92,6 +92,10 @@ public class OrderVo {
 	private List<MerchantProdcutVo> merchantProduct;
 	//商品详情
 	private List<OrderItemVo> items;
+
+	//话费充值运营商 cmcc cucc ctc
+	private String operator;
+
 
 	public OrderVo() {
 		super();
@@ -433,6 +437,14 @@ public class OrderVo {
 
 	public void setSupportPayType(String supportPayType) {
 		this.supportPayType = supportPayType;
+	}
+
+	public String getOperator() {
+		return operator;
+	}
+
+	public void setOperator(String operator) {
+		this.operator = operator;
 	}
 
 	@Override

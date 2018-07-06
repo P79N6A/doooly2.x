@@ -1,16 +1,6 @@
 
 package com.doooly.business.ofpay.service.impl;
 
-import java.io.StringReader;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import com.doooly.business.ofpay.OfUtil;
 import com.doooly.business.ofpay.service.OfPayService;
 import com.doooly.business.order.vo.OrderItemVo;
@@ -19,6 +9,10 @@ import com.doooly.business.utils.DateUtils;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.MD5Util;
 import com.doooly.dto.common.PayMsg;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,6 +20,10 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class OfPayServiceImpl implements OfPayService {
@@ -71,7 +69,7 @@ public class OfPayServiceImpl implements OfPayService {
 		String sporderId = order.getOrderNumber();
 		OrderItemVo item = order.getItems().get(0);
 		int perValue = item.getPrice().intValue();
-		String flowValue = OfUtil.PER_VALUES.get(perValue);
+		String flowValue = item.getSku().split("/")[1];
 		String phoneno = order.getConsigneeMobile();
 		String md5userpws = MD5Util.digest(OfUtil.USERPWS, "gbk");
 		String md5param = OfUtil.USERID + md5userpws + phoneno + perValue + 

@@ -1,12 +1,6 @@
 package com.doooly.business.ofpay;
 
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.doooly.common.constants.PropertiesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -14,7 +8,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.doooly.common.constants.PropertiesHolder;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OfUtil {
 	private final static Logger logger = LoggerFactory.getLogger(OfUtil.class);
@@ -70,6 +68,7 @@ public class OfUtil {
 		PER_VALUES.put(30, "500M");
 		PER_VALUES.put(50, "1G");
 		PER_VALUES.put(70, "2G");
+		PER_VALUES.put(90, "2G");
 	}
 	
 	/**
@@ -125,8 +124,8 @@ public class OfUtil {
 	
 
 	public static Map<String, String> parseOfcardResponse(String xmlString) {
-		Map<String, String> result = new HashMap<String, String>();
 		try {
+			Map<String, String> result = new HashMap<String, String>();
 			StringReader stringReader = new StringReader(xmlString);
 			InputSource inputSource = new InputSource(stringReader);
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -217,12 +216,13 @@ public class OfUtil {
 				}
 
 			}
+			return result;
 			//logger.info("parseOfcardResponse result = {}", result);
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("e = {}, xmlString = {}", e, xmlString);
 		}
-		return result;
+		return null;
 	}
 
 }

@@ -56,6 +56,8 @@ public class OrderServiceImpl implements OrderService {
 	AdRechargeRecordDao adRechargeRecordDao;
 	@Autowired
 	private MallBusinessService mallBusinessService;
+	@Autowired
+	private AdRechargeConfDao adRechargeConfDao;
 
 
 	@Override
@@ -72,11 +74,8 @@ public class OrderServiceImpl implements OrderService {
 		OrderExtVo orderExtVo = orderVo.getOrderExt();
 		List<MerchantProdcutVo> merchants = orderVo.getMerchantProduct();
 		long userId = orderVo.getUserId();
-		String groupId = orderVo.getGroupId();
 		String orderNum = IdGeneratorUtil.getOrderNumber(orderVo.getIsSource());
 		String actType = ActivityType.COMMON_ORDER.getActType();
-		BigDecimal serviceCharge = new BigDecimal("0");
-
 		for (MerchantProdcutVo merchantProduct : merchants) {
 			int merchantId = merchantProduct.getMerchantId();
 			String remarks = merchantProduct.getRemarks();
@@ -102,122 +101,69 @@ public class OrderServiceImpl implements OrderService {
 				if (buyQuantity <= 0) {
 					return new OrderMsg(OrderMsg.failure_code, "购买数量必须大于0");
 				}
-				BigDecimal sellPrice =  new BigDecimal(sku.getSellPrice());
-				//================= 活动信息 =============================================================
-				//兜礼话费特惠订单不计算手续费
-				if((orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode())
-						&&orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()){
-					OrderMsg msg = getServiceCharge(orderVo, sellPrice);
-					if (!OrderMsg.success_code.equals(msg.getCode())) {
+				BigDecimal sellPrice = new BigDecimal(sku.getSellPrice());
+				if ((orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode())
+						&& orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
+					OrderMsg msg = getServiceCharge(orderVo, sku);
+					if (OrderMsg.success_code.equals(msg.getCode())) {
+						orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+					} else {
 						return msg;
 					}
-					orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
-				}else if(orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()){
+				} else if (orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()) {
 					// do nothing
-
-				}else{
-					ActivityInfo actInfo = this.getActivityInfo(groupId, skuId);
-					logger.info("actInfo = {}",actInfo);
-					if(actInfo != null){
-						//活动类型
-						String activityName = actInfo.getActivityName();
-						if(StringUtils.isEmpty(activityName)){
-							logger.error("activityName = {}", activityName);
-							return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
-						}
-						//活动价格
-						BigDecimal actPrice = actInfo.getSpecialPrice();
-						if(actPrice != null && actPrice.compareTo(BigDecimal.ZERO) == 1){
-							sellPrice =  actPrice;
-						}
-						//用户限购数量
-						Integer actLimitNum = actInfo.getBuyNumberLimit();
-						int buyNum = getBuyNum(userId, skuId, activityName);
-						logger.info("actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, buyNum + buyQuantity);
-						if (actLimitNum != null && actLimitNum < buyNum + buyQuantity) {
-							return new OrderMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
-						}
-						//活动库存校验
-						Integer inventory = actInfo.getInventory();
-						if(inventory != null) {
-							//校验库存
-							if (inventory <= 0) {
-								logger.error("activity.inventory = {}", inventory);
-								return new OrderMsg(OrderMsg.lack_of_stock_code, OrderMsg.lack_of_stock_mess);
-							}
-							//扣减库存
-							OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
-							if(msg != null){
-								return msg;
-							}
-						}
-						actType = activityName;
+				} else {
+					//活动
+					OrderMsg msg = getActInfo(orderVo, productSkuVo);
+					if (OrderMsg.success_code.equals(msg.getCode())) {
+						actType = (String) msg.data.get("actType");
+						sellPrice = (BigDecimal) msg.data.get("actPrice");
+					} else {
+						return msg;
 					}
 				}
-				//=================商品库存===============================================================
+				//校验库存并扣除库存
 				Integer inventory = sku.getInventory();
-				if(inventory != null) {
-					//校验库存
+				if (inventory != null) {
 					if (inventory <= 0) {
 						logger.error("product.inventory = {}", inventory);
-						return new OrderMsg(OrderMsg.lack_of_stock_code, OrderMsg.lack_of_stock_mess);
+						return new OrderMsg(OrderMsg.out_of_stock_code1, OrderMsg.out_of_stock_mess1);
 					}
-					//扣减活动库存
 					int rows = productService.decInventory(skuId);
 					logger.info("decInventory() skuId={},inventor={},rows={}", skuId, inventory, rows);
 					if (rows == 0) {
 						return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
 					}
 				}
-				//================= 活动信息 ==============================================================
 				BigDecimal marketPrice = new BigDecimal(sku.getMarketPrice());
 				totalMount = totalMount.add(sellPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
 				totalPrice = totalPrice.add(marketPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
 				OrderItemVo orderItem = buildOrderItem(userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
 				orderItems.add(orderItem);
 			}
-			//================= 自营优惠券 ==============================================================
+			//自营优惠券
+			OrderMsg msg = getDisAmountAndSetCoupon(orderVo, totalMount);
 			BigDecimal couponValue = null;
-			String couponId = orderVo.getCouponId();
-			if(StringUtils.isNotEmpty(couponId)){
-				AdCouponCode couponCode = adCouponCodeDao.getSelfCoupon(userId,couponId);
-				if(couponCode != null){
-					if(!AdCouponCode.LOCKED.equals(couponCode.getIsLocked())){
-						AdCoupon coupon = couponCode.getAdCoupon();
-						if(null != coupon) {
-							couponValue = coupon.getCouponValue();
-							//券金额不能大于售价
-							if(totalMount.compareTo(couponValue) == -1){
-								return new OrderMsg("3001", "抵扣券金额大于售价");
-							}
-							//锁定券
-							int row = lockCoupon(userId,couponId);
-							if(row == 0){
-								return new OrderMsg("3002", "锁定券失败");
-							}
-							//抵扣后的金额
-							totalMount = totalMount.subtract(couponValue);
-						}
-					}else{
-						return new OrderMsg("3003", "券已被锁定,无法使用");
-					}
-				}else{
-					return new OrderMsg("3004", "无效的券ID");
-				}
+			String couponId = null;
+			if (OrderMsg.success_code.equals(msg.getCode())) {
+				BigDecimal discountAmount = (BigDecimal) msg.data.get("discountAmount");
+				totalMount = discountAmount != null ? discountAmount : totalMount;
+				couponValue = (BigDecimal) msg.data.get("couponValue");
+				couponId = (String) msg.data.get("couponId");
+			}else{
+				return msg;
 			}
 			//扣券后的订单明细金额
 			orderItems.get(0).setAmount(totalMount);
-			//订单主表信息
+			//保存订单
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
-			//保存订单
 			int rows = saveOrder(order, orderExt, orderItems);
-			logger.info("Create order successfully. orderNumber = {} , orderId = {}, rows = {}", orderNum, rows);
+			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows,System.currentTimeMillis() - s);
 		}
 		//下单成功返回信息
 		OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
 		msg.getData().put("orderNum", orderNum);
-		logger.info("Create order end. execution time : {} milliseconds.", System.currentTimeMillis() - s);
 		return msg;
 	}
 
@@ -235,34 +181,133 @@ public class OrderServiceImpl implements OrderService {
 	 * @param orderVo
 	 * @return
 	 */
-	public OrderMsg getServiceCharge(OrderVo orderVo, BigDecimal sellPrice) {
-		AdGroup adGroup = adGroupDao.findGroupByID(orderVo.getGroupId());
+	public OrderMsg getServiceCharge(OrderVo orderVo,AdSelfProductSku sku) {
+		AdRechargeConf conf = adRechargeConfDao.getRechargeConf(orderVo.getGroupId());
+		String operator =  orderVo.getOperator();
+		BigDecimal sellPrice =  new BigDecimal(sku.getSellPrice());
 		//每月消费的额度
 		BigDecimal consumptionAmount = this.getConsumptionAmount(orderVo.getUserId());
-		BigDecimal limit = adGroup.getDailyLimit();
+		BigDecimal limit = conf.getLimit();
 		logger.info("consumptionAmount = {},limit = {}", consumptionAmount, limit);
-		//话费和流量充值每天每人限制额度
+		//话费和流量充值每月每人限制额度
 		if (limit != null) {
 			if (consumptionAmount == null) {
 				consumptionAmount = new BigDecimal("0");
 			}
 			if (consumptionAmount.add(sellPrice).compareTo(limit) > 1) {
-				return new OrderMsg(OrderMsg.purchase_limit_code, String.format("话费和流量充值每天每人限制额度%s元", limit));
+				return new OrderMsg(OrderMsg.purchase_limit_code, String.format("话费和流量充值每月每人限制额度%s元", limit));
 			}
 		}
 		//话费充值订单计算手续费,扣除在积分支付时扣除
-		BigDecimal charges = adGroup.getCharges();
-		logger.info("charges = {}", charges);
 		BigDecimal serviceCharge = new BigDecimal("0");
-		//话费充值才计算手续费
-		if (charges != null && orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode()) {
-			serviceCharge = sellPrice.multiply(charges.divide(new BigDecimal("100"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+		if(!StringUtils.isEmpty(operator)) {
+			BigDecimal charges = conf.getServiceChareges(operator);
+			logger.info("charges = {}", charges);
+			//话费充值才计算手续费
+			if (charges != null && orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode()) {
+				serviceCharge = sellPrice.multiply(charges.divide(new BigDecimal("100"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+			}
+			logger.info("sellPrice = {},serviceCharge = {}", sellPrice, serviceCharge);
+
 		}
-		logger.info("sellPrice = {},serviceCharge = {}", sellPrice, serviceCharge);
 		Map map = new HashMap();
 		map.put("serviceCharge", serviceCharge);
 		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
 	}
+
+	//设置优惠券并返回优化订单金额
+	public OrderMsg getDisAmountAndSetCoupon(OrderVo orderVo,BigDecimal totalMount){
+		BigDecimal discountAmount = null;
+		BigDecimal couponValue = null;
+		String couponId = orderVo.getCouponId();
+		long userId = orderVo.getUserId();
+		if(StringUtils.isNotEmpty(couponId)){
+			AdCouponCode couponCode = adCouponCodeDao.getSelfCoupon(userId,couponId);
+			if(couponCode != null){
+				if(!AdCouponCode.LOCKED.equals(couponCode.getIsLocked())){
+					AdCoupon coupon = couponCode.getAdCoupon();
+					if(null != coupon) {
+						couponValue = coupon.getCouponValue();
+						//券金额不能大于售价
+						if(totalMount.compareTo(couponValue) == -1){
+							return new OrderMsg("3001", "抵扣券金额大于售价");
+						}
+						//锁定券
+						int row = lockCoupon(userId,couponId);
+						if(row == 0){
+							return new OrderMsg("3002", "锁定券失败");
+						}
+						//抵扣后的金额
+						discountAmount = totalMount.subtract(couponValue);
+					}
+				}else{
+					return new OrderMsg("3003", "券已被锁定,无法使用");
+				}
+			}else{
+				return new OrderMsg("3004", "无效的券ID");
+			}
+		}
+		Map map = new HashMap();
+		map.put("discountAmount", discountAmount);
+		map.put("couponValue", couponValue);
+		map.put("couponId", couponId);
+		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
+	}
+
+
+	/**
+	 * 商品配置的活动信息
+	 *
+	 * @param orderVo
+	 * @param product
+	 * @return
+	 */
+	public OrderMsg getActInfo(OrderVo orderVo,ProductSkuVo product){
+		int skuId = product.getSkuId();
+		int buyQuantity = product.getBuyNum();
+		ActivityInfo actInfo = this.getActivityInfo(orderVo.getGroupId(), skuId);
+		logger.info("actInfo = {}",actInfo);
+		String activityName = null;
+		BigDecimal actPrice = null;
+		if(actInfo != null){
+			//活动类型
+			activityName = actInfo.getActivityName();
+			if(StringUtils.isEmpty(activityName)){
+				logger.error("activityName = {}", activityName);
+				return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+			}
+			//活动价格
+			if(actInfo.getSpecialPrice() != null && actInfo.getSpecialPrice().compareTo(BigDecimal.ZERO) == 1){
+				actPrice =  actInfo.getSpecialPrice();
+			}
+			//用户限购数量
+			Integer actLimitNum = actInfo.getBuyNumberLimit();
+			int buyNum = getBuyNum(orderVo.getUserId(), skuId, activityName);
+			logger.info("actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, buyNum + buyQuantity);
+			if (actLimitNum != null && actLimitNum < buyNum + buyQuantity) {
+				return new OrderMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
+			}
+			//活动库存校验
+			Integer inventory = actInfo.getInventory();
+			if(inventory != null) {
+				//校验库存
+				if (inventory <= 0) {
+					logger.error("activity.inventory = {}", inventory);
+					return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
+				}
+				//扣减库存
+				OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
+				if(msg != null){
+					return msg;
+				}
+			}
+		}
+		Map map = new HashMap();
+		map.put("actType", activityName);
+		map.put("actPrice", actPrice);
+		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
+	}
+
 
 	@Transactional(rollbackFor = Exception.class)
 	public OrderMsg decStock(int number,int skuId,int oldNum){

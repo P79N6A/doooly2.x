@@ -1,17 +1,7 @@
 package com.doooly.business.pay.processor.productprocessor;
 
-import java.util.Date;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
-import com.doooly.common.util.ThirdPartySMSUtil;
-import com.doooly.entity.reachad.AdUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.doooly.business.ofpay.OfUtil;
 import com.doooly.business.ofpay.service.OfPayService;
 import com.doooly.business.order.service.OrderService;
@@ -19,7 +9,16 @@ import com.doooly.business.order.service.OrderService.ProductType;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
+import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.reachad.AdUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.Map;
 
 /***
  * 流量充值
@@ -61,7 +60,7 @@ public class FlowRechargeProcessor implements ProductProcessor{
 					bool = true;
 				}else{
 					String retcode = retMap.get("retcode");
-					bool = OfUtil.mobileCanRefund(retcode);
+					bool = OfUtil.flowCanRefund(retcode);
 				}
 				if(bool){
 					//退款

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdRechargeConfDao">
+    
+    <select id="getRechargeConf" resultType="com.doooly.entity.reachad.AdRechargeConf">
+      SELECT
+        g.group_id groupId,
+        c.id id,
+        c.name name,
+        c.month_limit monthLimit,
+        c.charges charges,
+        c.discounts_month_limit discountsMonthLimit,
+        c.cmcc_charges cmccCharges,
+        c.chu_charges chuCharges,
+        c.cha_charges chaCharges,
+        c.discounts_start_date discountsStartDate,
+        c.discounts_end_date discountsEndDate,
+        c.update_date,
+        c.create_date
+    FROM
+        ad_oufei_recharge_group_conn g,
+        ad_oufei_recharge_config c
+    WHERE
+        g.oufei_recharge_id = c.id
+        and group_id = #{groupId}
+    </select>
+
+</mapper>

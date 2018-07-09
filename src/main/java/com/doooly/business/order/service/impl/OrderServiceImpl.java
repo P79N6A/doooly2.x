@@ -106,7 +106,9 @@ public class OrderServiceImpl implements OrderService {
 						&& orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
 					OrderMsg msg = getServiceCharge(orderVo, sku);
 					if (OrderMsg.success_code.equals(msg.getCode())) {
-						orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+						if(msg.data != null) {
+							orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+						}
 					} else {
 						return msg;
 					}
@@ -116,8 +118,10 @@ public class OrderServiceImpl implements OrderService {
 					//活动
 					OrderMsg msg = getActInfo(orderVo, productSkuVo);
 					if (OrderMsg.success_code.equals(msg.getCode())) {
-						actType = (String) msg.data.get("actType");
-						sellPrice = (BigDecimal) msg.data.get("actPrice");
+						if (msg.data != null) {
+							actType = (String) msg.data.get("actType");
+							sellPrice = (BigDecimal) msg.data.get("actPrice");
+						}
 					} else {
 						return msg;
 					}
@@ -208,11 +212,11 @@ public class OrderServiceImpl implements OrderService {
 				serviceCharge = sellPrice.multiply(charges.divide(new BigDecimal("100"))).setScale(2, BigDecimal.ROUND_HALF_UP);
 			}
 			logger.info("sellPrice = {},serviceCharge = {}", sellPrice, serviceCharge);
-
+			Map map = new HashMap();
+			map.put("serviceCharge", serviceCharge);
+			return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
 		}
-		Map map = new HashMap();
-		map.put("serviceCharge", serviceCharge);
-		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
+		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, null);
 	}
 
 	//设置优惠券并返回优化订单金额
@@ -301,11 +305,12 @@ public class OrderServiceImpl implements OrderService {
 					return msg;
 				}
 			}
+			Map map = new HashMap();
+			map.put("actType", activityName);
+			map.put("actPrice", actPrice);
+			return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
 		}
-		Map map = new HashMap();
-		map.put("actType", activityName);
-		map.put("actPrice", actPrice);
-		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
+		return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, null);
 	}
 
 

@@ -2,14 +2,16 @@ package com.doooly.business.redisUtil.impl;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.redisUtil.RedisUtilService;
 import com.doooly.common.constants.RedisConstants;
@@ -29,7 +31,7 @@ import com.doooly.entity.reachad.AdProductCategory;
 public class RedisUtilServiceImpl implements RedisUtilService {
 
 	/** 日志 */
-	private Log logger = LogFactory.getLog(this.getClass());
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	protected StringRedisTemplate redisTemplate;

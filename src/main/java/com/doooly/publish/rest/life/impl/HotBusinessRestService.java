@@ -170,13 +170,12 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	@Path(value = "/businessServiceDataV21")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String businessServiceDataV21(BaseReq<JSONObject> json) {
+	public String businessServiceDataV21(JSONObject json) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			long start = System.currentTimeMillis();
 			logger.info(JSON.toJSONString(json));
-			JSONObject jsonObject = json.getParams();
-			Long userId = jsonObject.getLong("userId");
+			Long userId = json.getLong("userId");
 			messageDataBean = hotBusinessServiceI.getBusinessServiceDataV21(userId);
 			logger.info(messageDataBean.toJsonString());
 			logger.info("商家服务列表时间" + (System.currentTimeMillis() - start) + " ms");

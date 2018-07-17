@@ -20,32 +20,6 @@ public class AdRechargeConf {
 	private Date discountsEndDate;		// 优惠结束时间
 
 
-	public BigDecimal getLimit() {
-		if (discountsStartDate != null && discountsEndDate != null) {
-			long t = System.currentTimeMillis();
-			if (discountsStartDate.getTime() <= t && t <= discountsEndDate.getTime()) {
-				return discountsMonthLimit;
-			}
-		}
-		return monthLimit;
-	}
-
-	public BigDecimal getServiceChareges(String opreator) {
-		if (discountsStartDate != null && discountsEndDate != null) {
-			long t = System.currentTimeMillis();
-			if (discountsStartDate.getTime() <= t && t <= discountsEndDate.getTime()) {
-				if ("cmcc".equals(opreator)) {
-					return cmccCharges;
-				} else if ("cucc".equals(opreator)) {
-					return chuCharges;
-				} else if ("ctc".equals(opreator)) {
-					return chaCharges;
-				}
-			}
-		}
-		return charges;
-	}
-
 	public String getName() {
 		return name;
 	}

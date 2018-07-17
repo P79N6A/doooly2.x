@@ -3,6 +3,7 @@ package com.doooly.publish.rest.payment.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.shanghaibank.service.ShangHaiBankService;
 import com.doooly.common.util.IdGeneratorUtil;
+import com.doooly.common.util.SendMailUtil;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.payment.ShanghaiBankRestServiceI;
 import org.slf4j.Logger;
@@ -71,14 +72,17 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     public String c19VirWithDrawalsInq(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        String eAcctNo = json.getString("eAcctNo");
+        String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
         try {
-            String eAcctNo = json.getString("eAcctNo");
-            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
             String usage = json.getString("usage");
             String channelFlowNo = IdGeneratorUtil.getOrderNumber(3);
             messageDataBean = shangHaiBankService.c19VirWithDrawalsInq(channelFlowNo, eAcctNo, amount, usage);
         } catch (Exception e) {
             logger.error("上海银行虚账户提款失败", e);
+            String[] address = { "qing.zhang@reach-core.com", "wei.dong@reach-core.com" };
+            String message = "上海银行虚账户提款失败，提款金额="+amount+"，提款虚账户="+eAcctNo;
+            SendMailUtil.sendCommonMail(address, "上海银行接口报错提醒", message);
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
         return messageDataBean.toJsonString();
@@ -96,14 +100,17 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     public String c19SingleCharge(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        String businessId = json.getString("businessId");
+        String eAcctNo = json.getString("eAcctNo");
+        String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
         try {
-            String businessId = json.getString("businessId");
-            String eAcctNo = json.getString("eAcctNo");
-            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
             String sign = json.getString("sign");
             messageDataBean = shangHaiBankService.c19SingleCharge(businessId, eAcctNo, amount,sign);
         } catch (Exception e) {
             logger.error("上海银行虚账户代缴失败", e);
+            String[] address = { "qing.zhang@reach-core.com", "wei.dong@reach-core.com" };
+            String message = "上海银行虚账户代缴代缴商户id=" + businessId + "，代缴金额="+amount+"，代缴虚账户="+eAcctNo;
+            SendMailUtil.sendCommonMail(address, "上海银行接口报错提醒", message);
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
         return messageDataBean.toJsonString();
@@ -122,14 +129,17 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
     public String c19VirSReTrigSer(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
+        String businessId = json.getString("businessId");
+        String groupId = json.getString("groupId");
+        String type = json.getString("type");
         try {
-            String amount  = String.valueOf(json.getBigDecimal("amount").setScale(2, BigDecimal.ROUND_DOWN));
-            String businessId = json.getString("businessId");
-            String groupId = json.getString("groupId");
-            String type = json.getString("type");
             messageDataBean = shangHaiBankService.c19VirSReTrigSer(amount,businessId,groupId,type);
         } catch (Exception e) {
             logger.error("上海银行虚账户代发失败", e);
+            String[] address = { "qing.zhang@reach-core.com", "wei.dong@reach-core.com" };
+            String message = "上海银行虚账户代发失败,代发企业id=" + groupId + "，代发商户id，" + businessId + "代发金额="+amount+"代发类型="+type;
+            SendMailUtil.sendCommonMail(address, "上海银行接口报错提醒", message);
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
         return messageDataBean.toJsonString();

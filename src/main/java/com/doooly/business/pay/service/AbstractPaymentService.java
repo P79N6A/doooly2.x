@@ -17,7 +17,6 @@ import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdUser;
 import org.slf4j.Logger;
@@ -345,54 +344,38 @@ public abstract class AbstractPaymentService  implements PaymentService{
 		return null;
 	}
 
-	protected PayMsg canPay(OrderVo order){
+	protected PayMsg canPay(OrderVo order) {
 		logger.info("productType={}", order.getProductType());
 		AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
-		if(order.getProductType() == OrderService.ProductType.FLOW_RECHARGE.getCode() || order.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()){
-			//手机话费充值和流量充值限制额度
-			//微信支付--> 都不收手续费
-			//积分支付--> 话费充值收手续费,流量充值不收手续费
-			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum().toString());
-			BigDecimal consumptionAmount = orderService.getConsumptionAmount(user.getId());
-			BigDecimal limit = conf.getLimit();
-			logger.info("conf = {}", conf);
-			logger.info("consumptionAmount={},order.getTotalMount()={},limit={}", consumptionAmount,order.getTotalMount(),limit);
-			if (consumptionAmount != null && limit != null) {
-				if (consumptionAmount.add(order.getTotalMount()).compareTo(limit) > 0) {
-					return new PayMsg(OrderMsg.purchase_limit_code, String.format("您已超出每日限额", limit));
-				}
-			}
-		}else {
-			if (!StringUtils.isEmpty(order.getActType())) {
-				//是否普通订单
-				if (!OrderService.ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
-					//若果活动结束或者下架,未完成的订单不能支付.
-					OrderItemVo item = order.getItems().get(0);
-					long userId = order.getUserId();
-					String str[] = item.getProductSkuId().split("-");
-					int skuId = Integer.valueOf(str[1]);
-					ActivityInfo actInfo = orderService.getActivityInfo(String.valueOf(user.getGroupNum()), skuId);
-					logger.info("canPay() actInfo = {},actType = {}", actInfo, order.getActType());
-					if (actInfo != null) {
-						if (actInfo.getActivityName().equals(order.getActType())) {
-							//用户限购数量
-							String activityName = actInfo.getActivityName();
-							Integer actLimitNum = actInfo.getBuyNumberLimit();
-							int buyQuantity = item.getNumber().intValue();
-							int byNum = orderService.getBuyNum(userId, skuId, activityName);
-							logger.info("canPay() actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, byNum + buyQuantity);
-							if (actLimitNum != null && actLimitNum < byNum + buyQuantity) {
-								return new PayMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
-							}
-						} else {
-							//找到的活动与订单活动不匹配
-							logger.info("活动与订单活动不匹配");
-							return new PayMsg(OrderMsg.end_activity_code, OrderMsg.end_activity_mess);
+		if (!StringUtils.isEmpty(order.getActType())) {
+			//是否普通订单
+			if (!OrderService.ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
+				//若果活动结束或者下架,未完成的订单不能支付
+				OrderItemVo item = order.getItems().get(0);
+				long userId = order.getUserId();
+				String str[] = item.getProductSkuId().split("-");
+				int skuId = Integer.valueOf(str[1]);
+				ActivityInfo actInfo = orderService.getActivityInfo(String.valueOf(user.getGroupNum()), skuId);
+				logger.info("canPay() actInfo = {},actType = {}", actInfo, order.getActType());
+				if (actInfo != null) {
+					if (actInfo.getActivityName().equals(order.getActType())) {
+						//用户限购数量
+						String activityName = actInfo.getActivityName();
+						Integer actLimitNum = actInfo.getBuyNumberLimit();
+						int buyQuantity = item.getNumber().intValue();
+						int byNum = orderService.getBuyNum(userId, skuId, activityName);
+						logger.info("canPay() actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, byNum + buyQuantity);
+						if (actLimitNum != null && actLimitNum < byNum + buyQuantity) {
+							return new PayMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
 						}
 					} else {
-						//未找到活动
+						//找到的活动与订单活动不匹配
+						logger.info("活动与订单活动不匹配");
 						return new PayMsg(OrderMsg.end_activity_code, OrderMsg.end_activity_mess);
 					}
+				} else {
+					//未找到活动
+					return new PayMsg(OrderMsg.end_activity_code, OrderMsg.end_activity_mess);
 				}
 			}
 		}

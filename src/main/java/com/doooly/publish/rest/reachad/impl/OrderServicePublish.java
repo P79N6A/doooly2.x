@@ -1,30 +1,30 @@
 package com.doooly.publish.rest.reachad.impl;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.mall.service.Impl.MallBusinessService;
+import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.OrderItemVo;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dto.common.OrderMsg;
+import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import com.doooly.entity.reachad.Order;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.mall.service.Impl.MallBusinessService;
-import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.OrderItemVo;
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.dto.common.OrderMsg;
-import com.doooly.entity.reachad.AdBusiness;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 订单
@@ -41,7 +41,13 @@ public class OrderServicePublish {
 	private OrderService orderService;
 	@Autowired
 	private MallBusinessService mallBusinessService;
-	
+	@Autowired
+	private AdOrderReportDao adOrderReportDao;
+	@Autowired
+	private AdRechargeConfDao adRechargeConfDao;
+	@Autowired
+	protected AdUserDao adUserDao;
+
 	@POST
 	@Path(value = "/createOrder")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -129,6 +135,15 @@ public class OrderServicePublish {
 		if(o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode() && o.getServiceCharge() != null)
 		{
 			retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
+		}
+		//话费充值需要校验积分消费金额,用到此参数
+		if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()) {
+			//用户消费金额
+			BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
+			retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
+			AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
+			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum()+"");
+			retJson.put("monthLimit",( conf == null || conf.getMonthLimit() == null ) ? "0" : conf.getMonthLimit());
 		}
 		logger.info("retJon = {}", retJson);
 		return retJson.toJSONString();

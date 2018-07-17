@@ -280,7 +280,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
         AdShanghaiBankAccount offset = new AdShanghaiBankAccount();
         //查询商户虚户
         AdShanghaiBankAccount adBussinessAccount = new AdShanghaiBankAccount();
-        if ("3".equals(type)) {
+        if ("3".equals(type)||"4".equals(type)) {
             adShanghaiBankAccount.setType(3);
             //查询轧差账户虚户
             offset = adShanghaiBankAccountDao.getBankAccount(adShanghaiBankAccount);
@@ -324,6 +324,11 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             payAccount = adGroupAccount.getEacctNo();
             payAccountName = adGroupAccount.getEacctName();
             usage = "企业退货积分代发记账";
+        } else if ("4".equals(type)) {
+            eAcctNo = adGroupAccount.getEacctNo();
+            payAccount = offset.getEacctNo();
+            payAccountName = offset.getEacctName();
+            usage = "轧差账户转发到虚账户";
         }
         long startTime = System.currentTimeMillis();
         messageDataBean = c19VirSReTrigSer(channelFlowNo, eAcctNo, amount, payAccount, payAccountName, usage, platformSummary);

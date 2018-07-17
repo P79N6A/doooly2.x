@@ -105,7 +105,6 @@ public class ProductServicePublish {
 			retJson.put("cucc_tel_default_sku_id", default_sku_id);
 			retJson.put("cucc_tel_list", array);
 
-
 			mobilePro = productService.getProductSku(Integer.valueOf(MERCHANT_ID), Integer.valueOf(CTC_TEL_ID), null);
 			mobileList = mobilePro.getProductSku();
 			array = new JSONArray();
@@ -214,11 +213,12 @@ public class ProductServicePublish {
 			//限额和手续费百分比
 			String groupId = params.getString("groupId");
 			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(groupId);
-			logger.info("AdRechargeConf={}", conf);
+			logger.info("conf={}", conf);
 			if (conf != null) {
                 //默认配置限额和手续费
-                retJson.put("daily_limit", conf.getLimit());
-                retJson.put("charges", conf.getCharges());
+                retJson.put("daily_limit", conf.getMonthLimit()); //限额1000
+                retJson.put("charges", conf.getCharges()); //折扣
+                retJson.put("discounts_month_limit", conf.getDiscountsMonthLimit());//免手续费金额
                 //活动时间内配置
                 if(conf.getDiscountsStartDate() != null && conf.getDiscountsStartDate() != null) {
                     long t = System.currentTimeMillis();

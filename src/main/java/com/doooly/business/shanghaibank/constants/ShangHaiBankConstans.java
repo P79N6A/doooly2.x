@@ -31,5 +31,5 @@ public class ShangHaiBankConstans {
 
     public static final String ENCODING = "UTF-8";
 
-    public static final String VIRACCTNOTICE = "virAcctNotice";//接口service名称
+    public static final String VIRACCTNOTICE = "viracctnotice";//接口service名称
 }

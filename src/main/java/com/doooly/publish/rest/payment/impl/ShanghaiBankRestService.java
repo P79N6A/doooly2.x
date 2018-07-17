@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 
 /**
  * @Description: 上海银行相关接口控制器
@@ -136,22 +139,25 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
     /**
      * 虚账户打款到账通知
      *
-     * @param json
      * @return
      */
     @POST
     @Path(value = "/c19WithDrawalsNotice")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
-    public String c19WithDrawalsNotice(JSONObject json) {
-        String checkvalue = json.getString("checkvalue");
-        String encmsg = json.getString("encmsg");
-        String service = json.getString("service");
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public String c19WithDrawalsNotice(@FormParam("checkvalue")String checkvalue, @FormParam("encmsg")String encmsg,
+                                       @FormParam("service")String service) {
+        try {
+            checkvalue = URLDecoder.decode(checkvalue, "UTF-8");
+            encmsg = URLDecoder.decode(encmsg, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.error("参数解码异常，异常原因", e);
+        }
         return shangHaiBankService.c19WithDrawalsNotice(checkvalue, encmsg, service);
     }
 
     /**
-     * 虚账户余额查询到账通知
+     * 虚账户余额查询
      *
      * @param json
      * @return

@@ -1,7 +1,7 @@
 package com.doooly.business.order.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.mall.service.Impl.MallBusinessService;
+import com.doooly.business.exwings.ExWingsUtils;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
 import com.doooly.business.product.entity.ActivityInfo;
@@ -49,13 +49,9 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	protected AdUserDao adUserDao;
 	@Autowired
-	private AdGroupDao adGroupDao;
-	@Autowired
 	private AdCouponCodeDao adCouponCodeDao;
 	@Autowired
 	AdRechargeRecordDao adRechargeRecordDao;
-	@Autowired
-	private MallBusinessService mallBusinessService;
 	@Autowired
 	private AdRechargeConfDao adRechargeConfDao;
 
@@ -102,9 +98,9 @@ public class OrderServiceImpl implements OrderService {
 					return new OrderMsg(OrderMsg.failure_code, "购买数量必须大于0");
 				}
 				BigDecimal sellPrice = new BigDecimal(sku.getSellPrice());
-				if ((orderVo.getProductType() == ProductType.FLOW_RECHARGE.getCode() || orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode())
-						&& orderVo.getProductType() != ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
-					OrderMsg msg = getServiceCharge(orderVo, sku);
+				if (orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode()) {
+					//话费充值计算手续费
+					OrderMsg msg = getServiceChargeAndCheckLimit(orderVo, sku);
 					if (OrderMsg.success_code.equals(msg.getCode())) {
 						if(msg.data != null) {
 							orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
@@ -142,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
 				BigDecimal marketPrice = new BigDecimal(sku.getMarketPrice());
 				totalMount = totalMount.add(sellPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
 				totalPrice = totalPrice.add(marketPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
-				OrderItemVo orderItem = buildOrderItem(userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
+				OrderItemVo orderItem = buildOrderItem(orderVo, userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
 				orderItems.add(orderItem);
 			}
 			//自营优惠券
@@ -163,7 +159,7 @@ public class OrderServiceImpl implements OrderService {
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
 			int rows = saveOrder(order, orderExt, orderItems);
-			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows,System.currentTimeMillis() - s);
+			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows, System.currentTimeMillis() - s);
 		}
 		//下单成功返回信息
 		OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
@@ -178,40 +174,48 @@ public class OrderServiceImpl implements OrderService {
 
 
 	/**
-	 * 手机话费充值和流量充值限制额度
-	 * 微信支付--> 都不收手续费
-	 * 积分支付--> 话费充值收手续费,流量充值不收手续费
+	 * 使用限制额度
 	 *
 	 * @param orderVo
 	 * @return
 	 */
-	public OrderMsg getServiceCharge(OrderVo orderVo,AdSelfProductSku sku) {
+	public OrderMsg getServiceChargeAndCheckLimit(OrderVo orderVo,AdSelfProductSku sku) {
 		AdRechargeConf conf = adRechargeConfDao.getRechargeConf(orderVo.getGroupId());
-		String operator =  orderVo.getOperator();
-		BigDecimal sellPrice =  new BigDecimal(sku.getSellPrice());
-		//每月消费的额度
-		BigDecimal consumptionAmount = this.getConsumptionAmount(orderVo.getUserId());
-		BigDecimal limit = conf.getLimit();
-		logger.info("consumptionAmount = {},limit = {}", consumptionAmount, limit);
-		//话费和流量充值每月每人限制额度
-		if (limit != null) {
-			if (consumptionAmount == null) {
-				consumptionAmount = new BigDecimal("0");
-			}
-			if (consumptionAmount.add(sellPrice).compareTo(limit) > 1) {
-				return new OrderMsg(OrderMsg.purchase_limit_code, String.format("话费和流量充值每月每人限制额度%s元", limit));
-			}
+		logger.info("conf = {}", conf);
+		if (conf == null) {
+			return new OrderMsg(OrderMsg.failure_code, "没有找到话费充值配置");
 		}
-		//话费充值订单计算手续费,扣除在积分支付时扣除
-		BigDecimal serviceCharge = new BigDecimal("0");
-		if(!StringUtils.isEmpty(operator)) {
-			BigDecimal charges = conf.getServiceChareges(operator);
-			logger.info("charges = {}", charges);
-			//话费充值才计算手续费
-			if (charges != null && orderVo.getProductType() == ProductType.MOBILE_RECHARGE.getCode()) {
-				serviceCharge = sellPrice.multiply(charges.divide(new BigDecimal("100"))).setScale(2, BigDecimal.ROUND_HALF_UP);
+		BigDecimal sellPrice = new BigDecimal(sku.getSellPrice());
+		//每月积分购买话费的金额
+		BigDecimal consumptionAmount = this.getConsumptionAmount(orderVo.getUserId());
+		if (consumptionAmount == null) {
+			consumptionAmount = new BigDecimal("0");
+		}
+		//话费充值订单计算手续费
+		BigDecimal charges = conf.getCharges();
+		if (charges != null) {
+			BigDecimal discountsMonthLimit = conf.getDiscountsMonthLimit();
+			if(discountsMonthLimit == null){
+				discountsMonthLimit = new BigDecimal("0");
 			}
-			logger.info("sellPrice = {},serviceCharge = {}", sellPrice, serviceCharge);
+			//超过免手续部分
+			BigDecimal c = charges.divide(new BigDecimal("100"));
+			BigDecimal serviceCharge = new BigDecimal("0");
+			//大于免手续部分按charges收
+			if (consumptionAmount.compareTo(discountsMonthLimit) > 0) {
+				serviceCharge = sellPrice.multiply(c).setScale(2, BigDecimal.ROUND_HALF_UP);
+			} else {
+				//剩余免手续费部分
+				BigDecimal leftDiscount = discountsMonthLimit.subtract(consumptionAmount);
+				if (sellPrice.compareTo(leftDiscount) > 0) {
+					BigDecimal diff = sellPrice.subtract(leftDiscount);
+					serviceCharge = diff.multiply(c).setScale(2, BigDecimal.ROUND_HALF_UP);
+				} else {
+					serviceCharge = new BigDecimal("0");
+				}
+			}
+			//计算手续费
+			logger.info("serviceCharge = {}", serviceCharge);
 			Map map = new HashMap();
 			map.put("serviceCharge", serviceCharge);
 			return new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess, map);
@@ -276,13 +280,13 @@ public class OrderServiceImpl implements OrderService {
 		if(actInfo != null){
 			//活动类型
 			activityName = actInfo.getActivityName();
-			if(StringUtils.isEmpty(activityName)){
+			if (StringUtils.isEmpty(activityName)) {
 				logger.error("activityName = {}", activityName);
 				return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
 			}
 			//活动价格
-			if(actInfo.getSpecialPrice() != null && actInfo.getSpecialPrice().compareTo(BigDecimal.ZERO) == 1){
-				actPrice =  actInfo.getSpecialPrice();
+			if (actInfo.getSpecialPrice() != null && actInfo.getSpecialPrice().compareTo(BigDecimal.ZERO) == 1) {
+				actPrice = actInfo.getSpecialPrice();
 			}
 			//用户限购数量
 			Integer actLimitNum = actInfo.getBuyNumberLimit();
@@ -293,7 +297,7 @@ public class OrderServiceImpl implements OrderService {
 			}
 			//活动库存校验
 			Integer inventory = actInfo.getInventory();
-			if(inventory != null) {
+			if (inventory != null) {
 				//校验库存
 				if (inventory <= 0) {
 					logger.error("activity.inventory = {}", inventory);
@@ -301,7 +305,7 @@ public class OrderServiceImpl implements OrderService {
 				}
 				//扣减库存
 				OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
-				if(msg != null){
+				if (msg != null) {
 					return msg;
 				}
 			}
@@ -362,7 +366,7 @@ public class OrderServiceImpl implements OrderService {
 		return null;
 	}
 
-	private OrderItemVo buildOrderItem(long userId, String remarks, int buyNum, AdSelfProduct product,
+	private OrderItemVo buildOrderItem(OrderVo order,long userId, String remarks, int buyNum, AdSelfProduct product,
 									   AdSelfProductSku sku, BigDecimal sellPrice, BigDecimal marketPrice) {
 		String category  = getCategory(product);
 		OrderItemVo orderItem = new OrderItemVo();
@@ -384,6 +388,10 @@ public class OrderServiceImpl implements OrderService {
 		orderItem.setProductSkuId(product.getId() + "-" + sku.getId());
 		orderItem.setExternalNumber(sku.getExternalNumber());
 		orderItem.setDuihuanUrl(product.getDuihuanUrl());
+		//摩拜订单号
+		if(order.getProductType() == ProductType.MOBIKE_RECHARGE.getCode()){
+			orderItem.setCardOid(ExWingsUtils.getOrderId());
+		}
 		AdSelfProductImage image = adSelfProductImageDao.getImageByProductId(product.getId());
 		if (image != null) {
 			orderItem.setProductImg(image.getImage());

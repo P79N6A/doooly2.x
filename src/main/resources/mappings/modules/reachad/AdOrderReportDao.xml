@@ -61,6 +61,7 @@
 			<result column="product_sku_id" property="productSkuId" jdbcType="VARCHAR" />
 			<result column="product_img" property="productImg" jdbcType="VARCHAR" />
 			<result column="external_number" property="externalNumber" jdbcType="VARCHAR" />
+			<result column="card_oid" property="cardOid" jdbcType="VARCHAR" />
 		</collection>
 	</resultMap>
 
@@ -69,14 +70,16 @@
 	<!--获得用户每天话费和流量充值的消费金额-->
 	<select id="getConsumptionAmount" resultType="java.math.BigDecimal" >
 		select
-		sum(r.total_mount - if(isnull(r.service_charge),0,r.service_charge))  totalMount
+			sum(r.total_mount - if(isnull(r.service_charge),0,r.service_charge))  totalMount
 		from
-		ad_order_report r
+			ad_order_report r,ad_pay_flow f
 		where
-		r.type = '1'
+		r.order_number = f.order_number
+		and r.type = '1'
 		and r.user_id = #{userId}
-		and r.product_type in (3,4)
+		and r.product_type = 3
 		and DATE_FORMAT(r.order_date,'%Y-%m') = DATE_FORMAT(now(),'%Y-%m')
+		and f.pay_type='doooly'
 	</select>
 
 	<!-- 获得用户未完成订单和完成订单的购买数量-->
@@ -96,15 +99,15 @@
 
 	<select id="getByOrderNum" resultMap="orderMap" >
 		select
-		o.*,
-		d.*,
-		d.id did
+			o.*,
+			d.*,
+			d.id did
 		from
-		ad_order_report o,ad_order_detail d
+			ad_order_report o,ad_order_detail d
 		where
-		o.id = d.order_report_id
-		and o.order_number = #{orderNumber}
-		and o.del_flag = '0'
+			o.id = d.order_report_id
+			and o.order_number = #{orderNumber}
+			and o.del_flag = '0'
 	</select>
 
 	<select id="getById" resultMap="orderMap" >

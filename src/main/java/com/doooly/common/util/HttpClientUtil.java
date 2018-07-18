@@ -1,21 +1,7 @@
 package com.doooly.common.util;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -30,12 +16,27 @@ import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 
 /**
@@ -198,7 +199,7 @@ public class HttpClientUtil {
 
 
 
-//
+
 //    //请求方法
 //    public static String httpsRequest(String requestUrl, String outputStr) {
 //        try {
@@ -238,6 +239,29 @@ public class HttpClientUtil {
 //        }
 //        return null;
 //    }
+
+    public static JSONObject httpPost(String httpUrl, JSONObject json) {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        try {
+            HttpPost request = new HttpPost(httpUrl);
+            StringEntity params = new StringEntity(json.toString());
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            HttpResponse response = httpClient.execute(request);
+            log.info(String.format("statusCode=%s", response.getStatusLine()));
+            String responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
+            return JSON.parseObject(responseJson);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("httpPost() ex={}", ex);
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+            }
+        }
+        return null;
+    }
 
 
     /**

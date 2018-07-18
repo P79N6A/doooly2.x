@@ -152,6 +152,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 					logger.info("doProcessor ===>start = {}",s3);
 					PayFlow flow = payFlowService.getById(payFlowId);
 					List<OrderVo> ods = orderService.getByOrdersNum(orderNum);
+					logger.info("doProcessor ods = {}",ods.get(0));
 					doProcessor(ods, flow);
 					logger.info("doProcessor end.cost = {}", System.currentTimeMillis() - s3);
 

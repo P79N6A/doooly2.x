@@ -44,6 +44,9 @@ public class ProductServicePublish {
 	private static final String SCTCD_MERCHANT_ID = PropertiesConstants.sctcdBundle.getString("SCTCD_MERCHANT_ID");
 	private static final String SCTCD_PRODUCT_ID = PropertiesConstants.sctcdBundle.getString("SCTCD_PRODUCT_ID");
 
+	private static final String MOBIKE_PRODUCT_ID = PropertiesConstants.dooolyBundle.getString("mobike_product_id");
+	private static final String MOBIKE_MERCHANT_ID = PropertiesConstants.dooolyBundle.getString("mobike_merchant_id");
+
 	@Autowired
 	private ProductService productService;
 	@Autowired
@@ -51,12 +54,39 @@ public class ProductServicePublish {
 	@Autowired
 	private AdRechargeConfDao adRechargeConfDao;
 
+	@POST
+	@Path(value = "/mobikeProductInfo")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String mobikeProductInfo() {
+		AdSelfProduct  mobikePro = productService.getProductSku(Integer.valueOf(MOBIKE_MERCHANT_ID), Integer.valueOf(MOBIKE_PRODUCT_ID), null);
+		JSONObject retJson = new JSONObject(true);
+		List<AdSelfProductSku> mobileList = mobikePro.getProductSku();
+		String default_sku_id = "";
+		JSONArray array = new JSONArray();
+		for (AdSelfProductSku adSelfProductSku : mobileList) {
+			JSONObject sku = new JSONObject();
+			sku.put("id", adSelfProductSku.getId());
+			sku.put("price", adSelfProductSku.getSellPrice());
+			sku.put("specification", adSelfProductSku.getSpecification());
+			//默认值
+			if(adSelfProductSku.getSpecification().equals("1元")){
+				default_sku_id = adSelfProductSku.getId();
+			}
+			array.add(sku);
+		}
+		retJson.put("mobike_merchant_id", MOBIKE_MERCHANT_ID);
+		retJson.put("mobike_product_id", mobikePro.getId());
+		retJson.put("mobike_default_sku_id", default_sku_id);
+		retJson.put("mobike_sku_list", array);
+		return retJson.toJSONString();
+	}
 
-	/***
-	 * 虚拟产品信息
-	 * @param request
-	 * @return
-	 */
+
+		/***
+         * 虚拟产品信息
+         * @param request
+         * @return
+         */
 	@POST
 	@Path(value = "/virProducts")
 	@Produces(MediaType.APPLICATION_JSON)

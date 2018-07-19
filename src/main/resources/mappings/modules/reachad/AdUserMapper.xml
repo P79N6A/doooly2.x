@@ -1267,4 +1267,16 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
 		and a.group_num in 
 		(select b.id from ad_group b INNER JOIN ad_bloc c on b.bloc_id=c.id and c.id in (83,95))
   	</select>
+
+
+    <select id="findOpenRebateSwitchNum" resultType="java.lang.Integer">
+        SELECT COUNT(p.id)
+        FROM ad_user_personal_info p
+        INNER JOIN ad_business_privilege_activity a
+        ON p.id = a.user_id
+        WHERE p.id = #{userId}
+        AND p.auth_flag = 1
+        AND a.privilege_type = 2
+        AND a.is_open_privilege = 1
+    </select>
 </mapper>

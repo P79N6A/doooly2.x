@@ -5,8 +5,12 @@ package com.doooly.dao.reachad;
 
 import com.doooly.business.pay.bean.AdOrderFlow;
 
+import java.util.List;
+
 public interface AdOrderFlowDao {
 	
 	int insert(AdOrderFlow adOrderFlow);
-	
+
+    List<AdOrderFlow> findListByAdOrderReport(AdOrderFlow adOrderFlowQuery);
+
 }

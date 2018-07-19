@@ -3,13 +3,14 @@
  */
 package com.doooly.dao.reachad;
 
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.entity.reachad.AdOrderReport;
+import com.doooly.entity.reachad.AdUserBusinessExpansion;
+import org.apache.ibatis.annotations.Param;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.ibatis.annotations.Param;
-
-import com.doooly.business.order.vo.OrderVo;
 
 public interface AdOrderReportDao {
 	/**
@@ -40,4 +41,21 @@ public interface AdOrderReportDao {
 	public List<Map<String,Object>> getByUserSku(@Param("userId") String userId,@Param("productSku") String productSku);
 
 	public String findUserIsBuyByProductAndSkuId(@Param("userId")String userId, @Param("productSkuId")String productSkuId, @Param("productSku")String productSku);
+
+    int getTotalNum(AdOrderReport adOrderReport);
+
+    List<AdOrderReport> findOrderList(AdOrderReport adOrderReport);
+
+    AdOrderReport getDetailByOrderReportId(long id);
+
+    List<Map> findOrderSum(AdOrderReport adOrderReport);
+
+    List<Map> findOrderSumByMonth(AdOrderReport adOrderReport);
+
+    AdOrderReport getOrderDetailInfoById(String orderReportId);
+
+    /**
+     * 查询都市旅游卡，账户信息
+     */
+    AdUserBusinessExpansion findSctcdAccount(AdOrderReport adOrderReport);
 }

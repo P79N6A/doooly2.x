@@ -56,6 +56,7 @@ public class AdBusiness {
 	private String sAppJumpStyle;// 可用积分服务-APP端跳转样式(0:H5,1:APP) 默认为1
 	private String sWechatJumpUrl;// 可用积分服务-微信端跳转地址
 	private String sAppJumpUrl;// 可用积分服务-APP端跳转地址
+    private String storeName;//门店地址
 
 	public AdBusiness() {
 
@@ -437,4 +438,11 @@ public class AdBusiness {
 		this.sAppJumpUrl = sAppJumpUrl;
 	}
 
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
 }

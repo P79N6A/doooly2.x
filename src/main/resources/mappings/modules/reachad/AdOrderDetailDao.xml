@@ -196,6 +196,49 @@
 	    </set>
 	    where id = #{id,jdbcType=BIGINT}
     </update>
-    
+
+
+    <sql id="adOrderDetailColumns">
+        a.id AS "id",
+        a.order_report_id AS "adOrderReport.id",
+        a.category_id AS "adBusinessCategory.id",
+        a.category_id AS "adBusinessCategory.categoryId",
+        a.code AS "code",
+        a.goods AS "goods",
+        a.sku AS "specification",
+        a.card_code AS "cardCode",
+        a.card_pass AS "cardPass",
+        a.product_img AS "productImg",
+        a.duihuan_url AS "duihuanUrl",
+        a.amount AS "amount",
+        a.price AS "price",
+        a.number AS "number",
+        a.tax AS "tax",
+        a.ret_msg AS "retMsg",
+        a.ret_code AS "retCode",
+        a.ret_state AS "retState",
+        a.del_flag AS "delFlag",
+        a.remarks AS "remarks",
+        a.update_date AS "updateDate",
+        a.create_date AS "createDate",
+        r.order_number AS "adOrderReport.orderNumber",
+        c.category_id AS "adBusinessCategory.categoryId",
+        c.category_name AS "adBusinessCategory.categoryName"
+    </sql>
+
+    <sql id="adOrderDetailJoins">
+        LEFT JOIN ad_order_report r ON r.id = a.order_report_id
+        LEFT JOIN ad_business_category c ON c.business_id = r.bussiness_id and c.category_id = a.category_id
+    </sql>
+
+    <select id="findListByAdOrderReport" resultType="com.doooly.entity.reachad.AdOrderDetail">
+        SELECT
+        <include refid="adOrderDetailColumns"/>
+        FROM ad_order_detail a
+        <include refid="adOrderDetailJoins"/>
+        WHERE a.order_report_id = #{adOrderReport.id}
+        ORDER BY a.update_date DESC
+    </select>
+
 
 </mapper>

@@ -1,16 +1,19 @@
 package com.doooly.business.pay.bean;
 
+import com.doooly.entity.reachad.AdOrderReport;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import com.sun.org.apache.xml.internal.utils.StringToStringTable;
-
 public class AdOrderFlow {
+    /** 支付类型：平台积分 */
+    public static final int PAY_TYPE_PLATFORM_POINT = 0;
+    /** 支付类型：微信支付 */
+    public static final int PAY_TYPE_WECHAT = 3;
 
 	private Long id;
+
+    private AdOrderReport adOrderReport;		// 订单报表编号 父类
 
 	private Long orderReportId;
 
@@ -42,7 +45,15 @@ public class AdOrderFlow {
 		this.id = id;
 	}
 
-	public Long getOrderReportId() {
+    public AdOrderReport getAdOrderReport() {
+        return adOrderReport;
+    }
+
+    public void setAdOrderReport(AdOrderReport adOrderReport) {
+        this.adOrderReport = adOrderReport;
+    }
+
+    public Long getOrderReportId() {
 		return orderReportId;
 	}
 

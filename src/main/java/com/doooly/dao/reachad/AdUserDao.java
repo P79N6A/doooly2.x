@@ -309,4 +309,6 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	public AdUser getUserByTelephoneBloc(@Param("telephone") String telephone);
 
 	void updateActiveAndDelFlagById(AdUser user);
+
+    int findOpenRebateSwitchNum(Long id);
 }

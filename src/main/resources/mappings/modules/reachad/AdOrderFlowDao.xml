@@ -31,6 +31,33 @@
       	#{createDate,jdbcType=TIMESTAMP}
       )
   </insert>
-	
+
+    <sql id="adOrderFlowColumns">
+        a.id AS "id",
+        a.order_report_id AS "adOrderReport.id",
+        a.type AS "type",
+        a.pay_type AS "payType",
+        a.amount AS "amount",
+        a.del_flag AS "delFlag",
+        a.remarks AS "remarks",
+        a.update_date AS "updateDate",
+        a.create_date AS "createDate",
+        u3.name AS "createBy",
+        b.order_number AS "adOrderReport.orderNumber"
+    </sql>
+
+    <sql id="adOrderFlowJoins">
+        LEFT JOIN ad_order_report b ON b.id = a.order_report_id
+        LEFT JOIN sys_user u3 ON u3.id = a.create_by
+    </sql>
+
+    <select id="findListByAdOrderReport" resultType="com.doooly.business.pay.bean.AdOrderFlow">
+        SELECT
+        <include refid="adOrderFlowColumns"/>
+        FROM ad_order_flow a
+        <include refid="adOrderFlowJoins"/>
+        WHERE a.order_report_id = #{adOrderReport.id}
+        ORDER BY a.update_date DESC
+    </select>
 	
 </mapper>

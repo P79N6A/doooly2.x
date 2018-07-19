@@ -7,9 +7,10 @@ import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +51,14 @@ public class ProductServicePublish {
 	@Autowired
 	private ProductService productService;
 	@Autowired
-	private AdGroupDao adGroupDao;
-	@Autowired
 	private AdRechargeConfDao adRechargeConfDao;
+	@Autowired
+	protected AdUserDao adUserDao;
 
 	@POST
 	@Path(value = "/mobikeProductInfo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String mobikeProductInfo() {
+	public String mobikeProductInfo(JSONObject params) {
 		AdSelfProduct  mobikePro = productService.getProductSku(Integer.valueOf(MOBIKE_MERCHANT_ID), Integer.valueOf(MOBIKE_PRODUCT_ID), null);
 		JSONObject retJson = new JSONObject(true);
 		List<AdSelfProductSku> mobileList = mobikePro.getProductSku();
@@ -78,6 +79,13 @@ public class ProductServicePublish {
 		retJson.put("mobike_product_id", mobikePro.getId());
 		retJson.put("mobike_default_sku_id", default_sku_id);
 		retJson.put("mobike_sku_list", array);
+		String userId = params.getString("userId");
+		if(userId != null) {
+			AdUser user = adUserDao.getById(userId);
+			retJson.put("integral", user.getIntegral());
+		}else{
+			retJson.put("integral", "0");
+		}
 		return retJson.toJSONString();
 	}
 

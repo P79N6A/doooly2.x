@@ -71,9 +71,9 @@ public class ExWingsServiceImpl implements ExWingsService {
         json.put("ts", ExWingsUtils.getTs());
         if (item.getSku().startsWith("1次")) {
             json.put("type", 0);
-        } else if (item.getSku().startsWith("7天")) {
+        } else if (item.getSku().startsWith("7次")) {
             json.put("type", 1);
-        } else if (item.getSku().startsWith("30天")) {
+        } else if (item.getSku().startsWith("30次")) {
             json.put("type", 2);
         } else {
             log.error("recharge() item.getSku()=" + item.getSku());

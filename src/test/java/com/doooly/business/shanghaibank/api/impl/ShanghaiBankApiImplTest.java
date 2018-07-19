@@ -32,7 +32,7 @@ public class ShanghaiBankApiImplTest {
 
     @Test
     public void c19SCrVirSingleAccount() throws Exception {
-        String result = shanghaiBankApi.c19SCrVirSingleAccount("testGroup2");
+        String result = shanghaiBankApi.c19SCrVirSingleAccount("testGroup22");
         System.out.println(result);
     }
 
@@ -49,7 +49,7 @@ public class ShanghaiBankApiImplTest {
     @Test
     public void c19VirAcctBlanceInq() throws Exception {
         try {
-            String res = shanghaiBankApi.c19VirAcctBlanceInq("3111110300286719100051");
+            String res = shanghaiBankApi.c19VirAcctBlanceInq("3111110300286719100041");
             System.out.println(res);
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,7 +82,7 @@ public class ShanghaiBankApiImplTest {
      */
     @Test
     public void c19VirSReTrigSer() throws Exception {
-        String res = shanghaiBankApi.c19VirSReTrigSer("fasdljfdskafasdf111122","3111110300286719100051","1000.00","03002792221","测试客户122120","打款操作","虚账户代发");
+        String res = shanghaiBankApi.c19VirSReTrigSer("fasdljfdskafaswer2332","3111110300286719100152","500.00","03002792221","测试客户122120","打款操作","虚账户代发");
         System.out.println(res);
     }
 

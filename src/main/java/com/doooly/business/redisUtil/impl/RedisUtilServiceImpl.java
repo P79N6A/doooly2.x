@@ -271,7 +271,7 @@ public class RedisUtilServiceImpl implements RedisUtilService {
 				logger.info("========缓存data数据量：" + totalCount);
 				return null;
 			}
-			if (totalCount < count || count == 0) {
+			if (totalCount < count || count == -1) {
 				count = Integer.valueOf(totalCount.toString());
 			}
 			// 获取数量

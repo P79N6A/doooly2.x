@@ -384,6 +384,42 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
     }
 
     /**
+     * 虚账户交易明细查询
+     * @param eAcctNo 虚账号
+     * @param beginDate 开始时间
+     * @param endDate   结束时间
+     * @param otherAccNo 对方账号
+     * @param otherAccName 对方户名
+     * @param voucherNo 凭证编号
+     * @param pageIndex 查询页码
+     * @param pageSize  每页多少条记录
+     * @return
+     */
+    @Override
+    public MessageDataBean c19VirAcctTranDtlQry(String eAcctNo, String beginDate, String endDate,
+                                                String otherAccNo, String otherAccName, String voucherNo, String pageIndex, String pageSize) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        HashMap<String,Object> map = new HashMap<>();
+        try {
+            //调用虚账户交易明细查询接口
+            String result = shanghaiBankApi.c19VirAcctTranDtlQry(eAcctNo, beginDate, endDate, otherAccNo, otherAccName, voucherNo,pageIndex,pageSize);
+            C19BaseRes c19BaseRes = JSONObject.parseObject(result, C19BaseRes.class);
+            JSONObject data = (JSONObject) c19BaseRes.getData();
+            //JSONObject jsonObject = JSONObject.parseObject(data.toJSONString());
+            //处理参数
+            map.put("result",data.toJSONString());
+            messageDataBean.setData(map);
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setMess(MessageDataBean.success_mess);
+        } catch (Exception e) {
+            LOGGER.error("虚账户交易明细查询失败,失败原因", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("虚账户交易明细查询失败");
+        }
+        return messageDataBean;
+    }
+
+    /**
      * 虚账户交易指令状态查询
      *
      * @param channelFlowNo 兜礼平台流水号

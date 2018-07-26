@@ -23,4 +23,7 @@ public interface ShanghaiBankRestServiceI {
                                 @FormParam("service")String service);
     // 虚账户余额查询
     String c19VirAcctBlanceInq(JSONObject obj);
+
+    // 虚账户交易明细查询
+    String c19VirAcctTranDtlQry(JSONObject obj);
 }

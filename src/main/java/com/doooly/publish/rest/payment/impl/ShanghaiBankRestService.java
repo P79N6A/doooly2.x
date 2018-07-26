@@ -145,6 +145,35 @@ public class ShanghaiBankRestService implements ShanghaiBankRestServiceI {
         return messageDataBean.toJsonString();
     }
 
+    /**
+     * 虚账户交易明细查询
+     *
+     * @param json
+     * @return
+     */
+    @POST
+    @Path(value = "/c19VirAcctTranDtlQry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_FORM_URLENCODED})
+    public String c19VirAcctTranDtlQry(JSONObject json) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        String eAcctNo = json.getString("eAcctNo");
+        String beginDate = json.getString("beginDate");
+        String endDate = json.getString("endDate");
+        String otherAccNo = json.getString("otherAccNo");
+        String otherAccName = json.getString("otherAccName");
+        String voucherNo = json.getString("voucherNo");
+        String pageIndex = json.getString("pageIndex");
+        String pageSize = json.getString("pageSize");
+        try {
+            messageDataBean = shangHaiBankService.c19VirAcctTranDtlQry(eAcctNo,beginDate,endDate,otherAccNo,otherAccName,voucherNo,pageIndex,pageSize);
+        } catch (Exception e) {
+            logger.error("虚账户交易明细查询出现异常", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+        }
+        return messageDataBean.toJsonString();
+    }
+
 
     /**
      * 虚账户打款到账通知

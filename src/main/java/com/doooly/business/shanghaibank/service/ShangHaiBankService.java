@@ -29,6 +29,9 @@ public interface ShangHaiBankService {
     MessageDataBean c19VirSReTrigSer(String amount, String businessId, String groupId,
                                 String type);//虚账户单笔代发
 
+    MessageDataBean c19VirAcctTranDtlQry(String eAcctNo, String beginDate, String endDate,
+                                         String otherAccNo, String otherAccName, String voucherNo, String pageIndex, String pageSize);//虚账户交易明细
+
     MessageDataBean c19VirSReTrigSer(String channelFlowNo, String eAcctNo, String amount,
                                 String payAccount, String payAccountName,
                                 String usage, String platformSummary);//虚账户单笔代发

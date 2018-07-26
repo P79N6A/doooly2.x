@@ -156,6 +156,26 @@ public class ShanghaiBankApiImpl implements ShangHaiBankApi {
     }
 
     /**
+     * 虚账户交易明细查询
+     * @param eAcctNo 虚账号
+     * @param beginDate 开始时间
+     * @param endDate   结束时间
+     * @param otherAccNo 对方账号
+     * @param otherAccName 对方户名
+     * @param voucherNo 凭证编号
+     * @param pageIndex 查询页码
+     * @param pageSize  每页多少条记录
+     * @return
+     * @throws IOException
+     */
+    public String c19VirAcctTranDtlQry(String eAcctNo, String beginDate, String endDate,
+                                                           String otherAccNo, String otherAccName, String voucherNo, String pageIndex, String pageSize) throws IOException {
+        Object o = virAccountApi.c19VirAcctTranDtlQry(eAcctNo, beginDate, endDate, otherAccNo, otherAccName, voucherNo, pageIndex,pageSize);
+        LOGGER.info("虚账户交易明细查询接口返回结果========="+JSON.toJSONString(o, true));
+        return JSON.toJSONString(o, true);
+    }
+
+    /**
      * 虚账户交易指令状态查询
      * @param channelFlowNo 兜礼平台流水号
      * @param channelId 接入渠道id

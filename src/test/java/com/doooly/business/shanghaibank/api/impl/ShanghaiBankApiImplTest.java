@@ -86,6 +86,16 @@ public class ShanghaiBankApiImplTest {
         System.out.println(res);
     }
 
+    /**
+     * 虚账户交易明细查询
+     * @throws Exception
+     */
+    @Test
+    public void c19VirAcctTranDtlQry() throws Exception {
+        String res = shanghaiBankApi.c19VirAcctTranDtlQry("3111110300286719100020","20180610","20180710","","","","","");
+        System.out.println(res);
+    }
+
     @Test
     public void c19VirAcctDeleCharSttInq() throws Exception {
         String res = shanghaiBankApi.c19VirAcctDeleCharSttInq("fasdljfdskafasdf","RUIQUVIR");

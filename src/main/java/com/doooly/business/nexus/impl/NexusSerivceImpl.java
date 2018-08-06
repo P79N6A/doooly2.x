@@ -8,6 +8,7 @@ import com.doooly.business.nexus.NexusSerivce;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.utils.DateUtils;
+import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdNexusBindDao;
 import com.doooly.dto.common.MessageDataBean;
@@ -25,6 +26,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.doooly.business.nexus.MaxxipointSecurity.verify;
+import static com.doooly.business.nexus.NexusUtil.jxcPublicKey;
+import static com.doooly.business.nexus.NexusUtil.privateKey;
 import static sun.rmi.rmic.newrmic.Constants.EXCEPTION;
 
 @Service
@@ -44,30 +47,28 @@ public class NexusSerivceImpl implements NexusSerivce {
     //需要退款状态
     public static final String NEED_REFUND = "9999";
 
-    private static final String NEXUS_URL = "http://app-uat.maxxipoint.com/NexusService/api";
-    private static final String APPID = "844AB181D6878FF9";
-    private static final String APPSECRECT = "90586B08844AB181D6878FF9DDF118C9";
+//    private static final String NEXUS_URL = "http://app-uat.maxxipoint.com/NexusService/api";
+//    private static final String APPID = "844AB181D6878FF9";
+//    private static final String APPSECRECT = "90586B08844AB181D6878FF9DDF118C9";
+//
+//    private static final String jxcPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfDvfIr5IRRCVIudeiKs53O+3cl3s2GCBqME2ywF31OhBIW8zC8PMmJkCuZk1Gt+y7IlYk2mPO3QCf7HZz1nd6P2WD869Bh/L6p8bN1zVplXleQ+Yqa8s4Bh4/jdLzs2+LBayowvUNju94QoPxo2ylljTez5g1D5wYVTVWZkClWQIDAQAB";
+//
+//    private static final String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAImde3QVAMisTip7zgXjtCh6wN5L\n" +
+//            "0R17mXZrX+U3ADTAGVpJAnuVrLc4dAgkJd/H0lvDHAfiSCNHh4d1Y+w0AgjWf+qj8yGeyqdk6sKH\n" +
+//            "RvGbRzQ/MBbIBgeSD8a0Y7pRpaCJaIyIyImYs/5gpisFW7jSowiKSiQe6vJ1lpjRqO6RAgMBAAEC\n" +
+//            "gYBsIkQEphBUnxhYx6nO9Or2t+ZfhsHN4fZnl93ldf+Cc8Q4LpB13dm2qvR6BTWBjzmbg0e+Zi97\n" +
+//            "EVTMuxCGZSOG+DAyiYDEm9TdiLCfGCRF9Fugi/y+PWmsRJME1kKkbZjiJruD+LbjQH892Tn5Y4A2\n" +
+//            "mHvyLHI/amLqb4TUxLYyVQJBAMzxuKwXKQKPwb0gf3Iqa2NYZWGviXvdVOFWSC6GnkH3hESJxPiZ\n" +
+//            "zKAaLFDaVOPAGXHX/6+X33L0CwcJ8evfw+sCQQCr5dzu1w3ZXPKfV+L3WOTEUhFYtgQDWMaVbS9Q\n" +
+//            "43v0LFHPc/h5LT30udK8Rs9ePj+svWZ/xY1VAx/AwZfpbMRzAkBIUyWw1ZuLY+AjNkzDpWSwcomU\n" +
+//            "p7YFGF7UBvcCNE+1R/xNk7EHan9kINhy0BoVJb3VBz0cYqRglO8vVLsjWpxxAkEAh93venhQYfWt\n" +
+//            "b3Sv2IFSkDmtrEhxc5O/omvicjTbzGsbXrVzN5Qi3EPj5Ryy2vKosYgic+tZglAt0NUzlTR7MQJB\n" +
+//            "AKbRL+yUfVjB16ZjRrEf65MsW1IAqqXocSWOttjTXJuSfLdmI1BYj4XJNvuUg5FsO1W7lqalO0km\n" +
+//            "BkV2ycWi4S0=";
 
-    private static final String jxcPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfDvfIr5IRRCVIudeiKs53O+3cl3s2GCBqME2ywF31OhBIW8zC8PMmJkCuZk1Gt+y7IlYk2mPO3QCf7HZz1nd6P2WD869Bh/L6p8bN1zVplXleQ+Yqa8s4Bh4/jdLzs2+LBayowvUNju94QoPxo2ylljTez5g1D5wYVTVWZkClWQIDAQAB";
-
-    private static final String privateKey = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAImde3QVAMisTip7zgXjtCh6wN5L\n" +
-            "0R17mXZrX+U3ADTAGVpJAnuVrLc4dAgkJd/H0lvDHAfiSCNHh4d1Y+w0AgjWf+qj8yGeyqdk6sKH\n" +
-            "RvGbRzQ/MBbIBgeSD8a0Y7pRpaCJaIyIyImYs/5gpisFW7jSowiKSiQe6vJ1lpjRqO6RAgMBAAEC\n" +
-            "gYBsIkQEphBUnxhYx6nO9Or2t+ZfhsHN4fZnl93ldf+Cc8Q4LpB13dm2qvR6BTWBjzmbg0e+Zi97\n" +
-            "EVTMuxCGZSOG+DAyiYDEm9TdiLCfGCRF9Fugi/y+PWmsRJME1kKkbZjiJruD+LbjQH892Tn5Y4A2\n" +
-            "mHvyLHI/amLqb4TUxLYyVQJBAMzxuKwXKQKPwb0gf3Iqa2NYZWGviXvdVOFWSC6GnkH3hESJxPiZ\n" +
-            "zKAaLFDaVOPAGXHX/6+X33L0CwcJ8evfw+sCQQCr5dzu1w3ZXPKfV+L3WOTEUhFYtgQDWMaVbS9Q\n" +
-            "43v0LFHPc/h5LT30udK8Rs9ePj+svWZ/xY1VAx/AwZfpbMRzAkBIUyWw1ZuLY+AjNkzDpWSwcomU\n" +
-            "p7YFGF7UBvcCNE+1R/xNk7EHan9kINhy0BoVJb3VBz0cYqRglO8vVLsjWpxxAkEAh93venhQYfWt\n" +
-            "b3Sv2IFSkDmtrEhxc5O/omvicjTbzGsbXrVzN5Qi3EPj5Ryy2vKosYgic+tZglAt0NUzlTR7MQJB\n" +
-            "AKbRL+yUfVjB16ZjRrEf65MsW1IAqqXocSWOttjTXJuSfLdmI1BYj4XJNvuUg5FsO1W7lqalO0km\n" +
-            "BkV2ycWi4S0=";
-
-//    private static final String NEXUS_URL = PropertiesHolder.getProperty("nexus_recharge_url");
-//    private static final String APPID = PropertiesHolder.getProperty("nexus_appid");
-//    private static final String APPSECRECT = PropertiesHolder.getProperty("nexus_appsecrect");
-//    private static final String jxcPublicKey = PropertiesHolder.getProperty("nexus_public_key");
-//    private static final String privateKey = PropertiesHolder.getProperty("nexus_private_key");
+    private static final String NEXUS_URL = PropertiesHolder.getProperty("nexus_recharge_url");
+    private static final String APPID = PropertiesHolder.getProperty("nexus_appid");
+    private static final String APPSECRECT = PropertiesHolder.getProperty("nexus_appsecrect");
 
     /**
      * 回滚

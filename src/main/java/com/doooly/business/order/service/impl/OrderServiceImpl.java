@@ -392,6 +392,10 @@ public class OrderServiceImpl implements OrderService {
 		if(order.getProductType() == ProductType.MOBIKE_RECHARGE.getCode()){
 			orderItem.setCardOid(ExWingsUtils.getOrderId());
 		}
+		//集享订单号
+		if(order.getProductType() == ProductType.NEXUS_RECHARGE.getCode()){
+			orderItem.setCardOid(ExWingsUtils.getOrderId());
+		}
 		AdSelfProductImage image = adSelfProductImageDao.getImageByProductId(product.getId());
 		if (image != null) {
 			orderItem.setProductImg(image.getImage());

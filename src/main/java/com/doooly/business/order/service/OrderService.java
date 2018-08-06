@@ -60,7 +60,8 @@ public interface OrderService {
 		TOURIST_CARD_RECHARGE(5, "旅游卡充值"),
 		SELF_CARDPSW_RECHARGE(6, "自营卡券"),
 		MOBILE_RECHARGE_PREFERENCE(7, "兜礼话费特惠"),
-		MOBIKE_RECHARGE(8, "摩拜充值");
+		MOBIKE_RECHARGE(8, "摩拜充值"),
+		NEXUS_RECHARGE(9, "集享积分充值");
 
 		private int code;
 		private String productTypeName;
@@ -90,6 +91,14 @@ public interface OrderService {
 					return FLOW_RECHARGE.getProductTypeName();
 				case 5:
 					return TOURIST_CARD_RECHARGE.getProductTypeName();
+				case 6:
+					return SELF_CARDPSW_RECHARGE.getProductTypeName();
+				case 7:
+					return MOBILE_RECHARGE_PREFERENCE.getProductTypeName();
+				case 8:
+					return MOBIKE_RECHARGE.getProductTypeName();
+				case 9:
+					return NEXUS_RECHARGE.getProductTypeName();
 				default:
 					break;
 			}

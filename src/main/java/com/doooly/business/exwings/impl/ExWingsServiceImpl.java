@@ -65,7 +65,7 @@ public class ExWingsServiceImpl implements ExWingsService {
     public JSONObject recharge(OrderVo order) {
         OrderItemVo item = order.getItems().get(0);
         JSONObject json = new JSONObject();
-        log.info("item.cardOid" + item.getCardOid() + "1");
+        log.info("item.cardOid=" + item.getCardOid());
         json.put("orderid", item.getCardOid());
         json.put("mobile", order.getConsigneeMobile());
         json.put("ts", ExWingsUtils.getTs());

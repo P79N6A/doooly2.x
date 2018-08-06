@@ -2,8 +2,10 @@ package com.doooly.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.common.MessageDataBean;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -197,9 +199,6 @@ public class HttpClientUtil {
     }
 
 
-
-
-
 //    //请求方法
 //    public static String httpsRequest(String requestUrl, String outputStr) {
 //        try {
@@ -281,15 +280,17 @@ public class HttpClientUtil {
             method.addHeader("Pragma", "no-cache");
             method.addHeader("Content-Type", "application/json; charset=UTF-8");
             HttpResponse response = httpClient.execute(method);
-            String responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
-            System.out.println(String.format("statusCode=%s", response.getStatusLine()));
-            System.out.println(responseJson);
-            return responseJson;
+            log.info(String.format("statusCode=%s", response.getStatusLine().getStatusCode()));
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                // 获取服务器响应字符串
+                String responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
+                return responseJson;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             log.info("sendPost e = {} httpUrl = {},reqJson = {}", e, httpUrl, reqJson);
         }
-        return null;
+        return MessageDataBean.failure_code;
     }
 
 

@@ -7,10 +7,13 @@ import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.dao.reachad.AdNexusBindDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdUser;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,13 +51,111 @@ public class ProductServicePublish {
 	private static final String MOBIKE_PRODUCT_ID = PropertiesConstants.dooolyBundle.getString("mobike_product_id");
 	private static final String MOBIKE_MERCHANT_ID = PropertiesConstants.dooolyBundle.getString("mobike_merchant_id");
 
+	private static final String NEXUS_PRODUCT_ID = PropertiesConstants.dooolyBundle.getString("nexus_product_id");
+	private static final String NEXUS_MERCHANT_ID = PropertiesConstants.dooolyBundle.getString("nexus_merchant_id");
+
 	@Autowired
 	private ProductService productService;
 	@Autowired
 	private AdRechargeConfDao adRechargeConfDao;
 	@Autowired
 	protected AdUserDao adUserDao;
+	@Autowired
+	protected AdNexusBindDao adNexusBindDao;
 
+
+
+	/***
+	 * 查询是否绑定纳客宝
+	 * @param params
+	 * @return
+	 */
+	@POST
+	@Path(value = "/nexusBindQuery")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String nexusBindQuery(JSONObject params) {
+		long userId = params.getLong("userId");
+		if (userId <= 0) {
+			return new MessageDataBean(MessageDataBean.failure_code, "userId is null").toJsonString();
+		}
+		String bindId = adNexusBindDao.getBindId(userId);
+		if(StringUtils.isEmpty(bindId)){
+			return new MessageDataBean(MessageDataBean.success_code, "用户id未绑定纳客宝").toJsonString();
+		}else {
+			return new MessageDataBean(MessageDataBean.failure_code, "用户id已绑定纳客宝").toJsonString();
+		}
+	}
+
+	/***
+	 * 纳客宝绑定用户
+	 * @param params
+	 * @return
+	 */
+	@POST
+	@Path(value = "/nexusBind")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String nexusBind(JSONObject params) {
+		long userId = params.getLong("userId");
+		if (userId <= 0) {
+			return new MessageDataBean(MessageDataBean.failure_code, "userId is null").toJsonString();
+		}
+		//校验是否绑定
+		String bindId = adNexusBindDao.getBindId(userId);
+		if(!StringUtils.isEmpty(bindId)){
+			//如果已经绑定返回1003
+			return new MessageDataBean(MessageDataBean.already_used_code, "用户id已绑定纳客宝").toJsonString();
+		}
+		String nexusId = params.getString("bindId");
+		if (StringUtils.isEmpty(nexusId)) {
+			return new MessageDataBean(MessageDataBean.failure_code, "bindId is null").toJsonString();
+		}
+		int i = adNexusBindDao.insert(String.valueOf(userId), nexusId);
+		if(i > 0){
+			return new MessageDataBean(MessageDataBean.success_code, "success").toJsonString();
+		}else {
+			return new MessageDataBean(MessageDataBean.failure_code, "failed").toJsonString();
+		}
+	}
+
+
+	/***
+	 * 纳客宝商品信息
+	 * @param params
+	 * @return
+	 */
+	@POST
+	@Path(value = "/nexusProductInfo")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String nexusProductInfo(JSONObject params) {
+		AdSelfProduct mobikePro = productService.getProductSku(Integer.valueOf(NEXUS_MERCHANT_ID), Integer.valueOf(NEXUS_PRODUCT_ID), null);
+		JSONObject retJson = new JSONObject(true);
+		List<AdSelfProductSku> mobileList = mobikePro.getProductSku();
+		String default_sku_id = "";
+		JSONArray array = new JSONArray();
+		for (AdSelfProductSku adSelfProductSku : mobileList) {
+			JSONObject sku = new JSONObject();
+			sku.put("id", adSelfProductSku.getId());
+			sku.put("price", adSelfProductSku.getSellPrice());
+			sku.put("specification", adSelfProductSku.getSpecification());
+			//默认值
+			if (adSelfProductSku.getSpecification().equals("1000")) {
+				default_sku_id = adSelfProductSku.getId();
+			}
+			array.add(sku);
+		}
+		retJson.put("merchant_id", NEXUS_MERCHANT_ID);
+		retJson.put("product_id", mobikePro.getId());
+		retJson.put("default_sku_id", default_sku_id);
+		retJson.put("sku_list", array);
+		return retJson.toJSONString();
+	}
+
+
+	/***
+	 * 摩拜
+	 * @param params
+	 * @return
+	 */
 	@POST
 	@Path(value = "/mobikeProductInfo")
 	@Produces(MediaType.APPLICATION_JSON)

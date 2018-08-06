@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdApplicationFormDao">
+
+    <insert id="insert" parameterType="com.doooly.entity.reachad.AdApplicationForm" >
+        insert into ad_application_form (id, enterprise_name, enterprise_scale,
+        application_products, name, phone,
+        job, email, remarks,
+        type)
+        values (#{id,jdbcType=INTEGER}, #{enterpriseName,jdbcType=VARCHAR}, #{enterpriseScale,jdbcType=VARCHAR},
+        #{applicationProducts,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+        #{job,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{remarks,jdbcType=VARCHAR},
+        #{type,jdbcType=INTEGER})
+    </insert>
+
+</mapper>

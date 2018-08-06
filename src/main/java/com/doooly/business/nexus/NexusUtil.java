@@ -1,21 +1,14 @@
 package com.doooly.business.nexus;
 
 import com.doooly.business.exwings.ExWingsUtils;
-import com.doooly.business.utils.RSA;
-import com.doooly.common.util.MD5Utils;
+import com.doooly.common.constants.PropertiesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-import static com.doooly.business.utils.RSA.getPrivateKey;
-import static com.doooly.business.utils.RSA.getPublicKey;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by WANG on 2018/7/20.
@@ -35,58 +28,31 @@ public class NexusUtil {
 //    private static final String PUBLIC_KEY_PATH = PropertiesHolder.getProperty("mobike_public_key");
 //    private static final RSAPublicKey publicKey = getPublicKey(getRootPath() + "/WEB-INF/classes/" + PUBLIC_KEY_PATH);
 
+    private static final String PRIVATE_KEY_PATH = PropertiesHolder.getProperty("nexus_private_key");
+    private static final String PUBLIC_KEY_PATH = PropertiesHolder.getProperty("nexus_public_key");
 
+    public static final String jxcPublicKey = getKey(getRootPath() + "/WEB-INF/classes/" + PRIVATE_KEY_PATH);
+    public static final String privateKey = getKey(getRootPath() + "/WEB-INF/classes/" + PUBLIC_KEY_PATH);
 
-    private static final RSAPrivateKey privKey = getPrivateKey("C:\\idea_space\\master\\doooly\\src\\main\\resources\\nexus\\test\\rsa_private_key.pem");
-    private static final RSAPublicKey publicKey = getPublicKey("C:\\idea_space\\master\\doooly\\src\\main\\resources\\nexus\\test\\nexus_public_key.pem");
-
-    public static String encryptByPublicKey(String rawText){
-        logger.info("rawText = {}",rawText);
+    private static String getKey(String filename)  {
+        // Read key from file
         try {
-            return RSA.encryptByPublicKey(rawText, publicKey);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String sign(String data) {
-        try {
-            logger.info("data={}", data);
-            return RSA.sign(privKey, data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String createNonce(SortedMap<String, Object> parameters, String key) {
-        StringBuffer sb = new StringBuffer();
-        parameters.put("appSecret",key);
-        Set es = parameters.entrySet();
-        // 所有参与传参的参数按照accsii排序（升序）
-        Iterator it = es.iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String k = (String) entry.getKey();
-            Object v = entry.getValue();
-            sb.append("&");
-            if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
-                sb.append(k + "=" + v);
+            String strKeyPEM = "";
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+            String line;
+            while ((line = br.readLine()) != null) {
+                strKeyPEM += line + "\n";
             }
+            br.close();
+            return strKeyPEM;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        String deeplink = "";
-        if (sb.length() > 0) {
-            deeplink = sb.substring(1, sb.length());
-        }
-        //sb.append("key=" + key);
-        logger.info("deeplink = {}", deeplink);
-        String sign = MD5Utils.encode(deeplink);
-        return sign;
+        return null;
     }
 
 
-    public static String getRootPath() {
+    private static String getRootPath() {
         String classPath = ExWingsUtils.class.getClassLoader().getResource("/").getPath();
         String rootPath = "";
         //windows下

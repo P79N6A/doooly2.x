@@ -99,20 +99,24 @@ public class ProductServicePublish {
 		if (userId <= 0) {
 			return new MessageDataBean(MessageDataBean.failure_code, "userId is null").toJsonString();
 		}
-		//校验是否绑定
 		String bindId = adNexusBindDao.getBindId(userId);
-		if(!StringUtils.isEmpty(bindId)){
-			//如果已经绑定返回1003
+		if (!StringUtils.isEmpty(bindId)) {
+			//用户已绑定bindId
 			return new MessageDataBean(MessageDataBean.already_used_code, "用户id已绑定纳客宝").toJsonString();
 		}
 		String nexusId = params.getString("bindId");
 		if (StringUtils.isEmpty(nexusId)) {
 			return new MessageDataBean(MessageDataBean.failure_code, "bindId is null").toJsonString();
 		}
+		String bid = adNexusBindDao.getByBindId(nexusId);
+		if (StringUtils.isEmpty(nexusId)) {
+			//bindId已经其他用户被绑定
+			return new MessageDataBean("1008", "纳客宝已经被绑定!").toJsonString();
+		}
 		int i = adNexusBindDao.insert(String.valueOf(userId), nexusId);
-		if(i > 0){
+		if (i > 0) {
 			return new MessageDataBean(MessageDataBean.success_code, "success").toJsonString();
-		}else {
+		} else {
 			return new MessageDataBean(MessageDataBean.failure_code, "failed").toJsonString();
 		}
 	}

@@ -11,4 +11,6 @@ public interface AdNexusBindDao {
 
     String getBindId(@Param("userId") long userId);
 
+    String getByBindId(@Param("bindId") String bindId);
+
 }

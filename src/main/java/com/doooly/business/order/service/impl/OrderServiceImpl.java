@@ -440,18 +440,24 @@ public class OrderServiceImpl implements OrderService {
 		order.setActType(actType);
 		order.setVoucher(couponValue);
 		order.setCouponId(couponId);
-		if(BigDecimal.ZERO.compareTo(totalMount) == 0) {
-			//0元订单
-			order.setSupportPayType("0");
-			order.setServiceCharge(BigDecimal.ZERO);
+		//支持支付方式 ==> 1:积分,2:微信, 3.支付宝; 多个以逗号分割
+		if(order.getProductType() == ProductType.NEXUS_RECHARGE.getCode()){
+			//全家集享卡只支持积分支付
+			order.setSupportPayType("1");
 		}else{
-			//非0元订单
-			String supportPayType = orderVo.getSupportPayType();
-			if (StringUtils.isEmpty(orderVo.getSupportPayType())) {
-				supportPayType = "all";
+			if (BigDecimal.ZERO.compareTo(totalMount) == 0) {
+				//0元订单
+				order.setSupportPayType("0");
+				order.setServiceCharge(BigDecimal.ZERO);
+			} else {
+				//非0元订单
+				String supportPayType = orderVo.getSupportPayType();
+				if (StringUtils.isEmpty(orderVo.getSupportPayType())) {
+					supportPayType = "all";
+				}
+				order.setSupportPayType(supportPayType);
+				order.setServiceCharge(orderVo.getServiceCharge());
 			}
-			order.setSupportPayType(supportPayType);
-			order.setServiceCharge(orderVo.getServiceCharge());
 		}
 		return order;
 	}

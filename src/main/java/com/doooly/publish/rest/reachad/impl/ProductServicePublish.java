@@ -109,7 +109,7 @@ public class ProductServicePublish {
 			return new MessageDataBean(MessageDataBean.failure_code, "bindId is null").toJsonString();
 		}
 		String bid = adNexusBindDao.getByBindId(nexusId);
-		if (!StringUtils.isEmpty(nexusId)) {
+		if (!StringUtils.isEmpty(bid)) {
 			//bindId已经其他用户被绑定
 			return new MessageDataBean("1008", "纳客宝已经被绑定!").toJsonString();
 		}

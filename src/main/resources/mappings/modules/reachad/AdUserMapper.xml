@@ -1279,4 +1279,44 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
         AND a.privilege_type = 2
         AND a.is_open_privilege = 1
     </select>
+    
+    <!-- 查询用户手机号更改记录 -->
+    <select id="getTelephoneChange" parameterType="com.doooly.entity.reachad.AdUser" resultType="java.lang.Integer">
+    	SELECT
+			COUNT(a.user_id)
+		FROM
+			ad_telephone_change a
+		WHERE
+			a.user_id = #{id}
+    </select>
+    
+    <!-- 存储手机号更改记录 -->
+    <insert id="saveTelephoneChange" parameterType="com.doooly.entity.reachad.AdUser">
+    	insert into
+    	ad_telephone_change
+    	(
+    		user_id,
+    		new_telephone,
+    		old_telephone,
+    		update_date
+    	)
+    	values
+    	(
+    		#{id},
+    		#{telephone},
+    		#{oldTelephone},
+    		now()
+    	)
+    </insert>
+    
+    <!-- 更新手机号更改记录 -->
+    <update id="updateTelephoneChange" parameterType="com.doooly.entity.reachad.AdUser">
+    	update
+    		ad_telephone_change
+    	set	
+    		new_telephone = #{telephone},
+    		old_telephone = #{oldTelephone},
+    		update_date = now()
+    	where user_id = #{id}
+    </update>
 </mapper>

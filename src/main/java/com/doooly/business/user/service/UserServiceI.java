@@ -164,6 +164,11 @@ public interface UserServiceI {
 
 	BaseRes<JSONObject> batchUpdateUser(JSONObject reqJson);
 
+	/**
+	 * 保存用户手机号修改记录
+	 */
+	BaseRes<JSONObject> saveTelephoneChange(JSONObject reqJson);
+
 	// public void scheduleUpdateUser();
 	//
 	// public void initializeScheduleUpdateUser();

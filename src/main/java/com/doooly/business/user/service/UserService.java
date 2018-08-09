@@ -843,6 +843,34 @@ public class UserService implements UserServiceI {
 		return result;
 	}
 
+	@Override
+	public BaseRes<JSONObject> saveTelephoneChange(JSONObject reqJson) {
+		BaseRes<JSONObject> baseRes = new BaseRes<>();
+		try {
+			AdUser adUser = new AdUser();
+			adUser.setTelephone(reqJson.getString("newTelephone"));
+			adUser.setOldTelephone(reqJson.getString("oldTelephone"));
+			adUser.setId(Long.valueOf(reqJson.getString("userId")));
+
+			int count = 0;
+			if (adUserDao.getTelephoneChange(adUser) > 0) {
+				count = adUserDao.updateTelephoneChange(adUser);
+			} else {
+				count = adUserDao.saveTelephoneChange(adUser);
+			}
+			if (count > 0) {
+				baseRes = new BaseRes<>("1000", "操作成功");
+			} else {
+				baseRes = new BaseRes<>("1001", "操作失败");
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			baseRes = new BaseRes<>("1001", "系统错误");
+		}
+
+		return baseRes;
+	}
+
 	// @Override
 	// public void scheduleUpdateUser() {
 	// String url

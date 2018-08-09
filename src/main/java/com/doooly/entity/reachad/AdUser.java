@@ -77,9 +77,9 @@ public class AdUser {
 	private String updateBy;
 
 	private Date createDate;
-	private Integer dataSources;//'数据来源  0:平台导入，1：员工自主申请',
-	private Integer isAudit;//'审核状态 0：审核中，1：审核通过，2：审核不通过',
-	private String departmentId;//部门id
+	private Integer dataSources;// '数据来源 0:平台导入，1：员工自主申请',
+	private Integer isAudit;// '审核状态 0：审核中，1：审核通过，2：审核不通过',
+	private String departmentId;// 部门id
 	private Integer blocId;
 	/** 会员企业 */
 	private AdGroup adGroup;
@@ -88,6 +88,9 @@ public class AdUser {
 	private AdActiveCode adActiveCode;
 	/** 个人信息 */
 	private AdUserPersonalInfo personalInfo;
+
+	/** 旧手机号 */
+	private String oldTelephone;
 
 	public AdGroup getAdGroup() {
 		return adGroup;
@@ -361,6 +364,12 @@ public class AdUser {
 		this.blocId = blocId;
 	}
 
+	public String getOldTelephone() {
+		return oldTelephone;
+	}
 
+	public void setOldTelephone(String oldTelephone) {
+		this.oldTelephone = oldTelephone;
+	}
 
 }

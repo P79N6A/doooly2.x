@@ -92,6 +92,7 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 		}
 		return resultData;
 	}
+
 	@POST
 	@Path(value = "/verifyCodeToActive")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -195,6 +196,19 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 				result.toJsonString(), (System.currentTimeMillis() - start)));
 		return result;
 	}
+
+	@POST
+	@Path(value = "/saveTelephoneChange")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public BaseRes<JSONObject> saveTelephoneChange(JSONObject req) {
+		long start = System.currentTimeMillis();
+		BaseRes<JSONObject> result = userService.saveTelephoneChange(req);
+		log.info(String.format("====>>保存手机号修改记录：jsonResult=%s, 耗时=%s", result.toJsonString(),
+				(System.currentTimeMillis() - start)));
+		return result;
+	}
+
 	// @POST
 	// @Path(value = "/schedule")
 	// @Produces(MediaType.APPLICATION_JSON)

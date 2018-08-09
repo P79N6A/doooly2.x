@@ -310,5 +310,20 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 
 	void updateActiveAndDelFlagById(AdUser user);
 
-    int findOpenRebateSwitchNum(Long id);
+	int findOpenRebateSwitchNum(Long id);
+
+	/**
+	 * 查询用户手机号修改记录
+	 */
+	int getTelephoneChange(AdUser adUser);
+	
+	/**
+	 * 存储用户手机号更改记录
+	 */
+	int saveTelephoneChange(AdUser adUser);
+
+	/**
+	 * 更新用户手机号修改记录
+	 */
+	int updateTelephoneChange(AdUser adUser);
 }

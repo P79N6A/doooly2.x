@@ -12,7 +12,7 @@
 
 
     <select resultType="java.lang.String" id="getByBindId">
-        SELECT bind_id from ad_nexus_bind where user_id = #{bindId} limit 1
+        SELECT bind_id from ad_nexus_bind where bind_id = #{bindId} limit 1
     </select>
 
 </mapper>

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.nexus.MaxxipointSecurity;
 import com.doooly.business.nexus.NexusSerivce;
+import com.doooly.business.nexus.NexusUtil;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.utils.DateUtils;
@@ -281,12 +282,12 @@ public class NexusSerivceImpl implements NexusSerivce {
             //返回码验证
             logger.info("retCode={},statusMsg={}", retCode,statusMsg);
             if(!RET_CODE.equals(retCode)){
-                return new MessageDataBean(MessageDataBean.failure_code, statusMsg);
+                return new MessageDataBean(NEED_REFUND, NexusUtil.getRetMsg(retCode));
             }
             //签名验证
             logger.info("verify={}", verify);
             if(!verify){
-                return new MessageDataBean(MessageDataBean.failure_code, statusMsg);
+                return new MessageDataBean(MessageDataBean.failure_code, NexusUtil.getRetMsg(retCode));
             }
             //解析返回结果
             String retJson = new String(MaxxipointSecurity.decryptByPrivateKey(privateKey, retByte), "UTF-8");

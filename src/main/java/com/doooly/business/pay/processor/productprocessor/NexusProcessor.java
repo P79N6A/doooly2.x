@@ -55,7 +55,7 @@ public class NexusProcessor implements ProductProcessor{
             //保存充值结果
             logger.info("NexusProcessor msg={}",msg.toJsonString());
             JSONObject retMap = new JSONObject();
-            if(msg != null && MessageDataBean.success_code.equals(msg.getCode())){
+            if(MessageDataBean.success_code.equals(msg.getCode())){
                 retMap.put("result","1");
                 retMap.put("message", msg.getMess() + ";" + msg.data.get("tranOutSeq"));
                 retMap.put("result","1");

@@ -271,6 +271,7 @@ public class HttpClientUtil {
      */
     public static String sendPost(JSONObject reqJson, String httpUrl) {
         try {
+            log.info("httpUrl = {}",httpUrl);
             CloseableHttpClient httpClient = createSSLClientDefault();
             HttpPost method = new HttpPost(httpUrl);
             StringEntity entity = new StringEntity(reqJson.toJSONString(), "UTF-8");

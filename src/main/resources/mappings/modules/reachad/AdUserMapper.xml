@@ -1319,4 +1319,14 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
     		update_date = now()
     	where user_id = #{id}
     </update>
+    
+    <!-- 获取用户激活信息 -->
+    <select id="getUserActiveInfo" parameterType="com.doooly.entity.reachad.AdUser" resultType="com.doooly.entity.reachad.AdUser">
+    	select 
+			case when timediff(DATE_FORMAT(date_add(DATE_FORMAT(NOW(),'%Y-%m-%d'), interval -3 day),'%Y-%m-%d %H:%i:%s') ,a.active_date) > 0 then 'true' else 'false' end as syncFlag,
+			DATE_FORMAT(date_add(DATE_FORMAT(NOW(),'%Y-%m-%d'), interval -3 day),'%Y-%m-%d %H:%i:%s') as syncBeginDate,
+			a.active_date as activeDateStr,
+			a.telephone
+		from ad_user a where a.id = #{id};
+    </select>
 </mapper>

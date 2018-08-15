@@ -56,10 +56,19 @@ public class AdBusiness {
 	private String sAppJumpStyle;// 可用积分服务-APP端跳转样式(0:H5,1:APP) 默认为1
 	private String sWechatJumpUrl;// 可用积分服务-微信端跳转地址
 	private String sAppJumpUrl;// 可用积分服务-APP端跳转地址
-    private String storeName;//门店地址
+	private String storeName;// 门店地址
+	private String upGradeState;//会员商户升级状态(0-升级完成,1-升级失败,2-升级中,3-未升级)
 
 	public AdBusiness() {
 
+	}
+
+	public String getUpGradeState() {
+		return upGradeState;
+	}
+
+	public void setUpGradeState(String upGradeState) {
+		this.upGradeState = upGradeState;
 	}
 
 	public Long getId() {
@@ -438,11 +447,11 @@ public class AdBusiness {
 		this.sAppJumpUrl = sAppJumpUrl;
 	}
 
-    public String getStoreName() {
-        return storeName;
-    }
+	public String getStoreName() {
+		return storeName;
+	}
 
-    public void setStoreName(String storeName) {
-        this.storeName = storeName;
-    }
+	public void setStoreName(String storeName) {
+		this.storeName = storeName;
+	}
 }

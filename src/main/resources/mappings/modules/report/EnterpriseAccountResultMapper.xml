@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.report.EnterpriseAccountResultDao">
+	<!-- 企业会员升级结果 -->
+	<select id="getResult" parameterType="com.doooly.entity.report.EnterpriseAccountResult" resultType="com.doooly.entity.report.EnterpriseAccountResult">
+		SELECT
+			a.result_code AS resultCode,
+			a.result_desc AS resultDesc
+		FROM
+			t_enterprise_accounts_result a
+		WHERE
+			a.phone_no = #{phoneNo}
+	</select>
+</mapper>

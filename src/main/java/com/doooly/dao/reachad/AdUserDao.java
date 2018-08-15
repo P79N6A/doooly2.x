@@ -316,7 +316,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 查询用户手机号修改记录
 	 */
 	int getTelephoneChange(AdUser adUser);
-	
+
 	/**
 	 * 存储用户手机号更改记录
 	 */
@@ -326,4 +326,9 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 更新用户手机号修改记录
 	 */
 	int updateTelephoneChange(AdUser adUser);
+
+	/**
+	 * 查询用户激活时间
+	 */
+	AdUser getUserActiveInfo(AdUser adUser);
 }

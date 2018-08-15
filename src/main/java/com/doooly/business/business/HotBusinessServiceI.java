@@ -1,5 +1,7 @@
 package com.doooly.business.business;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 
@@ -17,7 +19,7 @@ public interface HotBusinessServiceI {
 	MessageDataBean getHotDatas(Integer userId, String address, Integer currentPage, Integer pageSize, String type,
 			Integer shopType);
 
-	MessageDataBean getBusinessInfo(Long userId);
+	MessageDataBean getBusinessInfo(Long userId, String token);
 
 	/**
 	 * 可用积分服务-商户详情

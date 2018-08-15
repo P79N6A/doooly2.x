@@ -5,16 +5,22 @@ import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.dao.reachad.*;
+import com.doooly.dao.report.EnterpriseAccountResultDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
+import com.doooly.entity.report.EnterpriseAccountResult;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import java.util.HashMap;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Description: 首页活动
@@ -23,6 +29,7 @@ import java.util.List;
  */
 @Service
 public class HotBusinessService implements HotBusinessServiceI {
+	private static final Logger logger = LoggerFactory.getLogger(HotBusinessService.class);
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -35,6 +42,10 @@ public class HotBusinessService implements HotBusinessServiceI {
 	private AdadDao adAdDao;
 	@Autowired
 	private AdBusinessServicePJDao adBusinessServicePJDao;
+	@Autowired
+	private EnterpriseAccountResultDao enterpriseAccountResultDao;
+	@Autowired
+	protected StringRedisTemplate redisTemplate;
 	// @Autowired
 	// private AdBusinessPrivilegeActivityDao adBusinessPrivilegeActivityDao;
 	// private int HOTBUSINESS = 1;
@@ -68,7 +79,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 		// messageDataBean.setCode(MessageDataBean.success_code);
 		// }
 		int pageType = INDEXADS;
-		if(null != adType && adType == 1){
+		if (null != adType && adType == 1) {
 			pageType = 8;
 		}
 		List<AdAd> ads = adAdDao.findAllByType(pageType, type, userId);
@@ -184,7 +195,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 	}
 
 	@Override
-	public MessageDataBean getBusinessInfo(Long adBusinessId) {
+	public MessageDataBean getBusinessInfo(Long adBusinessId, String token) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		AdBusiness adBusiness = adBusinessDao.get(adBusinessId + "");
@@ -205,6 +216,34 @@ public class HotBusinessService implements HotBusinessServiceI {
 			} else {
 				map.put("productId", productId);
 			}
+			// 如果是唯品会,校验会员同步状态
+			if (adBusiness.getCompany().contains("唯品会")) {
+				// 获取同步结果
+				EnterpriseAccountResult resultParam = new EnterpriseAccountResult();
+				// 查询用户手机号,激活时间
+				AdUser adUser = new AdUser();
+				adUser.setId(Long.valueOf(redisTemplate.opsForValue().get(token).toString()));
+				adUser = adUserDao.getUserActiveInfo(adUser);
+				resultParam.setPhoneNo(adUser.getTelephone());
+				EnterpriseAccountResult result = enterpriseAccountResultDao.getResult(resultParam);
+				if (result != null) {
+					logger.info("====>>企业会员升级结果-result：" + result.getResultCode() + ",==msg：" + result.getResultDesc());
+					if ("001".equals(result.getResultCode())) {
+						adBusiness.setUpGradeState("0");
+					} else {
+						adBusiness.setUpGradeState("1");
+					}
+				} else {
+					// 无同步记录,验证激活时间是否在
+					logger.info("====>>用户激活结果-无同步记录,激活时间是否超出三天：" + adUser.getSyncFlag() + ",==同步开始时间："
+							+ adUser.getSyncBeginDate() + ",==激活时间：" + adUser.getActiveDateStr());
+					if ("true".equals(adUser.getSyncFlag())) {
+						adBusiness.setUpGradeState("3");
+					} else {
+						adBusiness.setUpGradeState("2");
+					}
+				}
+			}
 			messageDataBean.setData(map);
 			messageDataBean.setCode(MessageDataBean.success_code);
 		} else {
@@ -215,6 +254,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 
 	/**
 	 * 2.0的接口
+	 * 
 	 * @param userId
 	 * @return
 	 */
@@ -239,6 +279,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 
 	/***
 	 * 2.1的接口
+	 * 
 	 * @param userId
 	 * @return
 	 */
@@ -248,13 +289,13 @@ public class HotBusinessService implements HotBusinessServiceI {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<AdBusinessServicePJ> list1 = adBusinessServicePJDao.getDataByUserId(userId, "1");
 		List<AdBusinessServicePJ> list2 = adBusinessServicePJDao.getDataByUserId(userId, "2");
-		if(!CollectionUtils.isEmpty(list1) || !CollectionUtils.isEmpty(list2)){
+		if (!CollectionUtils.isEmpty(list1) || !CollectionUtils.isEmpty(list2)) {
 			map.put("list1", list1);
 			map.put("list2", list2);
 			messageDataBean.setData(map);
 			messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
 			messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
-		}else{
+		} else {
 			map.put("list1", null);
 			map.put("list2", null);
 			messageDataBean.setData(map);
@@ -267,6 +308,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 
 	/**
 	 * 2.0可用积分服务-商户详情
+	 * 
 	 * @param userId
 	 * @return
 	 */

@@ -92,6 +92,39 @@ public class AdUser {
 	/** 旧手机号 */
 	private String oldTelephone;
 
+	/** 会员同步标志-true:符合同步条件;false:不符合同步条件 */
+	private String syncFlag;
+
+	/** 会员同步起始时间 */
+	private String syncBeginDate;
+
+	/** 激活时间dateStr */
+	private String activeDateStr;
+
+	public String getActiveDateStr() {
+		return activeDateStr;
+	}
+
+	public void setActiveDateStr(String activeDateStr) {
+		this.activeDateStr = activeDateStr;
+	}
+
+	public String getSyncFlag() {
+		return syncFlag;
+	}
+
+	public void setSyncFlag(String syncFlag) {
+		this.syncFlag = syncFlag;
+	}
+
+	public String getSyncBeginDate() {
+		return syncBeginDate;
+	}
+
+	public void setSyncBeginDate(String syncBeginDate) {
+		this.syncBeginDate = syncBeginDate;
+	}
+
 	public AdGroup getAdGroup() {
 		return adGroup;
 	}

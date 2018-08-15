@@ -10,7 +10,6 @@ import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.HotBusinessRestServiceI;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -35,8 +34,6 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	private static Logger logger = Logger.getLogger(HotBusinessRestService.class);
 	@Autowired
 	private HotBusinessServiceI hotBusinessServiceI;
-	@Autowired
-	protected StringRedisTemplate redisTemplate;
 
 	@POST
 	@Path(value = "/index")
@@ -119,11 +116,12 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	@Path(value = "/businessInfo")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String getBusinessInfo(JSONObject json) {
+	public String getBusinessInfo(JSONObject json, @Context HttpServletRequest request) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			Long adBusinessId = json.getLong("adBusinessId");
-			messageDataBean = hotBusinessServiceI.getBusinessInfo(adBusinessId);
+			String token = json.getString(ConstantsLogin.TOKEN);
+			messageDataBean = hotBusinessServiceI.getBusinessInfo(adBusinessId, token);
 			// logger.info(messageDataBean.toJsonString());
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -279,15 +279,16 @@ public class NexusSerivceImpl implements NexusSerivce {
             byte[] retByte = Base64.decodeBase64(retData);
             byte[] signByte = Base64.decodeBase64(retSign);
             boolean verify = MaxxipointSecurity.verify(jxcPublicKey, retByte, signByte);
+            //签名验证
+            logger.info("verify={}", verify);
+            if(!verify){
+                //验证失败情况下不能退款
+                return new MessageDataBean(MessageDataBean.failure_code, "验证签名错误!");
+            }
             //返回码验证
             logger.info("retCode={},statusMsg={}", retCode,statusMsg);
             if(!RET_CODE.equals(retCode)){
                 return new MessageDataBean(NEED_REFUND, NexusUtil.getRetMsg(retCode));
-            }
-            //签名验证
-            logger.info("verify={}", verify);
-            if(!verify){
-                return new MessageDataBean(MessageDataBean.failure_code, NexusUtil.getRetMsg(retCode));
             }
             //解析返回结果
             String retJson = new String(MaxxipointSecurity.decryptByPrivateKey(privateKey, retByte), "UTF-8");

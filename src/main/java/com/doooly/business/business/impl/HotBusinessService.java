@@ -244,11 +244,10 @@ public class HotBusinessService implements HotBusinessServiceI {
 					logger.info("====>>用户激活结果-无同步记录,激活时间是否超出三天：" + adUser.getSyncFlag() + ",==同步开始时间："
 							+ adUser.getSyncBeginDate() + ",==激活时间：" + adUser.getActiveDateStr());
 					if ("true".equals(adUser.getSyncFlag())) {
-						adBusiness.setUpGradeState("3");
-					} else {
 						//由于2017-3之前导入唯品会的数据无法通过唯品会大企业员工升级接口查询，只能默认升级成功
 						adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
-//						adBusiness.setUpGradeState("2");
+					} else {
+						adBusiness.setUpGradeState("2");
 					}
 				}
 			}

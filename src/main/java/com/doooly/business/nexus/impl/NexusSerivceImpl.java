@@ -29,7 +29,7 @@ import java.util.*;
 import static com.doooly.business.nexus.MaxxipointSecurity.verify;
 import static com.doooly.business.nexus.NexusUtil.jxcPublicKey;
 import static com.doooly.business.nexus.NexusUtil.privateKey;
-import static sun.rmi.rmic.newrmic.Constants.EXCEPTION;
+//import static sun.rmi.rmic.newrmic.Constants.EXCEPTION;
 
 @Service
 public class NexusSerivceImpl implements NexusSerivce {
@@ -132,7 +132,7 @@ public class NexusSerivceImpl implements NexusSerivce {
             logger.error("query() e={}", e);
             e.printStackTrace();
         }
-        return EXCEPTION;
+        return null;
     }
 
     /***

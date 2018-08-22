@@ -1,5 +1,9 @@
 package com.doooly.common.constants;
 
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 public class Constants {
 
 	/***
@@ -21,7 +25,8 @@ public class Constants {
 	public static final String CHANNEL_WECHAT = "wechat";
 	public static final String CHANNEL_APP = "app";
 	public static final String CHANNEL_H5 = "h5";
-
+	public static final List<String> VIP_VOP_EMPLOYEE_ERROR_LIST = Lists.newArrayList("task has be closed","employee mobile is muti binded","employee status is wrong");
+	public static final String VIP_VOP_EMPLOYEE_CODE_SUCCESS="0";
 	/**
 	 * 消息响应成功
 	 */

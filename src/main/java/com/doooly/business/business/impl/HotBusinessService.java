@@ -3,6 +3,7 @@ package com.doooly.business.business.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.utils.Pagelab;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.dao.reachad.*;
 import com.doooly.dao.report.EnterpriseAccountResultDao;
@@ -229,9 +230,14 @@ public class HotBusinessService implements HotBusinessServiceI {
 				if (result != null) {
 					logger.info("====>>企业会员升级结果-result：" + result.getResultCode() + ",==msg：" + result.getResultDesc());
 					if ("001".equals(result.getResultCode())) {
-						adBusiness.setUpGradeState("0");
+						adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
 					} else {
-						adBusiness.setUpGradeState("1");
+						//返回码002并不都是升级失败的，只有以下错误信息可以认定为升级失败
+						if(Constants.VIP_VOP_EMPLOYEE_ERROR_LIST.contains(result.getResultDesc())){
+							adBusiness.setUpGradeState("1");
+						}else{
+							adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
+						}
 					}
 				} else {
 					// 无同步记录,验证激活时间是否在
@@ -240,7 +246,9 @@ public class HotBusinessService implements HotBusinessServiceI {
 					if ("true".equals(adUser.getSyncFlag())) {
 						adBusiness.setUpGradeState("3");
 					} else {
-						adBusiness.setUpGradeState("2");
+						//由于2017-3之前导入唯品会的数据无法通过唯品会大企业员工升级接口查询，只能默认升级成功
+						adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
+//						adBusiness.setUpGradeState("2");
 					}
 				}
 			}

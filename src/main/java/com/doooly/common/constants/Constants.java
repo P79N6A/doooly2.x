@@ -27,6 +27,13 @@ public class Constants {
 	public static final String CHANNEL_H5 = "h5";
 	public static final List<String> VIP_VOP_EMPLOYEE_ERROR_LIST = Lists.newArrayList("task has be closed","employee mobile is muti binded","employee status is wrong");
 	public static final String VIP_VOP_EMPLOYEE_CODE_SUCCESS="0";
+	public static final String VIP_VOP_EMPLOYEE_CODE_FAILURE="1";
+	//指定兜礼会员在唯品会的企业ID为16，如果有此异常，认定为升级成功；否则是在唯品会的其它企业，认定升级失败
+	public static final String VIP_VOP_EMPLOYEE_SUCCESS_DESC="upgrade enterprise user exception企业用户id已经存在,id号:16";
+	//员工已存在唯品会对应企业描述信息
+	public static final String VIP_VOP_ENTERPRISE_EXIST_DESC="upgrade enterprise user exception企业用户id已经存在,id号:";
+	
+	
 	/**
 	 * 消息响应成功
 	 */

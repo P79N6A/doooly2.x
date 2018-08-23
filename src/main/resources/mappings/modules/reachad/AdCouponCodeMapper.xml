@@ -235,7 +235,23 @@
 		and a.user_id = #{userId} 
 		and a.coupon = #{couponId}
 	</select>
+	<select id="getUserCouponCountByIds" parameterType="com.doooly.entity.reachad.AdCouponCode" resultType="java.lang.Integer">
+		select count(*)
+		from ad_coupon_code
+		<where>
+			1=1
+			<if test="activityId!=null">
+				and activity_id=#{activityId}
+			</if>
+			<if test="activityId!=null">
+				and user_id=#{userId}
+			</if>
+			<if test="activityId!=null">
+				and coupon=#{couponId}
+			</if>
+		</where>	
 	
+	</select>
 	<!-- 查询已经拥有该活动卡券的用户 -->
 	<select id="checkIsHadCode" resultType="java.lang.Long" >
 		select 

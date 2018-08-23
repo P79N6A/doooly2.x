@@ -1,11 +1,12 @@
 package com.doooly.dao.reachad;
 
-import com.doooly.common.dao.BaseDaoI;
-import com.doooly.entity.reachad.AdCouponActivity;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
 import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.doooly.common.dao.BaseDaoI;
+import com.doooly.entity.reachad.AdCouponActivity;
 
 public interface AdCouponActivityDao extends BaseDaoI<AdCouponActivity> {
 	// 热门活动
@@ -32,5 +33,16 @@ public interface AdCouponActivityDao extends BaseDaoI<AdCouponActivity> {
 	List<Map<String, Object>> getNowActivityCoupon();
 
 	AdCouponActivity getActivityIdByIdFlag(String idFlag);
+	/**
+	 * 验证活动是否在有效期
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年8月23日 下午2:41:40 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	int checkActivityValid(Integer id);
 
 }

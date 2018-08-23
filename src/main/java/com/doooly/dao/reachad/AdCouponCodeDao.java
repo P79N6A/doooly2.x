@@ -12,6 +12,17 @@ import com.doooly.entity.reachad.AdCouponCode;
 public interface AdCouponCodeDao extends BaseDaoI<AdCouponCode> {
 
 	/**
+	 * 根据条件查询用户活动已领取券码数
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年8月23日 下午4:42:46 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	int getUserCouponCountByIds(AdCouponCode coupon);
+	/**
 	 * @name B系统更新优惠码对应用户
 	 * @param dataMap
 	 *            userId(IN)-用户ID productSN(IN)-商品SN couponCodeId(OUT)-优惠码主键

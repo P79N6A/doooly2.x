@@ -36,5 +36,10 @@
 		FROM ad_group_activity_conn a
 		WHERE a.activity_id = #{activityId} and #{groupNum} in (208,199,198,192,160) limit 1;
 	</select>
-
+	<select id="checkUserEligibleActivities" resultType="java.lang.Integer">
+		select count(*)
+		from ad_group_activity_conn gac 
+		join ad_user u on gac.group_id=u.group_num
+		where u.id=#{userId}
+	</select>
 </mapper>

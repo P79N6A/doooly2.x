@@ -210,6 +210,13 @@
 			ORDER BY  a.create_date DESC
 			limit 1
 	</select>
-
+	<select id="checkActivityValid" resultType="java.lang.Integer">
+		select count(*)
+		from ad_coupon_activity
+		<![CDATA[
+		where 
+		id=#{id} and begin_date<now() and end_date>now()
+		]]>
+	</select>
 
 </mapper>

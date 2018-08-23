@@ -1,7 +1,5 @@
 package com.doooly.business.activity;
 
-import org.json.JSONObject;
-
 import com.doooly.dto.common.MessageDataBean;
 
 /**

@@ -34,15 +34,15 @@ public interface AdCouponActivityDao extends BaseDaoI<AdCouponActivity> {
 
 	AdCouponActivity getActivityIdByIdFlag(String idFlag);
 	/**
-	 * 验证活动是否在有效期
+	 * 根据活动ID获取活动详细信息（全部字段）
 	 * 
 	* @author  hutao 
-	* @date 创建时间：2018年8月23日 下午2:41:40 
+	* @date 创建时间：2018年8月23日 下午6:34:16 
 	* @version 1.0 
 	* @parameter  
 	* @since  
 	* @return
 	 */
-	int checkActivityValid(Integer id);
+	AdCouponActivity getActivityById(Integer id);
 
 }

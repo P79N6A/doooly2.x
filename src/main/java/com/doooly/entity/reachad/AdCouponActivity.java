@@ -9,6 +9,8 @@ import java.util.Date;
  * @version 2016-12-14
  */
 public class AdCouponActivity {
+	public static Integer ACTIVITY_OPEN = 1;
+	public static Integer ACTIVITY_CLOSE = 0;
 
 	private int id;
 	private String name;// 活动名称
@@ -19,24 +21,24 @@ public class AdCouponActivity {
 	private Date update_date;
 	private Date beginDate; // 生效开始时间
 	private Date endDate; // 生效结束时间
-    private int optionCount;//候选项数量（默认为0）
-    private int voteCount;//活动总投票数（默认为0）
-    private int pvCount;//网页访问次数（默认为0）
-    private String ruleImage;//规则图片
-    private String endDateStr;//结束时间格式化
-    private String receiveType;//领取类型，默认为0（0-可直接领取，1-报名领取）
-	private String activityType;//活动类型(如：新手开卡，0元抢券，签到答题...对应表-)
-	private String plateformType;//适用平台(0-微信端)
-	private String businessId;//商家编号
-	private String listImageUrl;//活动列表页图片地址
-	private String detailImageUrl;//活动详情页图片地址
-	private String introduction;//活动介绍
+	private int optionCount;// 候选项数量（默认为0）
+	private int voteCount;// 活动总投票数（默认为0）
+	private int pvCount;// 网页访问次数（默认为0）
+	private String ruleImage;// 规则图片
+	private String endDateStr;// 结束时间格式化
+	private String receiveType;// 领取类型，默认为0（0-可直接领取，1-报名领取）
+	private String activityType;// 活动类型(如：新手开卡，0元抢券，签到答题...对应表-)
+	private String plateformType;// 适用平台(0-微信端)
+	private String businessId;// 商家编号
+	private String listImageUrl;// 活动列表页图片地址
+	private String detailImageUrl;// 活动详情页图片地址
+	private String introduction;// 活动介绍
 	private String activityLinkUrl;// 活动链接
 	private int sort;// 排序号
 	private String activityCode;// 活动编号
 	private String deleteFlag;// 删除标记（0-正常，1-删除）
 	private String category;// N活动券显示对应一级分类
-	private String description;//活动描述
+	private String description;// 活动描述
 	private Integer userCount;
 
 	public int getId() {
@@ -111,45 +113,45 @@ public class AdCouponActivity {
 		this.endDate = endDate;
 	}
 
-    public int getOptionCount() {
-        return optionCount;
-    }
+	public int getOptionCount() {
+		return optionCount;
+	}
 
-    public void setOptionCount(int optionCount) {
-        this.optionCount = optionCount;
-    }
+	public void setOptionCount(int optionCount) {
+		this.optionCount = optionCount;
+	}
 
-    public int getVoteCount() {
-        return voteCount;
-    }
+	public int getVoteCount() {
+		return voteCount;
+	}
 
-    public void setVoteCount(int voteCount) {
-        this.voteCount = voteCount;
-    }
+	public void setVoteCount(int voteCount) {
+		this.voteCount = voteCount;
+	}
 
-    public int getPvCount() {
-        return pvCount;
-    }
+	public int getPvCount() {
+		return pvCount;
+	}
 
-    public void setPvCount(int pvCount) {
-        this.pvCount = pvCount;
-    }
+	public void setPvCount(int pvCount) {
+		this.pvCount = pvCount;
+	}
 
-    public String getRuleImage() {
-        return ruleImage;
-    }
+	public String getRuleImage() {
+		return ruleImage;
+	}
 
-    public void setRuleImage(String ruleImage) {
-        this.ruleImage = ruleImage;
-    }
+	public void setRuleImage(String ruleImage) {
+		this.ruleImage = ruleImage;
+	}
 
-    public String getEndDateStr() {
-        return endDateStr;
-    }
+	public String getEndDateStr() {
+		return endDateStr;
+	}
 
-    public void setEndDateStr(String endDateStr) {
-        this.endDateStr = endDateStr;
-    }
+	public void setEndDateStr(String endDateStr) {
+		this.endDateStr = endDateStr;
+	}
 
 	public String getReceiveType() {
 		return receiveType;
@@ -262,5 +264,5 @@ public class AdCouponActivity {
 	public void setUserCount(Integer userCount) {
 		this.userCount = userCount;
 	}
-    
+
 }

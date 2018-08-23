@@ -43,7 +43,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	public static final String RECHARGE_ACTIVITY = "recharge_activity";
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
 	public static final String BRING_COLLNESS_ACTIVITY = "bring_coolness_activity";
-	public static final String MU_RECHARGE_ACTIVITY = "mu_recharge_activity";
+	public static final String MU_RECHARGE_ACTIVITY = "mu_coupon_activity";
 
 	/** 微信推送事件Service */
 	@Autowired
@@ -141,6 +141,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
 					} else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
 						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
+					} else if (EventKey.contains(MU_RECHARGE_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
 					} else {
 						// 微信公众号关注回复信息
 						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);

@@ -63,7 +63,7 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	// (StringRedisTemplate)SpringContextHolder.getBean("redisTemplate");
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
 	public static final String BRING_COLLNESS_ACTIVITY = "bring_coolness_activity";
-	public static final String MU_RECHARGE_ACTIVITY = "mu_recharge_activity";
+	public static final String MU_RECHARGE_ACTIVITY = "mu_coupon_activity";
 
 	private static final String WUGANG_SCAN_NEWS_URL = PropertiesConstants.wechatPushBundle
 			.getString("wugang_scan_news_url");

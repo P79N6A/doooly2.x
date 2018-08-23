@@ -31,7 +31,7 @@ public interface AdGroupActivityConnDao extends BaseDaoI<AdGroupActivityConn> {
 	* @since  
 	* @return 大于0：有资格 0：无资格
 	 */
-	int checkUserEligibleActivities(@Param("userId") Integer userId);
+	int checkUserEligibleActivities(@Param("userId") Integer userId, @Param("activityId") Integer activityId);
 
 	AdGroupActivityConn getRealGIft(@Param("activityId") Integer activityId, @Param("groupNum") Long groupNum);
 }

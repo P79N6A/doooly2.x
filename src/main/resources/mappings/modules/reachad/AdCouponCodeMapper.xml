@@ -247,7 +247,7 @@
 				and user_id=#{userId}
 			</if>
 			<if test="activityId!=null">
-				and coupon=#{couponId}
+				and coupon=#{coupon}
 			</if>
 		</where>	
 	

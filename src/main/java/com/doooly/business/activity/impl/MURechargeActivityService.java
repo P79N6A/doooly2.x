@@ -16,6 +16,7 @@ import com.doooly.entity.reachad.AdCoupon;
 import com.doooly.entity.reachad.AdCouponActivity;
 import com.doooly.entity.reachad.AdCouponActivityConn;
 import com.doooly.entity.reachad.AdCouponCode;
+import com.doooly.entity.reachad.AdGroupActivityConn;
 
 @Service
 public class MURechargeActivityService implements CommonActivityServiceI{
@@ -44,7 +45,7 @@ public class MURechargeActivityService implements CommonActivityServiceI{
 			return new MessageDataBean("2012","活动未开始或已结束");
 		}
 		//2.验证是否有资格参与
-		checkResult = groupActivityConnDao.checkUserEligibleActivities(userId);
+		checkResult = groupActivityConnDao.checkUserEligibleActivities(userId, activityId);
 		if(checkResult == 0){
 			return new MessageDataBean("2013","企业未参与该活动");
 		}

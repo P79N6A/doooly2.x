@@ -40,6 +40,6 @@
 		select count(*)
 		from ad_group_activity_conn gac 
 		join ad_user u on gac.group_id=u.group_num
-		where u.id=#{userId}
+		where gac.activity_id=#{activityId} and u.id=#{userId}
 	</select>
 </mapper>

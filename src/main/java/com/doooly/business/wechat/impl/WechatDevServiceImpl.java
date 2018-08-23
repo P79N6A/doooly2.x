@@ -43,6 +43,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	public static final String RECHARGE_ACTIVITY = "recharge_activity";
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
 	public static final String BRING_COLLNESS_ACTIVITY = "bring_coolness_activity";
+	public static final String MU_RECHARGE_ACTIVITY = "mu_recharge_activity";
 
 	/** 微信推送事件Service */
 	@Autowired
@@ -100,12 +101,12 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			json.put("channel", channel);
 			// 处理消息集合
 			List<String> messageList = new ArrayList<String>();
-			//回复文本消息
+			// 回复文本消息
 			if (WechatConstants.MESSAGE_TYPE_TEXT.equals(msgType)) {
 				String conent = json.getString("Content");
-				//添加回复文本消息内容
+				// 添加回复文本消息内容
 				messageList.add(createTextMessage(channel, fromUserName, conent));
-			// 推送事件
+				// 推送事件
 			} else {
 				String event = json.getString("Event");
 				switch (event) {
@@ -117,10 +118,12 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
 						String[] paramArr = EventKey.split("~");
 						handleIsPush(channel, fromUserName, paramArr);
-					}else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
-						handleIsPushNews(channel,fromUserName,WUGANG_SCAN_ACTIVITY);
-					}else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
-						handleIsPushNews(channel,fromUserName,BRING_COLLNESS_ACTIVITY);
+					} else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
+					} else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
+					} else if (EventKey.contains(MU_RECHARGE_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
 					}
 
 					// 存储微信推送信息
@@ -134,12 +137,12 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
 						String[] paramArr = EventKey.replace("qrscene_", "").split("~");
 						handleIsPush(channel, fromUserName, paramArr);
-					}else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
-						handleIsPushNews(channel,fromUserName,WUGANG_SCAN_ACTIVITY);
-					}else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
-						handleIsPushNews(channel,fromUserName,BRING_COLLNESS_ACTIVITY);
+					} else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
+					} else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
 					} else {
-						//微信公众号关注回复信息
+						// 微信公众号关注回复信息
 						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
 						messageList.add(textMsg);
 						log.info("====【dealCallback】关注微信公众号后回复文本消息" + textMsg);
@@ -159,9 +162,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				default:
 					break;
 				}
-				
-				
-				
+
 			}
 
 			return messageList;
@@ -176,23 +177,23 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		String activityMark = paramArr[1];
 		// 获取分享人openId
 		String shareOpendId = null;
-		if (paramArr.length ==3) {
+		if (paramArr.length == 3) {
 			shareOpendId = paramArr[2];
 		}
-		log.info("====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:"
-				+ fromUserName);
+		log.info(
+				"====【dealCallback】活动标识：" + activityMark + ",分享人openId：" + shareOpendId + ",扫描人openId:" + fromUserName);
 
-		if (StringUtils.isBlank(shareOpendId)||!shareOpendId.equals(fromUserName)) {
-			MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName,
-					shareOpendId, channel, activityMark);
+		if (StringUtils.isBlank(shareOpendId) || !shareOpendId.equals(fromUserName)) {
+			MessageDataBean messageDataBean = activityCodeImageServiceI.pushImageAndText(fromUserName, shareOpendId,
+					channel, activityMark);
 			log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
 		} else {
 			log.info("====【dealCallback】扫自己二维码,不推送信息====");
 		}
 	}
+
 	private void handleIsPushNews(String channel, String fromUserName, String activityKey) throws Exception {
-		MessageDataBean messageDataBean = activityCodeImageServiceI.pushNews(fromUserName,
-				channel,activityKey);
+		MessageDataBean messageDataBean = activityCodeImageServiceI.pushNews(fromUserName, channel, activityKey);
 		log.info("====【dealCallback】推送结果：" + messageDataBean.toJsonString());
 	}
 
@@ -268,8 +269,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		JSONObject contentJson = new JSONObject();
 		String dictKey = channel + "_" + switchType;
 		String content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
-		//若为空则默认返回客服中心统一消息
-		if(StringUtils.isBlank(content)){
+		// 若为空则默认返回客服中心统一消息
+		if (StringUtils.isBlank(content)) {
 			content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
 		}
 		contentJson.put("content", content);

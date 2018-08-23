@@ -57,8 +57,12 @@ import com.wechat.vo.SceneQRCode;
  */
 @Service
 public class ActivityCodeImageService implements ActivityCodeImageServiceI {
-
 	private static Logger logger = Logger.getLogger(ActivityCodeImageService.class);
+	@Autowired
+	private StringRedisTemplate stringRedis;
+	@Autowired
+	private AdConfigDictDao configDictDao;
+	
 	// private static StringRedisTemplate redisTemplate =
 	// (StringRedisTemplate)SpringContextHolder.getBean("redisTemplate");
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
@@ -109,14 +113,14 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	private static final String BRING_COLLNESS_NEWS_DESCRIPTION3 = PropertiesConstants.wechatPushBundle
 			.getString("bring_coolness_news_description3");
 	//==========东航拉新活动=============
-	private static final String MU_RECHARGE_NEWS_URL = PropertiesConstants.wechatPushBundle
-			.getString("mu_recharge_news_url");
-	private static final String MU_RECHARGE_NEWS_PIC_URL = PropertiesConstants.wechatPushBundle
-			.getString("mu_recharge_news_pic_url");
-	private static final String MU_RECHARGE_NEWS_TITLE = PropertiesConstants.wechatPushBundle
-			.getString("mu_recharge_news_title");
-	private static final String MU_RECHARGE_NEWS_DESCRIPTION = PropertiesConstants.wechatPushBundle
-			.getString("mu_recharge_news_description");
+//	private static final String MU_RECHARGE_NEWS_URL = PropertiesConstants.wechatPushBundle
+//			.getString("mu_recharge_news_url");
+//	private static final String MU_RECHARGE_NEWS_PIC_URL = PropertiesConstants.wechatPushBundle
+//			.getString("mu_recharge_news_pic_url");
+//	private static final String MU_RECHARGE_NEWS_TITLE = PropertiesConstants.wechatPushBundle
+//			.getString("mu_recharge_news_title");
+//	private static final String MU_RECHARGE_NEWS_DESCRIPTION = PropertiesConstants.wechatPushBundle
+//			.getString("mu_recharge_news_description");
 	
 	
 
@@ -548,12 +552,18 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			article3.put("description", BRING_COLLNESS_NEWS_DESCRIPTION3);
 			articles.add(article3);
 		} else if (key.equals(MU_RECHARGE_ACTIVITY)) {
-			JSONObject article1 = new JSONObject();
-			article1.put("url", MU_RECHARGE_NEWS_URL);
-			article1.put("picurl", MU_RECHARGE_NEWS_PIC_URL);
-			article1.put("title", MU_RECHARGE_NEWS_TITLE);
-			article1.put("description", MU_RECHARGE_NEWS_DESCRIPTION);
-			articles.add(article1);
+			String acticleStr = stringRedis.opsForValue().get(MU_RECHARGE_ACTIVITY);
+			if(StringUtils.isEmpty(acticleStr)){
+				acticleStr = configDictDao.getValueByTypeAndKey("OPERATING_ACTIVITY", MU_RECHARGE_ACTIVITY);
+				stringRedis.opsForValue().set(MU_RECHARGE_ACTIVITY, acticleStr);
+			}
+			JSONObject articleJson = JSONObject.parseObject(acticleStr);
+			JSONObject article = new JSONObject();
+			article.put("url", articleJson.getString("activity_url"));
+			article.put("picurl", articleJson.getString("img_url"));
+			article.put("title", articleJson.getString("title"));
+			article.put("description", articleJson.getString("description"));
+			articles.add(article);
 		}
 		logger.info(articles);
 		String sendNews = this.sendNews(accessToken.getString("accessToken"), openId, articles);

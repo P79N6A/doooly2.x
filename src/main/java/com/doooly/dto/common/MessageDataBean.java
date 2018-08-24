@@ -48,6 +48,10 @@ public class MessageDataBean {
 	public static String failure_code = "1001";
 	// 操作失败返回信息
 	public static String failure_mess = "操作失败";
+	// 券码库存不足
+	public static String coupon_stock_zero_code = "1015";
+	// 券码库存不足
+	public static String coupon_stock_zero_msg = "操作失败";
 
 	// 已领取返回码
 	public static String already_receive_code = "1002";

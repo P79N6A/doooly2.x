@@ -75,6 +75,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 	// 会员coupon_code，唯一标识，缓存值4个0（0000）
 	private static String COUPON_CODE_VALUE = "0000";
 	ReentrantLock lock = new ReentrantLock();
+
 	@Override
 	public MessageDataBean receiveCoupon(Integer adId, Integer couponId, Integer activityId, String productSn) {
 		MessageDataBean messageDataBean = new MessageDataBean();
@@ -90,8 +91,13 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 				messageDataBean.setMess(MessageDataBean.already_receive_mess);
 			}
 		} else {
-			messageDataBean.setCode(MessageDataBean.failure_code);
-			messageDataBean.setMess(MessageDataBean.failure_mess);
+			if (adCouponCode.getCode() == null) {
+				messageDataBean.setCode(MessageDataBean.coupon_stock_zero_code);
+				messageDataBean.setMess(MessageDataBean.coupon_stock_zero_msg);
+			} else {
+				messageDataBean.setCode(MessageDataBean.failure_code);
+				messageDataBean.setMess(MessageDataBean.failure_mess);
+			}
 		}
 		return messageDataBean;
 	}
@@ -164,7 +170,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 					if (codeList != null) {
 						adCouponCode.setCode(codeList.get(0));
 						// 同步数据库code
-						int count = adCouponCodeDao.updateCouponCode(adCouponCode,businessId);
+						int count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
 						if (count > 0) {
 							// 修改关联表中库存,直接领取时点击之后库存减一
 							adCouponActivityConnDao.reduceRemindQuantity(couponId, activityId);
@@ -257,20 +263,18 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 	}
 
 	@Override
-	public List<String> sendCoupons(String businessId, Integer activityId,
-			List<String> userIds, Integer couponId) {
+	public List<String> sendCoupons(String businessId, Integer activityId, List<String> userIds, Integer couponId) {
 		List<String> returnUserList = new ArrayList<String>();
 		// 方法进入时间
 		Long startTime = System.currentTimeMillis();
-		logger.info("====sendCoupon参数信息-activityId:" + activityId
-				+ ",couponId:" + couponId + ",userIds:" + userIds + ",方法进入时间："
-				+ startTime);
+		logger.info("====sendCoupon参数信息-activityId:" + activityId + ",couponId:" + couponId + ",userIds:" + userIds
+				+ ",方法进入时间：" + startTime);
 		try {
 			if (activityId > 0 && userIds.size() > 0 && couponId > 0) {
 				List<HashMap<String, Object>> userCodeList = new ArrayList<HashMap<String, Object>>();
 				// 用户是否已领取券码
-				List<Long> hadCodeUsers = adCouponCodeDao.checkIsHadCode(
-						activityId.toString(), couponId.longValue(), userIds);
+				List<Long> hadCodeUsers = adCouponCodeDao.checkIsHadCode(activityId.toString(), couponId.longValue(),
+						userIds);
 				for (Long userId : hadCodeUsers) {
 					if (userIds.contains(userId.toString())) {
 						userIds.remove(userId.toString());
@@ -278,11 +282,9 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 				}
 				// ==============发放券码-start==============
 				if (userIds.size() > 0) {
-					List<String> codeList = redisUtilService.PopDataFromRedis(
-							businessId + "+" + couponId + "+" + activityId,
-							userIds.size());
-					logger.info("====codeList:" + codeList
-							+ ",codeList == null:" + (codeList == null));
+					List<String> codeList = redisUtilService
+							.PopDataFromRedis(businessId + "+" + couponId + "+" + activityId, userIds.size());
+					logger.info("====codeList:" + codeList + ",codeList == null:" + (codeList == null));
 					// 验证库存是否足够
 					if (codeList.size() == 0) {
 						return returnUserList;
@@ -295,24 +297,19 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 						userCodeList.add(map);
 					}
 					// 同步数据库code
-					int count = adCouponCodeDao
-							.batchUpdateCouponCode(userCodeList,businessId);
+					int count = adCouponCodeDao.batchUpdateCouponCode(userCodeList, businessId);
 					if (count > 0) {
 						// 修改关联表中库存,直接领取时点击之后库存减一
-						adCouponActivityConnDao.BatchreduceRemindQuantity(
-								couponId, activityId, userCodeList.size());
+						adCouponActivityConnDao.BatchreduceRemindQuantity(couponId, activityId, userCodeList.size());
 						// 发券成功后将券的信息放入redis队列-->微信端发送领券成功通知
 						for (int i = 0; i < codeList.size(); i++) {
 							JSONObject data = new JSONObject();
 							data.put("userId", userIds.get(i));
 							data.put("activityId", activityId);
 							data.put("couponId", couponId);
-							redisTemplate.convertAndSend("COUPON_CHANNEL",
-									data.toString());
-							logger.info("====activityId:" + activityId
-									+ ",couponId:" + couponId + ",userId:"
-									+ userIds.get(i) + ",成功发券执行耗时："
-									+ (System.currentTimeMillis() - startTime));
+							redisTemplate.convertAndSend("COUPON_CHANNEL", data.toString());
+							logger.info("====activityId:" + activityId + ",couponId:" + couponId + ",userId:"
+									+ userIds.get(i) + ",成功发券执行耗时：" + (System.currentTimeMillis() - startTime));
 							returnUserList.add(userIds.get(i));
 						}
 						String mobils = "";
@@ -321,16 +318,16 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 							mobils = mobils + "," + telephone;
 						}
 						mobils = mobils.substring(1);
-		            	logger.info("=========短信推送手机号码：" + mobils + "==============");
-		    			JSONObject reqJSON = new JSONObject();
-		    			// 手机号，多个以英文逗号分隔
-		    			// 切换开关 true：使用阿里大鱼平台 false:嘉怡短信平台
-		    			AdUser user = new AdUser();
-		    			// 严选活动ID =SMS_25595369
-		    			JSONObject paramSMSJSON = new JSONObject();
-		    			reqJSON.put("smsContent", null);
-		    			adUserService.batchSendSms(user, paramSMSJSON, mobils, "SMS_122140024", null, true);
-		            	logger.info("========网易严选活动符合发送短信条件========");
+						logger.info("=========短信推送手机号码：" + mobils + "==============");
+						JSONObject reqJSON = new JSONObject();
+						// 手机号，多个以英文逗号分隔
+						// 切换开关 true：使用阿里大鱼平台 false:嘉怡短信平台
+						AdUser user = new AdUser();
+						// 严选活动ID =SMS_25595369
+						JSONObject paramSMSJSON = new JSONObject();
+						reqJSON.put("smsContent", null);
+						adUserService.batchSendSms(user, paramSMSJSON, mobils, "SMS_122140024", null, true);
+						logger.info("========网易严选活动符合发送短信条件========");
 					} else {
 						logger.info("========发券失败=======");
 						return returnUserList;
@@ -412,32 +409,35 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		try {
-			//adIntegralAcquireRecordDao;adIntegralActivityDao;adIntegralActivityConnDao;
-			//判断是否领取过
+			// adIntegralAcquireRecordDao;adIntegralActivityDao;adIntegralActivityConnDao;
+			// 判断是否领取过
 			AdIntegralAcquireRecord record = adIntegralAcquireRecordDao.checkIsHadProvided(userId);
-			if (record != null ) {
+			if (record != null) {
 				// 已领取
-				messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
+				messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode() + "");
 				messageDataBean.setMess(ActivityCode.HAD_ALREADY.getMsg());
-				logger.info("====用户已发放过积分=====积分活动id为"+record.getIntegralActivityId()+"===获取的积分数量为==:"+record.getIntegral());
-//				return messageDataBean;
+				logger.info("====用户已发放过积分=====积分活动id为" + record.getIntegralActivityId() + "===获取的积分数量为==:"
+						+ record.getIntegral());
+				// return messageDataBean;
 			} else {
-				//判断是否有积分活动
-				AdIntegralActivityConn activityConn =adIntegralActivityConnDao.checkIsHadActivity(userId);
-				if (activityConn ==null) {
-					messageDataBean.setCode(ActivityCode.NOT_STARTED.getCode()+"");
+				// 判断是否有积分活动
+				AdIntegralActivityConn activityConn = adIntegralActivityConnDao.checkIsHadActivity(userId);
+				if (activityConn == null) {
+					messageDataBean.setCode(ActivityCode.NOT_STARTED.getCode() + "");
 					messageDataBean.setMess(ActivityCode.NOT_STARTED.getMsg());
-					logger.info("====用户所属企业未有正在进行的积分活动====用户id为:=="+userId);
-//					return messageDataBean;
-				}else {
-					//判断是否可以发放积分(积分是否充足)(update ad_integral_activity set available_integral - 10 where id =id and available_integral>=10 )
-					if (activityConn.getAvailableIntegral().compareTo(activityConn.getIntegralForEach())==-1) {
-						messageDataBean.setCode(ActivityCode.HAD_NONE.getCode()+"");
+					logger.info("====用户所属企业未有正在进行的积分活动====用户id为:==" + userId);
+					// return messageDataBean;
+				} else {
+					// 判断是否可以发放积分(积分是否充足)(update ad_integral_activity set
+					// available_integral - 10 where id =id and
+					// available_integral>=10 )
+					if (activityConn.getAvailableIntegral().compareTo(activityConn.getIntegralForEach()) == -1) {
+						messageDataBean.setCode(ActivityCode.HAD_NONE.getCode() + "");
 						messageDataBean.setMess(ActivityCode.HAD_NONE.getMsg());
-						logger.info("====用户所属企业积分活动余额不足====用户id为:=="+userId);
-//						return messageDataBean;
-					}else {
-						messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+						logger.info("====用户所属企业积分活动余额不足====用户id为:==" + userId);
+						// return messageDataBean;
+					} else {
+						messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
 						messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
 						DecimalFormat df1 = new DecimalFormat("0.00");
 						data.put("integral", df1.format(activityConn.getIntegralForEach()));
@@ -447,11 +447,12 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode()+"");
+			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode() + "");
 			messageDataBean.setMess(SystemCode.SYSTEM_ERROR.getMsg());
 		}
 		return messageDataBean;
 	}
+
 	@Override
 	@Transactional
 	public MessageDataBean sendIntegralActivity(Long userId) {
@@ -459,70 +460,75 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		boolean isLocked = false;
 		try {
-		if (redisTemplate.opsForValue().setIfAbsent("integral_activity_"+userId, String.valueOf(System.currentTimeMillis() + 5*60*1000))){
-            logger.info("integral_activity_"+userId + " - tryLock success.");
-            // 设置锁的有效期，防止因异常情况无法释放锁而造成死锁情况的发生
-            redisTemplate.expire("integral_activity_"+userId, 5*60*1000, TimeUnit.MILLISECONDS);
-            isLocked = true;
-            //adIntegralAcquireRecordDao;adIntegralActivityDao;adIntegralActivityConnDao;
-            //判断是否领取过
-            AdIntegralAcquireRecord record = adIntegralAcquireRecordDao.checkIsHadProvided(userId);
-            if (record != null ) {
-            	// 已领取
-            	messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-            	messageDataBean.setMess(ActivityCode.HAD_ALREADY.getMsg());
-            	logger.info("====用户已发放过积分=====积分活动id为"+record.getIntegralActivityId()+"===获取的积分数量为==:"+record.getIntegral());
-//				return messageDataBean;
-            } else {
-            	//判断是否有积分活动
-            	AdIntegralActivityConn activityConn =adIntegralActivityConnDao.checkIsHadActivity(userId);
-            	//判断是否可以发放积分(积分是否充足)(update ad_integral_activity set available_integral - 10 where id =id and available_integral>=10 )
-            	int update = adIntegralActivityDao.updateIntegralGiveOut(activityConn.getIntegralId(),activityConn.getIntegralForEach());
-            	if (update == 0) {
-            		messageDataBean.setCode(ActivityCode.HAD_NONE.getCode()+"");
-            		messageDataBean.setMess(ActivityCode.HAD_NONE.getMsg());
-            		logger.info("====用户所属企业积分活动余额不足====用户id为:=="+userId);
-            		//					return messageDataBean;
-            	}else {
-            		//更新available和user以及插入ad_integral_acquire_record表
-            		AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
-            		adAvailablePoints.setUserId(userId+"");
-            		adAvailablePoints.setBusinessRebateAmount(activityConn.getIntegralForEach());
-            		adAvailablePoints.setType(AdAvailablePoints.TYPE_INTEGRAL_ACTIVITY);
-            		adAvailablePoints.setStatus(AdAvailablePoints.STATUS_OBTAINED);
-            		adAvailablePointsDao.insert(adAvailablePoints);
-            		adUserService.addIntegral(userId,activityConn.getIntegralForEach());
-            		AdIntegralAcquireRecord adIntegralAcquireRecord = new AdIntegralAcquireRecord();
-            		adIntegralAcquireRecord.setUserId(userId);
-            		adIntegralAcquireRecord.setIntegral(activityConn.getIntegralForEach());
-            		adIntegralAcquireRecord.setIntegralActivityId(activityConn.getIntegralId());
-            		adIntegralAcquireRecord.setCreateDate(new Date());
-            		adIntegralAcquireRecordDao.insert(adIntegralAcquireRecord);
-            		messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
-            		messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
-            		DecimalFormat df1 = new DecimalFormat("0.00");
-            		data.put("integral",df1.format(activityConn.getIntegralForEach()));
-            		messageDataBean.setData(data);
-            	}
-            }
-		}else {
-			messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-        	messageDataBean.setMess(ActivityCode.HAD_ALREADY.getMsg());
-        	logger.info("====当前用户二次请求,userId为==="+userId);
-		}
-//		lock.lock();
+			if (redisTemplate.opsForValue().setIfAbsent("integral_activity_" + userId,
+					String.valueOf(System.currentTimeMillis() + 5 * 60 * 1000))) {
+				logger.info("integral_activity_" + userId + " - tryLock success.");
+				// 设置锁的有效期，防止因异常情况无法释放锁而造成死锁情况的发生
+				redisTemplate.expire("integral_activity_" + userId, 5 * 60 * 1000, TimeUnit.MILLISECONDS);
+				isLocked = true;
+				// adIntegralAcquireRecordDao;adIntegralActivityDao;adIntegralActivityConnDao;
+				// 判断是否领取过
+				AdIntegralAcquireRecord record = adIntegralAcquireRecordDao.checkIsHadProvided(userId);
+				if (record != null) {
+					// 已领取
+					messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode() + "");
+					messageDataBean.setMess(ActivityCode.HAD_ALREADY.getMsg());
+					logger.info("====用户已发放过积分=====积分活动id为" + record.getIntegralActivityId() + "===获取的积分数量为==:"
+							+ record.getIntegral());
+					// return messageDataBean;
+				} else {
+					// 判断是否有积分活动
+					AdIntegralActivityConn activityConn = adIntegralActivityConnDao.checkIsHadActivity(userId);
+					// 判断是否可以发放积分(积分是否充足)(update ad_integral_activity set
+					// available_integral - 10 where id =id and
+					// available_integral>=10 )
+					int update = adIntegralActivityDao.updateIntegralGiveOut(activityConn.getIntegralId(),
+							activityConn.getIntegralForEach());
+					if (update == 0) {
+						messageDataBean.setCode(ActivityCode.HAD_NONE.getCode() + "");
+						messageDataBean.setMess(ActivityCode.HAD_NONE.getMsg());
+						logger.info("====用户所属企业积分活动余额不足====用户id为:==" + userId);
+						// return messageDataBean;
+					} else {
+						// 更新available和user以及插入ad_integral_acquire_record表
+						AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
+						adAvailablePoints.setUserId(userId + "");
+						adAvailablePoints.setBusinessRebateAmount(activityConn.getIntegralForEach());
+						adAvailablePoints.setType(AdAvailablePoints.TYPE_INTEGRAL_ACTIVITY);
+						adAvailablePoints.setStatus(AdAvailablePoints.STATUS_OBTAINED);
+						adAvailablePointsDao.insert(adAvailablePoints);
+						adUserService.addIntegral(userId, activityConn.getIntegralForEach());
+						AdIntegralAcquireRecord adIntegralAcquireRecord = new AdIntegralAcquireRecord();
+						adIntegralAcquireRecord.setUserId(userId);
+						adIntegralAcquireRecord.setIntegral(activityConn.getIntegralForEach());
+						adIntegralAcquireRecord.setIntegralActivityId(activityConn.getIntegralId());
+						adIntegralAcquireRecord.setCreateDate(new Date());
+						adIntegralAcquireRecordDao.insert(adIntegralAcquireRecord);
+						messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
+						messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
+						DecimalFormat df1 = new DecimalFormat("0.00");
+						data.put("integral", df1.format(activityConn.getIntegralForEach()));
+						messageDataBean.setData(data);
+					}
+				}
+			} else {
+				messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode() + "");
+				messageDataBean.setMess(ActivityCode.HAD_ALREADY.getMsg());
+				logger.info("====当前用户二次请求,userId为===" + userId);
+			}
+			// lock.lock();
 		} catch (Exception e) {
 			e.printStackTrace();
-			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode()+"");
+			messageDataBean.setCode(SystemCode.SYSTEM_ERROR.getCode() + "");
 			messageDataBean.setMess(SystemCode.SYSTEM_ERROR.getMsg());
-			redisTemplate.delete("integral_activity_"+userId);
+			redisTemplate.delete("integral_activity_" + userId);
 		}
-//		finally {
-//			if(isLocked) {
-//	            isLocked = false;
-//	            redisTemplate.delete("integral_activity_"+userId);
-//	        }
-//		}
+		// finally {
+		// if(isLocked) {
+		// isLocked = false;
+		// redisTemplate.delete("integral_activity_"+userId);
+		// }
+		// }
 		return messageDataBean;
 	}
 

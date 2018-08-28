@@ -142,7 +142,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 */
 	public AdUser getUserInfo(AdUser adUser);
 
-	AdUser getById(@Param("id") String userId);
+	AdUser getById(@Param("id") Integer userId);
 
 	/**
 	 * 通过用户id查询用户的账户信息

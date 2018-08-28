@@ -70,7 +70,7 @@ public class ScanDiscountService implements ScanDiscountServiceI{
 				&&StringUtils.isNotBlank(businessId)
 				&&StringUtils.isNotBlank(miniLogo)) {
 			
-			AdUser adUser = adUserDao.getById(userId);
+			AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 			BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
 			if (company.equals("大润发")) {
 				map.put("dimensionCode", adUser.getCardNumber());

@@ -190,7 +190,7 @@ public class ProductServicePublish {
 		retJson.put("mobike_product_id", mobikePro.getId());
 		retJson.put("mobike_default_sku_id", default_sku_id);
 		retJson.put("mobike_sku_list", array);
-		String userId = params.getString("userId");
+		Integer userId = params.getInteger("userId");
 		if (userId != null) {
 			AdUser user = adUserDao.getById(userId);
 			retJson.put("integral", user.getIntegral());

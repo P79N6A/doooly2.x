@@ -125,7 +125,7 @@ public class RefundServiceImpl extends AbstractRefundService {
 		String url = WebService.ADDINTEGRALAUTHORIZATION;
 		// 积分退款
 		AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
-		AdUser adUser = adUserDao.getById(String.valueOf(order.getUserId()));
+		AdUser adUser = adUserDao.getById(order.getUserId().intValue());
 		JSONObject params = new JSONObject();
 		params.put("orderNumber", order.getOrderNumber());
 		params.put("serialNumber", order.getOrderNumber());

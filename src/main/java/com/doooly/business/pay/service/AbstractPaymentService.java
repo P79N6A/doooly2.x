@@ -347,7 +347,7 @@ public abstract class AbstractPaymentService  implements PaymentService{
 
 	protected PayMsg canPay(OrderVo order) {
 		logger.info("productType={}", order.getProductType());
-		AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
+		AdUser user = adUserDao.getById(order.getUserId().intValue());
 		if (!StringUtils.isEmpty(order.getActType())) {
 			//是否普通订单
 			if (!OrderService.ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {

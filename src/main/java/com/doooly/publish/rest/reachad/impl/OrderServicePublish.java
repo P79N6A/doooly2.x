@@ -141,7 +141,7 @@ public class OrderServicePublish {
 			//用户消费金额
 			BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
 			retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
-			AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
+			AdUser user = adUserDao.getById(order.getUserId().intValue());
 			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum()+"");
 			retJson.put("monthLimit",( conf == null || conf.getMonthLimit() == null ) ? "0" : conf.getMonthLimit());
 		}

@@ -254,7 +254,7 @@ public class ProductServiceImpl implements ProductService {
 		Integer buyNumberLimit = productSku.getBuyNumberLimit();
 		if(buyNumberLimit!=null){
 			//查询用户所属企业id
-			AdUser adUser = adUserDao.getById(userId);
+			AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 			String groupId = adUser!=null?adUser.getGroupNum().toString():"";
 			logger.info("判断是否超出限购  groupId = " + groupId);
 			//根据企业id跟skuId查询活动信息

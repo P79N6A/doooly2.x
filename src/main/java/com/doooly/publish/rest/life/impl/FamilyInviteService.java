@@ -98,7 +98,7 @@ public class FamilyInviteService {
                 return new MessageDataBean("10001","token is null").toJsonString();
             }
             String userId = redisTemplate.opsForValue().get(userToken);
-            AdUser user = adUserServiceI.getById(userId);
+            AdUser user = adUserServiceI.getById(Integer.valueOf(userId));
             logger.info("channel={},userToken={},userId={},user={}", channel, userToken, userId, user);
 
             //1.获取会员邀请详细信息
@@ -128,7 +128,7 @@ public class FamilyInviteService {
                         //wechat
                         HashMap<String, String> hashMap = new HashMap<String, String>();
                         String inviteeId = inviteeMap.get("inviteeId").toString();
-                        AdUser invitee = adUserServiceI.getById(inviteeId);
+                        AdUser invitee = adUserServiceI.getById(Integer.valueOf(inviteeId));
                         String ivTelephone = invitee.getTelephone();
                         String cardNumber = invitee.getCardNumber();
                         LifeWechatBinding wechatHead = WechatUtil.getLifeWechatBinding(ivTelephone, cardNumber);
@@ -182,7 +182,7 @@ public class FamilyInviteService {
             String channel = request.getHeader(Constants.CHANNEL);
             res.put("channel", channel);
             String userId = redisTemplate.opsForValue().get(userToken);
-            AdUser user = adUserServiceI.getById(userId);
+            AdUser user = adUserServiceI.getById(Integer.valueOf(userId));
             String telephone = json.getString("telephone");
             logger.info("channel={},userToken={},userId={},telephone={}", channel, userToken, userId, telephone);
             // 判断的登录人是否为会员还是家属
@@ -274,7 +274,7 @@ public class FamilyInviteService {
         try {
             String userId = json.getString("userId");
             String channel = json.getString("channel");
-            AdUser user = adUserServiceI.getById(userId);
+            AdUser user = adUserServiceI.getById(Integer.valueOf(userId));
             String mobile = user.getTelephone();
             String cardNumber = user.getCardNumber();
             // 获取头像

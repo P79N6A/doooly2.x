@@ -129,7 +129,7 @@ public class MobileRechargePreference implements ProductProcessor {
                 }
                 Thread.sleep(2 * 1000);
                 //给分享人推送信息2
-                AdUser user = adUserServiceI.getById(String.valueOf(record.getUserId()));
+                AdUser user = adUserServiceI.getById(record.getUserId().intValue());
                 JSONObject data2 = new JSONObject();
                 data2.put("openId", sourceOpenId);
                 data2.put("channel", channel);
@@ -144,7 +144,7 @@ public class MobileRechargePreference implements ProductProcessor {
             AdCouponActivity activity = adCouponActivityService.getActivityIdByIdFlag("recharge_activity");
             logger.info("activity = {}", activity);
             AdCoupon adCoupon = adCouponActivityConnDao.getActivityConnByActivityId(String.valueOf(activity.getId())).get(0).getCoupon();
-            AdCouponCode code = freeCouponBusinessServiceI.sendCoupon(adCoupon.getBusinessId(), activity.getId(), (int) order.getUserId(), adCoupon.getId().intValue());
+            AdCouponCode code = freeCouponBusinessServiceI.sendCoupon(adCoupon.getBusinessId(), activity.getId(), order.getUserId().intValue(), adCoupon.getId().intValue());
             logger.info("activityId = {},code = {}", activity.getId(), code.getCode());
         } catch (Exception e) {
             e.printStackTrace();

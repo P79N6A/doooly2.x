@@ -50,7 +50,7 @@ public class NexusProcessor implements ProductProcessor{
         if (order != null && order.getItems() != null) {
             //订单充值
             OrderItemVo oldItem = order.getItems().get(0);
-            AdUser user = adUserServiceI.getById(String.valueOf(order.getUserId()));
+            AdUser user = adUserServiceI.getById(order.getUserId().intValue());
             MessageDataBean msg = nexusSerivceImpl.consume(order, user);
             //保存充值结果
             logger.info("NexusProcessor msg={}",msg.toJsonString());

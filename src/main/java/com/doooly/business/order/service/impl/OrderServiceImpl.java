@@ -655,7 +655,7 @@ public class OrderServiceImpl implements OrderService {
 		String str[] = item.getProductSkuId().split("-");
 		int skuId = Integer.valueOf(str[1]);
 		if (!ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
-			AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
+			AdUser user = adUserDao.getById(order.getUserId().intValue());
 			ActivityInfo actInfo = this.getActivityInfo(String.valueOf(user.getGroupNum()), Integer.valueOf(str[1]));
 			logger.info("actInfo = {}", actInfo);
 			int rows = productService.incStock(actInfo.getNumber(), skuId);

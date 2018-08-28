@@ -52,7 +52,7 @@ public class CouponAuthorizationProcessor implements AfterPayProcessor{
             if(StringUtils.isNotEmpty(couponId)){
                 AdCouponCode couponCode = adCouponCodeDao.get(couponId);
                 AdCoupon coupon = adCouponDao.get(String.valueOf(couponCode.getCoupon()));
-                AdUser user = adUserDao.getById(String.valueOf(order.getUserId()));
+                AdUser user = adUserDao.getById(order.getUserId().intValue());
                 AdBusiness adBusiness = adBusinessDao.get(coupon.getBusinessId());
                 JSONArray array =  createRefundPointDetail(order.getItems().get(0));
                 JSONObject json = new JSONObject();

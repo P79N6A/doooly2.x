@@ -61,7 +61,7 @@ public class OrderDeliveryServiceImpl implements OrderDeliveryService {
 			}
 			// 2.电子卡取当前用户姓名、电话
 			if (VIRTUAL_CARD_ID.equals(productTypeId)) {
-				AdUser user = adUserDao.getById(userId);
+				AdUser user = adUserDao.getById(Integer.valueOf(userId));
 				defaultDelivery.setReceiverName(user.getName());
 				defaultDelivery.setReceiverTelephone(user.getTelephone());
 			}

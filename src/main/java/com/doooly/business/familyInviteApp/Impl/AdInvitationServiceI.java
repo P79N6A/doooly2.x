@@ -64,7 +64,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 		try {
 			Integer userId = jsonReq.getInteger("userId");
 			// 获取邀请人会员卡号、企业编号
-			AdUser adUser = adUserDao.getById(String.valueOf(userId));
+			AdUser adUser = adUserDao.getById(userId);
 			Integer invitationType = jsonReq.getInteger("invitationType");
 			// 生成邀请码（使用会员ID，长度为6位，不足在左边以0填充）
 			AdInvitation adInvitation = new AdInvitation();

@@ -103,7 +103,7 @@ public class AdUserService implements AdUserServiceI {
 	@Autowired
 	private StringRedisTemplate redisTemplate;
 
-	public AdUser getById(String id) {
+	public AdUser getById(Integer id) {
 		return adUserDao.getById(id);
 	}
 
@@ -1304,7 +1304,7 @@ public class AdUserService implements AdUserServiceI {
 				if(record != null) {
                     String from = record.getChannel();
                     if (!StringUtils.isEmpty(from)) {
-						AdUser user = adUserDao.getById(String.valueOf(record.getInviterId()));
+						AdUser user = adUserDao.getById(record.getInviterId());
                         String dateStr = DateUtils.formatDate(new Date(), "yyyy年MM月dd日 HH:mm");
 						String telephone = loginUser.getTelephone();
                         if (from.endsWith("app")) {

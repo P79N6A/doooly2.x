@@ -341,7 +341,7 @@ public class MyPoinitService implements MyPointServiceI {
 		Pagelab pagelab = new Pagelab(currentPage,pageSize);
 		// 查询总数
 		int totalNum = voucherCardRecordDao.getTotalCountByUserId(userId);
-		AdUser user = adUserDao.getById(userId+"");
+		AdUser user = adUserDao.getById(userId.intValue());
 		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId+"");
 		map.put("integral", availablePoint!=null ? availablePoint : new BigDecimal("0"));
 		pagelab.setTotalNum(totalNum);
@@ -373,7 +373,7 @@ public class MyPoinitService implements MyPointServiceI {
 		boolean isFailed = true;
 		// 判断充值码是否可用
 		cardPassword = this.exChange(cardPassword);
-		AdUser user = adUserDao.getById(userId+"");
+		AdUser user = adUserDao.getById(userId.intValue());
 		VoucherCardRecord record = voucherCardRecordDao.checkCardPasswordData(cardPassword);
 		try {
 			Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
@@ -484,7 +484,7 @@ public class MyPoinitService implements MyPointServiceI {
 		adAvailablePointsDao.insert(adAvailablePoints);
 		adUserDao.addIntegral(userId, new BigDecimal(record.getCardMoney()));
 		//更新record充值状态
-		AdUser user = adUserDao.getById(userId+"");
+		AdUser user = adUserDao.getById(userId.intValue());
 		record.setCardUseUid(userId+"");
 		record.setCardUseStatus(1);
 		record.setActivationCodeUseStatus(1);

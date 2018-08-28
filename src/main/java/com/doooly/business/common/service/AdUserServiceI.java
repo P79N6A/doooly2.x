@@ -26,7 +26,7 @@ public interface AdUserServiceI {
 
 	public long getID(AdUser user);
 
-	public AdUser getById(String id);
+	public AdUser getById(Integer id);
 
 	/**
 	 * 根据会员卡号或会员手机号查找 若只有手机号则会员卡号为NULL 若只有会员卡号手机号则为NULL

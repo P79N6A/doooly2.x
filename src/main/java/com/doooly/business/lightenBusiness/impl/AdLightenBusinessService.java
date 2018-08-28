@@ -92,7 +92,7 @@ public class AdLightenBusinessService implements AdLightenBusinessServiceI{
 			List<String> businessIdList = JSONObject.parseArray(businessIds, String.class);
 			//如果为老用户则把所有商户均点亮
 			//查询该用户是否在app上线之前注册的
-			AdUser adUser = adUserDao.getById(userId);
+			AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 			Date appDate = new SimpleDateFormat("yyyy-MM-dd").parse(APP_ONLINE_TIME);
 			if(adUser.getCreateDate().before(appDate)){
 				List<AdBusiness> businessList = adBusinessDao.findAllBusinessAllLogo();

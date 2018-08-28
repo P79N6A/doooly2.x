@@ -37,7 +37,7 @@ public class OneNumberService implements OneNumberServiceI{
     public MessageDataBean getTargetUrl(String userId, String businessId,String targetUrl) throws UnsupportedEncodingException {
         MessageDataBean messageDataBean = new MessageDataBean();
         HashMap<String, Object> map = new HashMap<>();
-        AdUser adUser = adUserDao.getById(userId);
+        AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         long timestamp = new Date().getTime() / 1000;
         String resultUrl;

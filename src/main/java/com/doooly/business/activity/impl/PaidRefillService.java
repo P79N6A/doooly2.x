@@ -61,7 +61,7 @@ public class PaidRefillService implements PaidRefillServiceI {
 		AdRechargeRecord rechargeRecord = adRechargeRecordDao.getLastRecord(userId);
 		OrderMsg createOrder = new OrderMsg();
 		if (rechargeRecord == null ||rechargeRecord.getDelFlag().equals("1") ) {
-			AdUser adUser = adUserDao.getById(userId);
+			AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 			JSONObject order = new JSONObject();
 			order.put("userId", userId);
 			order.put("groupId", adUser.getGroupNum());

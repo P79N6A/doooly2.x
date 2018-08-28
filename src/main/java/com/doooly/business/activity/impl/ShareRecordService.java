@@ -158,7 +158,7 @@ public class ShareRecordService implements ShareRecordServiceI {
 				messageDataBean.setData(data);
 				return messageDataBean;
 			}
-			AdUser adUser = adUserService.getById(telephoneUserId);
+			AdUser adUser = adUserService.getById(Integer.valueOf(telephoneUserId));
 			if (adUser!=null) {
 				//ad_vote_record表中,state为0代表未被使用,1代表已被使用过,activity_id使用3
 				//获取所有telephone的记录,遍历,判断是否有该userId,或者state为1的数据

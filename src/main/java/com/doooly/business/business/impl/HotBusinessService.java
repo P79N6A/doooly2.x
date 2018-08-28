@@ -99,7 +99,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 			map.put("logo", null);
 			map.put("groupShortName", null);
 		}
-		AdUser user = adUserDao.getById(userId + "");
+		AdUser user = adUserDao.getById(userId);
 		if (user != null) {
 			map.put("type", user.getType());
 		} else {

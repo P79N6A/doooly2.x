@@ -587,12 +587,15 @@
 			c.group_short_name as groupShortName,
 			d.department_name as "departmentName",
 			e.family_relationship as "familyRelation",
-			IFNULL(b.auth_flag,"0") as authFlag
+			IFNULL(b.auth_flag,"0") as authFlag,
+			f.id as blocId,
+			f.bloc_name as blocName
 		from ad_user a 
 			left join ad_user_personal_info b on b.id = a.id
 			left join ad_group c on c.id = a.group_num
 			left join ad_group_department d on d.id = b.ad_group_department_id
 			left join ad_family_user e ON e.user_id = a.id
+			left join ad_bloc f on c.bloc_id = f.id
 			where a.id = #{userId}
  	</select>
  	

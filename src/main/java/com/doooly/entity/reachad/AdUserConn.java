@@ -76,6 +76,26 @@ public class AdUserConn {
 	private Integer finishTotal;
 	/** “已取消”订单数 */
 	private Integer cancelTotal;
+	/** 集团id */
+	private String blocId;
+	/** 集团名称 */
+	private String blocName;
+
+	public String getBlocId() {
+		return blocId;
+	}
+
+	public void setBlocId(String blocId) {
+		this.blocId = blocId;
+	}
+
+	public String getBlocName() {
+		return blocName;
+	}
+
+	public void setBlocName(String blocName) {
+		this.blocName = blocName;
+	}
 
 	public long getId() {
 		return id;

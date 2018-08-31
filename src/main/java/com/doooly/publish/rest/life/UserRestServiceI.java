@@ -1,6 +1,7 @@
 package com.doooly.publish.rest.life;
 
-import com.alibaba.fastjson.JSONObject;
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.user.CheckActiveCodeReq;
 import com.doooly.dto.user.LoginReq;
@@ -86,7 +87,7 @@ public interface UserRestServiceI {
 	 * @param paramJson
 	 * @return
 	 */
-	public String userLogout(JSONObject paramJson);
+	public String userLogout(JSONObject paramJson, HttpServletRequest request);
 
 	JSONObject addActiveUser(JSONObject userJson);
 

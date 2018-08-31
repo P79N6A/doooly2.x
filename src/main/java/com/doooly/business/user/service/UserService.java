@@ -39,6 +39,8 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 会员服务类(主)
  * 
@@ -570,19 +572,24 @@ public class UserService implements UserServiceI {
 	}
 
 	@Override
-	public MessageDataBean userLogout(JSONObject paramJson) throws Exception {
-		logger.info("====【userLogout】-传入参数：" + paramJson.toJSONString());
+	public MessageDataBean userLogout(JSONObject paramJson, HttpServletRequest request) throws Exception {
 		// 返回数据
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			// 用户认证token-rediskey
-			String token = paramJson.getString(Constants.TOKEN_NAME);
-			String userId = paramJson.getString("userId");
-			String channel = paramJson.getString(Constants.CHANNEL);
-			// 删除用户缓存key
-			if (StringUtils.isNotBlank(userId)) {
-				redisTemplate.delete(String.format(channel + ":" + TOKEN_KEY, paramJson.getString("userId")));
+			String token = request.getHeader(ConstantsLogin.TOKEN);
+			String userId = redisTemplate.opsForValue().get(token);
+			String channel = request.getHeader(ConstantsLogin.CHANNEL);
+			logger.info("====【userLogout】-传入参数：" + paramJson.toJSONString() + ",==header-token：" + token + ",==channel："
+					+ channel + ",==userId：" + userId);
+			if (StringUtils.isBlank(token) || StringUtils.isBlank(userId) || StringUtils.isBlank(channel)) {
+				// 用户认证token-rediskey
+				token = paramJson.getString(ConstantsLogin.TOKEN);
+				userId = paramJson.getString("userId");
+				channel = paramJson.getString(ConstantsLogin.CHANNEL);
 			}
+			// 删除用户缓存key
+			redisTemplate.delete(String.format(channel + ":" + TOKEN_KEY, userId));
 			redisTemplate.delete(token);
 			messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
 			messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());

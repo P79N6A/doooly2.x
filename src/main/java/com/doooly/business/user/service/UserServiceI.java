@@ -1,5 +1,7 @@
 package com.doooly.business.user.service;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.dto.BaseRes;
 import com.doooly.dto.common.MessageDataBean;
@@ -139,7 +141,7 @@ public interface UserServiceI {
 	 * @param paramJson
 	 * @return
 	 */
-	public MessageDataBean userLogout(JSONObject paramJson) throws Exception;
+	public MessageDataBean userLogout(JSONObject paramJson, HttpServletRequest request) throws Exception;
 
 	/**
 	 * 微信免登陆,初始化微信token

@@ -577,16 +577,16 @@ public class UserService implements UserServiceI {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			// 用户认证token-rediskey
-			String token = request.getHeader(ConstantsLogin.TOKEN);
-			String userId = redisTemplate.opsForValue().get(token);
-			String channel = request.getHeader(ConstantsLogin.CHANNEL);
-			logger.info("====【userLogout】-传入参数：" + paramJson.toJSONString() + ",==header-token：" + token + ",==channel："
-					+ channel + ",==userId：" + userId);
+			String token = paramJson.getString(ConstantsLogin.TOKEN);
+			String userId = paramJson.getString("userId");
+			String channel = paramJson.getString(ConstantsLogin.CHANNEL);
+			logger.info("====【userLogout】-传入参数：" + paramJson.toJSONString());
 			if (StringUtils.isBlank(token) || StringUtils.isBlank(userId) || StringUtils.isBlank(channel)) {
 				// 用户认证token-rediskey
-				token = paramJson.getString(ConstantsLogin.TOKEN);
-				userId = paramJson.getString("userId");
-				channel = paramJson.getString(ConstantsLogin.CHANNEL);
+				token =  request.getHeader(ConstantsLogin.TOKEN);
+				userId = redisTemplate.opsForValue().get(token);
+				channel = request.getHeader(ConstantsLogin.CHANNEL);
+				logger.info("====>>【userLogout】header-token：" + token + ",==channel："	+ channel + ",==userId：" + userId);
 			}
 			// 删除用户缓存key
 			redisTemplate.delete(String.format(channel + ":" + TOKEN_KEY, userId));

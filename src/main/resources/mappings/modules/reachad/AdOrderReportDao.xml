@@ -69,17 +69,19 @@
 
 	<!--获得用户每天话费和流量充值的消费金额-->
 	<select id="getConsumptionAmount" resultType="java.math.BigDecimal" >
-		select
-			sum(r.total_mount - if(isnull(r.service_charge),0,r.service_charge))  totalMount
-		from
-			ad_order_report r,ad_pay_flow f
-		where
-		r.order_number = f.order_number
-		and r.type = '1'
-		and r.user_id = #{userId}
-		and r.product_type = 3
-		and DATE_FORMAT(r.order_date,'%Y-%m') = DATE_FORMAT(now(),'%Y-%m')
-		and f.pay_type='doooly'
+		SELECT
+            SUM(IF(o.type=1,o.amount,0)-IF(o.type=5,o.amount,0)) totalAmount
+        FROM
+            ad_order_report r,
+            _order o
+        WHERE
+            r.order_number = o.orderNumber
+        AND o.state = 1
+        AND o.type in (1,5)
+        AND o.payType = 0
+        AND r.user_id = #{userId}
+        AND r.product_type = 3
+        AND DATE_FORMAT(r.order_date, '%Y-%m') = DATE_FORMAT(now(), '%Y-%m')
 	</select>
 
 	<!-- 获得用户未完成订单和完成订单的购买数量-->

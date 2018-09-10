@@ -1,10 +1,8 @@
 package com.doooly.dao.reachad;
 
-import java.util.List;
-
 import com.doooly.common.dao.BaseDaoI;
-import com.doooly.entity.reachad.AdGroupDepartment;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Description: 用户信息
@@ -14,6 +12,7 @@ import com.doooly.entity.reachad.AdUserPersonalInfo;
 public interface AdUserPersonalInfoDao extends BaseDaoI<AdUserPersonalInfo> {
 
 
+    Integer getIsSetPayPassword(String userId);
 
-    
+    Integer updatePayPassword(@Param("userId") String userId, @Param("payPassword") String payPassword,@Param("isPayPassword") String isPayPassword);
 }

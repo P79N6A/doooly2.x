@@ -59,6 +59,8 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		//查询会员名字、会员所属企业、会员头像、会员可用积分、是否为认证会员
 		AdAppUserInfos adUserInfos = adAppHomePageDao.findAdUserInfos(request.getUserId());
 		homePageData.setMemberName(adUserInfos.getMemberName());
+        homePageData.setIsPayPassword(adUserInfos.getIsPayPassword());
+        homePageData.setIsSetPayPassword(adUserInfos.getIsSetPayPassword());
 		homePageData.setMemberCompanyName(adUserInfos.getEnterpriseName());
 		homePageData.setMemberHeadImgUrl(
 				StringUtils.isBlank(adUserInfos.getMemberHeadImgURL()) ?

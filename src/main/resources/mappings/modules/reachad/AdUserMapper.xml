@@ -78,15 +78,15 @@
   		</choose>
   	</where>	 -->
   </select>
-  
-  <select id="getById" resultType="com.doooly.entity.reachad.AdUser" parameterType="com.doooly.entity.reachad.AdUser">
+
+  <select id="getById" resultType="com.doooly.entity.reachad.AdUser" parameterType="java.lang.Integer">
   	Select *
   	From ad_user
   	<where>
   		id = #{id}
   	</where>
   </select>
-  
+
   <update id="updateActiveStatus" parameterType="com.doooly.entity.reachad.AdUser">
   	Update ad_user
   	Set 
@@ -574,6 +574,8 @@
 			a.sex as "sex",
 			a.card_number as "cardNumber",
 			a.type as "userType",
+			a.is_pay_password as "isPayPassword",
+			b.is_set_password as "isSetPayPassword",
 			b.app_head_image_url as "appHeadImageUrl",
 			b.work_number as "workNumber",
 			DATE_FORMAT(b.birthday,'%Y-%m-%d') as "birthday",

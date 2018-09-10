@@ -156,4 +156,86 @@ public class MyAccountRestService implements MyAccountRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
+
+	@POST
+	@Path(value = "/isSetPayPassword")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String isSetPayPassword(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+            String userId = obj.getString("userId");
+			HashMap<String, Object> map = myAccountService.isSetPayPassword(userId);
+			messageDataBean.setCode(MessageDataBean.success_code);
+			messageDataBean.setData(map);
+		} catch (Exception e) {
+			logger.error("获取是否设置过支付密码数据异常！");
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+
+	@POST
+	@Path(value = "/setPayPassword")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String setPayPassword(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+            String userId = obj.getString("userId");
+            String payPassword = obj.getString("payPassword");
+            String isPayPassword = obj.getString("isPayPassword");
+            messageDataBean = myAccountService.setPayPassword(userId,payPassword,isPayPassword);
+		} catch (Exception e) {
+			logger.error("设置支付密码数据异常！",e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+			messageDataBean.setMess("设置支付密码数据异常");
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+
+	@POST
+	@Path(value = "/validPayPassword")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String validPayPassword(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+            String userId = obj.getString("userId");
+            String payPassword = obj.getString("payPassword");
+            messageDataBean = myAccountService.validPayPassword(userId,payPassword);
+		} catch (Exception e) {
+			logger.error("设置支付密码数据异常！",e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+			messageDataBean.setMess("设置支付密码数据异常");
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+
+	@POST
+	@Path(value = "/openPayPassword")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String openPayPassword(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+            String userId = obj.getString("userId");
+            String isPayPassword = obj.getString("isPayPassword");
+            messageDataBean = myAccountService.openPayPassword(userId,isPayPassword);
+		} catch (Exception e) {
+			logger.error("设置支付方式数据异常！",e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+			messageDataBean.setMess("设置支付方式数据异常");
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+
 }

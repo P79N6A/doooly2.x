@@ -2,16 +2,11 @@ package com.doooly.business.pay.processor.afterpayprocessor;
 
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
-import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.Order;
-import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
 
 /**
  * 计算佣金
@@ -36,7 +29,7 @@ public class OrderCommissionProcessor implements AfterPayProcessor {
     private MallBusinessService mallBusinessService;
 
     @Override
-    public PayMsg process(OrderVo order, PayFlow payFlow) {
+    public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
         try {
             logger.info("OrderCommissionProcessor orderNum = {}",order.getOrderNumber());
             //旅游卡计算返佣返利

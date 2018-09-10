@@ -13,6 +13,6 @@ import com.doooly.dto.common.PayMsg;
 public interface AfterPayProcessor {
 	
 	
-	public PayMsg process(OrderVo order,PayFlow payFlow);
+	public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType);
 	
 }

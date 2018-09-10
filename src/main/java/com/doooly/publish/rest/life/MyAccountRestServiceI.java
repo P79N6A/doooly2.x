@@ -47,4 +47,27 @@ public interface MyAccountRestServiceI {
 	 *
 	 */
 	String batchGetFamilyUserInfo(JSONObject obj);
+
+	/**
+	 * 是否设置密码
+	 *
+	 */
+	String isSetPayPassword(JSONObject obj);
+
+	/**
+	 * 设置密码
+	 *
+	 */
+	String setPayPassword(JSONObject obj);
+
+	/**
+	 * 验证密码
+	 *
+	 */
+	String validPayPassword(JSONObject obj);
+	/**
+	 * 支付方式开关
+	 *
+	 */
+	String openPayPassword(JSONObject obj);
 }

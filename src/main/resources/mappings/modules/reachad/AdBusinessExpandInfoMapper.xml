@@ -8,7 +8,9 @@
 		a.shop_id AS "shopId",
 		a.shop_key AS "shopKey",
 		a.business_url AS "businessUrl",
-		a.type AS "type"
+		a.type AS "type",
+		a.client_id AS "clientId",
+		a.client_secret AS "clientSecret"
 	</sql>
 	
 	

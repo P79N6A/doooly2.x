@@ -3,17 +3,35 @@ package com.doooly.business.order.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.exwings.ExWingsUtils;
 import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.*;
+import com.doooly.business.order.vo.MerchantProdcutVo;
+import com.doooly.business.order.vo.OrderExtVo;
+import com.doooly.business.order.vo.OrderItemVo;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.business.order.vo.ProductSkuVo;
+import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductImage;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.common.util.IdGeneratorUtil;
-import com.doooly.dao.reachad.*;
+import com.doooly.dao.reachad.AdCouponCodeDao;
+import com.doooly.dao.reachad.AdOrderDeliveryDao;
+import com.doooly.dao.reachad.AdOrderDetailDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdRechargeRecordDao;
+import com.doooly.dao.reachad.AdSelfProductImageDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
-import com.doooly.entity.reachad.*;
+import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.reachad.AdCoupon;
+import com.doooly.entity.reachad.AdCouponCode;
+import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +41,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 统一下单接口
@@ -54,6 +76,8 @@ public class OrderServiceImpl implements OrderService {
 	AdRechargeRecordDao adRechargeRecordDao;
 	@Autowired
 	private AdRechargeConfDao adRechargeConfDao;
+    @Autowired
+    private RefundService refundService;
 
 
 	@Override
@@ -194,6 +218,7 @@ public class OrderServiceImpl implements OrderService {
 		//话费充值订单计算手续费
 		BigDecimal charges = conf.getCharges();
 		if (charges != null) {
+            //每月免手续费金额
 			BigDecimal discountsMonthLimit = conf.getDiscountsMonthLimit();
 			if(discountsMonthLimit == null){
 				discountsMonthLimit = new BigDecimal("0");
@@ -512,6 +537,7 @@ public class OrderServiceImpl implements OrderService {
 		o.setUserRebate(new BigDecimal("0"));
 		o.setCreateDateTime(new Date());
 		o.setState(0);
+        o.setSource(3);//兜礼自营
 		orderDao.insert(o);
 		return o.getId();
 	}
@@ -646,7 +672,13 @@ public class OrderServiceImpl implements OrderService {
 			logger.info("cancleOrder() orders = {},order = {}", orders, order);
 			return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
 		}
-		//修改为取消状态
+		//2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum);
+        if(!payMsg.getCode().equals(PayMsg.success_code)){
+            //退款失败
+            return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());
+        }
+        //修改为取消状态
 		orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
 		orderParam.setState(PayState.CANCELLED.getCode());
 		int updateStatus = adOrderReportDao.cancleOrder(orderParam);

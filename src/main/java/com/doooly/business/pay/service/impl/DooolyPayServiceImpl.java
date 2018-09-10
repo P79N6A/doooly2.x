@@ -84,6 +84,7 @@ public class DooolyPayServiceImpl extends AbstractPaymentService {
 				map.put("orders", orders);
 				// 积分支付没有交易流水号
 				map.put("transNo", "0");
+                map.put("realPayType", "0");//兜礼积分支付方式
 				return map;
 			}
 		}catch (Exception e){

@@ -76,6 +76,10 @@ public class AdUserConn {
 	private Integer finishTotal;
 	/** “已取消”订单数 */
 	private Integer cancelTotal;
+    /** 支付密码开关标志,默认为认证会员(1-验证码支付,2-支付密码支付) */
+    private String isPayPassword;
+    /** 是否设置过支付密码，0未设置，1设置了 */
+    private String isSetPayPassword;
 	/** 集团id */
 	private String blocId;
 	/** 集团名称 */
@@ -376,4 +380,20 @@ public class AdUserConn {
 	public void setDelFlag(String delFlag) {
 		this.delFlag = delFlag;
 	}
+
+    public String getIsPayPassword() {
+        return isPayPassword;
+    }
+
+    public void setIsPayPassword(String isPayPassword) {
+        this.isPayPassword = isPayPassword;
+    }
+
+    public String getIsSetPayPassword() {
+        return isSetPayPassword;
+    }
+
+    public void setIsSetPayPassword(String isSetPayPassword) {
+        this.isSetPayPassword = isSetPayPassword;
+    }
 }

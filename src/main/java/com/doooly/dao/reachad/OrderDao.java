@@ -75,5 +75,6 @@ public interface OrderDao extends BaseDaoI<Order> {
 
 	public Order getTotalByOrderNumberByTypeFive(String orderNumber);
 
-
+    //查询已同步订单
+    Order getSyncOrder(Order o);
 }

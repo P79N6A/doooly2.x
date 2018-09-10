@@ -1,15 +1,24 @@
 package com.doooly.business.myaccount.service.impl;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSONObject;
+import com.business.common.util.AESUtils;
+import com.business.common.util.EncryptDecryptUtil;
+import com.doooly.business.myaccount.service.MyAccountServiceI;
+import com.doooly.business.mypoint.service.impl.MyPoinitService;
+import com.doooly.common.constants.KeyConstants;
+import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.common.util.FileUtils;
+import com.doooly.common.util.MD5Util;
+import com.doooly.dao.reachad.AdAvailablePointsDao;
+import com.doooly.dao.reachad.AdFamilyDao;
+import com.doooly.dao.reachad.AdFamilyUserDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserPersonalInfoDao;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdFamily;
+import com.doooly.entity.reachad.AdFamilyUser;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserConn;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -25,20 +34,15 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.myaccount.service.MyAccountServiceI;
-import com.doooly.business.mypoint.service.impl.MyPoinitService;
-import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.common.util.FileUtils;
-import com.doooly.dao.reachad.AdAvailablePointsDao;
-import com.doooly.dao.reachad.AdFamilyDao;
-import com.doooly.dao.reachad.AdFamilyUserDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdFamily;
-import com.doooly.entity.reachad.AdFamilyUser;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserConn;
+import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
  * 个人中心Service实现
@@ -63,6 +67,9 @@ public class MyAccountService implements MyAccountServiceI {
 
 	@Autowired
 	private AdUserDao adUserDao;
+
+	@Autowired
+	private AdUserPersonalInfoDao adUserPersonalInfoDao;
 
 	@Autowired
 	private AdFamilyUserDao adFamilyUserDao;
@@ -300,8 +307,104 @@ public class MyAccountService implements MyAccountServiceI {
         map.put("invitationFamilyList",invitationFamilyList);
 		return map;
 	}
-	
-	public void setNewOrdersFlag(AdUserConn adUserConn,String userId){
+
+    @Override
+    public HashMap<String, Object> isSetPayPassword(String userId) {
+        logger.info(String.format("获取设置支付密码信息"));
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Integer isSetPayPassword = adUserPersonalInfoDao.getIsSetPayPassword(userId);
+        map.put("isSetPayPassword",isSetPayPassword==null?0:isSetPayPassword);
+        return map;
+    }
+
+    @Override
+    public MessageDataBean setPayPassword(String userId, String payPassword, String isPayPassword) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        logger.info(String.format("设置支付密码"));
+        String decryptByRSAPrivateKey = EncryptDecryptUtil.decryptByRSAPrivateKey(payPassword, KeyConstants.RSA_PRIBKEY);
+        String decryptByAES = AESUtils.deCode(decryptByRSAPrivateKey, KeyConstants.AES_KEY);
+        if(StringUtils.isBlank(decryptByRSAPrivateKey)|| StringUtils.isBlank(decryptByAES)){
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("参数解密失败");
+            return messageDataBean;
+        }
+        String encryptByMd5 = MD5Util.digest(decryptByAES,KeyConstants.CHARSET);
+        adUserPersonalInfoDao.updatePayPassword(userId,encryptByMd5,isPayPassword);
+        messageDataBean.setCode(MessageDataBean.success_code);
+        return messageDataBean;
+    }
+
+    @Override
+    public MessageDataBean validPayPassword(String userId, String payPassword) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        logger.info(String.format("校验支付密码"));
+        String decryptByRSAPrivateKey = EncryptDecryptUtil.decryptByRSAPrivateKey(payPassword, KeyConstants.RSA_PRIBKEY);
+        //logger.info("rsa解密出来值======"+decryptByRSAPrivateKey);
+        String decryptByAES = AESUtils.deCode(decryptByRSAPrivateKey, KeyConstants.AES_KEY);
+        //logger.info("aes解密出来key==========="+decryptByAES);
+        if(StringUtils.isBlank(decryptByRSAPrivateKey)|| StringUtils.isBlank(decryptByAES)){
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("参数解密失败");
+            return messageDataBean;
+        }
+        String encryptByMd5 = MD5Util.digest(decryptByAES,KeyConstants.CHARSET);
+        AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
+        if(adUser.getPayPassword().equals(encryptByMd5)){
+            //校验通过
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setMess(decryptByAES);
+        }else {
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("旧密码不正确，请重新输入");
+        }
+        return messageDataBean;
+    }
+
+
+    @Override
+    public MessageDataBean openPayPassword(String userId, String isPayPassword) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        logger.info(String.format("开启支付密码支付"));
+        Integer isSetPayPassword = adUserPersonalInfoDao.getIsSetPayPassword(userId);
+        if(isSetPayPassword!=1){
+            //直接返回错误信息
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("请先设置支付密码后在开启");
+        }else {
+            AdUser aduser = new AdUser();
+            aduser.setId(Long.valueOf(userId));
+            aduser.setIsPayPassword(isPayPassword);
+            try {
+                adUserDao.updateByPrimaryKeySelective(aduser);
+                messageDataBean.setCode(MessageDataBean.success_code);
+            } catch (Exception e) {
+                logger.error("更新用户支付方式异常",e);
+                messageDataBean.setCode(MessageDataBean.failure_code);
+            }
+        }
+        return messageDataBean;
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        //System.out.println(UUID.randomUUID().toString().replaceAll("-","").substring(0,16));
+        String s4 = EncryptDecryptUtil.encryptByDES("111111", KeyConstants.AES_KEY);
+        System.out.println("des加密前字符串========"+s4);
+        String s5 = EncryptDecryptUtil.decryptByDES(s4, KeyConstants.AES_KEY);
+        System.out.println("des解密后字符串=========="+s5);
+        //1，先aes加密在rsa加密
+        String s1 = AESUtils.enCode("111111", KeyConstants.AES_KEY);
+        System.out.println("aeskey加密后的字符串----------"+s1);
+        String s = EncryptDecryptUtil.encryptByRSAPublicKey(s1, KeyConstants.RSA_PUBKEY);
+        System.out.println("rsa公钥加密后字符串---------"+s);
+        //2，解密,先私钥解密在aes解密
+        String s2 = EncryptDecryptUtil.decryptByRSAPrivateKey(s, KeyConstants.RSA_PRIBKEY);
+        System.out.println("rsa私钥解密结果==========="+s2);
+        String s3 = AESUtils.deCode(s2, KeyConstants.AES_KEY);
+        System.out.println("aeskey解密后的字符串==========="+s3);
+
+    }
+
+    public void setNewOrdersFlag(AdUserConn adUserConn,String userId){
 		// 1.Redis获取用户各个状态订单数
 		ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 		String orderTotal = opsForValue.get("ordertotal:"+userId+":0");//已下单

@@ -6,6 +6,8 @@
 		SELECT
 			a.name AS 'memberName',
 			a.integral AS 'availablePoints',
+            a.is_pay_password as "isPayPassword",
+			b.is_set_password as "isSetPayPassword",
 			c.group_name AS 'enterpriseName',
 			c.logo_url AS 'enterpriseLogoURL',
 			b.app_head_image_url AS 'memberHeadImgURL',

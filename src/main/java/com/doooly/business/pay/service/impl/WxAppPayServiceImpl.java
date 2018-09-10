@@ -108,6 +108,7 @@ public class WxAppPayServiceImpl extends AbstractPaymentService {
 			map.put("payFlowId", payFlowId);
 			map.put("orders", orders);
 			map.put("transNo", result.getTransaction_id());
+            map.put("realPayType", "1");//微信支付方式1
 			return map;
 		} catch (Exception e) {
 			logger.error("resolveAndVerifyResult(). payType = {} , e = {}", payType, e);

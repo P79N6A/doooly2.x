@@ -13,6 +13,10 @@ public class AdBusinessExpandInfo {
     private String shopKey;//兜礼访问商家密钥32位
     private String businessUrl;//商家接口地址
     private Integer type;//对接类型 默认0，我方提供对接方式 ，1内购网专属
+    /**兜礼访问商家唯一标识*/
+    private String clientId;
+    /**兜礼访问商家密钥32位*/
+    private String clientSecret;
 
     public Long getId() {
         return id;
@@ -61,5 +65,21 @@ public class AdBusinessExpandInfo {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }

@@ -4,7 +4,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: App常亮
+ * @Description: App常量
  * @author: qing.zhang
  * @date: 2017-07-24
  */

@@ -44,6 +44,9 @@ public class OrderMsg extends MessageDataBean {
 	//已锁定券
 	public static String islocked_coupon_err_code = "2011";
 	public static String islocked_coupon_err_mess = "券已被锁定无法使用";
+	//正确订单
+	public static String valid_pass_code = "2000";
+	public static String valid_pass__mess = "订单校验通过";
 
 	public OrderMsg() {
 		super();

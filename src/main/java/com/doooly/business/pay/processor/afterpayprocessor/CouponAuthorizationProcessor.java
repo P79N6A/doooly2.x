@@ -8,7 +8,6 @@ import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.HTTPSClientUtils;
-import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdCouponCodeDao;
@@ -45,7 +44,7 @@ public class CouponAuthorizationProcessor implements AfterPayProcessor{
     private AdBusinessDao adBusinessDao;
 
     @Override
-    public PayMsg process(OrderVo order, PayFlow payFlow) {
+    public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
         logger.info("CouponAuthorizationProcessor start. orderNum = {}",order.getOrderNumber());
         try {
             String couponId = order.getCouponId();

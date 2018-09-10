@@ -27,6 +27,8 @@ public class AdAppUserInfos {
 	private Integer integralGuideFinished;
 	// 兜礼APP_v2.0.0，企业员工专属特权的json字符串，{"app-index-privilege":{"business":0,"friends":0,"integral":0,"coupon":0,"birthday":0}}
 	private String appIndexPrivilege;
+    private String isPayPassword;
+    private String isSetPayPassword;
 
 	public String getMemberName() {
 		return memberName;
@@ -99,4 +101,20 @@ public class AdAppUserInfos {
 	public void setAppIndexPrivilege(String appIndexPrivilege) {
 		this.appIndexPrivilege = appIndexPrivilege;
 	}
+
+    public String getIsPayPassword() {
+        return isPayPassword;
+    }
+
+    public void setIsPayPassword(String isPayPassword) {
+        this.isPayPassword = isPayPassword;
+    }
+
+    public String getIsSetPayPassword() {
+        return isSetPayPassword;
+    }
+
+    public void setIsSetPayPassword(String isSetPayPassword) {
+        this.isSetPayPassword = isSetPayPassword;
+    }
 }

@@ -137,14 +137,15 @@ public class OrderServicePublish {
 			retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
 		}
 		//话费充值需要校验积分消费金额,用到此参数
-		if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()) {
-			//用户消费金额
-			BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
-			retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
-			AdUser user = adUserDao.getById(order.getUserId().intValue());
+        AdUser user = adUserDao.getById(order.getUserId().intValue());
+        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()) {
+            //用户消费金额
+            BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
+            retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
 			AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum()+"");
 			retJson.put("monthLimit",( conf == null || conf.getMonthLimit() == null ) ? "0" : conf.getMonthLimit());
 		}
+        retJson.put("isPayPassword",user.getIsPayPassword());
 		logger.info("retJon = {}", retJson);
 		return retJson.toJSONString();
 	}

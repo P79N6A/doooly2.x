@@ -56,7 +56,7 @@
     select 
     <include refid="Base_Column_List" />
     from ad_return_flow
-    where order_report_id = #{orderId,jdbcType=BIGINT}
+    where order_report_id = #{orderId,jdbcType=BIGINT} limit 1
   </select>
   
    <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdReturnFlow">

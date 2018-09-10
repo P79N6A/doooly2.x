@@ -1,28 +1,15 @@
 package com.doooly.business.pay.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessor;
-import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessorFactory;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
-
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.service.OrderService.OrderStatus;
-import com.doooly.business.order.service.OrderService.PayState;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
+import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
+import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
 import com.doooly.business.pay.service.PayFlowService.PayType;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.dao.reachad.AdRefundFlowDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
@@ -32,6 +19,15 @@ import com.doooly.entity.reachad.AdReturnDetail;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public abstract class AbstractRefundService implements RefundService {
 	
@@ -48,8 +44,8 @@ public abstract class AbstractRefundService implements RefundService {
 	private OrderDao orderDao;
 	@Autowired
 	private MallBusinessService mallBusinessService;
-	@Autowired
-	private ReturnFlowService returnFlowService;
+    @Autowired
+    private ReturnFlowService returnFlowService;
 
 	public abstract PayMsg doRefund(OrderVo order, PayFlow payFlow,String refundFlowId);
 	
@@ -57,7 +53,10 @@ public abstract class AbstractRefundService implements RefundService {
 		try {
 			PayFlow payFlow = payFlowService.getByOrderNum(orderNum, null, PayFlowService.PAYMENT_SUCCESS);
 			//兜礼自动退款并自动审核退货单
-			if(PayFlowService.PAYTYPE_DOOOLY.equals(payFlow.getPayType())){
+            if(payFlow == null){
+                //说明成功支付预付单 直接返回退款成功
+                return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
+            }
 				OrderVo order = checkOrderStatus(userId, orderNum);
 				//生成退货单
 				long id = saveReturnFlow(order, payFlow);
@@ -66,14 +65,13 @@ public abstract class AbstractRefundService implements RefundService {
 					// 兜礼自动退款并自动审核退货单
 					PayMsg msg = refund(order, payFlow);
 					if (PayMsg.success_code.equals(msg.getCode())) {
-						AdReturnFlow adReturnFlow = new AdReturnFlow();
-						adReturnFlow.setId(id);
-						adReturnFlow.setType("1");
-						returnFlowService.updateByPrimaryKeySelective(adReturnFlow);
-						return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
-					}
-				}
-			}
+                        AdReturnFlow adReturnFlow = new AdReturnFlow();
+                        adReturnFlow.setId(id);
+                        adReturnFlow.setType("1");
+                        returnFlowService.updateByPrimaryKeySelective(adReturnFlow);
+                    }
+                    return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
+                }
 		} catch (Exception e) {
 			logger.info("autoRefund error! orderNum = {}", orderNum);
 		}
@@ -110,31 +108,34 @@ public abstract class AbstractRefundService implements RefundService {
 		logger.info("refundMsg = {}", refundMsg);
 		String errCode = refundMsg.getCode();
 		String errReason = refundMsg.getMess();
-		if(!PayMsg.success_code.equals(refundMsg.getCode())){
+        //退款失败
+		if(GlobalResultStatusEnum.REFUND_STATUS_FAIL.toString().equals(refundMsg.getCode())){
 			updateRefundFlow(refundFlowId, null, REFUND_STATUS_F, errCode, errReason);
 			return refundMsg;
 		}
 		// 修改退款记录状态
-		String refundId = refundMsg.data == null ? "0" :(String)refundMsg.data.get("refund_id");//支付平台退款流水ID
-		int u1 = updateRefundFlow(refundFlowId, refundId, REFUND_STATUS_S, errCode, errReason);
-		// 修改订单状态-已退款
-		int u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
-		
-		if(!PayFlowService.PAYTYPE_DOOOLY.equals(payFlow.getPayType())){
-			// 非积分退款需要同步退款流水到_order
-			saveOneOrder(order, payFlow);
-		}else{
-			//积分退款要修改businessId一致
-			updateBusinessId(order);
-		}
-		if(u1 > 0 && u2 >0){
-			//
-			afterRefundProcess(order);
-			return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
-		}else{
-			logger.error("u1 = {},u2 = {}", u1, u2);
-			return new PayMsg(PayMsg.failure_code, PayMsg.failure_mess);
-		}
+        if(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS.toString().equals(refundMsg.getCode())){
+            String refundId = refundMsg.data == null ? "0" :(String)refundMsg.data.get("refund_id");//支付平台退款流水ID
+            int u1 = updateRefundFlow(refundFlowId, refundId, REFUND_STATUS_S, errCode, errReason);
+            // 修改订单状态-已退款
+            int u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
+
+            if(!PayFlowService.PAYTYPE_DOOOLY.equals(payFlow.getPayType())){
+                // 非积分退款需要同步退款流水到_order
+                saveOneOrder(order, payFlow);
+            }else{
+                //积分退款要修改businessId一致
+                updateBusinessId(order);
+            }
+            if(u1 > 0 && u2 >0){
+                afterRefundProcess(order);
+                return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
+            }else{
+                logger.error("u1 = {},u2 = {}", u1, u2);
+                return new PayMsg(PayMsg.failure_code, PayMsg.failure_mess);
+            }
+        }
+        return refundMsg;
 	}
 
 	private int updateBusinessId(OrderVo order) {
@@ -154,8 +155,8 @@ public abstract class AbstractRefundService implements RefundService {
 			OrderVo o = new OrderVo();
 			o.setOrderNumber(orderNum);
 			o.setUserId(userId);
-			o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
-			o.setState(PayState.PAID.getCode());
+            //o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setState(PayState.PAID.getCode());
 			return orderService.getOrder(o).get(0);
 		} catch (Exception e) {
 			logger.error("checkOrderStatus() error = {},orderNum = {}",e, orderNum);
@@ -180,7 +181,12 @@ public abstract class AbstractRefundService implements RefundService {
 	
 	private long saveReturnFlow(OrderVo order,PayFlow payFlow){
 		try {
-			// 退货流水记录
+            AdReturnFlow returnFlow = returnFlowService.getByOrderId(order.getId());
+            if(returnFlow != null){
+                //说明已经生成过流水
+                return returnFlow.getId();
+            }
+            // 退货流水记录
 			AdReturnFlow adReturnFlow = new AdReturnFlow();
 			adReturnFlow.setOrderReportId(order.getId());
 			adReturnFlow.setReturnFlowNumber(order.getOrderNumber());
@@ -298,7 +304,17 @@ public abstract class AbstractRefundService implements RefundService {
 	 */
 	private PayMsg saveRefundFlow(OrderVo order, PayFlow payFlow) {
 		try {
-			AdRefundFlow flow = new AdRefundFlow();
+            AdRefundFlow byOrderNumber = adRefundFlowDao.findByOrderNumber(order.getOrderNumber());
+            if(byOrderNumber != null){
+                if(byOrderNumber.getRefundStatus().equals(REFUND_STATUS_S)){
+                    //说明已经退款
+                   return new PayMsg(PayMsg.failure_code, "改订单已经退款，请勿重复退款");
+                }
+                PayMsg msg = new PayMsg(PayMsg.success_code, PayMsg.success_mess,new HashMap<String, Object>());
+                msg.data.put("out_refund_id", byOrderNumber.getId().toString());
+                return msg;
+            }
+            AdRefundFlow flow = new AdRefundFlow();
 			flow.setOrderNumber(order.getOrderNumber());
 			flow.setPayType(payFlow.getPayType());
 			flow.setUserId(payFlow.getUserId());

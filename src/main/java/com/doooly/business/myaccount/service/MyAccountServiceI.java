@@ -1,6 +1,7 @@
 package com.doooly.business.myaccount.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.common.MessageDataBean;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -57,4 +58,12 @@ public interface MyAccountServiceI {
     HashMap<String,Object> getFamilyUserInfo(String userId);
 
     HashMap<String,Object> batchGetFamilyUserInfo(List<Map> invitationFamilyList);
+
+    HashMap<String,Object> isSetPayPassword(String userId);
+
+    MessageDataBean setPayPassword(String userId, String payPassword, String isPayPassword);
+
+    MessageDataBean validPayPassword(String userId, String payPassword);
+
+    MessageDataBean openPayPassword(String userId, String isPayPassword);
 }

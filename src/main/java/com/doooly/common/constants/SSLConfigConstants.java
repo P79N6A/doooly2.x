@@ -1,12 +1,11 @@
 package com.doooly.common.constants;
 
+import com.doooly.common.webservice.WebService;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-
-import com.doooly.common.webservice.WebService;
 
 public class SSLConfigConstants {
 	public static InputStream TRUSTSTORE_INPUTSTREAM;
@@ -41,7 +40,8 @@ public class SSLConfigConstants {
 	}
 	public static String getRootPath() {
 		String classPath = WebService.class.getClassLoader().getResource("/").getPath();
-		String rootPath = "";
+        System.out.println(classPath);
+        String rootPath = "";
 		//windows下
 		if("\\".equals(File.separator)){
 		rootPath = classPath.substring(1,classPath.indexOf("/WEB-INF"));
@@ -55,6 +55,7 @@ public class SSLConfigConstants {
 	}
 	public static void main(String[] args) {
 		try {
+            getRootPath();
 			System.out.println(ClassLoader.getSystemResource("ssl/client.truststore").openStream());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -32,6 +32,9 @@ public class HomePageDataV2 {
 	private boolean newFinishFlag;
 	private boolean newCancelFlag;
 
+    private String isPayPassword;
+    private String isSetPayPassword;
+
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -137,8 +140,23 @@ public class HomePageDataV2 {
 		this.newCancelFlag = newCancelFlag;
 	}
 
+    public String getIsPayPassword() {
+        return isPayPassword;
+    }
 
-	//	public Integer getNoviceGuideFinished() {
+    public void setIsPayPassword(String isPayPassword) {
+        this.isPayPassword = isPayPassword;
+    }
+
+    public String getIsSetPayPassword() {
+        return isSetPayPassword;
+    }
+
+    public void setIsSetPayPassword(String isSetPayPassword) {
+        this.isSetPayPassword = isSetPayPassword;
+    }
+
+//	public Integer getNoviceGuideFinished() {
 //		return noviceGuideFinished;
 //	}
 //

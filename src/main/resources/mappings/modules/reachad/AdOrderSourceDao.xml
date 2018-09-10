@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdOrderSource">
+	
+	<insert id="insert" parameterType="com.doooly.business.pay.bean.AdOrderSource" >
+    		insert into ad_order_flow (
+    		business_id,
+    		order_number,
+            cash_desk_source,
+            trace_code_source,
+            create_date
+          )
+            values
+          (
+            #{businessId,jdbcType=BIGINT},
+            #{orderNumber,jdbcType=VARCHAR},
+            #{cashDeskSource,jdbcType=VARCHAR},
+            #{traceCodeSource,jdbcType=CHAR},
+            now()
+          )
+  </insert>
+
+</mapper>

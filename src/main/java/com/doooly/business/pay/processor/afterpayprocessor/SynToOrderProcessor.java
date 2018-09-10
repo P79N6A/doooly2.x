@@ -1,15 +1,5 @@
 package com.doooly.business.pay.processor.afterpayprocessor;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.service.OrderService.OrderStatus;
@@ -23,7 +13,15 @@ import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 /***
  * 同步订单到_order
@@ -44,9 +42,23 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 
 	
 	@Override
-	public PayMsg process(OrderVo order,PayFlow payFlow) {
+	public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
 		try {
 			logger.info("同步订单到_order开始. orderNum = {}", order.getOrderNumber());
+            BigDecimal amount = new BigDecimal("0");
+            String payType = "doooly";
+            if(realPayType.equals("2")){
+                //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
+                Order o = new Order();
+                o.setOrderNumber(order.getOrderNumber());
+                o.setPayType(PayFlowService.PayType.getCodeByName("weixin"));
+                o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+                o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+                Order order1 = orderDao.getSyncOrder(o);
+                amount = order1.getAmount();
+            }else if(realPayType.equals("1")){
+                payType = "weixin";
+            }
 			AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
 			Order o = new Order();
 			o.setId(order.getId());
@@ -56,11 +68,11 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 			o.setStoresId(OrderService.STORESID);
 			o.setPayPassword(null);
 			o.setVerificationCode(null);
-			o.setAmount(order.getTotalMount());
+			o.setAmount(order.getTotalMount().subtract(amount));
 			o.setTotalAmount(order.getTotalMount());
 			o.setPrice(order.getTotalPrice());
 			o.setTotalPrice(order.getTotalPrice());
-			o.setPayType(PayType.getCodeByName(payFlow.getPayType()));
+			o.setPayType(PayType.getCodeByName(payType));
 			o.setOrderNumber(order.getOrderNumber());
 			o.setSerialNumber(order.getOrderNumber());
 			o.setOrderDate(order.getOrderDate());

@@ -8,6 +8,7 @@ import com.doooly.entity.reachad.AdBusinessExpandInfo;
  * @date: 2017-08-29
  */
 public interface AdBusinessExpandInfoDao {
+
     AdBusinessExpandInfo getByBusinessId(String businessId);
 
 }

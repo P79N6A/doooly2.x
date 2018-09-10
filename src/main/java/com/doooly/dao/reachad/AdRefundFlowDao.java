@@ -14,4 +14,7 @@ public interface AdRefundFlowDao {
     int updateByPrimaryKeySelective(AdRefundFlow record);
 
     int updateByPrimaryKey(AdRefundFlow record);
+
+    AdRefundFlow findByOrderNumber(String merchantOrderNo);
+
 }

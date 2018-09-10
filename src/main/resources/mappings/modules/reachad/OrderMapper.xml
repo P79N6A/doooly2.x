@@ -95,6 +95,18 @@
 		ORDER BY a.orderDate desc;
 	</select>
 	
+	<select id="getSyncOrder" resultMap="resultMap" parameterType="com.doooly.entity.reachad.Order">
+		select
+			<include refid="orderColumns"/>
+		from
+		_order a
+		where a.orderNumber=#{orderNumber}
+        and a.payType = #{payType}
+        and a.state = #{state}
+        and a.type = #{type}
+		ORDER BY a.orderDate desc limit 1;
+	</select>
+
 	<!-- ______________________________________积分查询订单总金额______________________________________ -->
 
 	<select id="get" resultMap="resultMap">

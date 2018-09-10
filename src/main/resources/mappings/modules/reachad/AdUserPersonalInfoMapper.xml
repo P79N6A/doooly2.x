@@ -206,4 +206,12 @@
 			</foreach>
 		</where>
 	</delete>
+
+    <select id="getIsSetPayPassword" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT is_set_password FROM ad_user_personal_info WHERE id =#{userId}
+    </select>
+
+    <update id="updatePayPassword">
+        UPDATE ad_user a ,ad_user_personal_info b SET a.pay_password =#{payPassword},a.is_pay_password =#{isPayPassword}, b.is_set_password = 1 WHERE a.id = b.id AND a.id =#{userId}
+    </update>
 </mapper>

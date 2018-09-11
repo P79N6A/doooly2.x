@@ -389,7 +389,9 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     @Override
-    public ResultModel dooolyPayCallback(JSONObject retJson) {
+    public ResultModel dooolyPayCallback(JSONObject resultJson) {
+        logger.info("收银台支付回调通知结果:{}",resultJson);
+        JSONObject retJson = resultJson.getJSONObject("param");
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
         PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();

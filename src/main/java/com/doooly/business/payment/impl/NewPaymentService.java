@@ -132,8 +132,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel unifiedorder(JSONObject jsonObject) {
         JSONObject orderSummary = getOrderSummary(jsonObject);
-        if(orderSummary==null){
-            return new ResultModel(GlobalResultStatusEnum.FAIL,"登录用户和下单用户不匹配");
+        if (orderSummary == null) {
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
         }
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
@@ -144,7 +144,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
         String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
-        logger.info(accessToken);
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
@@ -165,10 +174,10 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
-            if(StringUtils.isNotBlank(integralRebatePayAmount)){
+            if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
-            logger.info("payment unifiedorder result data={}",data);
+            logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
         } else {
             return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
@@ -190,12 +199,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
         List<OrderVo> orderVoList = orderService.getOrder(order);
-        if(CollectionUtils.isEmpty(orderVoList)){
+        if (CollectionUtils.isEmpty(orderVoList)) {
             return null;
         }
         OrderVo o = orderVoList.get(0);
         OrderItemVo item = o.getItems().get(0);
-        String sku = item.getSku() != null?item.getSku():"";
+        String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
         //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
         JSONObject retJson = new JSONObject();
@@ -231,8 +240,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
         param.put("body", orderDesc);
-        param.put("isSource",  o.getIsSource());
-        param.put("orderDate",DateUtils.formatDateTime(o.getOrderDate()));
+        param.put("isSource", o.getIsSource());
+        param.put("orderDate", DateUtils.formatDateTime(o.getOrderDate()));
         param.put("storesId", "A001");
         param.put("price", price);
         param.put("amount", amount);
@@ -244,12 +253,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         jsonDetail.put("code", item.getCode());
         jsonDetail.put("goods", item.getGoods());
         jsonDetail.put("number", item.getNumber());
-        jsonDetail.put("price",item.getPrice());
-        jsonDetail.put("category",item.getCategoryId());
-        jsonDetail.put("tax",item.getTax());
-        jsonDetail.put("amount",item.getAmount());
+        jsonDetail.put("price", item.getPrice());
+        jsonDetail.put("category", item.getCategoryId());
+        jsonDetail.put("tax", item.getTax());
+        jsonDetail.put("amount", item.getAmount());
         jsonArray.add(jsonDetail);
-        param.put("orderDetail",jsonArray.toJSONString());
+        param.put("orderDetail", jsonArray.toJSONString());
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
@@ -287,6 +296,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
         String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
@@ -333,7 +352,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new PayMsg(PayMsg.failure_code, "请勿重复支付");
         }
         //校验是否可以支付
-        PayMsg msg = canPay(order,json);
+        PayMsg msg = canPay(order, json);
         if (!OrderMsg.valid_pass_code.equals(msg.getCode())) {
             return msg;
         }
@@ -390,7 +409,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel dooolyPayCallback(JSONObject resultJson) {
-        logger.info("收银台支付回调通知结果:{}",resultJson);
+        logger.info("收银台支付回调通知结果:{}", resultJson);
         String client_id = resultJson.getString("client_id");
         String timestamp = resultJson.getString("timestamp");
         String param = resultJson.getString("param");
@@ -404,9 +423,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("timestamp", timestamp);
         parameters.put("param", param);
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
-        logger.info("回传sign,{},解密sign,{},解密参数{}",returnSign,sign,parameters);
-        if(!sign.equals(returnSign)){
-            return new ResultModel(GlobalResultStatusEnum.FAIL,"参数解密失败");
+        logger.info("回传sign,{},解密sign,{},解密参数{}", returnSign, sign, parameters);
+        if (!sign.equals(returnSign)) {
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "参数解密失败");
         }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
         PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
@@ -508,6 +527,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("access_token", accessToken);
         parameters.put("param", param);
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
@@ -609,7 +638,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         Integer payType = json.getInteger("payType");
         if (order.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
-                && (payType ==0 || payType ==2)) {
+                && (payType == 0 || payType == 2)) {
             //获取已使用额度
             AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
             logger.info("conf = {}", conf);
@@ -620,7 +649,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             BigDecimal monthLimit = conf.getMonthLimit();
             //每月优惠额度
             BigDecimal discountsMonthLimit = conf.getDiscountsMonthLimit();
-            if(discountsMonthLimit == null){
+            if (discountsMonthLimit == null) {
                 discountsMonthLimit = new BigDecimal("0");
             }
             //每月积分购买话费的金额
@@ -629,7 +658,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 consumptionAmount = new BigDecimal("0");
             }
             BigDecimal subtract = consumptionAmount.add(discountsMonthLimit).subtract(monthLimit);
-            if(subtract.compareTo(BigDecimal.ZERO)>=0){
+            if (subtract.compareTo(BigDecimal.ZERO) >= 0) {
                 //说明已经超出限额
                 return new PayMsg(OrderMsg.failure_code, "您已超出每月限额");
             }
@@ -669,6 +698,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("access_token", accessToken);
         parameters.put("param", param);
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
@@ -694,6 +732,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
         String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
@@ -724,11 +771,29 @@ public class NewPaymentService implements NewPaymentServiceI {
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
         String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
         parameters.put("param", param);
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
@@ -801,7 +866,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
         PayMsg payMsg = refundService.autoRefund(Long.parseLong(userId), orderNum);
-        return new ResultModel(Integer.parseInt(payMsg.getCode()),payMsg.getMess());
+        return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
     }
 
     private int updateRefundFlow(String refundFlowId, String refundId, String refundStatus, String errCode, String errReason) {

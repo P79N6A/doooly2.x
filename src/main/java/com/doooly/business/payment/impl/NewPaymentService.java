@@ -391,7 +391,23 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel dooolyPayCallback(JSONObject resultJson) {
         logger.info("收银台支付回调通知结果:{}",resultJson);
-        JSONObject retJson = resultJson.getJSONObject("param");
+        String client_id = resultJson.getString("client_id");
+        String timestamp = resultJson.getString("timestamp");
+        String param = resultJson.getString("param");
+        String returnSign = resultJson.getString("sign");
+        JSONObject retJson = JSONObject.parseObject(param);
+        String businessId = retJson.getString("businessId");
+        AdBusiness byBusinessId = adBusinessDao.getByBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(String.valueOf(byBusinessId.getId()));
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        parameters.put("client_id", client_id);
+        parameters.put("timestamp", timestamp);
+        parameters.put("param", param);
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        logger.info("回传sign,{},解密sign,{},解密参数{}",returnSign,sign,parameters);
+        if(!sign.equals(returnSign)){
+            return new ResultModel(GlobalResultStatusEnum.FAIL,"参数解密失败");
+        }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
         PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();

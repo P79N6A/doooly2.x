@@ -186,15 +186,15 @@ public class MyOrderService implements MyOrderServiceI {
         //查询参数
         JSONObject data = param.getJSONObject("data");
         String userId =  data.getString("userId");
-        String orderReportId =  data.getString("orderReportId");
-        if (StringUtils.isBlank(userId) || StringUtils.isBlank(orderReportId)) {
+        String orderNumber =  data.getString("orderNumber");
+        if (StringUtils.isBlank(userId) || StringUtils.isBlank(orderNumber)) {
             status.put("code",100);// 返回码
             status.put("msg", "The data format error");// 返回信息
             orderResult.setStatus(status);
             return orderResult;
         }
 
-        AdOrderReport adOrderReport = adOrderReportDao.getOrderDetailInfoById(orderReportId);
+        AdOrderReport adOrderReport = adOrderReportDao.getOrderDetailInfoByOrderNumber(orderNumber);
         if (adOrderReport == null) {
             status.put("code",124);// 返回码
             status.put("msg", "查无此订单记录");// 返回信息

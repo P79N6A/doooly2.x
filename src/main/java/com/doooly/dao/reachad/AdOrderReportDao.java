@@ -52,7 +52,7 @@ public interface AdOrderReportDao {
 
     List<Map> findOrderSumByMonth(AdOrderReport adOrderReport);
 
-    AdOrderReport getOrderDetailInfoById(String orderReportId);
+    AdOrderReport getOrderDetailInfoByOrderNumber(String orderNumber);
 
     /**
      * 查询都市旅游卡，账户信息

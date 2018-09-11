@@ -10,6 +10,7 @@ import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.service.AbstractPaymentService;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.dao.reachad.AdOrderFlowDao;
+import com.doooly.dao.reachad.AdOrderSourceDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
@@ -39,6 +40,9 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
 
     @Autowired
     private MallBusinessService mallBusinessService;
+
+    @Autowired
+    private AdOrderSourceDao adOrderSourceDao;
 
     @Override
     public String getPayType() {
@@ -140,7 +144,7 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                 adOrderSource.setBusinessId(business.getId());
                 adOrderSource.setCashDeskSource("d");
                 adOrderSource.setTraceCodeSource("d");
-
+                adOrderSourceDao.insert(adOrderSource);
                 // 返回解析结果数据
                 List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
                 Map<String, Object> map = new HashMap<String, Object>();

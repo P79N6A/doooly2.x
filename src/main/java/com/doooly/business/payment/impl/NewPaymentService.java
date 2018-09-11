@@ -785,15 +785,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("access_token", accessToken);
         parameters.put("param", param);
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
-        if (accessToken == null) {
-            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
-            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
-                accessToken = (String) data.get("access_token");
-            }else {
-                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
-            }
-        }
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);

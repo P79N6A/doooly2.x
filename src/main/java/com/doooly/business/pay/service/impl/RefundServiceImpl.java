@@ -24,6 +24,7 @@ import com.doooly.entity.reachad.AdUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -83,13 +84,13 @@ public class RefundServiceImpl extends AbstractRefundService {
         }
         JSONObject params = new JSONObject();
         params.put("businessId", business.getBusinessId());
-        params.put("storesId", order.getStoresId());
+        params.put("storesId", order.getStoresId()==null?"":order.getStoresId());
         params.put("cardNumber", adUser.getCardNumber());
         params.put("merchantOrderNo", order.getOrderNumber());
         params.put("orderDetail", jsonArray.toJSONString());
         params.put("merchantRefundNo", refundFlowId);
-        params.put("refundPrice", order.getTotalPrice());
-        params.put("refundAmount", order.getTotalMount());
+        params.put("refundPrice",  String.valueOf(order.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN)));
+        params.put("refundAmount",  String.valueOf(order.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN)));
         params.put("notifyUrl", PaymentConstants.PAYMENT_REFUND_NOTIFY_URL);
         params.put("nonceStr", UUID.randomUUID().toString().replace("-", ""));
         params.put("id", business.getId());

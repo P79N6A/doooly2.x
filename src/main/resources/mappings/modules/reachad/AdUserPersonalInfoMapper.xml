@@ -215,7 +215,7 @@
         UPDATE ad_user a ,ad_user_personal_info b
         <set>
             <if test="#{isPayPassword !=null and isPayPassword != ''}">a.is_pay_password =#{isPayPassword},</if>
-            <if test="#{pay_password !=null and pay_password != ''}">a.pay_password =#{payPassword},</if>
+            <if test="#{payPassword !=null and payPassword != ''}">a.pay_password =#{payPassword},</if>
             b.is_set_password = 1
         </set>
         WHERE a.id = b.id AND a.id =#{userId}

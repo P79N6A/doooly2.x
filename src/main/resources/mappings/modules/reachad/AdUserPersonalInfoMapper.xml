@@ -212,6 +212,12 @@
     </select>
 
     <update id="updatePayPassword">
-        UPDATE ad_user a ,ad_user_personal_info b SET a.pay_password =#{payPassword},a.is_pay_password =#{isPayPassword}, b.is_set_password = 1 WHERE a.id = b.id AND a.id =#{userId}
+        UPDATE ad_user a ,ad_user_personal_info b
+        <set>
+            <if test="#{isPayPassword !=null and isPayPassword != ''}">a.is_pay_password =#{isPayPassword},</if>
+            <if test="#{pay_password !=null and pay_password != ''}">a.pay_password =#{payPassword},</if>
+            b.is_set_password = 1
+        </set>
+        WHERE a.id = b.id AND a.id =#{userId}
     </update>
 </mapper>

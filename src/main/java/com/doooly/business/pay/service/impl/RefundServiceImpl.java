@@ -75,6 +75,7 @@ public class RefundServiceImpl extends AbstractRefundService {
         params.put("merchantRefundNo", merchantRefundNo);
         params.put("id", business.getId());
         ResultModel resultModel = newPaymentServiceI.dooolyPayRefund(params);
+        logger.info("收银台退款返回结果code:{},info:{},data:{}",resultModel.getCode(),resultModel.getInfo(),resultModel.getData());
         if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //退款成功
             try {
@@ -112,7 +113,7 @@ public class RefundServiceImpl extends AbstractRefundService {
         for (OrderItemVo item : items) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("code",item.getCode());
-            jsonObject.put("goods",item.getGoods());
+            jsonObject.put("goods",item.getGoods()+"-"+ item.getSku());
             jsonObject.put("number",item.getNumber());
             jsonObject.put("amount",item.getAmount());
             jsonObject.put("category",item.getCategoryId());

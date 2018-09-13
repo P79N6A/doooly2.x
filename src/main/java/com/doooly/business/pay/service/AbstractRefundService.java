@@ -126,7 +126,72 @@ public abstract class AbstractRefundService implements RefundService {
 		return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
 	}
 
-
+    private int saveOneOrder(OrderVo order,int payType,String amount,String price) {
+        try {
+            int rows = 0;
+            logger.info("同步订单到_order开始. order ={} ===> payType = {}", order, payType);
+            AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
+            Order o = new Order();
+            o.setUserid(order.getUserId());
+            o.setOrderUserId(order.getUserId());
+            o.setBussinessId(business.getBusinessId());
+            o.setStoresId(OrderService.STORESID);
+            o.setPayPassword(null);
+            o.setVerificationCode(null);
+            o.setAmount(new BigDecimal(amount));
+            o.setTotalAmount(order.getTotalMount());
+            o.setPrice(new BigDecimal(price));
+            o.setTotalPrice(order.getTotalPrice());
+            //积分是0其他是2现金
+            o.setPayType(payType);
+            o.setOrderNumber(order.getOrderNumber());
+            o.setSerialNumber(order.getOrderNumber());
+            o.setOrderDate(order.getOrderDate());
+            //o.setOriginOrderNumber(null);
+            o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            o.setOrderType(1);
+            o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
+            o.setSource(order.getIsSource());
+            o.setIsPayPassword(0);
+            o.setOrderDetail(null);
+            o.setIsRebate(0);
+            o.setBusinessRebate(new BigDecimal("0"));
+            o.setUserRebate(new BigDecimal("0"));
+            o.setCreateDateTime(new Date());
+            o.setCheckState(0);
+            rows = orderDao.insert(o);
+            logger.info("同步订单到_order结束. rows = {}", rows);
+            //同步detail
+            if(o.getId() != null){
+                List<OrderItemVo> items = order.getItems();
+                for (int i = 0; i < items.size(); i++) {
+                    OrderItemVo itVo = items.get(i);
+                    OrderDetail d = new OrderDetail();
+                    d.setOrderid(o.getId().intValue());
+                    d.setCode(itVo.getCode());
+                    d.setGoods(itVo.getGoods() + itVo.getSku());
+                    d.setAmount(itVo.getAmount());
+                    d.setPrice(itVo.getPrice());
+                    d.setNumber(itVo.getNumber());
+                    d.setTax(new BigDecimal("0"));
+                    d.setCategory(itVo.getCategoryId());
+                    d.setFirstCategory(null);
+                    d.setSecondCategory(null);
+                    d.setBrandName(null);
+                    d.setCreatedatetime(new Date());
+                    int r = orderDao.insertDetail(d);
+                    if (r > 0) {
+                        logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
+                    }
+                    rows += r;
+                }
+            }
+            return rows;
+        } catch (Exception e) {
+            logger.error("同步订单到_order出现异常. order = {},e = {}", order, e);
+        }
+        return 0;
+    }
 	
 	public PayMsg refund(long userId,String orderNum) {
 		logger.info("refund start. userId = {},orderNum = {}", userId, orderNum);

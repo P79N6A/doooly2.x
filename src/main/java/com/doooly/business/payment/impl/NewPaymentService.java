@@ -794,6 +794,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
+        logger.info("退款返回结果",jsonObject.toJSONString());
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
@@ -846,9 +847,11 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel dooolyRefundCallback(JSONObject json) {
+        logger.info("退款通知参数：{}",json.toJSONString());
         String code = json.getString("code");
         String info = json.getString("info");
-        JSONObject param = json.getJSONObject("param");
+        String paramstr = json.getString("param");
+        JSONObject param = JSONObject.parseObject(paramstr);
         String merchantOrderNo = param.getString("merchantOrderNo");
         String outRefundNo = param.getString("outRefundNo");
         String merchantRefundNo = param.getString("merchantRefundNo");
@@ -860,12 +863,20 @@ public class NewPaymentService implements NewPaymentServiceI {
             //说明退款成功
             OrderVo order = checkOrderStatus(merchantOrderNo);
             // 修改订单状态-已退款
-            int u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
-            //退款成功
-            int payType1 = Integer.parseInt(payType);
-            if(payType1!=0){
-                //非积分需要插入流水
-                saveOneOrder(order, payType1,refundFee,settlementRefundFee);
+            int u2 = 0;
+            //在查询下订单
+            if(order.getType()!= OrderService.OrderStatus.RETURN_ORDER.getCode()){
+                //说明还没处理
+                // 修改订单状态-已退款
+                u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
+                //退款成功
+                //退款成功
+                int payType1 = Integer.parseInt(payType);
+                if(payType1!=0){
+                    //非积分需要插入流水
+                    payType1 = 3;//微信
+                    saveOneOrder(order, payType1,refundFee,settlementRefundFee);
+                }
             }
             //积分退款要修改businessId一致
             updateBusinessId(order);
@@ -984,7 +995,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

@@ -756,12 +756,12 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
     </sql>
 
-    <select id="getOrderDetailInfoByOrderNumber" resultType="com.doooly.entity.reachad.AdOrderReport">
+    <select id="getOrderDetailInfoById" resultType="com.doooly.entity.reachad.AdOrderReport">
         SELECT
         <include refid="getOrderDetailInfoColumns"/>
         FROM ad_order_report a
         <include refid="OrderDetailInfoJoins"/>
-        WHERE a.order_number = #{orderNumber}
+        WHERE a.id = #{orderReportId}
     </select>
 
     <select id="findSctcdAccount" resultType="com.doooly.entity.reachad.AdUserBusinessExpansion">

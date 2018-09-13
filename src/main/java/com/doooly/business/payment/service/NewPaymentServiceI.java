@@ -28,7 +28,11 @@ public interface NewPaymentServiceI {
 
     ResultModel dooolyPayRefund(JSONObject json);
 
+    ResultModel dooolyApplyPayRefund(JSONObject json);
+
     ResultModel dooolyRefundCallback(JSONObject json);
 
     ResultModel refund(JSONObject json);
+
+    ResultModel applyRefund(JSONObject json);
 }

@@ -9,6 +9,7 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.bean.WxRefundParams;
 import com.doooly.business.pay.service.AbstractRefundService;
+import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.pay.utils.WxUtil;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
@@ -45,11 +46,14 @@ public class RefundServiceImpl extends AbstractRefundService {
     private NewPaymentServiceI newPaymentServiceI;
 
     @Override
-    public PayMsg doRefund(OrderVo order, PayFlow payFlow, String refundFlowId) {
+    public PayMsg doRefund(OrderVo order, PayFlow payFlow) {
         logger.info("doRefund start . orderNumber = {}", order.getOrderNumber());
         try {
             // 积分退款
-            return dooolyPayRefund(order, payFlow, refundFlowId);
+            //旧的支付方式
+            if(payFlow != null && payFlow.getPayType().equals(PayFlowService.PAYTYPE_DOOOLY)){
+                return dooolyRefund(order,payFlow);
+            }
         } catch (Exception e) {
             logger.info("doRefund() e = {}", e);
         }
@@ -60,11 +64,45 @@ public class RefundServiceImpl extends AbstractRefundService {
      * doooly 支付退款
      *
      * @param order
-     * @param payFlow
-     * @param refundFlowId
      * @return
      */
-    private PayMsg dooolyPayRefund(OrderVo order, PayFlow payFlow, String refundFlowId) {
+    public ResultModel dooolyPayRefund(OrderVo order,String merchantRefundNo) {
+        // 积分退款
+        AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
+        JSONObject params = new JSONObject();
+        params.put("businessId", business.getBusinessId());
+        params.put("merchantOrderNo", order.getOrderNumber());
+        params.put("merchantRefundNo", merchantRefundNo);
+        params.put("id", business.getId());
+        ResultModel resultModel = newPaymentServiceI.dooolyPayRefund(params);
+        if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //退款成功
+            try {
+                // 积分退成功发送短信
+                List<OrderItemVo> items = order.getItems();
+                OrderItemVo orderItem = items.get(0);
+                AdUser adUser = adUserDao.getById(order.getUserId().intValue());
+                String mobiles = adUser.getTelephone();
+                String alidayuSmsCode = "SMS_109475271";
+                JSONObject paramSMSJSON = new JSONObject();
+                paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
+                paramSMSJSON.put("integral", order.getTotalMount().toString());
+                int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
+                logger.info("sendMsg orderNum = {},i = {}", order.getOrderNumber(), i);
+            } catch (Exception e) {
+                logger.error("sendMsg has an error. e = {}", e);
+            }
+        }
+        return resultModel;
+    }
+
+    /**
+     * doooly 申请支付退款
+     *
+     * @param order
+     * @return
+     */
+    public ResultModel dooolyApplyRefund(OrderVo order) {
         // 积分退款
         AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
         AdUser adUser = adUserDao.getById(order.getUserId().intValue());
@@ -88,33 +126,14 @@ public class RefundServiceImpl extends AbstractRefundService {
         params.put("cardNumber", adUser.getCardNumber());
         params.put("merchantOrderNo", order.getOrderNumber());
         params.put("orderDetail", jsonArray.toJSONString());
-        params.put("merchantRefundNo", refundFlowId);
+        params.put("merchantRefundNo", order.getOrderNumber());
         params.put("refundPrice",  String.valueOf(order.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN)));
         params.put("refundAmount",  String.valueOf(order.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN)));
         params.put("notifyUrl", PaymentConstants.PAYMENT_REFUND_NOTIFY_URL);
         params.put("nonceStr", UUID.randomUUID().toString().replace("-", ""));
         params.put("id", business.getId());
-        ResultModel resultModel = newPaymentServiceI.dooolyPayRefund(params);
-        if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-            //退款成功
-            PayMsg payMsg = new PayMsg(PayMsg.success_code, "退款成功");
-            try {
-                // 积分退成功发送短信
-                OrderItemVo orderItem = items.get(0);
-                String mobiles = adUser.getTelephone();
-                String alidayuSmsCode = "SMS_109475271";
-                JSONObject paramSMSJSON = new JSONObject();
-                paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
-                paramSMSJSON.put("integral", payFlow.getAmount().toString());
-                int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
-                logger.info("sendMsg orderNum = {},i = {}", order.getOrderNumber(), i);
-            } catch (Exception e) {
-                logger.error("sendMsg has an error. e = {}", e);
-            }
-            return payMsg;
-        } else {
-            return new PayMsg(String.valueOf(resultModel.getCode()), resultModel.getInfo());
-        }
+        ResultModel resultModel = newPaymentServiceI.dooolyApplyPayRefund(params);
+        return resultModel;
     }
 
     private PayMsg wxAppRefund(OrderVo order, PayFlow payFlow) {
@@ -245,4 +264,6 @@ public class RefundServiceImpl extends AbstractRefundService {
         }
 
     }
+
+
 }

@@ -42,8 +42,9 @@ import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdRefundFlow;
-import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.Order;
+import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,7 +62,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_I;
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 
 /**
@@ -812,44 +812,140 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     @Override
+    public ResultModel dooolyApplyPayRefund(JSONObject param) {
+        String id = param.getString("id");
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(id);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            }else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param);
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
+        object.put("param", param);
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_APPLY_REFUND_URL);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"),jsonObject.getString("data"));
+    }
+
+    @Override
     public ResultModel dooolyRefundCallback(JSONObject json) {
         String code = json.getString("code");
         String info = json.getString("info");
         JSONObject param = json.getJSONObject("param");
-        String merchantOrderNo = json.getString("merchantOrderNo");
-        String outRefundNo = json.getString("outRefundNo");
-        String merchantRefundNo = json.getString("merchantRefundNo");
-        String refundStatus = json.getString("refundStatus");
-        AdRefundFlow flow = adRefundFlowDao.selectByPrimaryKey(Long.valueOf(merchantRefundNo));
-        if (refundStatus.equals(flow.getRefundStatus())) {
-            //相等说明处理过了
-            return ResultModel.ok();
-        } else if (refundStatus.equals(REFUND_STATUS_S)) {
+        String merchantOrderNo = param.getString("merchantOrderNo");
+        String outRefundNo = param.getString("outRefundNo");
+        String merchantRefundNo = param.getString("merchantRefundNo");
+        String payType = param.getString("payType");
+        String refundFee = param.getString("refundFee");
+        String settlementRefundFee = param.getString("settlementRefundFee");
+        String refundStatus = param.getString("refundStatus");
+        if (refundStatus.equals(REFUND_STATUS_S)) {
             //说明退款成功
             OrderVo order = checkOrderStatus(merchantOrderNo);
-            int u1 = updateRefundFlow(String.valueOf(flow.getId()), outRefundNo, REFUND_STATUS_S, code, info);
             // 修改订单状态-已退款
             int u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
+            //退款成功
+            int payType1 = Integer.parseInt(payType);
+            if(payType1!=0){
+                //非积分需要插入流水
+                saveOneOrder(order, payType1,refundFee,settlementRefundFee);
+            }
             //积分退款要修改businessId一致
             updateBusinessId(order);
-            //修改退货记录表
-            AdReturnFlow adReturnFlow = returnFlowService.getByOrderId(order.getOrderId());
-            adReturnFlow.setType("1");
-            returnFlowService.updateByPrimaryKeySelective(adReturnFlow);
-            if (u1 > 0 && u2 > 0) {
+            if ( u2 > 0) {
                 //退款后处理
                 afterRefundProcess(order);
                 return ResultModel.ok();
             } else {
-                logger.error("u1 = {},u2 = {}", u1, u2);
+                logger.error("u2 = {}", u2);
                 return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
             }
-        } else if (refundStatus.equals(REFUND_STATUS_I)) {
-            //退款失败更新状态值
-            updateRefundFlow(String.valueOf(flow.getId()), outRefundNo, REFUND_STATUS_I, code, info);
-            logger.info("autoRefund error! orderNum = {}", merchantOrderNo);
         }
         return ResultModel.ok();
+    }
+
+    private int saveOneOrder(OrderVo order,int payType,String amount,String price) {
+        try {
+            int rows = 0;
+            logger.info("同步订单到_order开始. order ={} ===> payType = {}", order, payType);
+            AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
+            Order o = new Order();
+            o.setUserid(order.getUserId());
+            o.setOrderUserId(order.getUserId());
+            o.setBussinessId(business.getBusinessId());
+            o.setStoresId(OrderService.STORESID);
+            o.setPayPassword(null);
+            o.setVerificationCode(null);
+            o.setAmount(new BigDecimal(amount));
+            o.setTotalAmount(order.getTotalMount());
+            o.setPrice(new BigDecimal(price));
+            o.setTotalPrice(order.getTotalPrice());
+            //积分是0其他是2现金
+            o.setPayType(payType);
+            o.setOrderNumber(order.getOrderNumber());
+            o.setSerialNumber(order.getOrderNumber());
+            o.setOrderDate(order.getOrderDate());
+            //o.setOriginOrderNumber(null);
+            o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            o.setOrderType(1);
+            o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
+            o.setSource(order.getIsSource());
+            o.setIsPayPassword(0);
+            o.setOrderDetail(null);
+            o.setIsRebate(0);
+            o.setBusinessRebate(new BigDecimal("0"));
+            o.setUserRebate(new BigDecimal("0"));
+            o.setCreateDateTime(new Date());
+            o.setCheckState(0);
+            rows = orderDao.insert(o);
+            logger.info("同步订单到_order结束. rows = {}", rows);
+            //同步detail
+            if(o.getId() != null){
+                List<OrderItemVo> items = order.getItems();
+                for (int i = 0; i < items.size(); i++) {
+                    OrderItemVo itVo = items.get(i);
+                    OrderDetail d = new OrderDetail();
+                    d.setOrderid(o.getId().intValue());
+                    d.setCode(itVo.getCode());
+                    d.setGoods(itVo.getGoods() + itVo.getSku());
+                    d.setAmount(itVo.getAmount());
+                    d.setPrice(itVo.getPrice());
+                    d.setNumber(itVo.getNumber());
+                    d.setTax(new BigDecimal("0"));
+                    d.setCategory(itVo.getCategoryId());
+                    d.setFirstCategory(null);
+                    d.setSecondCategory(null);
+                    d.setBrandName(null);
+                    d.setCreatedatetime(new Date());
+                    int r = orderDao.insertDetail(d);
+                    if (r > 0) {
+                        logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
+                    }
+                    rows += r;
+                }
+            }
+            return rows;
+        } catch (Exception e) {
+            logger.error("同步订单到_order出现异常. order = {},e = {}", order, e);
+        }
+        return 0;
     }
 
 
@@ -857,8 +953,16 @@ public class NewPaymentService implements NewPaymentServiceI {
     public ResultModel refund(JSONObject json) {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
-        PayMsg payMsg = refundService.autoRefund(Long.parseLong(userId), orderNum);
-        return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum);
+        return resultModel;
+    }
+
+    @Override
+    public ResultModel applyRefund(JSONObject json) {
+        String userId = json.getString("userId");
+        String orderNum = json.getString("orderNum");
+        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum);
+        return resultModel;
     }
 
     private int updateRefundFlow(String refundFlowId, String refundId, String refundStatus, String errCode, String errReason) {

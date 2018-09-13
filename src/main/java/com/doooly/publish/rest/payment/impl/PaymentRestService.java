@@ -126,4 +126,14 @@ public class PaymentRestService implements PaymentRestServiceI{
         ResultModel resultModel = paymentService.refund(json);
         return resultModel.toJsonString();
     }
+
+    @Override
+    @POST
+    @Path(value = "/applyRefund")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String applyRefund(JSONObject json, HttpServletRequest httpServletRequest) {
+        ResultModel resultModel = paymentService.applyRefund(json);
+        return resultModel.toJsonString();
+    }
 }

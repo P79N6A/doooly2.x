@@ -37,4 +37,6 @@ public interface PaymentRestServiceI {
 
     // 兜礼退款
     String refund(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 兜礼申请退款
+    String applyRefund(JSONObject obj, HttpServletRequest httpServletRequest);
 }

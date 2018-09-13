@@ -294,4 +294,12 @@ public class MyOrderService implements MyOrderServiceI {
         }
         return list;
     }
+
+	@Override
+	public long getOrderReportIdByOrderNum(String orderNum) {
+		AdOrderReport adOrderReport = new AdOrderReport();
+		adOrderReport.setOrderNumber(orderNum);
+		adOrderReport = adOrderReportDao.getOrderReportIdByOrderNum(adOrderReport);
+		return adOrderReport.getId();
+	}
 }

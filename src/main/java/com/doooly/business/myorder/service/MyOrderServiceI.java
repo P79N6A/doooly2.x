@@ -12,4 +12,6 @@ public interface MyOrderServiceI {
     OrderResult getOrders(String paramBody);
 
     OrderResult getOrderDetail(String paramBody);
+    
+    long getOrderReportIdByOrderNum(String orderNum);
 }

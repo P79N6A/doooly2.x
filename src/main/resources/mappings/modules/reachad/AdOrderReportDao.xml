@@ -781,5 +781,12 @@
         WHERE r.id = #{id}
         ORDER BY r.create_date DESC limit 1;
     </select>
+    
+    <select id="getOrderReportIdByOrderNum" resultType="com.doooly.entity.reachad.AdOrderReport">
+        SELECT
+        a.id
+        FROM ad_order_report a
+        WHERE a.order_number = #{orderNumber}
+    </select>
 
 </mapper>

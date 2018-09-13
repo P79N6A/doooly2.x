@@ -58,6 +58,10 @@ public abstract class AbstractRefundService implements RefundService {
 	public PayMsg autoRefund(long userId,String orderNum){
 		try {
 			PayFlow payFlow = payFlowService.getByOrderNum(orderNum, null, PayFlowService.PAYMENT_SUCCESS);
+            if(payFlow==null){
+                //说明没有支付完成的 直接返回成功
+                return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
+            }
 			//兜礼自动退款并自动审核退货单
             OrderVo order = checkOrderStatus(userId, orderNum);
             if( payFlow!= null && PayFlowService.PAYTYPE_DOOOLY.equals(payFlow.getPayType())){

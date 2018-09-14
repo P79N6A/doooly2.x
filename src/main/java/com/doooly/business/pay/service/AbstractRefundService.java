@@ -58,12 +58,12 @@ public abstract class AbstractRefundService implements RefundService {
 	public PayMsg autoRefund(long userId,String orderNum){
 		try {
 			PayFlow payFlow = payFlowService.getByOrderNum(orderNum, null, PayFlowService.PAYMENT_SUCCESS);
-            if(payFlow==null){
-                //说明没有支付完成的 直接返回成功
-                return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
-            }
 			//兜礼自动退款并自动审核退货单
             OrderVo order = checkOrderStatus(userId, orderNum);
+            if(order == null){
+                //表示订单未完成支付，直接返回
+                return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
+            }
             if( payFlow!= null && PayFlowService.PAYTYPE_DOOOLY.equals(payFlow.getPayType())){
 				//生成退货单
 				long id = saveReturnFlow(order, payFlow);
@@ -80,7 +80,7 @@ public abstract class AbstractRefundService implements RefundService {
 					}
 				}
 			}
-			else if(PayFlowService.PAYTYPE_CASHIER_DESK.equals(payFlow.getPayType())){
+			else if(payFlow == null || PayFlowService.PAYTYPE_CASHIER_DESK.equals(payFlow.getPayType())){
                 //兜礼收银台退款
                 ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum);
                 if(resultModel.getCode()==GlobalResultStatusEnum.SUCCESS.getCode()){
@@ -103,6 +103,10 @@ public abstract class AbstractRefundService implements RefundService {
 		try {
             String merchantRefundNo;
             OrderVo order = checkOrderStatus(userId, orderNum);
+            if(order == null){
+                //表示订单未完成支付，直接返回
+                return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
+            }
             AdReturnFlow adReturnFlow = returnFlowService.getByOrderId(order.getId());
             if(adReturnFlow != null && adReturnFlow.getType().equals("1")){
                 //表示已经退款
@@ -254,6 +258,10 @@ public abstract class AbstractRefundService implements RefundService {
     @Override
     public ResultModel applyRefund(long userId, String orderNum) {
         OrderVo order = checkOrderStatus(userId, orderNum);
+        if(order == null){
+            //表示订单未完成支付，直接返回
+            return new ResultModel(GlobalResultStatusEnum.FAIL,"订单未完成支付，申请退款失败");
+        }
         return dooolyApplyRefund(order);
     }
 
@@ -262,8 +270,8 @@ public abstract class AbstractRefundService implements RefundService {
 			OrderVo o = new OrderVo();
 			o.setOrderNumber(orderNum);
 			o.setUserId(userId);
-            //o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
-            //o.setState(PayState.PAID.getCode());
+            o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
+            o.setState(OrderService.PayState.PAID.getCode());
 			return orderService.getOrder(o).get(0);
 		} catch (Exception e) {
 			logger.error("checkOrderStatus() error = {},orderNum = {}",e, orderNum);

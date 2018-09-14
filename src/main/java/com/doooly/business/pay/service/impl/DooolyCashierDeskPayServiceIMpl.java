@@ -77,6 +77,7 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     o.setOrderNumber(order.getOrderNumber());
                     o.setTotalMount(order.getTotalMount().add(order.getServiceCharge()));
                     o.setUpdateBy("resolveAndVerifyResult");
+                    o.setServiceCharge(new BigDecimal("0"));
                     int i = orderService.updateByNum(o);
                     logger.info("updateByNum() i = {}", i);
                 }

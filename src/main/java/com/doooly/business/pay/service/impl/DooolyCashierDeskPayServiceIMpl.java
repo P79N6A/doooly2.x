@@ -71,7 +71,8 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                 OrderVo order = orderService.getByOrderNum(orderNum);
                 AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
                 BigDecimal serviceCharge = order.getServiceCharge();
-                if (OrderService.ProductType.MOBILE_RECHARGE.getCode() == order.getProductType() && serviceCharge != null) {
+                //包含积分支付才添加手续费
+                if (OrderService.ProductType.MOBILE_RECHARGE.getCode() == order.getProductType() && serviceCharge != null && !realPayType.equals("1")) {
                     OrderVo o = new OrderVo();
                     o.setOrderNumber(order.getOrderNumber());
                     o.setTotalMount(order.getTotalMount().add(order.getServiceCharge()));

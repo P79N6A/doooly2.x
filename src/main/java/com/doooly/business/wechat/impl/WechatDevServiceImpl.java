@@ -16,14 +16,18 @@ import org.springframework.stereotype.Service;
 
 import com.business.common.constant.ConnectorConstants.WechatConstants;
 import com.doooly.business.common.service.ActivityCodeImageServiceI;
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.report.WechatEventPushService;
+import com.doooly.business.utils.DateUtils;
 import com.doooly.business.wechat.WechatDevCallbackServiceI;
-import com.doooly.dao.reachad.AdConfigDictDao;
+import com.doooly.common.constants.ActivityConstants;
+import com.doooly.common.util.WechatUtil;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.report.WechatEventPush;
 import com.wechat.ThirdPartyWechatUtil;
 import com.wechat.vo.Image;
 import com.wechat.vo.ImageMessage;
+import com.wechat.vo.UserInfo;
 
 /**
  * 
@@ -52,9 +56,12 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	/** 微信扫码推送推文/图片 */
 	@Autowired
 	private ActivityCodeImageServiceI activityCodeImageServiceI;
-
+//
+//	@Autowired
+//	private AdConfigDictDao configDictDao;
+	
 	@Autowired
-	private AdConfigDictDao configDictDao;
+	private ConfigDictServiceI configService;
 
 	/**
 	 * 方法名：checkSignature</br>
@@ -96,7 +103,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			// 发送方帐号（一个OpenID）
 			String fromUserName = json.getString("FromUserName");
 			// 二维码参数
-			String EventKey = "";
+			String eventKey = "";
 			// 放入渠道
 			json.put("channel", channel);
 			// 处理消息集合
@@ -112,36 +119,46 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				switch (event) {
 				// 用户已关注时的事件推送
 				case WechatConstants.EVENT_TYPE_SCAN:
-					EventKey = json.getString("EventKey");
-					// 话费充值活动
-					if (EventKey.contains(RECHARGE_ACTIVITY)) {
-						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
-						String[] paramArr = EventKey.split("~");
-						handleIsPush(channel, fromUserName, paramArr);
-					} else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
-						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
-					} else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
-						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
-					} else if (EventKey.contains(MU_RECHARGE_ACTIVITY)) {
-						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
-					}
-
 					// 存储微信推送信息
 					this.saveWechatEventPush(json);
+					eventKey = json.getString("EventKey");
+					// 话费充值活动
+					if (eventKey.contains(RECHARGE_ACTIVITY)) {
+						handleIsPush(channel, fromUserName, eventKey);
+					} else if (eventKey.contains(WUGANG_SCAN_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
+					} else if (eventKey.contains(BRING_COLLNESS_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
+					} else if (eventKey.contains(MU_RECHARGE_ACTIVITY)) {
+						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
+					//兜礼裂变v1活动
+					} else if(eventKey.contains(ActivityConstants.FISSION_V1_ACTIVITY)){
+						// 通过活动标签识别
+						fissionActivityCallback(channel, fromUserName, eventKey);
+					}
+
 					break;
 				// 用户关注时的事件推送
 				case WechatConstants.EVENT_TYPE_SUBSCRIBE:
-					EventKey = json.getString("EventKey");
+					// 存储微信推送信息
+					this.saveWechatEventPush(json);
+					eventKey = json.getString("EventKey");
 					// 话费充值活动
-					if (EventKey.contains(RECHARGE_ACTIVITY)) {
+					if (eventKey.contains(RECHARGE_ACTIVITY)) {
 						// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
-						String[] paramArr = EventKey.replace("qrscene_", "").split("~");
-						handleIsPush(channel, fromUserName, paramArr);
-					} else if (EventKey.contains(WUGANG_SCAN_ACTIVITY)) {
+						// String[] paramArr = eventKey.replace("qrscene_",
+						// "").split("~");
+						handleIsPush(channel, fromUserName, eventKey);
+					}
+					//兜礼裂变v1活动
+					else if (eventKey.contains(ActivityConstants.FISSION_V1_ACTIVITY)){
+						fissionActivityCallback(channel, fromUserName, eventKey);
+					}
+					else if (eventKey.contains(WUGANG_SCAN_ACTIVITY)) {
 						handleIsPushNews(channel, fromUserName, WUGANG_SCAN_ACTIVITY);
-					} else if (EventKey.contains(BRING_COLLNESS_ACTIVITY)) {
+					} else if (eventKey.contains(BRING_COLLNESS_ACTIVITY)) {
 						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
-					} else if (EventKey.contains(MU_RECHARGE_ACTIVITY)) {
+					} else if (eventKey.contains(MU_RECHARGE_ACTIVITY)) {
 						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
 					} else {
 						// 微信公众号关注回复信息
@@ -149,13 +166,12 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						messageList.add(textMsg);
 						log.info("====【dealCallback】关注微信公众号后回复文本消息" + textMsg);
 					}
-					// 存储微信推送信息
-					this.saveWechatEventPush(json);
+					
 					break;
 				// 用户点击事件推送
 				case WechatConstants.EVENT_TYPE_CLICK:
-					EventKey = json.getString("EventKey");
-					String textMsg = createTextMessage(channel, fromUserName, EventKey);
+					eventKey = json.getString("EventKey");
+					String textMsg = createTextMessage(channel, fromUserName, eventKey);
 					messageList.add(textMsg);
 					log.info("====【dealCallback】用户点击菜单事件回复文本消息" + textMsg);
 					// 存储微信推送信息
@@ -174,7 +190,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		return null;
 	}
 
-	private void handleIsPush(String channel, String fromUserName, String[] paramArr) throws Exception {
+	private void handleIsPush(String channel, String fromUserName, String eventKey) throws Exception {
+		// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
+		String[] paramArr = eventKey.replace("qrscene_", "").split("~");
 		// 活动标记
 		String activityMark = paramArr[1];
 		// 获取分享人openId
@@ -270,10 +288,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		textMsg.put("msgtype", WechatConstants.MESSAGE_TYPE_TEXT);
 		JSONObject contentJson = new JSONObject();
 		String dictKey = channel + "_" + switchType;
-		String content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		String content = configService.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
 		// 若为空则默认返回客服中心统一消息
 		if (StringUtils.isBlank(content)) {
-			content = configDictDao.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
+			content = configService.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
 		}
 		contentJson.put("content", content);
 		textMsg.put("text", contentJson);
@@ -281,5 +299,41 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		result = result.replaceAll("%s", "\n");
 		log.info("微信回调事件-被动回复文本消息=" + result);
 		return result;
+	}
+	
+	/**
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年9月16日 下午3:59:09 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	private void fissionActivityCallback(String channel, String fromUserName, String eventKey) throws Exception{
+		//以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
+		if(eventKey.endsWith("~")){
+			handleIsPush(channel, fromUserName, eventKey);
+			log.info("兜礼裂变v1活动带参二维码回调成功，channel={},fromUserName={},eventKey={}={}",channel, fromUserName, eventKey);
+		}else{
+			String toUserName = eventKey.substring(eventKey.lastIndexOf("~")+1);
+			com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
+			String accessToken = token.getString("accessToken");
+			Integer invitationCount = wechatEventPushService.selectCountByEventKey(eventKey);
+			Integer maxInvitationCount = Integer.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
+			String customMsg = null;
+			if(maxInvitationCount>invitationCount){
+				customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
+				UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
+				String nickName = userinfo.getNickname();
+				customMsg = customMsg.replace("KEYWORD1", nickName).replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1])).replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
+			}else{
+				customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
+				customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1])).replace("NUMBER", String.valueOf(maxInvitationCount)).replace("TOUSER", toUserName);
+			}
+			ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+			log.info("兜礼裂变v1活动，发送客服消息={}", customMsg);
+		}
+		
 	}
 }

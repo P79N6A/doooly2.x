@@ -14,4 +14,6 @@ public interface WechatEventPushService {
 	 * @return
 	 */
 	long insert(WechatEventPush wechatEventPush);
+	
+	Integer selectCountByEventKey(String eventKey);
 }

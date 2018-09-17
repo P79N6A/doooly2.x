@@ -17,4 +17,6 @@ public interface WechatEventPushDao {
 	 * 微信事件推送信息存储
 	 */
 	long insert(WechatEventPush wechatEventPush);
+	
+	Integer selectCountByEventKey(String eventKey);
 }

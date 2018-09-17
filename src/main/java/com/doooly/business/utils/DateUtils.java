@@ -11,8 +11,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.doooly.business.ofpay.service.impl.OfPayServiceImpl;
-
 /**
  * 日期工具类, 继承org.apache.commons.lang.time.DateUtils类
  * @author ThinkGem
@@ -20,9 +18,9 @@ import com.doooly.business.ofpay.service.impl.OfPayServiceImpl;
  */
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	
-	protected static Logger logger = LoggerFactory.getLogger(OfPayServiceImpl.class);
+	protected static Logger logger = LoggerFactory.getLogger(DateUtils.class);
 	
-	private static String[] parsePatterns = {
+	public static String[] parsePatterns = {
 		"yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM", 
 		"yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
 		"yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};

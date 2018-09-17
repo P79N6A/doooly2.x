@@ -35,4 +35,10 @@ public class WechatEventPushServiceImpl implements WechatEventPushService {
 	public long insert(WechatEventPush wechatEventPush) {
 		return wechatEventPushDao.insert(wechatEventPush);
 	}
+
+	@Override
+	public Integer selectCountByEventKey(String eventKey) {
+		
+		return wechatEventPushDao.selectCountByEventKey(eventKey);
+	}
 }

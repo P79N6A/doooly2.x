@@ -23,4 +23,10 @@
 			NOW()
 		)
   	</insert>
+  	<select id="selectCountByEventKey" resultType="java.lang.Integer">
+  		select count(*) from t_wechat_push_record
+  		<where>
+  			event_key=#{eventKey}
+  		</where>
+  	</select>
 </mapper>

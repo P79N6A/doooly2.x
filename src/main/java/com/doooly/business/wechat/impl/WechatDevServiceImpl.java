@@ -325,7 +325,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
 					String customMsg = null;
 					if (maxInvitationCount >= invitationCount) {
-						if (maxInvitationCount == invitationCount) {
+						if (maxInvitationCount > invitationCount) {
 							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
 							UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);

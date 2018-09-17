@@ -727,7 +727,9 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel integralPay(JSONObject param) {
-        String businessId = param.getString("businessId");
+        String orderNum = param.getString("orderNum");
+        OrderVo orderVo = adOrderReportDao.getByOrderNum(orderNum).get(0);
+        String businessId = String.valueOf(orderVo.getBussinessId());
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();

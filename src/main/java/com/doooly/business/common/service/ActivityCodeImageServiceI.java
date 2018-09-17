@@ -14,7 +14,7 @@ public interface ActivityCodeImageServiceI {
 	//画布合并图片
 	public BufferedImage overlapImage(BufferedImage big, BufferedImage small,int height);
 	//推送文字消息
-	public String sendText(String accessToken,String openId,JSONObject linkUrl,String sourceOpenId);
+	public String sendLinkText(String accessToken,String openId,JSONObject linkUrl,String sourceOpenId);
 	//推送图片
 	public String sendImage(String accessToken,String openId,String mediaId);
 	//推送活动消息

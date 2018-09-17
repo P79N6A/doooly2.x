@@ -27,6 +27,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Case;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,10 +35,13 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.business.common.constant.ConnectorConstants;
 import com.business.common.constant.ConnectorConstants.WechatConstants;
 import com.business.common.util.HttpClientUtil;
 import com.doooly.business.common.service.ActivityCodeImageServiceI;
 import com.doooly.business.common.utils.CodeUtil;
+import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.common.constants.ActivityConstants;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.common.util.WechatUtil;
@@ -61,8 +65,8 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	@Autowired
 	private StringRedisTemplate stringRedis;
 	@Autowired
-	private AdConfigDictDao configDictDao;
-	
+	private ConfigDictServiceI configService;
+
 	// private static StringRedisTemplate redisTemplate =
 	// (StringRedisTemplate)SpringContextHolder.getBean("redisTemplate");
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
@@ -112,17 +116,6 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			.getString("bring_coolness_news_title3");
 	private static final String BRING_COLLNESS_NEWS_DESCRIPTION3 = PropertiesConstants.wechatPushBundle
 			.getString("bring_coolness_news_description3");
-	//==========东航拉新活动=============
-//	private static final String MU_RECHARGE_NEWS_URL = PropertiesConstants.wechatPushBundle
-//			.getString("mu_recharge_news_url");
-//	private static final String MU_RECHARGE_NEWS_PIC_URL = PropertiesConstants.wechatPushBundle
-//			.getString("mu_recharge_news_pic_url");
-//	private static final String MU_RECHARGE_NEWS_TITLE = PropertiesConstants.wechatPushBundle
-//			.getString("mu_recharge_news_title");
-//	private static final String MU_RECHARGE_NEWS_DESCRIPTION = PropertiesConstants.wechatPushBundle
-//			.getString("mu_recharge_news_description");
-	
-	
 
 	private String PHONE_FEE = "PHONE_FEE";
 	private String PHONE_FEE_WUGANG = "PHONE_FEE_WUGANG";
@@ -153,27 +146,44 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			}
 			g.drawImage(small, x, y, small.getWidth(), small.getHeight(), null);
 			g.dispose();
-			// ImageIO.write((RenderedImage)big, "png", new
-			// File("C:/Users/80418/Desktop/datas/10.png"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return big;
 	}
 
-	@Override
-	public String sendText(String accessToken, String openId, JSONObject linkUrl, String sourceOpenId) {
-		// String accessToken = ThirdPartyWechatUtil.getAccessToken();
-		// String accessToken =
-		// "8_McIFN7SumjwCT2_8xheg8fW1Bjzzc5lzyNMqidytgHIZq8m3twl1_hoqBd9cp1O6-SWfhgUjg-6Y5WzAV0DzXcCNEhbHQcRwEYlE-w-lVPBgjfCI9oesVWu3njJjM9mvL2x2Lng3jI-jWZcfDMMeAJAVEE";
+	public BufferedImage overlapImage(BufferedImage image, BufferedImage qrcode, int topPX, int rightPx) {
+		try {
+			Graphics2D g = image.createGraphics();
+
+			g.drawImage(qrcode, rightPx, topPX, qrcode.getWidth(), qrcode.getHeight(), null);
+			g.dispose();
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		return image;
+	}
+
+	private String sendText(String accessToken, String openId, String contentText, String sourceOpenId) {
 		logger.info("推文获取的accessToken为:" + accessToken);
 		JSONObject textMsg = new JSONObject();
 		textMsg.put("touser", openId);
 		textMsg.put("msgtype", "text");
 		JSONObject context = new JSONObject();
-		// todo...按实际业务需要进行替换
-		// String contextStr = "心灵鸡汤\n\n<a href=\"https://baidu.com\">点此进入</a>";
-		// 心灵鸡汤\n\n<a href=\"https://baidu.com\">点此进入</a>
+		context.put("content", contentText);
+		textMsg.put("text", context);
+		String result = ThirdPartyWechatUtil.sendCustomMessage(textMsg.toJSONString(), accessToken);
+		logger.info("调用微信客服接口推文返回结果" + result);
+		return result;
+	}
+
+	@Override
+	public String sendLinkText(String accessToken, String openId, JSONObject linkUrl, String sourceOpenId) {
+		logger.info("推文获取的accessToken为:" + accessToken);
+		JSONObject textMsg = new JSONObject();
+		textMsg.put("touser", openId);
+		textMsg.put("msgtype", "text");
+		JSONObject context = new JSONObject();
 		String phoneFee = linkUrl.getString("phoneFee");
 		String phoneFeeUrl = linkUrl.getString("phoneFeeUrl");
 		String contextStr = phoneFee.replace("URL", phoneFeeUrl + sourceOpenId);
@@ -186,10 +196,6 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 
 	@Override
 	public String sendImage(String accessToken, String openId, String mediaId) {
-		// String accessToken = ThirdPartyWechatUtil.getAccessToken();
-		// String accessToken =
-		// "8_fIxLCM95-WZ9funEFT0kUUvpKTfBuBmBLAphfN8j7iMG4SlP6gUj5L1ExeRb8SJYmQDW9pmGQqTgEVgqiW8MEmWx-6FiRB69P-f3oDdWIFYnlYUadpePJ5vZYGFimXjCsrV9qkWPf1vNT3tWOHEiAJAKDA";
-		// logger.info(accessToken);
 		JSONObject imageMsg = new JSONObject();
 		imageMsg.put("touser", openId);
 		imageMsg.put("msgtype", WechatConstants.MESSAGE_TYPE_IMAGE);
@@ -206,15 +212,14 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	public String sendActivityText(String accessToken, String openId, String sourceOpenId) {
 		String channel = sourceOpenId.substring(0, sourceOpenId.indexOf("~"));
 		if (channel.equals("wugang")) {
-			return this.sendText(accessToken, openId, this.getPhoneFee(PHONE_FEE_WUGANG), sourceOpenId);
+			return this.sendLinkText(accessToken, openId, this.getPhoneFee(PHONE_FEE_WUGANG), sourceOpenId);
 		}
-		return this.sendText(accessToken, openId, this.getPhoneFee(PHONE_FEE), sourceOpenId);
+		return this.sendLinkText(accessToken, openId, this.getPhoneFee(PHONE_FEE), sourceOpenId);
 
 	}
 
 	@Override
 	public String sendActivityImage(String accessToken, String openId, String mediaId) {
-		// TODO Auto-generated method stub
 		return this.sendImage(accessToken, openId, mediaId);
 	}
 
@@ -238,68 +243,152 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 	public MessageDataBean pushImageAndText(String openId, String sourceOpenId, String channel, String activityId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> data = new HashMap<String, Object>();
-		// logger.info(new File(".").getAbsolutePath());
-		// logger.info(WebService.getRootPath());
 		JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 		String accessToken = token.getString("accessToken");
-		BufferedImage big = null;
-		BufferedImage small = null;
-		BufferedImage headImageAndNiceName = null;
+		sourceOpenId = channel + "~" + activityId + "~" + sourceOpenId;
+		String mediaId = null;
+		switch (activityId) {
+		// 兜礼裂变活动
+		case ActivityConstants.FISSION_V1_ACTIVITY:
+			String textMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
+					ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_TEXT_MSG);
+			// 执行微信推文发送
+			data.put("textCode", this.sendText(accessToken, openId, textMsg, sourceOpenId));
+			// 生成微信带参二维码图片并上传到微信素材
+			mediaId = this.createFissionPosterImg(data, accessToken, openId, channel, activityId);
+			break;
+		// 兜礼话费活动
+		case ActivityConstants.RECHARGE_ACTIVITY:
+			// 执行微信推文发送
+			data.put("textCode", this.sendActivityText(accessToken, openId, sourceOpenId));
+			// 生成微信带参二维码图片并上传到微信素材
+			mediaId = this.createHuaFeiPosterImg(data, accessToken, sourceOpenId, channel, activityId);
+		default:
+			break;
+		}
+		// 执行微信图片发送
+		String sendActivityImage = this.sendActivityImage(accessToken, openId, mediaId);
+		data.put("imageCode", sendActivityImage);
+		messageDataBean.setData(data);
+		messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
+		messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
+		logger.info("调用微信推送图片和文字接口返回结果" + messageDataBean.toJsonString());
+
+		return messageDataBean;
+	}
+
+	/**
+	 * 裂变活动：生成微信带参二维码图片并上传到微信素材
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年9月12日 下午6:39:47
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	private String createFissionPosterImg(Map<String, Object> data, String accessToken, String openId, String channel,
+			String activityId) {
+		// 海报图片（大图）
+		BufferedImage posterImg = null;
+		// 微信个人带参二维码
+		BufferedImage qrCodeImg = null;
+		// 头像
+		BufferedImage headImg = null;
 		try {
-			if (channel.equals("wugang")) {
-				// big = ImageIO.read(new
-				// FileInputStream(WebService.getRootPath()+"/image/wugangActivityImage.jpg"));
-				big = ImageIO.read(new FileInputStream(WebService.getRootPath() + "/image/activityImage.jpg"));
-			} else {
-				big = ImageIO.read(new FileInputStream(WebService.getRootPath() + "/image/activityImage.jpg"));
-			}
+			posterImg = ImageIO
+					.read(new FileInputStream(WebService.getRootPath() + String.format("/image/%s.png", activityId)));
 			String qrCodeUrl = this.getQRCodeUrl(accessToken, openId, channel, activityId);
-			small = CodeUtil.newQRCode(qrCodeUrl, 297, 297, "", "png");
-			big = this.overlapImage(big, small, 1);
+			qrCodeImg = CodeUtil.newQRCode(qrCodeUrl, 146, 146, "", "png");
+			posterImg = this.overlapImage(posterImg, qrCodeImg, 786,410);
 			// 进行微信头像和昵称的插入
 			// LifeWechatBinding wechatData = this.getWechatData(openId);
 			Map<String, String> wechatUserByOpenId = WechatUtil.getWechatUserByOpenId(openId, channel);
 			if (wechatUserByOpenId != null) {
 				// 下载headurl到本地
-				headImageAndNiceName = this.downLoadHeadImage(wechatUserByOpenId.get("headimgurl"));
+				headImg = this.downLoadHeadImage(wechatUserByOpenId.get("headimgurl"));
 				// 将头像和昵称拼到big的左上角
-				big = this.overlapImage(big, headImageAndNiceName, 2);
-				Graphics2D g = big.createGraphics();
+				posterImg = this.overlapImage(posterImg, headImg, 2);
+				Graphics2D g = posterImg.createGraphics();
 				Font f = new Font("宋体", Font.BOLD, 25);
 				Color mycolor = Color.white;// new Color(0, 0, 255);
 				g.setColor(mycolor);
 				g.setFont(f);
 				g.drawString(wechatUserByOpenId.get("nickname"), 90, 58);
 				g.dispose();
-				// ImageIO.write((RenderedImage)big, "png", new
-				// File("C:/Users/80418/Desktop/datas/wechat.png"));
 			}
 			String url = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
-			String mediaIdJson = CodeUtil.uploadFile(url, big, openId);
+			String mediaIdJson = CodeUtil.uploadFile(url, posterImg, openId);
 			data.put("uploadCode", mediaIdJson);
 			JSONObject mJsonObject = JSON.parseObject(mediaIdJson);
 			String mediaId = mJsonObject.getString("media_id");
 			logger.info("上传微信服务器素材返回mediaId为:" + mediaId);
-			sourceOpenId = channel + "~" + activityId + "~" + sourceOpenId;
-			// 执行微信推文发送
-			String sendActivityText = this.sendActivityText(accessToken, openId, sourceOpenId);
-			data.put("textCode", sendActivityText);
-			// 执行微信图片发送
-			String sendActivityImage = this.sendActivityImage(accessToken, openId, mediaId);
-			data.put("imageCode", sendActivityImage);
-			messageDataBean.setData(data);
-			messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
-			messageDataBean.setMess(SystemCode.SUCCESS.getMsg());
-			logger.info("调用微信推送图片和文字接口返回结果" + messageDataBean.toJsonString());
+			return mediaId;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("生成兜礼裂变v1活动海报图片失败", e);
 		} finally {
-			big = null;
-			small = null;
-			headImageAndNiceName = null;
+			posterImg = null;
+			qrCodeImg = null;
+			headImg = null;
 		}
-		return messageDataBean;
+		return null;
+	}
+
+	/**
+	 * 生成微信带参二维码图片并上传到微信素材
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年9月12日 下午6:39:47
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	private String createHuaFeiPosterImg(Map<String, Object> data, String accessToken, String openId, String channel,
+			String activityId) {
+		// 海报图片（大图）
+		BufferedImage posterImg = null;
+		// 微信个人带参二维码
+		BufferedImage qrCodeImg = null;
+		// 头像
+		BufferedImage headImg = null;
+		try {
+			posterImg = ImageIO
+					.read(new FileInputStream(WebService.getRootPath() + String.format("/image/%s.png", activityId)));
+			String qrCodeUrl = this.getQRCodeUrl(accessToken, openId, channel, activityId);
+			qrCodeImg = CodeUtil.newQRCode(qrCodeUrl, 297, 297, "", "png");
+			posterImg = this.overlapImage(posterImg, qrCodeImg, 1);
+			// 进行微信头像和昵称的插入
+			// LifeWechatBinding wechatData = this.getWechatData(openId);
+			Map<String, String> wechatUserByOpenId = WechatUtil.getWechatUserByOpenId(openId, channel);
+			if (wechatUserByOpenId != null) {
+				// 下载headurl到本地
+				headImg = this.downLoadHeadImage(wechatUserByOpenId.get("headimgurl"));
+				// 将头像和昵称拼到big的左上角
+				posterImg = this.overlapImage(posterImg, headImg, 2);
+				Graphics2D g = posterImg.createGraphics();
+				Font f = new Font("宋体", Font.BOLD, 25);
+				Color mycolor = Color.white;// new Color(0, 0, 255);
+				g.setColor(mycolor);
+				g.setFont(f);
+				g.drawString(wechatUserByOpenId.get("nickname"), 90, 58);
+				g.dispose();
+			}
+			String url = "https://api.weixin.qq.com/cgi-bin/media/upload?access_token=" + accessToken + "&type=image";
+			String mediaIdJson = CodeUtil.uploadFile(url, posterImg, openId);
+			data.put("uploadCode", mediaIdJson);
+			JSONObject mJsonObject = JSON.parseObject(mediaIdJson);
+			String mediaId = mJsonObject.getString("media_id");
+			logger.info("上传微信服务器素材返回mediaId为:" + mediaId);
+			return mediaId;
+		} catch (Exception e) {
+			logger.error("生成话费活动海报图片失败", e);
+		} finally {
+			posterImg = null;
+			qrCodeImg = null;
+			headImg = null;
+		}
+		return null;
 	}
 
 	private BufferedImage downLoadHeadImage(String url) {
@@ -312,16 +401,9 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			in = new ByteArrayInputStream(btImg);
 			try {
 				big = ImageIO.read(in);
-				// ImageIO.write((RenderedImage)big, "png", new
-				// File("C:/Users/80418/Desktop/datas/wechat0.png"));
 				convertImage = scaleByPercentage(big, 50, 50);
-				// ImageIO.write((RenderedImage)convertImage, "png", new
-				// File("C:/Users/80418/Desktop/datas/wechat1.png"));
 				convertImage = convertCircular(convertImage);
-				// ImageIO.write((RenderedImage)convertImage, "png", new
-				// File("C:/Users/80418/Desktop/datas/wechat2.png"));
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				IOUtils.closeQuietly(in);
@@ -552,11 +634,8 @@ public class ActivityCodeImageService implements ActivityCodeImageServiceI {
 			article3.put("description", BRING_COLLNESS_NEWS_DESCRIPTION3);
 			articles.add(article3);
 		} else if (key.equals(MU_RECHARGE_ACTIVITY)) {
-			String acticleStr = stringRedis.opsForValue().get(MU_RECHARGE_ACTIVITY);
-			if(StringUtils.isEmpty(acticleStr)){
-				acticleStr = configDictDao.getValueByTypeAndKey("OPERATING_ACTIVITY", MU_RECHARGE_ACTIVITY);
-				stringRedis.opsForValue().set(MU_RECHARGE_ACTIVITY, acticleStr);
-			}
+			String acticleStr = configService.getValueByTypeAndKey("OPERATING_ACTIVITY", MU_RECHARGE_ACTIVITY);
+			stringRedis.opsForValue().set(MU_RECHARGE_ACTIVITY, acticleStr);
 			JSONObject articleJson = JSONObject.parseObject(acticleStr);
 			JSONObject article = new JSONObject();
 			article.put("url", articleJson.getString("activity_url"));

@@ -309,13 +309,13 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	 * @since
 	 * @return
 	 */
-	private void fissionActivityCallback(String channel, String fromUserName, String eventKey)  {
+	private void fissionActivityCallback(String channel, String fromUserName, String eventKey) {
 		new Thread(new java.lang.Runnable() {
 			@Override
 			public void run() {
 				// 以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
 				if (!eventKey.endsWith("~")) {
-					
+
 					String toUserName = eventKey.substring(eventKey.lastIndexOf("~") + 1);
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 					String accessToken = token.getString("accessToken");
@@ -325,15 +325,14 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
 					String customMsg = null;
 					if (maxInvitationCount >= invitationCount) {
-						if (maxInvitationCount > invitationCount) {
-							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
-									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
-							UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
-							String nickName = userinfo.getNickname();
-							customMsg = customMsg.replace("KEYWORD1", nickName)
-									.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
-									.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
-						} else {
+						customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
+								ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
+						UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
+						String nickName = userinfo.getNickname();
+						customMsg = customMsg.replace("KEYWORD1", nickName)
+								.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
+								.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
+						if (maxInvitationCount == invitationCount) {
 							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
 							customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1]))

@@ -312,28 +312,26 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	 */
 	private void fissionActivityCallback(String channel, String fromUserName, String eventKey) throws Exception{
 		//以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
-		if(eventKey.endsWith("~")){
-			handleIsPush(channel, fromUserName, eventKey);
-			log.info("兜礼裂变v1活动带参二维码回调成功，channel={},fromUserName={},eventKey={}={}",channel, fromUserName, eventKey);
-		}else{
+		if(!eventKey.endsWith("~")){
 			String toUserName = eventKey.substring(eventKey.lastIndexOf("~")+1);
 			com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 			String accessToken = token.getString("accessToken");
 			Integer invitationCount = wechatEventPushService.selectCountByEventKey(eventKey);
 			Integer maxInvitationCount = Integer.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
 			String customMsg = null;
-			if(maxInvitationCount>invitationCount){
+			if(maxInvitationCount>=invitationCount){
 				customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
 				UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
 				String nickName = userinfo.getNickname();
 				customMsg = customMsg.replace("KEYWORD1", nickName).replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1])).replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
 			}else{
 				customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE, ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
-				customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1])).replace("NUMBER", String.valueOf(maxInvitationCount)).replace("TOUSER", toUserName);
+				customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1])).replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
 			}
 			ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
-			log.info("兜礼裂变v1活动，发送客服消息={}", customMsg);
+			log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
 		}
-		
+		handleIsPush(channel, fromUserName, eventKey);
+		log.info("兜礼裂变v1活动带参二维码回调成功，channel={},fromUserName={},eventKey={}={}",channel, fromUserName, eventKey);
 	}
 }

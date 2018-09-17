@@ -332,13 +332,16 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						customMsg = customMsg.replace("KEYWORD1", nickName)
 								.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
 								.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
+						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+						
 						if (maxInvitationCount == invitationCount) {
 							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
 							customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1]))
 									.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
+							ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
 						}
-						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+//						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
 						log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
 					} else {
 						log.info("兜礼裂变v1活动分享人任务已完成，不再推送模板消息，eventKey={}", eventKey);

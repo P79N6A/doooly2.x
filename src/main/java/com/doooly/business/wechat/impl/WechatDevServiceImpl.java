@@ -323,16 +323,16 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		new Thread(new java.lang.Runnable() {
 			@Override
 			public void run() {
-				Long addCount = stringRedis.opsForSet().add(eventKey, fromUserName);
-				log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
 				// 以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
-				if (!eventKey.endsWith("~") && addCount>0) {
+				if (!eventKey.endsWith("~")) {
+					Long addCount = stringRedis.opsForSet().add(eventKey, fromUserName);
+					log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
 					String toUserName = eventKey.substring(eventKey.lastIndexOf("~") + 1);
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 					String accessToken = token.getString("accessToken");
 					Integer invitationCount = wechatEventPushService.selectCountByEventKey(eventKey);
 					//只有参与人数大于0才推送消息给分享人
-					if (invitationCount > 0) {
+					if (invitationCount > 0 && addCount>0) {
 						Integer maxInvitationCount = Integer
 								.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 										ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));

@@ -145,7 +145,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				case WechatConstants.EVENT_TYPE_SUBSCRIBE:
 					// 存储微信推送信息
 					count = this.saveWechatEventPush(json);
-					//若为0则插入失败，不再执行后续业务
+					// 若为0则插入失败，不再执行后续业务
 					if (count == 0) {
 						return null;
 					}
@@ -326,32 +326,36 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 					String accessToken = token.getString("accessToken");
 					Integer invitationCount = wechatEventPushService.selectCountByEventKey(eventKey);
-					Integer maxInvitationCount = Integer
-							.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
-									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
-					String customMsg = null;
-					if (maxInvitationCount >= invitationCount) {
-						customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
-								ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
-						UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
-						String nickName = userinfo.getNickname();
-						customMsg = customMsg.replace("KEYWORD1", nickName)
-								.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
-								.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
-						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
-
-						if (maxInvitationCount == invitationCount) {
+					//只有参与人数大于0才推送消息给分享人
+					if (invitationCount > 0) {
+						Integer maxInvitationCount = Integer
+								.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
+										ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));
+						String customMsg = null;
+						if (maxInvitationCount >= invitationCount) {
 							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
-									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
-							customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1]))
+									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_NOTICE);
+							UserInfo userinfo = ThirdPartyWechatUtil.getUserInfo(accessToken, fromUserName);
+							String nickName = userinfo.getNickname();
+							customMsg = customMsg.replace("KEYWORD1", nickName)
+									.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
 									.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
 							ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+
+							if (maxInvitationCount == invitationCount) {
+								customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
+										ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
+								customMsg = customMsg.replace("KEYWORD3", DateUtils.getDate(DateUtils.parsePatterns[1]))
+										.replace("NUMBER", String.valueOf(invitationCount))
+										.replace("TOUSER", toUserName);
+								ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+							}
+							// ThirdPartyWechatUtil.sendTemplateMsg(customMsg,
+							// accessToken);
+							log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
+						} else {
+							log.info("兜礼裂变v1活动分享人任务已完成，不再推送模板消息，eventKey={}", eventKey);
 						}
-						// ThirdPartyWechatUtil.sendTemplateMsg(customMsg,
-						// accessToken);
-						log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
-					} else {
-						log.info("兜礼裂变v1活动分享人任务已完成，不再推送模板消息，eventKey={}", eventKey);
 					}
 				}
 				try {

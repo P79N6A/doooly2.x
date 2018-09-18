@@ -67,7 +67,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 
 	@Autowired
 	private StringRedisTemplate stringRedis;
-	
+
 	/**
 	 * 方法名：checkSignature</br>
 	 * 详述：验证签名</br>
@@ -142,7 +142,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						// 兜礼裂变v1活动
 					} else if (eventKey.contains(ActivityConstants.FISSION_V1_ACTIVITY)) {
 						// 通过活动标签识别
-						fissionActivityCallback(channel, fromUserName, eventKey);
+						handleIsPush(channel, fromUserName, eventKey);
 					}
 
 					break;
@@ -326,16 +326,17 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			public void run() {
 				// 以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
 				if (!eventKey.endsWith("~")) {
-					Long addCount = stringRedis.opsForSet().add(eventKey, fromUserName);
-					//默认set 30天有效
-					stringRedis.expire(eventKey, 30, TimeUnit.DAYS);
-					log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
+					// Long addCount = stringRedis.opsForSet().add(eventKey,
+					// fromUserName);
+					// //默认set 30天有效
+					// stringRedis.expire(eventKey, 30, TimeUnit.DAYS);
+					// log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
 					String toUserName = eventKey.substring(eventKey.lastIndexOf("~") + 1);
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 					String accessToken = token.getString("accessToken");
 					Integer invitationCount = wechatEventPushService.selectCountByEventKey(eventKey);
-					//只有参与人数大于0才推送消息给分享人
-					if (invitationCount > 0 && addCount>0) {
+					// 只有参与人数大于0才推送消息给分享人
+					if (invitationCount > 0) {
 						Integer maxInvitationCount = Integer
 								.valueOf(configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 										ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_INVITATION_NUMBER));

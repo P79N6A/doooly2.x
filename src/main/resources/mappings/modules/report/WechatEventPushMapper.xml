@@ -26,7 +26,7 @@
   	<select id="selectCountByEventKey" resultType="java.lang.Integer">
   		select count(*) from t_wechat_push_record
   		<where>
-  			event_key=#{eventKey}
+  			event_key=#{eventKey} and event='subscribe'
   		</where>
   	</select>
 </mapper>

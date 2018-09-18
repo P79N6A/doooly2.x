@@ -120,7 +120,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				// 用户已关注时的事件推送
 				case WechatConstants.EVENT_TYPE_SCAN:
 					// 存储微信推送信息
-					this.saveWechatEventPush(json);
+					Long count = this.saveWechatEventPush(json);
+					if (count == 0) {
+						return null;
+					}
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动
 					if (eventKey.contains(RECHARGE_ACTIVITY)) {
@@ -141,7 +144,11 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				// 用户关注时的事件推送
 				case WechatConstants.EVENT_TYPE_SUBSCRIBE:
 					// 存储微信推送信息
-					this.saveWechatEventPush(json);
+					count = this.saveWechatEventPush(json);
+					//若为0则插入失败，不再执行后续业务
+					if (count == 0) {
+						return null;
+					}
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动
 					if (eventKey.contains(RECHARGE_ACTIVITY)) {
@@ -221,29 +228,24 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	 * 
 	 * @param json
 	 */
-	private WechatEventPush saveWechatEventPush(JSONObject jsonObject) throws Exception {
+	private Long saveWechatEventPush(JSONObject jsonObject) throws Exception {
 		log.info("====【saveWechatEventPush】执行微信推送信息存储");
 		WechatEventPush wechatEventPush = new WechatEventPush();
 
-		try {
-			wechatEventPush.setToUserName(jsonObject.getString("ToUserName"));
-			wechatEventPush.setFromUserName(jsonObject.getString("FromUserName"));
-			wechatEventPush.setMsgType(jsonObject.getString("MsgType"));
-			wechatEventPush.setEvent(jsonObject.getString("Event"));
-			if (jsonObject.has("EventKey")) {
-				wechatEventPush.setEventKey(jsonObject.getString("EventKey").replace("qrscene_", ""));
-			}
-			wechatEventPush.setChannel(jsonObject.getString("channel"));
-			Long CreateTime = jsonObject.getLong("CreateTime");
-			wechatEventPush.setCreateTime(new Date(CreateTime * 1000));
-			Long count = wechatEventPushService.insert(wechatEventPush);
-			log.info("====【saveWechatEventPush】生成的记录行数:" + count);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException();
+		wechatEventPush.setToUserName(jsonObject.getString("ToUserName"));
+		wechatEventPush.setFromUserName(jsonObject.getString("FromUserName"));
+		wechatEventPush.setMsgType(jsonObject.getString("MsgType"));
+		wechatEventPush.setEvent(jsonObject.getString("Event"));
+		if (jsonObject.has("EventKey")) {
+			wechatEventPush.setEventKey(jsonObject.getString("EventKey").replace("qrscene_", ""));
 		}
+		wechatEventPush.setChannel(jsonObject.getString("channel"));
+		Long CreateTime = jsonObject.getLong("CreateTime");
+		wechatEventPush.setCreateTime(new Date(CreateTime * 1000));
+		Long count = wechatEventPushService.insert(wechatEventPush);
+		log.info("====【saveWechatEventPush】生成的记录行数:" + count);
+		return count;
 
-		return wechatEventPush;
 	}
 
 	/**
@@ -310,6 +312,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	 * @return
 	 */
 	private void fissionActivityCallback(String channel, String fromUserName, String eventKey) {
+		// 1.若是自己扫码关注自己则不进行处理
+		if (eventKey.contains(fromUserName))
+			return;
+		// 2.通过异步线程处理
 		new Thread(new java.lang.Runnable() {
 			@Override
 			public void run() {
@@ -333,7 +339,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 								.replace("KEYWORD2", DateUtils.getDate(DateUtils.parsePatterns[1]))
 								.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
 						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
-						
+
 						if (maxInvitationCount == invitationCount) {
 							customMsg = configService.getValueByTypeAndKey(ActivityConstants.ACTIVITY_TYPE,
 									ActivityConstants.DOOOLY_FISSION_V1_ACTIVITY_TEMPLATE_COMPLETION);
@@ -341,7 +347,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 									.replace("NUMBER", String.valueOf(invitationCount)).replace("TOUSER", toUserName);
 							ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
 						}
-//						ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
+						// ThirdPartyWechatUtil.sendTemplateMsg(customMsg,
+						// accessToken);
 						log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
 					} else {
 						log.info("兜礼裂变v1活动分享人任务已完成，不再推送模板消息，eventKey={}", eventKey);

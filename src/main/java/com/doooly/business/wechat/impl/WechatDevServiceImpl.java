@@ -12,6 +12,7 @@ import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.business.common.constant.ConnectorConstants.WechatConstants;
@@ -63,6 +64,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	@Autowired
 	private ConfigDictServiceI configService;
 
+	@Autowired
+	private StringRedisTemplate stringRedis;
+	
 	/**
 	 * 方法名：checkSignature</br>
 	 * 详述：验证签名</br>
@@ -319,9 +323,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		new Thread(new java.lang.Runnable() {
 			@Override
 			public void run() {
+				Long addCount = stringRedis.opsForSet().add(eventKey, fromUserName);
+				log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
 				// 以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
-				if (!eventKey.endsWith("~")) {
-
+				if (!eventKey.endsWith("~") && addCount>0) {
 					String toUserName = eventKey.substring(eventKey.lastIndexOf("~") + 1);
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 					String accessToken = token.getString("accessToken");
@@ -350,8 +355,6 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 										.replace("TOUSER", toUserName);
 								ThirdPartyWechatUtil.sendTemplateMsg(customMsg, accessToken);
 							}
-							// ThirdPartyWechatUtil.sendTemplateMsg(customMsg,
-							// accessToken);
 							log.info("兜礼裂变v1活动，发送模板消息结果={}", customMsg);
 						} else {
 							log.info("兜礼裂变v1活动分享人任务已完成，不再推送模板消息，eventKey={}", eventKey);

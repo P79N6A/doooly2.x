@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -326,6 +327,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				// 以~结尾标识活动带参二维码，非以~结尾标识个人带参二维码
 				if (!eventKey.endsWith("~")) {
 					Long addCount = stringRedis.opsForSet().add(eventKey, fromUserName);
+					//默认set 30天有效
+					stringRedis.expire(eventKey, 30, TimeUnit.DAYS);
 					log.info("兜礼裂变活动，添加redis到set，addCount={}",addCount);
 					String toUserName = eventKey.substring(eventKey.lastIndexOf("~") + 1);
 					com.alibaba.fastjson.JSONObject token = WechatUtil.getAccessTokenTicketRedisByChannel(channel);

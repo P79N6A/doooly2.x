@@ -8,6 +8,7 @@ import com.doooly.business.order.service.OrderService.ProductType;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.PayMsg;
@@ -75,7 +76,7 @@ public class NexusProcessor implements ProductProcessor{
                 //【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
                 if (!PayMsg.success_code.equals(refMsg.getCode())) {
                     String mobiles = user.getTelephone();
-                    String alidayuSmsCode = "SMS_125955124";
+                    String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
                     JSONObject paramSMSJSON = new JSONObject();
                     paramSMSJSON.put("productType", ProductType.getProductTypeName(order.getProductType()));
                     paramSMSJSON.put("phone", "4001582212");

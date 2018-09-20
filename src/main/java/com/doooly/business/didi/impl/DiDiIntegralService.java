@@ -7,6 +7,7 @@ import com.didi.DiDiConnector;
 import com.doooly.business.didi.constants.DiDiConstants;
 import com.doooly.business.didi.service.DiDiIntegralServiceI;
 import com.doooly.business.didi.utils.DidiEnterpriseApiUtil;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.IdGeneratorUtil;
 import com.doooly.common.util.ThirdPartySMSUtil;
@@ -341,7 +342,7 @@ public class DiDiIntegralService implements DiDiIntegralServiceI {
                 try {
                     // 积分退成功发送短信
                     String mobiles = adUser.getTelephone();
-                    String alidayuSmsCode = "SMS_109475271";
+                    String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.refund_success_template_code;
                     JSONObject paramSMSJSON = new JSONObject();
                     paramSMSJSON.put("product", "滴滴积分兑换");
                     paramSMSJSON.put("integral", integral);

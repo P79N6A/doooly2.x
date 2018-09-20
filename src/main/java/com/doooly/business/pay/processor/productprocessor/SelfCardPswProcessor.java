@@ -2,14 +2,13 @@ package com.doooly.business.pay.processor.productprocessor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
-import com.doooly.business.ofpay.service.OfPayService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.utils.AESTool;
 import com.doooly.business.product.service.ProductCouponService;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.common.constants.PropertiesHolder;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdSelfProductCoupon;
@@ -105,7 +104,7 @@ public class SelfCardPswProcessor implements ProductProcessor {
         if(!bool){
             AdUser user = adUserServiceI.getById(order.getUserId().intValue());
             String mobiles = user.getTelephone();
-            String alidayuSmsCode = "SMS_125955124";
+            String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
             JSONObject paramSMSJSON = new JSONObject();
             paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
             paramSMSJSON.put("phone", "4001582212");

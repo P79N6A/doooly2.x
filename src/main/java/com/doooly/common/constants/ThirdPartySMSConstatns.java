@@ -78,4 +78,14 @@ public class ThirdPartySMSConstatns {
 		/** 罗森smsContent */
 		public static String luosen_smsContent = smsBundle.getString("luosen.smsContent");
 	}
+
+	/** 短信模板参数配置 */
+	public static class SMSTemplateConfig{
+		/** 充值失败短信模板 */
+		public static String recharge_fail_template_code = "SMS_145596520";
+		/** 退款成功短信模板 */
+		public static String refund_success_template_code = "SMS_145596516";
+		/** 发送卡号卡密模板 */
+		public static String send_card_template_code = "SMS_124330065";
+	}
 }

@@ -15,6 +15,7 @@ import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.common.constants.PaymentConstants;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.common.webservice.WebService;
@@ -84,7 +85,7 @@ public class RefundServiceImpl extends AbstractRefundService {
                 OrderItemVo orderItem = items.get(0);
                 AdUser adUser = adUserDao.getById(order.getUserId().intValue());
                 String mobiles = adUser.getTelephone();
-                String alidayuSmsCode = "SMS_145596516";
+                String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.refund_success_template_code;
                 JSONObject paramSMSJSON = new JSONObject();
                 paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
                 paramSMSJSON.put("integral", order.getTotalMount().toString());
@@ -245,7 +246,7 @@ public class RefundServiceImpl extends AbstractRefundService {
                     // 积分退成功发送短信
                     OrderItemVo orderItem = order.getItems().get(0);
                     String mobiles = adUser.getTelephone();
-                    String alidayuSmsCode = "SMS_145596516";
+                    String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.refund_success_template_code;
                     JSONObject paramSMSJSON = new JSONObject();
                     paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
                     paramSMSJSON.put("integral", payFlow.getAmount().toString());

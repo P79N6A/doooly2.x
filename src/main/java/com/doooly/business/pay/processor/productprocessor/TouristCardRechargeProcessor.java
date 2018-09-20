@@ -9,6 +9,7 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.touristCard.datacontract.response.AccountRechargeResponse;
 import com.doooly.business.touristCard.service.TouristCardService;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.dao.reachad.TouristCardDao;
 import com.doooly.dto.common.PayMsg;
@@ -87,7 +88,7 @@ public class TouristCardRechargeProcessor implements ProductProcessor {
 					if(!PayMsg.success_code.equals(payMsg.getCode())){
 						AdUser user = adUserServiceI.getById(order.getUserId().intValue());
 						String mobiles = user.getTelephone();
-						String alidayuSmsCode = "SMS_125955124";
+						String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
 						JSONObject paramSMSJSON = new JSONObject();
 						paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
 						paramSMSJSON.put("phone", "4001582212");

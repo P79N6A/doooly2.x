@@ -3,6 +3,7 @@ package com.doooly.business.pay.processor.productprocessor;
 import java.util.Map;
 
 import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.common.constants.ThirdPartySMSConstatns;
 import com.doooly.entity.reachad.AdUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class CardPswProcessor implements ProductProcessor{
 						String orderDetail = item.getGoods() + item.getSku();
 						if(!StringUtils.isEmpty(cardno) && !StringUtils.isEmpty(cardpws)){
 							String mobiles = order.getConsigneeMobile();
-							String alidayuSmsCode = "SMS_124330065";
+							String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.send_card_template_code;
 							JSONObject paramSMSJSON = new JSONObject();
 							paramSMSJSON.put("product", orderDetail);
 							//paramSMSJSON.put("cardNo", cardno);
@@ -104,7 +105,7 @@ public class CardPswProcessor implements ProductProcessor{
 				if(!bool){
 					AdUser user = adUserServiceI.getById(order.getUserId().intValue());
 					String mobiles = user.getTelephone();
-					String alidayuSmsCode = "SMS_125955124";
+					String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
 					JSONObject paramSMSJSON = new JSONObject();
 					paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
 					paramSMSJSON.put("phone", "4001582212");

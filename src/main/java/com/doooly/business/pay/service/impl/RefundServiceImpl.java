@@ -84,7 +84,7 @@ public class RefundServiceImpl extends AbstractRefundService {
                 OrderItemVo orderItem = items.get(0);
                 AdUser adUser = adUserDao.getById(order.getUserId().intValue());
                 String mobiles = adUser.getTelephone();
-                String alidayuSmsCode = "SMS_109475271";
+                String alidayuSmsCode = "SMS_145596516";
                 JSONObject paramSMSJSON = new JSONObject();
                 paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
                 paramSMSJSON.put("integral", order.getTotalMount().toString());
@@ -187,7 +187,7 @@ public class RefundServiceImpl extends AbstractRefundService {
 //					// 积分退成功发送短信
 //					OrderItemVo orderItem = order.getItems().get(0);
 //					String mobiles = adUser.getTelephone();
-//					String alidayuSmsCode = "SMS_109475271";
+//					String alidayuSmsCode = "SMS_145596516";
 //					JSONObject paramSMSJSON = new JSONObject();
 //					paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
 //					paramSMSJSON.put("integral", payFlow.getAmount().toString());
@@ -245,7 +245,7 @@ public class RefundServiceImpl extends AbstractRefundService {
                     // 积分退成功发送短信
                     OrderItemVo orderItem = order.getItems().get(0);
                     String mobiles = adUser.getTelephone();
-                    String alidayuSmsCode = "SMS_109475271";
+                    String alidayuSmsCode = "SMS_145596516";
                     JSONObject paramSMSJSON = new JSONObject();
                     paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
                     paramSMSJSON.put("integral", payFlow.getAmount().toString());

@@ -22,6 +22,7 @@ public final class AdUserPersonalInfo {
 	private Integer isAudit;// '审核状态 0：审核中，1：审核通过，2：审核不通过',
 	private Integer dataSources;// '数据来源 0:平台导入，1：员工自主申请',
 	private String authFlag;// 认证标识,默认非认证会员(0-非认证会员,1-认证会员),
+	private Integer isSetPassword;// 是否设置过支付密码 0 ，未设置；1，已设置
 
 	public Long getId() {
 		return id;
@@ -114,7 +115,16 @@ public final class AdUserPersonalInfo {
 		this.authFlag = authFlag;
 	}
 
-	@Override
+
+    public Integer getIsSetPassword() {
+        return isSetPassword;
+    }
+
+    public void setIsSetPassword(Integer isSetPassword) {
+        this.isSetPassword = isSetPassword;
+    }
+
+    @Override
 	public String toString() {
 		return "AdUserPersonalInfo [id=" + id + ", adGroupDepartment=" + adGroupDepartment + ", workNumber="
 				+ workNumber + ", birthday=" + birthday + ", isRegularEmployee=" + isRegularEmployee + ", entryDate="

@@ -328,7 +328,8 @@ public class AdInvitationServiceI implements AdInvitationService {
 			//新增会员附属表数据
 			AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
 			adUserPersonalInfo.setId(famUser.getId());
-			adUserPersonalInfo.setAuthFlag("0");;
+			adUserPersonalInfo.setAuthFlag("0");
+            adUserPersonalInfo.setIsSetPassword(0);//默认未设置过密码
 			adUserPersonalInfoDao.insert(adUserPersonalInfo);
 			//邀请记录表新增记录
 			int result = this.sendCodeAndSaveRecord(famUser, invitation, channel);

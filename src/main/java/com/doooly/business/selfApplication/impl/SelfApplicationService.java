@@ -1,16 +1,5 @@
 package com.doooly.business.selfApplication.impl;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.doooly.business.selfApplication.SelfApplicationServiceI;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdGroupDepartmentDao;
@@ -25,7 +14,15 @@ import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
 import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
-import com.doooly.publish.rest.life.impl.SelfApplicationRestService;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @Description: 员工自主申请
@@ -96,7 +93,7 @@ public class SelfApplicationService implements SelfApplicationServiceI{
 			//record.setDataSources(1);
 			record.setSex(sex);
 			record.setPassword("96e79218965eb72c92a549dd5a330112");
-			record.setPayPassword("96e79218965eb72c92a549dd5a330112");// 默认支付密码
+			record.setPayPassword(null);// 默认支付密码
 			record.setIntegral(new BigDecimal("0"));
 			record.setLineCredit(new BigDecimal("0"));
 			record.setIsActive("1");// 默认未激活
@@ -121,6 +118,7 @@ public class SelfApplicationService implements SelfApplicationServiceI{
 				count = wPrefix + count;
 				
 			}
+			record.setIsPayPassword("1");
 			record.setCardNumber(findGroupByID.getGroupNum()+count);
 			adUserDao.insert(record);
 			AdUser adUser = adUserDao.findByMobile(telephone);
@@ -131,6 +129,7 @@ public class SelfApplicationService implements SelfApplicationServiceI{
 			adUserPersonalInfo.setIsAudit(0);
 			adUserPersonalInfo.setDepartmentID(Long.valueOf(departmentId));
 			adUserPersonalInfo.setWorkNumber(workNumber);
+            adUserPersonalInfo.setIsSetPassword(0);
 			adUserPersonalInfoDao.insert(adUserPersonalInfo);
 			//加A库数据
 			LifeGroup lifeGroup = new LifeGroup();

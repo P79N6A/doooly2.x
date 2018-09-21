@@ -595,6 +595,7 @@ public class AdUserService implements AdUserServiceI {
 				if (jsonParam.get("workerNumber") != null && !"".equals(jsonParam.get("workerNumber"))) {
 					adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 				}
+                adUserPersonalInfo.setIsSetPassword(0);
 				// 执行保存
 				int personalCount = adUserPersonalInfoDao.insert(adUserPersonalInfo);
 				if (personalCount <= 0) {
@@ -1156,6 +1157,12 @@ public class AdUserService implements AdUserServiceI {
 						//不存在手机号(A库是否存在手机号)
 						AdUser u = newAdUser(telephone, group, md5Pwd);
 						adUserDao.insert(u);
+                        //插入个人扩展属性
+                        AdUser adUser = adUserDao.findByMobile(telephone);
+                        AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+                        adUserPersonalInfo.setId(adUser.getId());
+                        adUserPersonalInfo.setIsSetPassword(0);
+                        adUserPersonalInfoDao.insert(adUserPersonalInfo);
 						//插入数据
 						AdUser findByMobile = adUserDao.findByMobile(telephone);
 						dealLifeMemberDataForActive(u);
@@ -1236,6 +1243,7 @@ public class AdUserService implements AdUserServiceI {
 		u.setCardNumber(group.getGroupNum() + countUser);
 		u.setPassword(md5Pwd);
 		u.setPayPassword(md5Pwd);
+        u.setIsPayPassword("1");
 		Date nowDate = new Date();
 		u.setDataSyn(AdUser.DATA_SYN_ON);
 		u.setCreateBy("0");

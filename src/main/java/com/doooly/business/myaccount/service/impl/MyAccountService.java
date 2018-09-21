@@ -329,6 +329,15 @@ public class MyAccountService implements MyAccountServiceI {
             return messageDataBean;
         }
         String encryptByMd5 = MD5Util.digest(decryptByAES,KeyConstants.CHARSET);
+        AdUserConn adUserConn = new AdUserConn();
+        adUserConn.setUserId(userId);
+        adUserConn.setId(Long.parseLong(userId));
+        int result = adUserDao.getPersonalInfoByUserId(adUserConn);
+        if (result == 0) {
+            //如果为空插入用户拓展信息
+            adUserDao.insertPersonalData(adUserConn);
+        }
+        //更新支付方式和密码
         adUserPersonalInfoDao.updatePayPassword(userId,encryptByMd5,isPayPassword);
         messageDataBean.setCode(MessageDataBean.success_code);
         return messageDataBean;

@@ -667,7 +667,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //构建收银台接口需要参数
         JSONObject param = new JSONObject();
         param.put("businessId", order.getBussinessId());
-        param.put("isPayPassword", user.getIsPayPassword());
+        param.put("isPayPassword", "2".equals(user.getIsPayPassword())?"2":1);//处理密码模式都是验证码模式
         PayMsg payMsg = new PayMsg(OrderMsg.valid_pass_code, OrderMsg.valid_pass__mess);
         payMsg.setJsonData(param);
         return payMsg;

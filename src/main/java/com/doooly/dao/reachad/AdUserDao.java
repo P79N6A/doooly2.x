@@ -12,6 +12,18 @@ import com.doooly.entity.reachad.AdUserConn;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
 
 public interface AdUserDao extends BaseDaoI<AdUser> {
+
+	/**
+	 * 通过手机号注销用户
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年9月25日 下午6:16:23 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	int cancelUserByPhoneNo(String phoneNo);
 	/**
 	 * token获取当前用户信息
 	 * 
@@ -19,7 +31,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 *            request token-登录验证参数 ,channel-请求来源
 	 * @return AdUser
 	 */
-	public AdUser getCurrentUser(@Param("userId") String userId);
+	AdUser getCurrentUser(@Param("userId") String userId);
 
 	int deleteByPrimaryKey(Long id);
 
@@ -39,9 +51,9 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param AdUser
 	 * @return
 	 */
-	public AdUser get(AdUser user);
+	AdUser get(AdUser user);
 
-	public int updatePwd(@Param("mobile") String mobile, @Param("newPwd") String newPwd);
+	int updatePwd(@Param("mobile") String mobile, @Param("newPwd") String newPwd);
 
 	/**
 	 * 修改用户激活状态
@@ -49,39 +61,39 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param adUser
 	 * @return
 	 */
-	public int updateActiveStatus(AdUser adUser);
+	int updateActiveStatus(AdUser adUser);
 
-	public AdUser findAvailableByCardNumber(AdUser adUser);
+	AdUser findAvailableByCardNumber(AdUser adUser);
 
 	/**
 	 * 获取近两周每天数目 type 1 家属 0 员工
 	 */
-	public Integer getCountByWeekActive(int type, int i);
+	Integer getCountByWeekActive(int type, int i);
 
 	/**
 	 * 获取近六个月每个月数目 * type 1 家属 0 员工
 	 */
-	public Integer getCountByMonthActive(int type, int i);
+	Integer getCountByMonthActive(int type, int i);
 
 	/**
 	 * 获取截止至两周的每天的数目 * type 1 家属 0 员工
 	 */
-	public Integer getCountByWeekMember(int type, int i);
+	Integer getCountByWeekMember(int type, int i);
 
 	/**
 	 * 获取截止至近六个月的每个月的数目 * type 1 家属 0 员工
 	 */
-	public Integer getCountByMonthMember(int type, int i);
+	Integer getCountByMonthMember(int type, int i);
 
 	/**
 	 * 获取当天激活数目 type 1 家属 0 员工 null 全部
 	 */
-	public Integer getCountByToday(Integer type);
+	Integer getCountByToday(Integer type);
 
 	/**
 	 * 获取截止今天总激活数目 type 1 家属 0 员工
 	 */
-	public Integer getCountByTotal(Integer type);
+	Integer getCountByTotal(Integer type);
 
 	/**
 	 * 根据查询条件获取用户信息
@@ -89,7 +101,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param adUser
 	 * @return
 	 */
-	public int getUserCounts(AdUser adUser);
+	int getUserCounts(AdUser adUser);
 
 	/**
 	 * 根据查询条件拼接会员手机号，以‘,’逗号分隔
@@ -97,9 +109,9 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param userMap
 	 * @return
 	 */
-	public String getUserTels(Map<String, Object> paramMap);
+	String getUserTels(Map<String, Object> paramMap);
 
-	public Long getIdByPhoneOrCard(String phoneOrCard);
+	Long getIdByPhoneOrCard(String phoneOrCard);
 
 	/**
 	 * 获取用户财富值
@@ -196,32 +208,32 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	/**
 	 * 根据手机号/工号获取用户信息
 	 */
-	public AdUser getUserByTelWorkNum(AdUser adUser);
+	AdUser getUserByTelWorkNum(AdUser adUser);
 
 	/**
 	 * 根据手机号获取用户信息
 	 */
-	public AdUser findByTelephone(AdUser adUser);
+	AdUser findByTelephone(AdUser adUser);
 
 	/**
 	 * 根据工号获取用户信息
 	 */
-	public AdUser findUserByNameAndWorkNumber(AdUser adUser);
+	AdUser findUserByNameAndWorkNumber(AdUser adUser);
 
 	/**
 	 * 保存用户个人信息
 	 */
-	public void savePersonalInfo(AdUserPersonalInfo adUserPersonalInfo);
+	void savePersonalInfo(AdUserPersonalInfo adUserPersonalInfo);
 
 	/**
 	 * 更新用户个人信息(user,personal)
 	 */
-	public void updateUserPersonal(AdUser user);
+	void updateUserPersonal(AdUser user);
 
 	/**
 	 * 删除用户信息(逻辑删除)
 	 */
-	public void deleteAdUser(AdUser user);
+	void deleteAdUser(AdUser user);
 
 	/**
 	 * 查詢家属邀请所有用户
@@ -229,7 +241,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param userList
 	 * @return
 	 */
-	public List<AdUser> getFamilysByids(@Param("userList") List<String> userList);
+	List<AdUser> getFamilysByids(@Param("userList") List<String> userList);
 
 	/**
 	 * 根据手机号查询
@@ -245,7 +257,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param cardNumber
 	 * @return
 	 */
-	public AdUser findByCardNumber(String cardNumber);
+	AdUser findByCardNumber(String cardNumber);
 
 	/**
 	 * 查询单个插入的员工
@@ -253,11 +265,11 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param adUser
 	 * @return
 	 */
-	public AdUser getUser(AdUser adUser);
+	AdUser getUser(AdUser adUser);
 
-	public AdUser findByMobileBySelfApplication(String mobile);
+	AdUser findByMobileBySelfApplication(String mobile);
 
-	public List<Map> getMyFamilyInfo(@Param("userId") String userId);
+	List<Map> getMyFamilyInfo(@Param("userId") String userId);
 
 	void updateSelfInfomation(AdUser user);
 
@@ -274,14 +286,14 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 
 	 * @param groupId-企业ID
 	 */
-	public String createCardNumber(@Param("groupId") String groupId);
+	String createCardNumber(@Param("groupId") String groupId);
 
 	/**
 	 * 部分字段存储用户
 	 * 
 	 * @return adUser-id
 	 */
-	public int saveUser(AdUser adUser);
+	int saveUser(AdUser adUser);
 
 	void addIntegral(@Param("userId") Long userId, @Param("addIntegral") BigDecimal addIntegral);
 
@@ -298,7 +310,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @return groupShortName - 企业简称
 	 * 
 	 */
-	public HashMap<String, Object> getWechatUserInitInfo(AdUser adUser);
+	HashMap<String, Object> getWechatUserInitInfo(AdUser adUser);
 
 	/**
 	 * 查询手机号对应会员是否为武钢员工
@@ -306,7 +318,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * @param telephone
 	 *            - 手机号
 	 */
-	public AdUser getUserByTelephoneBloc(@Param("telephone") String telephone);
+	AdUser getUserByTelephoneBloc(@Param("telephone") String telephone);
 
 	void updateActiveAndDelFlagById(AdUser user);
 

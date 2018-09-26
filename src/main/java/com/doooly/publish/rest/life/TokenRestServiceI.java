@@ -1,6 +1,7 @@
 package com.doooly.publish.rest.life;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.common.MessageDataBean;
 
 /**
  * 
@@ -45,5 +46,17 @@ public interface TokenRestServiceI {
 	 * @version V1.0
 	 */
 	String refreshToken(JSONObject json);
+	
+	/**
+	 * 注销用户时清空该用户所有渠道已登录token
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年9月25日 下午5:59:54 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	MessageDataBean cancelToken(JSONObject json);
 
 }

@@ -1,8 +1,30 @@
 package com.doooly.business.user.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Date;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.common.service.*;
+import com.doooly.business.common.service.AdActiveCodeServiceI;
+import com.doooly.business.common.service.AdGroupServiceI;
+import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.business.common.service.AppClientServiceI;
+import com.doooly.business.common.service.AppTokenServiceI;
+import com.doooly.business.common.service.LifeMemberServiceI;
+import com.doooly.business.common.service.WSServiceI;
 import com.doooly.business.common.utils.GenerateImageCodeUtil;
 import com.doooly.business.common.utils.ReqTransFormatUtils;
 import com.doooly.business.myaccount.service.MyAccountServiceI;
@@ -17,29 +39,37 @@ import com.doooly.common.token.TokenUtil;
 import com.doooly.dao.reachad.AdBlocBlackUserDao;
 import com.doooly.dao.reachad.AdBlocGroupLoginDao;
 import com.doooly.dao.reachad.AdGroupDao;
+import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.dto.user.*;
-import com.doooly.entity.reachad.*;
+import com.doooly.dto.user.CheckActiveCodeReq;
+import com.doooly.dto.user.CheckActiveCodeRes;
+import com.doooly.dto.user.CheckVerifyCodeReq;
+import com.doooly.dto.user.CheckVerifyCodeRes;
+import com.doooly.dto.user.GetVerifyCodeReq;
+import com.doooly.dto.user.GetVerifyCodeRes;
+import com.doooly.dto.user.LoginReq;
+import com.doooly.dto.user.LoginRes;
+import com.doooly.dto.user.LogoutReq;
+import com.doooly.dto.user.LogoutRes;
+import com.doooly.dto.user.ModifyMobileReq;
+import com.doooly.dto.user.ModifyMobileRes;
+import com.doooly.dto.user.ModifyPwdReq;
+import com.doooly.dto.user.ModifyPwdRes;
+import com.doooly.dto.user.UserActiveNewReq;
+import com.doooly.dto.user.UserActiveReq;
+import com.doooly.dto.user.UserActiveRes;
+import com.doooly.entity.reachad.AdBlocBlackUser;
+import com.doooly.entity.reachad.AdBlocGroupLogin;
+import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AppClient;
+import com.doooly.entity.reachad.AppToken;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.pay.dto.BasePayRes;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.HashMap;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 会员服务类(主)
@@ -51,7 +81,7 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class UserService implements UserServiceI {
 
-	private static Logger logger = Logger.getLogger(UserService.class);
+	private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	@Autowired
 	private WSServiceI wsService;
@@ -79,7 +109,8 @@ public class UserService implements UserServiceI {
 	private AdBlocGroupLoginDao blocGroupLoginDao;
 	@Autowired
 	private AdBlocBlackUserDao blocBlackUserDao;
-
+	@Autowired
+	private AdReturnPointsDao returnPointsDao;
 	@Autowired
 	protected MyAccountServiceI myAccountService;
 
@@ -583,10 +614,11 @@ public class UserService implements UserServiceI {
 			logger.info("====【userLogout】-传入参数：" + paramJson.toJSONString());
 			if (StringUtils.isBlank(token) || StringUtils.isBlank(userId) || StringUtils.isBlank(channel)) {
 				// 用户认证token-rediskey
-				token =  request.getHeader(ConstantsLogin.TOKEN);
+				token = request.getHeader(ConstantsLogin.TOKEN);
 				userId = redisTemplate.opsForValue().get(token);
 				channel = request.getHeader(ConstantsLogin.CHANNEL);
-				logger.info("====>>【userLogout】header-token：" + token + ",==channel："	+ channel + ",==userId：" + userId);
+				logger.info(
+						"====>>【userLogout】header-token：" + token + ",==channel：" + channel + ",==userId：" + userId);
 			}
 			// 删除用户缓存key
 			redisTemplate.delete(String.format(channel + ":" + TOKEN_KEY, userId));
@@ -878,145 +910,24 @@ public class UserService implements UserServiceI {
 		return baseRes;
 	}
 
-	// @Override
-	// public void scheduleUpdateUser() {
-	// String url
-	// ="http://dunion-test.think-tec.com/index.php?s=/addon/WeiSite/Donghang/getMemberInfo.html&end_time=ENDTIME&start_time=STARTTIME&phone=&timestamp=TIMESTAMP&sign=SIGN";
-	// Calendar calendar = Calendar.getInstance();
-	// Long end_time =calendar.getTimeInMillis()/1000;
-	// calendar.setTime(new Date());
-	// calendar.set(Calendar.DATE, calendar.get(Calendar.DATE) - 1);
-	// Long start_time = calendar.getTimeInMillis()/1000;
-	// Long timestamp = Calendar.getInstance().getTimeInMillis()/1000;
-	// String orign
-	// ="end_time="+end_time+"&password=hongbao&start_time="+start_time+"&timestamp="+timestamp;
-	// String sign = MD5Util.MD5Encode(orign, "utf-8");
-	// System.out.println(sign);
-	// url = url.replace("SIGN", sign);
-	// url = url.replace("ENDTIME", String.valueOf(end_time));
-	// url = url.replace("STARTTIME", String.valueOf(start_time));
-	// url = url.replace("TIMESTAMP", String.valueOf(timestamp));
-	// System.out.println(url);
-	// String httpsGet = HttpClientUtil.httpsGet(url);
-	// JSONObject parseObject = JSONObject.parseObject(httpsGet);
-	// if (parseObject.getBooleanValue("success")) {
-	// List<UserCompareReq> users =
-	// JSON.parseArray(parseObject.getString("data"), UserCompareReq.class);
-	// for (UserCompareReq user : users) {
-	// //如果手机号不在我们库中,添加到ad_bloc_user
-	// AdUser findByMobile = adUserDao.findByMobile(user.getPhone());
-	// if (findByMobile ==null) {
-	// try {
-	// AdBlocBlackUser blackUser = new AdBlocBlackUser(88, 0L, user.getPhone(),
-	// user.getPhone(),
-	// user.getUsername(), user.getSub_org());
-	// blocBlackUserDao.insert(blackUser);
-	// logger.info(String.format("定时对比员工数据加入成功一条：name=%s,mobile=%s,groupName=%s",
-	// user.getUsername(),
-	// user.getPhone(),user.getSub_org()));
-	// } catch (Exception e) {
-	// logger.info(String.format("定时对比员工数据加入失败一条：name=%s,mobile=%s,groupName=%s",
-	// user.getUsername(),
-	// user.getPhone(),user.getSub_org()));
-	// }
-	// }
-	// }
-	// }else {
-	// logger.error("定时对比员工数据出错:"+parseObject.getString("error"));
-	// }
-	// }
-	//
-	// @Override
-	// public void initializeScheduleUpdateUser() {
-	// //最初的数据日期
-	//// Calendar earliest = new GregorianCalendar(2017,4,1);
-	//// Calendar now = Calendar.getInstance();
-	// Date d1 = new Date();
-	// Date d2 = new Date();
-	// try {
-	// SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	// d1 = sdf.parse("2017-04-01 00:00:00");
-	// //d2 = sdf.parse("2017-05-30 16:20:00");
-	// } catch (ParseException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// Calendar cal = Calendar.getInstance();
-	// cal.setTime(d1);
-	// long time1 = cal.getTimeInMillis();
-	// cal.setTime(d2);
-	// long time2 = cal.getTimeInMillis();
-	// Long between_days=(time2-time1)/(1000*3600*24);
-	//// Long
-	// between_days=(now.getTimeInMillis()-earliest.getTimeInMillis())/(1000*3600*24);
-	// int count =7;
-	// int maxLoop = (int) (between_days / count);
-	// int minLoop = (int) (between_days % count);
-	//
-	// if (minLoop != 0) {
-	// maxLoop++;
-	// }
-	// int time =0;
-	// try {
-	// for (int i = 0; i < maxLoop; i++) {
-	// time++;
-	// String url
-	// ="http://dunion-test.think-tec.com/index.php?s=/addon/WeiSite/Donghang/getMemberInfo.html&end_time=ENDTIME&start_time=STARTTIME&phone=&timestamp=TIMESTAMP&sign=SIGN";
-	// Calendar calstart = Calendar.getInstance();
-	// Long timestamp =calstart.getTimeInMillis()/1000;
-	// calstart.setTime(d1);
-	// calstart.set(Calendar.DATE, calstart.get(Calendar.DATE) + (count*i));
-	// Long start_time = calstart.getTimeInMillis()/1000;
-	// calstart.setTime(d1);
-	// calstart.set(Calendar.DATE, calstart.get(Calendar.DATE) + (count*(i+1)));
-	// Long end_time = calstart.getTimeInMillis()/1000;
-	// if (start_time < timestamp) {
-	// String orign
-	// ="end_time="+end_time+"&password=hongbao&start_time="+start_time+"&timestamp="+timestamp;
-	// String sign = MD5Util.MD5Encode(orign, "utf-8");
-	// System.out.println(sign);
-	// url = url.replace("SIGN", sign);
-	// url = url.replace("ENDTIME", String.valueOf(end_time));
-	// url = url.replace("STARTTIME", String.valueOf(start_time));
-	// url = url.replace("TIMESTAMP", String.valueOf(timestamp));
-	// System.out.println(url);
-	// String httpsGet = HttpClientUtil.httpsGet(url);
-	// JSONObject parseObject = JSONObject.parseObject(httpsGet);
-	// if (parseObject.getBooleanValue("success")) {
-	// List<UserCompareReq> users =
-	// JSON.parseArray(parseObject.getString("data"), UserCompareReq.class);
-	// for (UserCompareReq user : users) {
-	// //如果手机号不在我们库中,添加到ad_bloc_user
-	// AdUser findByMobile = adUserDao.findByMobile(user.getPhone());
-	// if (findByMobile ==null) {
-	// try {
-	// AdBlocBlackUser blackUser = new AdBlocBlackUser(88, 0L, user.getPhone(),
-	// user.getPhone(),
-	// user.getUsername(), user.getSub_org());
-	// blocBlackUserDao.insert(blackUser);
-	// logger.info(String.format("定时对比员工数据加入成功一条：name=%s,mobile=%s,groupName=%s",
-	// user.getUsername(),
-	// user.getPhone(),user.getSub_org()));
-	// } catch (Exception e) {
-	// logger.info(String.format("定时对比员工数据加入失败一条：name=%s,mobile=%s,groupName=%s",
-	// user.getUsername(),
-	// user.getPhone(),user.getSub_org()));
-	// }
-	// }
-	// }
-	// }else {
-	// logger.error("定时对比员工数据出错:"+parseObject.getString("error"));
-	// }
-	// }else{break;}
-	// }
-	// } catch (Exception e) {
-	// try {
-	// throw new Exception("批量插入记录错误!", e);
-	// } catch (Exception e1) {
-	// e1.printStackTrace();
-	// }
-	// }
-	// System.out.println(time);
-	// }
-	//
+	@Override
+	public Long cancelUserByphoneNo(String phoneNo) {
+
+		// 1.根据手机号查询该用户信息
+		AdUser user = adUserDao.findByMobile(phoneNo);
+		if (user != null) {
+			Long userId = user.getId();
+			//1.1 ad_user表用户修改为注销状态
+			adUserDao.cancelUserByPhoneNo(phoneNo);
+			//1.2 xx_member表用户修改为注销状态
+			memberDao.cancelUserByPhoneNo(phoneNo);
+			//1.3 冻结预计返利状态
+			returnPointsDao.cancelRebateByUserId(userId);
+			return userId;
+		} else {
+			logger.info("兜礼会员不存在无需注销用，phoneNo={}", phoneNo);
+		}
+		return null;
+	}
+
 }

@@ -2,11 +2,14 @@ package com.doooly.common.token;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.doooly.common.context.SpringContextUtils;
@@ -22,6 +25,7 @@ import com.doooly.common.context.SpringContextUtils;
  * @version V1.0
  */
 public class TokenUtil {
+	private static Logger log = LoggerFactory.getLogger(TokenUtil.class);
 	private static StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
 			.getBeanByClass(StringRedisTemplate.class);
 	// 会员token，唯一标识，放入缓存
@@ -107,5 +111,36 @@ public class TokenUtil {
 		redisService.opsForValue().set(userToken, userId);
 
 		return userToken;
+	}
+
+	/**
+	 * 注销用户时清除掉用户的token令牌
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年9月25日 下午5:24:41
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	public static void cancelUserToken(String userId) {
+		long start = System.currentTimeMillis();
+		// 1.初始化需要删除的token key值
+		Set<String> tokenKeys = new HashSet<>();
+		tokenKeys.add(String.format("token:%s", userId));
+		tokenKeys.add(String.format("h5:token:%s", userId));
+		tokenKeys.add(String.format("wechat:token:%s", userId));
+		tokenKeys.add(String.format("wiscoapp:token:%s", userId));
+		tokenKeys.add(String.format("wiscowechat:token:%s", userId));
+
+		// 2.查询key对应的value集合
+		List<String> valueList = redisService.opsForValue().multiGet(tokenKeys);
+
+		// 3.删除该用户的所有token key
+		redisService.delete(tokenKeys);
+		redisService.delete(valueList);
+
+		log.info("注销用户时清空该用户token，cost={}ms, token key list={},{}", System.currentTimeMillis() - start, tokenKeys,
+				valueList);
 	}
 }

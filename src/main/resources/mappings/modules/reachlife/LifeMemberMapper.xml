@@ -72,7 +72,12 @@
 	  </set>
 	  where mobile = #{mobile}
 	</update>
-  
+  	<update id="cancelUserByPhoneNo" parameterType="java.lang.String">
+		update xx_member set is_enabled=4,modify_date=now()
+		<where>
+			mobile=#{phoneNo}
+		</where>
+	</update>
 	<!-- ID获取用户信息 -->
 	<select id="get" parameterType="String" resultType="com.doooly.entity.reachlife.LifeMember">
 		select

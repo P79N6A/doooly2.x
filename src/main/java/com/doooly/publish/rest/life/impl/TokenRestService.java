@@ -5,11 +5,18 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.user.service.UserServiceI;
 import com.doooly.common.exception.GlobalException;
 import com.doooly.common.token.TokenUtil;
 import com.doooly.dto.common.ConstantsLogin;
+import com.doooly.dto.common.ConstantsLogin.Login;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.TokenRestServiceI;
 
 /**
@@ -24,6 +31,9 @@ import com.doooly.publish.rest.life.TokenRestServiceI;
 @Component
 @Path("/token")
 public class TokenRestService implements TokenRestServiceI {
+
+	@Autowired
+	private UserServiceI userService;
 
 	@POST
 	@Path(value = "/validateUserToken")
@@ -74,4 +84,19 @@ public class TokenRestService implements TokenRestServiceI {
 		return TokenUtil.refreshUserToken(json.getString(ConstantsLogin.CHANNEL), json.getString("userId"));
 	}
 
+	@POST
+	@Path(value = "/cancelToken")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public MessageDataBean cancelToken(JSONObject json) {
+		JSONArray phones = json.getJSONArray("phones");
+		if(phones!=null){
+			for(int index=0;index<phones.size();index++){
+				String phoneNo = phones.getString(index);
+				userService.cancelUserByphoneNo(phoneNo);
+			}
+		}
+		return new MessageDataBean(Login.SUCCESS.getCode(),Login.SUCCESS.getMsg());
+	}
 }

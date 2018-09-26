@@ -6,6 +6,19 @@ import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachlife.LifeMember;
 
 public interface LifeMemberDao extends BaseDaoI<LifeMember> {
+
+	/**
+	 * 通过手机号注销用户
+	 * 
+	* @author  hutao 
+	* @date 创建时间：2018年9月25日 下午6:23:31 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return
+	 */
+	int cancelUserByPhoneNo(@Param("phoneNo")String phoneNo);
+
 	/**
 	 * 根据会员卡号修改会员信息
 	 * 
@@ -69,8 +82,9 @@ public interface LifeMemberDao extends BaseDaoI<LifeMember> {
 	 */
 	public int saveMember(LifeMember lifeMember);
 
-	public int updateFlgByAdId(@Param("adId") String adId,@Param("flg") String flg);
-	public LifeMember findMemberByTelephone(@Param("telephone")String telephone);
+	public int updateFlgByAdId(@Param("adId") String adId, @Param("flg") String flg);
+
+	public LifeMember findMemberByTelephone(@Param("telephone") String telephone);
 
 	public void updateActiveAndDelFlagById(LifeMember member);
 }

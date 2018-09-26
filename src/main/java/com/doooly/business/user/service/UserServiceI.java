@@ -170,6 +170,17 @@ public interface UserServiceI {
 	 * 保存用户手机号修改记录
 	 */
 	BaseRes<JSONObject> saveTelephoneChange(JSONObject reqJson);
+	/**
+	 * 通过手机号注销用户
+	 * 并返回该用户ID
+	* @author  hutao 
+	* @date 创建时间：2018年9月25日 下午6:07:15 
+	* @version 1.0 
+	* @parameter  
+	* @since  
+	* @return 用户ID
+	 */
+	Long cancelUserByphoneNo(String phoneNo);
 
 	// public void scheduleUpdateUser();
 	//

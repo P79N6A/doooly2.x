@@ -1,12 +1,14 @@
 package com.doooly.common.token;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,10 +137,16 @@ public class TokenUtil {
 
 		// 2.查询key对应的value集合
 		List<String> valueList = redisService.opsForValue().multiGet(tokenKeys);
-
 		// 3.删除该用户的所有token key
+		for (String tt : tokenKeys) {
+			String vv = redisService.opsForValue().get(tt);
+			if (vv != null) {
+				redisService.delete(vv);
+			}
+		}
 		redisService.delete(tokenKeys);
-		redisService.delete(valueList);
+
+		// redisService.delete(valueList);
 
 		log.info("注销用户时清空该用户token，cost={}ms, token key list={},{}", System.currentTimeMillis() - start, tokenKeys,
 				valueList);

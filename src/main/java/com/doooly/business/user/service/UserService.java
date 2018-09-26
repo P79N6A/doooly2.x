@@ -923,6 +923,8 @@ public class UserService implements UserServiceI {
 			memberDao.cancelUserByPhoneNo(phoneNo);
 			//1.3 冻结预计返利状态
 			returnPointsDao.cancelRebateByUserId(userId);
+			//1.4 清空token
+			TokenUtil.cancelUserToken(String.valueOf(userId));
 			return userId;
 		} else {
 			logger.info("兜礼会员不存在无需注销用，phoneNo={}", phoneNo);

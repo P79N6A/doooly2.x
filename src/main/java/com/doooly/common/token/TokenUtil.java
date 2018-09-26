@@ -131,6 +131,7 @@ public class TokenUtil {
 		Set<String> tokenKeys = new HashSet<>();
 		tokenKeys.add(String.format("token:%s", userId));
 		tokenKeys.add(String.format("h5:token:%s", userId));
+		tokenKeys.add(String.format("app:token:%s", userId));
 		tokenKeys.add(String.format("wechat:token:%s", userId));
 		tokenKeys.add(String.format("wiscoapp:token:%s", userId));
 		tokenKeys.add(String.format("wiscowechat:token:%s", userId));

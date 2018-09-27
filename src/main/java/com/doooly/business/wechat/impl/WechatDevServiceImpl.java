@@ -117,7 +117,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			if (WechatConstants.MESSAGE_TYPE_TEXT.equals(msgType)) {
 				String conent = json.getString("Content");
 				// 添加回复文本消息内容
-				messageList.add(createTextMessage(channel, fromUserName, conent));
+				messageList.add(createMessageReqJson(channel, fromUserName, conent));
 				// 推送事件
 			} else {
 				String event = json.getString("Event");

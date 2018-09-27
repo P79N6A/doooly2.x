@@ -183,7 +183,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				// 用户点击事件推送
 				case WechatConstants.EVENT_TYPE_CLICK:
 					eventKey = json.getString("EventKey");
-					String textMsg = createTextMessage(channel, fromUserName, eventKey);
+					String textMsg = createMessageReqJson(channel, fromUserName, eventKey);
 					messageList.add(textMsg);
 					log.info("====【dealCallback】用户点击菜单事件回复文本消息" + textMsg);
 					// 存储微信推送信息

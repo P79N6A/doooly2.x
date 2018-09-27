@@ -152,7 +152,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					count = this.saveWechatEventPush(json);
 					// 若为0则插入失败，不再执行后续业务
 					if (count == 0) {
-						return null;
+						String msg = createMessageReqJson(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
+						messageList.add(msg);
+						return messageList;
 					}
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动

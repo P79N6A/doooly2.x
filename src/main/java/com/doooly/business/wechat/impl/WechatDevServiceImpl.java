@@ -173,9 +173,10 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
 					} else {
 						// 微信公众号关注回复信息
-						String textMsg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
-						messageList.add(textMsg);
-						log.info("====【dealCallback】关注微信公众号后回复文本消息" + textMsg);
+						String msg = createMessageReqJson(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
+//						String msg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
+						messageList.add(msg);
+						log.info("====【dealCallback】关注微信公众号后回复客服消息" + msg);
 					}
 
 					break;
@@ -254,28 +255,25 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	}
 
 	/**
-	 * 组装回复图片消息
+	 * 创建客服消息（文本/图片/图文等消息）
 	 * 
 	 * @author hutao
-	 * @date 创建时间：2018年4月12日 下午4:40:20
+	 * @date 创建时间：2018年9月27日 上午9:32:25
 	 * @version 1.0
 	 * @parameter
 	 * @since
-	 * @return
+	 * @return 客服消息（Json格式）
 	 */
-	private String createImageMessage(String fromUserName, String toUserName) {
-		ImageMessage image = new ImageMessage();
-		image.setCreateTime(System.currentTimeMillis() / 1000);
-		image.setMsgType(WechatConstants.MESSAGE_TYPE_IMAGE);
-		Image ig = new Image();
-		// todo...生成图片文件通过微信素材文件接口上传到微信服务器
-		ig.setMediaId("hI3K44PcMYgrgzS18IHLfZkaU6leU3bL9cQ8fu1eXAxmiy04oH93sFyyTnm5pjBL");
-		image.setImage(ig);
-		image.setFromUserName(toUserName);
-		image.setToUserName(fromUserName);
-		String imageXml = ThirdPartyWechatUtil.messageBean2Xml(image);
-		log.info("微信回调事件-被动回复图片消息=" + imageXml);
-		return imageXml;
+	private String createMessageReqJson(String channel, String toUserName, String switchType) {
+		String dictKey = channel + "_" + switchType;
+		String msgJson = configService.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		// 若为空则默认返回客服中心统一消息
+		if (StringUtils.isBlank(msgJson)) {
+			msgJson = configService.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
+		}
+		msgJson = msgJson.replace("OPENID", toUserName);
+
+		return msgJson;
 	}
 
 	/**

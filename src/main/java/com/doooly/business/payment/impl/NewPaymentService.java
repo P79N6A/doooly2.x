@@ -157,14 +157,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         logger.info(sign);
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
@@ -309,13 +309,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", params);
+        parameters.put("param", params.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", params);
+        object.put("param", params.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.GET_PAYFROM_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -525,7 +525,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         logger.info("下预付单参数=======accessToken========" + accessToken);
         if (accessToken == null) {
@@ -541,7 +541,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_QUERY_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -697,7 +697,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         if (accessToken == null) {
             ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
@@ -712,7 +712,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.GET_PAYFROM_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -747,13 +747,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -786,13 +786,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
@@ -834,13 +834,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("client_id", clientId);
         parameters.put("timestamp", timestamp);
         parameters.put("access_token", accessToken);
-        parameters.put("param", param);
+        parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
         object.put("access_token", accessToken);
-        object.put("param", param);
+        object.put("param", param.toJSONString());
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_APPLY_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);

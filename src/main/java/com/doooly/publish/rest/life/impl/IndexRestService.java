@@ -148,6 +148,7 @@ public class IndexRestService {
                 bean.setIconUrl(merchant.getLogo());
                 bean.setLinkUrl(BASE_URL + dealType + "/" + merchant.getId());
                 bean.setSubUrl(BASE_URL.substring(BASE_URL.indexOf("#") + 1, BASE_URL.length()) + dealType + "/" + merchant.getId());
+                bean.setIsSupportIntegral(merchant.getIsSupportIntegral());
                 beans.add(bean);
             }
         }

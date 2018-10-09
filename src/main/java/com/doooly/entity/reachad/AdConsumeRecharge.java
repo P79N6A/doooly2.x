@@ -12,6 +12,8 @@ public class AdConsumeRecharge {
     private String iconUrl;  //图标地址
     private String linkUrl; //链接地址
     private String subUrl; //跳转链接后缀
+    /** 是否支持积分*/
+    private String isSupportIntegral;
 
 
     public String getMainTitle() {
@@ -53,4 +55,13 @@ public class AdConsumeRecharge {
     public void setSubUrl(String subUrl) {
         this.subUrl = subUrl;
     }
+
+	public String getIsSupportIntegral() {
+		return isSupportIntegral;
+	}
+
+	public void setIsSupportIntegral(String isSupportIntegral) {
+		this.isSupportIntegral = isSupportIntegral;
+	}
+    
 }

@@ -13,6 +13,7 @@ import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.audience.AudienceTarget;
+import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
 import com.doooly.common.constants.AppConstants;
@@ -226,6 +227,56 @@ public class AppMessageService {
     }
 
     /**
+     * 推送消息 全平台
+     *
+     * @param content 发送内容
+     * @param type    发送平台
+     * @param flag    发送环境
+     * @param url    附加字段
+     * @return 0 失败 ，1成功
+     */
+    public int sendUrlMessage(String content, Integer type, Boolean flag,String url) {
+        LOG.info("send==start==发送内容{},类型{},环境{}", content, type, flag);
+        JPushClient jpushClient;
+        PushPayload payload;
+        if (AppConstants.IOS_SEND == type) {
+            //iso 设置环境
+            jpushClient = new JPushClient(AppConstants.MASTER_SECRET, AppConstants.APP_KEY, null, ClientConfig.getInstance());
+            payload = buildPushObject_ios_all_extra_alert(content,flag, url);
+        } else {
+            //安卓全平台
+            if (flag) {
+                jpushClient = new JPushClient(AppConstants.MASTER_SECRET, AppConstants.APP_KEY, null, ClientConfig.getInstance());
+            } else {
+                jpushClient = new JPushClient(AppConstants.TEST_MASTER_SECRET, AppConstants.TEST_APP_KEY, null, ClientConfig.getInstance());
+            }
+            payload = buildPushObject_android_all_extra_alert(content,url);
+        }
+
+        try {
+            PushResult result = jpushClient.sendPush(payload);
+            LOG.info("Got result - " + result);
+            if (result.getResponseCode() == 200) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } catch (APIConnectionException e) {
+            // Connection error, should retry later
+            LOG.error("Connection error, should retry later", e);
+            return 0;
+
+        } catch (APIRequestException e) {
+            // Should review the error, and fix the request
+            LOG.error("Should review the error, and fix the request", e);
+            LOG.info("HTTP Status: " + e.getStatus());
+            LOG.info("Error Code: " + e.getErrorCode());
+            LOG.info("Error Message: " + e.getErrorMessage());
+            return 0;
+        }
+    }
+
+    /**
      * 快捷地构建推送对象：所有平台，所有设备，内容为 ALERT 的通知。
      *
      * @return
@@ -256,11 +307,46 @@ public class AppMessageService {
      *
      * @return
      */
+    public static PushPayload buildPushObject_ios_all_extra_alert(String content, Boolean flag, String url) {
+        return new PushPayload.Builder()
+                .setPlatform(Platform.ios())
+                .setAudience(Audience.all())
+                .setNotification(Notification.newBuilder().addPlatformNotification(IosNotification.newBuilder()
+                        .setAlert(content)
+                        .addExtra("url",url)
+                        .build())
+                        .build())
+                .setOptions(Options.newBuilder().setApnsProduction(flag).build())
+                .build();
+    }
+
+    /**
+     * 快捷地构建推送对象：所有平台，所有设备，内容为 ALERT 的通知。
+     *
+     * @return
+     */
     public static PushPayload buildPushObject_android_all_alert(String content) {
         return new PushPayload.Builder()
                 .setPlatform(Platform.android())
                 .setAudience(Audience.all())
                 .setNotification(Notification.alert(content))
+                .build();
+    }
+
+    /**
+     * 快捷地构建推送对象：所有平台，所有设备，内容为 ALERT 的通知。
+     *
+     * @return
+     */
+    public static PushPayload buildPushObject_android_all_extra_alert(String content,String url) {
+        return new PushPayload.Builder()
+                .setPlatform(Platform.android())
+                .setAudience(Audience.all())
+                .setNotification(Notification.newBuilder().addPlatformNotification(AndroidNotification.newBuilder()
+                        .setAlert(content)
+                        .addExtra("url",url)
+                        .build())
+                        .build())
                 .build();
     }
 
@@ -274,6 +360,23 @@ public class AppMessageService {
                 .setPlatform(Platform.all())
                 .setAudience(Audience.alias(alias))
                 .setNotification(Notification.alert(content))
+                .build();
+    }
+
+    /**
+     * 构建推送对象：所有平台，推送目标是别名为 "alias"，通知内容为 content。
+     *
+     * @return
+     */
+    public static PushPayload buildPushObject_all_alias_extra_alert(String alias, String content, String url) {
+        return PushPayload.newBuilder()
+                .setPlatform(Platform.all())
+                .setAudience(Audience.alias(alias))
+                .setNotification(Notification.newBuilder().addPlatformNotification(IosNotification.newBuilder()
+                        .setAlert(content)
+                        .addExtra("url",url)
+                        .build())
+                        .build())
                 .build();
     }
 

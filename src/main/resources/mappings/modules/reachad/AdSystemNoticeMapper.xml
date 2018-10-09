@@ -26,10 +26,32 @@
 			new_target_url as "newTargetUrl"
 		from ad_system_notice
 		where
-		(receive_user = #{userId} OR receive_user = '0')
+		receive_user IN (#{userId},'0')
 		and
-		target = #{target}
+		target IN (#{target},'2') AND push_types in (0,1)
 		order by 
+		create_date
+		desc
+		LIMIT #{startIndex},#{pageSize}
+	</select>
+
+	<select id="getSystemNoticeByTypeList" resultType="com.doooly.entity.reachad.AdSystemNotice">
+		select
+			id as "id",
+			title as "title",
+			content as "content",
+			target as "target",
+			create_date as "createDate",
+			notice_type as "noticeType",
+			receive_user as "receiveUser",
+			target_url as "targetUrl",
+			new_target_url as "newTargetUrl"
+		from ad_system_notice
+		where
+		receive_user IN (#{userId},'0')
+		and
+		target IN (#{target},'2') AND push_types in (0,1) AND notice_type = #{noticeType}
+		order by
 		create_date
 		desc
 		LIMIT #{startIndex},#{pageSize}
@@ -40,9 +62,19 @@
 		  COUNT(1)
 		from ad_system_notice
 		where
-		(receive_user = #{userId} OR receive_user = '0')
+		receive_user IN (#{userId},'0')
 		and
-		target = #{target}
+		target IN (#{target},'2') AND push_types in (0,1)
+	</select>
+
+	<select id="getSystemNoticeByTypeNum" resultType="int">
+		select
+		  COUNT(1)
+		from ad_system_notice
+		where
+		receive_user IN (#{userId},'0')
+		and
+		target IN (#{target},'2') AND push_types in (0,1) AND notice_type = #{noticeType}
 	</select>
 
 	<select id="getNoReadList" resultType="com.doooly.entity.reachad.AdSystemNotice">
@@ -51,9 +83,20 @@
         from ad_system_notice a
         where a.id not in (
         select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
-        and (a.receive_user = #{userId} or a.receive_user = '0')
+        AND receive_user IN (#{userId},'0')
         and
-        a.target = #{target}
+        target IN (#{target},'2') AND push_types in (0,1)
+	</select>
+
+	<select id="getNoReadListByType" resultType="com.doooly.entity.reachad.AdSystemNotice">
+		select
+          <include refid="couponColumns"/>
+        from ad_system_notice a
+        where a.id not in (
+        select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
+        AND receive_user IN (#{userId},'0')
+        and
+        target IN (#{target},'2') AND push_types in (0,1) AND notice_type = #{noticeType}
 	</select>
 
 	<select id="getNoReadNum" resultType="int">
@@ -62,9 +105,20 @@
 		from ad_system_notice a
 		where a.id not in (
             select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
-		and (a.receive_user = #{userId} or a.receive_user = '0')
+		AND receive_user IN (#{userId},'0')
 		and
-		a.target = #{target}
+		target IN (#{target},'2') AND push_types in (0,1)
+	</select>
+
+	<select id="getNoReadNumByType" resultType="int">
+		select
+		  COUNT(1)
+		from ad_system_notice a
+		where a.id not in (
+            select b.notice_id from ad_system_notice_read b where b.receive_user = #{userId} )
+		AND receive_user IN (#{userId},'0')
+		and
+		target IN (#{target},'2') AND push_types in (0,1) AND notice_type = #{noticeType}
 	</select>
 
     <insert id="insert" parameterType="com.doooly.entity.reachad.AdSystemNotice">
@@ -90,11 +144,7 @@
                 #{newTargetUrl}
 	        )
     </insert>
-    
-    <update id="updateReadType">
-        UPDATE ad_system_notice SET read_type = 1 WHERE receive_user = #{userId} and target = #{target}
-    </update>
-    
+
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO ad_system_notice_read (
             notice_id,
@@ -108,4 +158,5 @@
               )
           </foreach>
     </insert>
+
 </mapper>

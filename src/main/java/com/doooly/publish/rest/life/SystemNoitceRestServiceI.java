@@ -16,4 +16,14 @@ public interface SystemNoitceRestServiceI {
     String updateReadType(JSONObject json);//修改消息读取状态
 
     String sendMessageToAll(JSONObject json);//发送消息给所有人
+
+    String sendUrlMessageToAll(JSONObject json);//发送消息给所有人带附加链接
+
+    String getSystemNoitceByTypeList(JSONObject json,@Context HttpServletRequest request);//根据推送类型查询结果
+
+    String getNoReadNumByType(JSONObject json);//根据推送类型获取未读取消息数量
+
+    String getListByType(JSONObject json);//获取所有类型集合和未读数量
+
+    String updateReadNoticeType(JSONObject json);//根据类型修改消息读取状态
 }

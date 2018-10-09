@@ -19,6 +19,8 @@ public class AdSystemNotice {
     private String noticeType;
     private String targetUrl;//跳转链接
     private String newTargetUrl;//新跳转链接
+    private String noticeTypeStr;//页面显示字段
+    private Integer noReadNum;//未读数量
 
     public String getId() {
         return id;
@@ -90,5 +92,61 @@ public class AdSystemNotice {
 
     public void setNewTargetUrl(String newTargetUrl) {
         this.newTargetUrl = newTargetUrl;
+    }
+
+    public String getNoticeTypeStr() {
+        return noticeTypeStr;
+    }
+
+    public void setNoticeTypeStr(String noticeTypeStr) {
+        this.noticeTypeStr = noticeTypeStr;
+    }
+
+    public Integer getNoReadNum() {
+        return noReadNum;
+    }
+
+    public void setNoReadNum(Integer noReadNum) {
+        this.noReadNum = noReadNum;
+    }
+
+    public enum NoticeTypeEnum{
+        ORDER_NOTICE("1","订单通知"),
+        POINT_NOTICE("2","积分通知"),
+        SYSTEM_NOTICE("0","系统通知");
+
+        private String noticeType;
+        private String noticeTypeStr;
+
+        NoticeTypeEnum(String noticeType, String noticeTypeStr){
+            this.noticeType = noticeType;
+            this.noticeTypeStr = noticeTypeStr;
+        }
+
+        public String getNoticeType() {
+            return noticeType;
+        }
+
+        public void setNoticeType(String noticeType) {
+            this.noticeType = noticeType;
+        }
+
+        public String getNoticeTypeStr() {
+            return noticeTypeStr;
+        }
+
+        public void setNoticeTypeStr(String noticeTypeStr) {
+            this.noticeTypeStr = noticeTypeStr;
+        }
+
+        public String getNoticeTypeStrByType(String noticeType){
+            NoticeTypeEnum[] values = NoticeTypeEnum.values();
+            for (NoticeTypeEnum value : values) {
+                if(value.noticeType.equals(noticeType)){
+                    return value.noticeTypeStr;
+                }
+            }
+            return null;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.doooly.dto.common;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,11 @@ public class MessageDataBean {
 	public MessageDataBean(String success_code, String success_mess) {
 		this.code = success_code;
 		this.mess = success_mess;
+	}
+	
+	public MessageDataBean(ActivityEnum activityEnum){
+		this.code = activityEnum.getCode();
+		this.mess = activityEnum.getDesc();
 	}
 
 	// 操作成功返回码

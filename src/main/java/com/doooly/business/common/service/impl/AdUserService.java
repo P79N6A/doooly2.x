@@ -575,8 +575,13 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setPassword(md5Pwd);
 			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn("1");
-			adUserParam.setIsActive("2");
-			adUserParam.setActiveDate(new Date());
+			String isActive = jsonParam.getString("isActive");
+			if(StringUtils.isEmpty(isActive)){
+				adUserParam.setIsActive("2");
+				adUserParam.setActiveDate(new Date());
+			}else{
+				adUserParam.setIsActive(isActive);
+			}
 			adUserParam.setCreateBy("0");
 			adUserParam.setCreateDate(new Date());
 			adUserParam.setUpdateBy("0");

@@ -1,9 +1,9 @@
 package com.doooly.business.activity;
 
-        import com.alibaba.fastjson.JSONObject;
-        import com.doooly.dto.activity.ActivityOrderReq;
-        import com.doooly.dto.activity.ActivityOrderRes;
-        import com.doooly.dto.common.MessageDataBean;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.activity.ActivityOrderReq;
+import com.doooly.dto.activity.ActivityOrderRes;
+import com.doooly.dto.common.MessageDataBean;
 
 /**
  *
@@ -13,9 +13,9 @@ package com.doooly.business.activity;
  */
 public interface ActivityServiceI {
 
-    public ActivityOrderRes activityOrderService(ActivityOrderReq req);
+	public ActivityOrderRes activityOrderService(ActivityOrderReq req);
 
-    public MessageDataBean getHotActivity(JSONObject results);
+	public MessageDataBean getHotActivity(JSONObject results);
 
 	public MessageDataBean getActivityInfo(JSONObject results);
 

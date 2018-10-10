@@ -9,15 +9,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.activity.AbstractActivityService;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.dict.ConfigDictServiceI;
-import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.webservice.WebService;
-import com.doooly.dao.reachad.AdCouponActivityConnDao;
-import com.doooly.dao.reachad.AdCouponActivityDao;
-import com.doooly.dao.reachad.AdCouponCodeDao;
-import com.doooly.dao.reachad.AdGroupActivityConnDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
 
@@ -33,24 +28,9 @@ import com.doooly.entity.reachad.AdUser;
 public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired
-	private static FreeCouponBusinessServiceI freeCouponBusinessServiceI;
-	@Autowired
-	private static AdCouponActivityConnDao couponActivityConnDao;
-	@Autowired
-	private static AdGroupActivityConnDao groupActivityConnDao;
-	@Autowired
-	private static AdCouponActivityDao couponActivityDao;
-	@Autowired
-	private static AdCouponCodeDao couponCodeDao;
-	@Autowired
 	private AdUserService userService;
 	@Autowired
 	private ConfigDictServiceI configService;
-
-	public XingFuJiaoHangActivityService() {
-		super(freeCouponBusinessServiceI, couponActivityConnDao, groupActivityConnDao, couponActivityDao,
-				couponCodeDao);
-	}
 
 	@Override
 	protected Boolean isDoBefore() {

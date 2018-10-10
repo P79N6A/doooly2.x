@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
@@ -18,29 +20,22 @@ import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdCouponActivity;
 import com.doooly.entity.reachad.AdCouponActivityConn;
 import com.doooly.entity.reachad.AdCouponCode;
-
+@Service
 public abstract class AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-
+	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
+	@Autowired
 	private AdCouponActivityConnDao couponActivityConnDao;
+	@Autowired
 	private AdGroupActivityConnDao groupActivityConnDao;
+	@Autowired
 	private AdCouponActivityDao couponActivityDao;
+	@Autowired
 	private AdCouponCodeDao couponCodeDao;
 
 	public AbstractActivityService() {
 		super();
-	}
-
-	public AbstractActivityService(FreeCouponBusinessServiceI freeCouponBusinessServiceI,
-			AdCouponActivityConnDao couponActivityConnDao, AdGroupActivityConnDao groupActivityConnDao,
-			AdCouponActivityDao couponActivityDao, AdCouponCodeDao couponCodeDao) {
-		super();
-		this.freeCouponBusinessServiceI = freeCouponBusinessServiceI;
-		this.couponActivityConnDao = couponActivityConnDao;
-		this.groupActivityConnDao = groupActivityConnDao;
-		this.couponActivityDao = couponActivityDao;
-		this.couponCodeDao = couponCodeDao;
 	}
 
 	/**
@@ -68,9 +63,9 @@ public abstract class AbstractActivityService {
 		// 活动ID
 		Integer activityId = sendJsonReq.getInteger("activityId");
 		// 礼品券ID
-		Integer couponId = sendJsonReq.getInteger("couponId");
+		Long couponId = sendJsonReq.getLong("couponId");
 		// 2.验证活动有效性
-		result = validParams(userId, activityId);
+		result = validParams(userId, activityId, couponId);
 		// 2.1若result不为空，则有效性验证失败
 		if (result != null) {
 			log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));
@@ -126,14 +121,14 @@ public abstract class AbstractActivityService {
 	 * @since
 	 * @return
 	 */
-	protected MessageDataBean validParams(Integer userId, Integer activityId) {
+	protected MessageDataBean validParams(Integer userId, Integer activityId, Long couponId) {
 		// 1.验证活动有效性
-		AdCouponActivityConn activityConn = couponActivityConnDao.getByActivityId(activityId);
+		AdCouponActivityConn activityConn = couponActivityConnDao.getByActivityId(activityId, couponId);
 		// 1.1验证活动是否存在
 		if (activityConn == null) {
 			return new MessageDataBean(ActivityEnum.ACTIVITY_NOT_EXIST);
 		}
-		Long couponId = activityConn.getCoupon().getId();
+		couponId = activityConn.getCoupon().getId();
 		AdCouponActivity couponActivity = couponActivityDao.getActivityById(activityId);
 		// 1.2验证活动是否开启
 		if (Integer.valueOf(couponActivity.getState()) == AdCouponActivity.ACTIVITY_CLOSE) {
@@ -176,10 +171,10 @@ public abstract class AbstractActivityService {
 	 * @since
 	 * @return
 	 */
-	public MessageDataBean sendCoupon(Integer userId, List<Integer> couponIdList, Integer activityId) {
+	public MessageDataBean sendCoupon(Integer userId, List<Long> couponIdList, Integer activityId) {
 		MessageDataBean messageDataBean = null;
-		for (Integer couponId : couponIdList) {
-			messageDataBean = freeCouponBusinessServiceI.receiveCoupon(userId, couponId, activityId, null);
+		for (Long couponId : couponIdList) {
+			messageDataBean = freeCouponBusinessServiceI.receiveCoupon(userId, couponId.intValue(), activityId, null);
 			if (!messageDataBean.getCode().equals(MessageDataBean.success_code)) {
 				log.warn("发放礼品券出错，error={}", JSONObject.toJSONString(messageDataBean));
 				break;

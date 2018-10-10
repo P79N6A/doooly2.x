@@ -37,7 +37,7 @@ public class MURechargeActivityService implements CommonActivityServiceI {
 	@Override
 	public MessageDataBean sendActivityCoupon(Integer userId, Integer activityId) {
 		// 1.验证活动有效性
-		AdCouponActivityConn activityConn = couponActivityConnDao.getByActivityId(activityId);
+		AdCouponActivityConn activityConn = couponActivityConnDao.getByActivityId(activityId, null);
 		// 1.1验证活动是否存在
 		if (activityConn == null) {
 			return new MessageDataBean("2010", "活动不存在");

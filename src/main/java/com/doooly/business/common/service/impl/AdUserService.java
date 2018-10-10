@@ -15,6 +15,9 @@ import com.doooly.business.utils.DateUtils;
 import com.doooly.common.util.WechatUtil;
 import com.doooly.entity.reachlife.LifeWechatBinding;
 import com.doooly.publish.rest.life.impl.FamilyInviteService;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +134,6 @@ public class AdUserService implements AdUserServiceI {
 		}
 	}
 
-	
 	/**
 	 * 得到用户id
 	 */
@@ -274,7 +276,7 @@ public class AdUserService implements AdUserServiceI {
 	 */
 	@Override
 	public JSONObject validateUserInfo(JSONObject param) throws Exception {
-        logger.info("validateUserInfo() param = " + param);
+		logger.info("validateUserInfo() param = " + param);
 		JSONObject jsonResult = new JSONObject();
 		// 登录成功,返回数据库加密密码
 		String dataBasePassword = "";
@@ -384,8 +386,8 @@ public class AdUserService implements AdUserServiceI {
 						jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.FAIL.getMsg());
 						return jsonResult;
 					} else {
-						//如果家属激活，给邀请人发消息推送
-						if(loginUser.getType() == AdUser.TYPE_FAMILY) {
+						// 如果家属激活，给邀请人发消息推送
+						if (loginUser.getType() == AdUser.TYPE_FAMILY) {
 							logger.info("===开始给邀请人发送消息 开始");
 							new Thread(new SendMsgJob(loginUser)).start();
 							logger.info("===开始给邀请人发送消息 结束");
@@ -399,7 +401,7 @@ public class AdUserService implements AdUserServiceI {
 				}
 			}
 		} catch (Exception e) {
-			logger.info("=== e = {}",e);
+			logger.info("=== e = {}", e);
 			e.printStackTrace();
 			jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
 			jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
@@ -560,11 +562,11 @@ public class AdUserService implements AdUserServiceI {
 			String cardNumber = adUserDao.createCardNumber(jsonParam.get("groupId").toString());
 
 			// 生成密码
-			String password = "";
-			Random random = new Random();
-			for (int i = 0; i < 6; i++) {
-				password += String.valueOf(random.nextInt(9) + 1);
-			}
+			String password = RandomStringUtils.randomNumeric(6);
+			// Random random = new Random();
+			// for (int i = 0; i < 6; i++) {
+			// password += String.valueOf(random.nextInt(9) + 1);
+			// }
 			String md5Pwd = MD5Utils.encode(password);
 
 			// 新增用户参数
@@ -576,10 +578,10 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn("1");
 			String isActive = jsonParam.getString("isActive");
-			if(StringUtils.isEmpty(isActive)){
+			if (StringUtils.isEmpty(isActive)) {
 				adUserParam.setIsActive("2");
 				adUserParam.setActiveDate(new Date());
-			}else{
+			} else {
 				adUserParam.setIsActive(isActive);
 			}
 			adUserParam.setCreateBy("0");
@@ -587,8 +589,13 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setUpdateBy("0");
 			adUserParam.setUpdateDate(new Date());
 			// 执行插入
-			int userCount = adUserDao.saveUser(adUserParam);
-			if (userCount > 0) {
+			adUserDao.saveUser(adUserParam);
+			// if (userCount >=0) {
+			// 若id为空，则说明用户已存在
+			if (adUserParam.getId() == null) {
+				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
+				adUserParam.setId(userInfo.getId());
+			} else {
 				// 回传明文密码,发短信
 				adUserParam.setPassword(password);
 				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
@@ -600,17 +607,18 @@ public class AdUserService implements AdUserServiceI {
 				if (jsonParam.get("workerNumber") != null && !"".equals(jsonParam.get("workerNumber"))) {
 					adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 				}
-                adUserPersonalInfo.setIsSetPassword(0);
+				adUserPersonalInfo.setIsSetPassword(0);
 				// 执行保存
 				int personalCount = adUserPersonalInfoDao.insert(adUserPersonalInfo);
 				if (personalCount <= 0) {
 					logger.info("====【saveUserAndPersonal】保存adUserPersonalInfo失败====");
 					throw new RuntimeException();
 				}
-			} else {
-				logger.info("====【saveUserAndPersonal】保存adUser失败====");
-				adUserParam = null;
 			}
+			// } else {
+			// logger.info("====【saveUserAndPersonal】保存adUser失败====");
+			// adUserParam = null;
+			// }
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -916,13 +924,14 @@ public class AdUserService implements AdUserServiceI {
 				return res;
 			}
 			if (user.getType() == 0) {
-				//改手机已经是会员
+				// 改手机已经是会员
 				res.put("code", "1001");
 				res.put("msg", "该手机已是会员");
 				return res;
 			} else if (user.getType() == 1) {
 				// 查询该家属去记录表中查询是否存在
-				AdInvitationRecord adInvitationRecord = adInvitationRecordDao.findRecodByInviteeId(user.getId().toString());
+				AdInvitationRecord adInvitationRecord = adInvitationRecordDao
+						.findRecodByInviteeId(user.getId().toString());
 				if (adInvitationRecord != null) {
 					if (!userId.equals(adInvitationRecord.getInviterId() + "")) {
 						res.put("code", "1007");
@@ -930,17 +939,19 @@ public class AdUserService implements AdUserServiceI {
 						return res;
 					} else if (userId.equals(adInvitationRecord.getInviterId() + "")) {
 						if (user.getDelFlag().equals("1")) {
-							//修改用户状态
+							// 修改用户状态
 							AdUser record = new AdUser();
 							record.setId(user.getId());
 							record.setDelFlag("0");
 							int u1 = adUserDao.updateByPrimaryKeySelective(record);
 							int u2 = lifeMemberDao.updateFlgByAdId(userId, "0");
-							//减少邀请机会
+							// 减少邀请机会
 							int u3 = adInvitationRecordDao.reduceInvitationAvail(userId);
-							//修改邀请记录
+							// 修改邀请记录
 							int u4 = adInvitationRecordDao.updateDateById(adInvitationRecord.getId());
-							logger.info("updateByPrimaryKeySelective={}  updateFlgByAdId={}  reduceInvitationAvail={} updateDateById={}",u1,u2,u3,u4);
+							logger.info(
+									"updateByPrimaryKeySelective={}  updateFlgByAdId={}  reduceInvitationAvail={} updateDateById={}",
+									u1, u2, u3, u4);
 
 							res.put("code", "1004");
 							res.put("msg", "该手机号再次被邀请！");
@@ -1022,7 +1033,7 @@ public class AdUserService implements AdUserServiceI {
 				lifemember.setName(adUser.getName());
 				lifemember.setEmail(adUser.getMailbox());
 				if (org.apache.commons.lang3.StringUtils.isNotBlank(adUser.getSex())) {
-				lifemember.setGender(Integer.valueOf(adUser.getSex()));
+					lifemember.setGender(Integer.valueOf(adUser.getSex()));
 				}
 				lifemember.setIdentityCard(adUser.getIdentityCard());
 				lifemember.setIsEnabled(Integer.parseInt(userdata.getIsActive()));
@@ -1062,6 +1073,7 @@ public class AdUserService implements AdUserServiceI {
 		// TODO Auto-generated method stub
 		adUserDao.addIntegral(userId, integralForEach);
 	}
+
 	/**
 	 * 验证企业口令是否存在,专属码是否可用,激活码是否可用并激活
 	 * 
@@ -1072,26 +1084,28 @@ public class AdUserService implements AdUserServiceI {
 		// 返回数据
 		JSONObject resultData = new JSONObject();
 		boolean isFailed = true;
-		String code =paramData.getString("code");
-		String telephone =paramData.getString("mobile");
+		String code = paramData.getString("code");
+		String telephone = paramData.getString("mobile");
 		try {
 			Long startTime = System.currentTimeMillis();
-			if (code.length()==6) {
-				//个人专属码
+			if (code.length() == 6) {
+				// 个人专属码
 				JSONObject validateResult = this.validateCode(code);
 				if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
-//					resultData = this.doActive(validateResult);
+					// resultData = this.doActive(validateResult);
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-					isFailed=false;
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
-				}else {
+					isFailed = false;
+					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时："
+							+ (System.currentTimeMillis() - startTime));
+				} else {
 					resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
 					resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时：" + (System.currentTimeMillis() - startTime));
+					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时："
+							+ (System.currentTimeMillis() - startTime));
 				}
-			}else if (code.length()==8) {
-				//企业口令
+			} else if (code.length() == 8) {
+				// 企业口令
 				HashMap<String, Object> paramMap = new HashMap<String, Object>();
 				paramMap.put("groupCommand", code);
 				paramMap.put("groupId", null);
@@ -1099,47 +1113,48 @@ public class AdUserService implements AdUserServiceI {
 				if (groupList != null && groupList.size() > 0) {
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-					isFailed=false;
+					isFailed = false;
 					logger.info("====【verifyCodeAndActivation】-验证企业口令成功,参入参数：" + code);
-				}else {
+				} else {
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CommandActive.GROUP_NO_DATA.getCode());
 					resultData.put(ConstantsLogin.MSG, ConstantsLogin.CommandActive.GROUP_NO_DATA.getMsg());
 					logger.info("====【verifyCodeAndActivation】-验证企业口令不成功,参入参数：" + code);
 				}
 				logger.info("====【verifyCodeAndActivation】-【企业口令】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
-			}else if (code.length()==12) {
-				//激活码,验证并激活
-				//判断激活码是否被使用
-				VoucherCardRecord voucherCardRecord =voucherCardRecordDao.findByActivationCode(code);
-				if (voucherCardRecord!=null) {
-					Date now =new Date();
-					if (voucherCardRecord.getCardActivationStatus()==0
-							||voucherCardRecord.getApplicationStatus()!=1
-							||now.getTime() <voucherCardRecord.getBeginTime().getTime()) {
+			} else if (code.length() == 12) {
+				// 激活码,验证并激活
+				// 判断激活码是否被使用
+				VoucherCardRecord voucherCardRecord = voucherCardRecordDao.findByActivationCode(code);
+				if (voucherCardRecord != null) {
+					Date now = new Date();
+					if (voucherCardRecord.getCardActivationStatus() == 0
+							|| voucherCardRecord.getApplicationStatus() != 1
+							|| now.getTime() < voucherCardRecord.getBeginTime().getTime()) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.NOT_ACTIVATE.getCode());
 						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.NOT_ACTIVATE.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
-					if (voucherCardRecord.getCardActivationStatus()==2) {
+					if (voucherCardRecord.getCardActivationStatus() == 2) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.IS_FREEZE.getCode());
 						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.IS_FREEZE.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
-					if (now.getTime()>voucherCardRecord.getEndTime().getTime()) {
+					if (now.getTime() > voucherCardRecord.getEndTime().getTime()) {
 						resultData.put(ConstantsLogin.CODE, ConstantsV2.IntegralCode.WRONG_TIME.getCode());
 						resultData.put(ConstantsLogin.MSG, ConstantsV2.IntegralCode.WRONG_TIME.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
-					if (voucherCardRecord.getActivationCodeUseStatus() != 0||voucherCardRecord.getCardUseStatus()!=0) {
+					if (voucherCardRecord.getActivationCodeUseStatus() != 0
+							|| voucherCardRecord.getCardUseStatus() != 0) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.IS_USED.getCode());
 						resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.IS_USED.getMsg());
 						logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
 						return resultData;
 					}
-					//进行激活操作
+					// 进行激活操作
 					AdGroup group = adGroupDao.findGroupByID(voucherCardRecord.getGroupId());
 					AdUser user = adUserDao.findByMobile(telephone);
 					String password = "";
@@ -1148,48 +1163,49 @@ public class AdUserService implements AdUserServiceI {
 						password += String.valueOf(random.nextInt(9) + 1);
 					}
 					String md5Pwd = MD5Utils.encode(password);
-					if (user!=null) {
-						//存在手机号(A库是否存在手机号)
-						//将b库数据还原正常,del_flag=0,is_active=2
+					if (user != null) {
+						// 存在手机号(A库是否存在手机号)
+						// 将b库数据还原正常,del_flag=0,is_active=2
 						user.setGroupNum(Long.valueOf(group.getId()));
 						user.setPassword(md5Pwd);
 						user.setPayPassword(md5Pwd);
 						adUserDao.updateActiveAndDelFlagById(user);
-						
+
 						dealLifeMemberDataForActive(user);
-						voucherCardRecord.setActivationCodeUseUid(user.getId()+"");
-					}else {
-						//不存在手机号(A库是否存在手机号)
+						voucherCardRecord.setActivationCodeUseUid(user.getId() + "");
+					} else {
+						// 不存在手机号(A库是否存在手机号)
 						AdUser u = newAdUser(telephone, group, md5Pwd);
 						adUserDao.insert(u);
-                        //插入个人扩展属性
-                        AdUser adUser = adUserDao.findByMobile(telephone);
-                        AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-                        adUserPersonalInfo.setId(adUser.getId());
-                        adUserPersonalInfo.setIsSetPassword(0);
-                        adUserPersonalInfoDao.insert(adUserPersonalInfo);
-						//插入数据
+						// 插入个人扩展属性
+						AdUser adUser = adUserDao.findByMobile(telephone);
+						AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+						adUserPersonalInfo.setId(adUser.getId());
+						adUserPersonalInfo.setIsSetPassword(0);
+						adUserPersonalInfoDao.insert(adUserPersonalInfo);
+						// 插入数据
 						AdUser findByMobile = adUserDao.findByMobile(telephone);
 						dealLifeMemberDataForActive(u);
-						voucherCardRecord.setActivationCodeUseUid(findByMobile.getId()+"");
+						voucherCardRecord.setActivationCodeUseUid(findByMobile.getId() + "");
 					}
 					LifeMember memberdata = lifeMemberDao.findMemberByTelephone(telephone);
 					resultData.put("memberId", memberdata.getId());
 					resultData.put("password", password);
-					//修改激活码状态activation_code_use_status activation_code_use_uid activation_code_use_time
+					// 修改激活码状态activation_code_use_status activation_code_use_uid
+					// activation_code_use_time
 					voucherCardRecord.setActivationCodeUseStatus(1);
 					voucherCardRecord.setActivationCodeUseTime(new Date());
 					voucherCardRecordDao.updateActiveData(voucherCardRecord);
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-					isFailed=false;
+					isFailed = false;
 					logger.info("====【verifyCodeAndActivation】-激活码激活成功,参入参数：" + code);
-				}else{
+				} else {
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getCode());
 					resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getMsg());
 				}
 				logger.info("====【verifyCodeAndActivation】-【激活码】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
-			}else {
+			} else {
 				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 				resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());
 				logger.info("====【verifyCodeAndActivation】-参数位数不合理,参数为：" + code);
@@ -1201,25 +1217,27 @@ public class AdUserService implements AdUserServiceI {
 			logger.info("====【verifyCodeAndActivation】-系统异常-error：" + e.getMessage());
 			throw new RuntimeException();
 		}
-		String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
+		String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT + telephone);
 		if (isFailed) {
 			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
-				redisTemplate.opsForValue().set(ACTIVATE_CODE_FAIL_COUNT+telephone,"1", 5*60*1000, TimeUnit.MILLISECONDS);
+				redisTemplate.opsForValue().set(ACTIVATE_CODE_FAIL_COUNT + telephone, "1", 5 * 60 * 1000,
+						TimeUnit.MILLISECONDS);
 				resultData.put("failCount", 1);
-			}else {
-				if (Integer.valueOf(old) >4) {
-					redisTemplate.delete(ACTIVATE_CODE_FAIL_COUNT+telephone);
+			} else {
+				if (Integer.valueOf(old) > 4) {
+					redisTemplate.delete(ACTIVATE_CODE_FAIL_COUNT + telephone);
 					resultData.put("failCount", 1);
-				}else{
-				redisTemplate.boundValueOps(ACTIVATE_CODE_FAIL_COUNT+telephone).increment(1);
-				resultData.put("failCount", Integer.valueOf(old)+1);
+				} else {
+					redisTemplate.boundValueOps(ACTIVATE_CODE_FAIL_COUNT + telephone).increment(1);
+					resultData.put("failCount", Integer.valueOf(old) + 1);
 				}
 			}
-		}else{
-//			String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
+		} else {
+			// String old =
+			// redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
 			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
 				resultData.put("failCount", 0);
-			}else {
+			} else {
 				resultData.put("failCount", Integer.valueOf(old));
 			}
 		}
@@ -1232,7 +1250,7 @@ public class AdUserService implements AdUserServiceI {
 		u.setTelephone(telephone);
 		u.setGroupNum(Long.valueOf(group.getId()));
 		u.setName(telephone);
-		String countUser = adUserDao.find12NumberCountByGroupId(group.getId()+"", group.getGroupNum());
+		String countUser = adUserDao.find12NumberCountByGroupId(group.getId() + "", group.getGroupNum());
 		if (!countUser.equals("0000000") && countUser.length() > 7) {
 			countUser = countUser.substring(countUser.length() - 7);
 		}
@@ -1248,7 +1266,7 @@ public class AdUserService implements AdUserServiceI {
 		u.setCardNumber(group.getGroupNum() + countUser);
 		u.setPassword(md5Pwd);
 		u.setPayPassword(md5Pwd);
-        u.setIsPayPassword("1");
+		u.setIsPayPassword("1");
 		Date nowDate = new Date();
 		u.setDataSyn(AdUser.DATA_SYN_ON);
 		u.setCreateBy("0");
@@ -1256,9 +1274,9 @@ public class AdUserService implements AdUserServiceI {
 		u.setCreateDate(nowDate);
 		u.setUpdateDate(nowDate);
 		u.setActiveDate(nowDate);
-//		user.setCardRange(2);
+		// user.setCardRange(2);
 		u.setIsActive(AdUser.USER_ACTIVATION_ON);
-		u.setDelFlag(0+"");
+		u.setDelFlag(0 + "");
 		u.setIntegral(new BigDecimal(0));
 		u.setLineCredit(new BigDecimal(0));
 		u.setType((short) 0);
@@ -1270,18 +1288,18 @@ public class AdUserService implements AdUserServiceI {
 	private void dealLifeMemberDataForActive(AdUser user) {
 		LifeMember member = lifeMemberDao.findMemberByTelephone(user.getTelephone());
 		if (member == null) {
-			//执行A库数据插入
+			// 执行A库数据插入
 			this.syncUserASystem(user);
-		}else {
-			//将a库数据还原正常,del_flag=0,is_enable=2
+		} else {
+			// 将a库数据还原正常,del_flag=0,is_enable=2
 			AdUser userdata = this.findByCardNumber(user.getCardNumber());
 			user.setId(userdata.getId());
 			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(user.getGroupNum() + "");
-			member.setAdId(userdata.getId()+"");
+			member.setAdId(userdata.getId() + "");
 			member.setName(userdata.getName());
 			if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
 				member.setGender(Integer.valueOf(userdata.getSex()));
-				}
+			}
 			member.setIdentityCard(userdata.getIdentityCard());
 			member.setIsEnabled(Integer.parseInt(userdata.getIsActive()));
 			member.setIsLocked(false);
@@ -1294,17 +1312,17 @@ public class AdUserService implements AdUserServiceI {
 			member.setSourceCardNumber(userdata.getSourceCardNumber());
 			lifeMemberDao.updateActiveAndDelFlagById(member);
 		}
-		
-		
+
 	}
-	class SendMsgJob implements Runnable{
+
+	class SendMsgJob implements Runnable {
 
 		private AdUser loginUser;
 
-		public SendMsgJob(){
+		public SendMsgJob() {
 		}
 
-		public SendMsgJob(AdUser user){
+		public SendMsgJob(AdUser user) {
 			this.loginUser = user;
 		}
 
@@ -1314,28 +1332,29 @@ public class AdUserService implements AdUserServiceI {
 			try {
 				AdInvitationRecord record = adInvitationRecordDao.findRecodByInviteeId(userId);
 				logger.info("SendMsgJob userId=" + userId + ",record.id=" + (record != null ? record.getId() : "null"));
-				if(record != null) {
-                    String from = record.getChannel();
-                    if (!StringUtils.isEmpty(from)) {
+				if (record != null) {
+					String from = record.getChannel();
+					if (!StringUtils.isEmpty(from)) {
 						AdUser user = adUserDao.getById(record.getInviterId());
-                        String dateStr = DateUtils.formatDate(new Date(), "yyyy年MM月dd日 HH:mm");
+						String dateStr = DateUtils.formatDate(new Date(), "yyyy年MM月dd日 HH:mm");
 						String telephone = loginUser.getTelephone();
-                        if (from.endsWith("app")) {
-                            String content = "您邀请的亲友(手机尾号"+ telephone.substring(7,11) +")已成功开通兜礼会员。";
-                            adSystemNoitceService.sendMessage(String.valueOf(user.getId()), "invitation", content);
-                        } else {
-                            //公众号推送
-                            LifeWechatBinding wechatBind = WechatUtil.getLifeWechatBinding(user.getTelephone(), user.getCardNumber());
-                            JSONObject data = new JSONObject();
-                            data.put("dateStr", dateStr);
-                            data.put("telphone", telephone);
-                            data.put("openId", wechatBind.getOpenId());
-                            data.put("url", invite_url);
-                            data.put("channel", from.startsWith("wisco") ? "wugang" : "doooly");
-                            redisTemplate.convertAndSend("FAMILY_INVITE", data.toString());
-                        }
-                    }
-                }
+						if (from.endsWith("app")) {
+							String content = "您邀请的亲友(手机尾号" + telephone.substring(7, 11) + ")已成功开通兜礼会员。";
+							adSystemNoitceService.sendMessage(String.valueOf(user.getId()), "invitation", content);
+						} else {
+							// 公众号推送
+							LifeWechatBinding wechatBind = WechatUtil.getLifeWechatBinding(user.getTelephone(),
+									user.getCardNumber());
+							JSONObject data = new JSONObject();
+							data.put("dateStr", dateStr);
+							data.put("telphone", telephone);
+							data.put("openId", wechatBind.getOpenId());
+							data.put("url", invite_url);
+							data.put("channel", from.startsWith("wisco") ? "wugang" : "doooly");
+							redisTemplate.convertAndSend("FAMILY_INVITE", data.toString());
+						}
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				logger.error("SendMsgJob userId=" + userId + ", e = +", e);

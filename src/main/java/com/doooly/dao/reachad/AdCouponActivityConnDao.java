@@ -95,7 +95,7 @@ public interface AdCouponActivityConnDao extends BaseDaoI<AdCouponActivityConn> 
 	
 	//根据活动id获取活动卡券关联
 	AdCouponActivityConn getByActivityId(String activityId);
-	AdCouponActivityConn getByActivityId(Integer activityId);
+	AdCouponActivityConn getByActivityId(@Param("activityId")Integer activityId, @Param("couponId") Long couponId);
 
 	List<AdCouponActivityConn> getActivityConnByActivityId(String activityId);
 

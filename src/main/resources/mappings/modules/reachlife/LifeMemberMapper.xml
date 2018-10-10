@@ -48,8 +48,8 @@
 	</sql>
 	<insert id="addMember" parameterType="LifeMember">
 		insert into xx_member(mobile,name,username,is_enabled,ad_id,group_id,login_failure_count,modify_date,create_date)
-		values(#{mobile},#{name},#{username},2,#{adId},(select id from xx_group where ad_id=#{groupId}),0,now(),now())
-		ON DUPLICATE KEY UPDATE is_enabled=2
+		values(#{mobile},#{name},#{username},#{isEnabled},#{adId},(select id from xx_group where ad_id=#{groupId}),0,now(),now())
+		ON DUPLICATE KEY UPDATE is_enabled=#{isEnabled},group_id=#{groupId}
 	</insert>
 	<update id="updateMemberActiveStatus" parameterType="com.doooly.entity.reachlife.LifeMember">
 	  Update xx_member

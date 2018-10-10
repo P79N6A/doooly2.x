@@ -1227,6 +1227,7 @@
 	        #{createDate,jdbcType=TIMESTAMP},
 	      </if>
 	    </trim>
+	    ON DUPLICATE KEY UPDATE group_num=#{groupNum}
 	</insert>
 	<update id="addIntegral" >
 		UPDATE ad_user 	

@@ -433,6 +433,9 @@
 		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
 		LEFT JOIN ad_business b ON c.business_id = b.id
 		WHERE cac.activity_id = #{activityId}
+		<if test="couponId!=null">
+			AND cac.coupon_id=#{couponId}
+		</if>
 	</select>
 	<select id="getActivityConnByActivityId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
 		SELECT

@@ -70,7 +70,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		verificationReq.put("businessId", WebService.BUSINESSID);
 		verificationReq.put("storesId", WebService.STOREID);
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
-		verificationReq.put("phone", beforeJson.getString("phone"));
+		verificationReq.put("cardNumber", beforeJson.getString("phone"));
 		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
 		// 验证码验证失败
 		if (JSONObject.parseObject(result).getInteger("code") != 0) {

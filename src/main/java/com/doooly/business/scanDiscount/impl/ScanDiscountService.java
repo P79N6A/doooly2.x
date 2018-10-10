@@ -85,7 +85,11 @@ public class ScanDiscountService implements ScanDiscountServiceI{
 				String url = WebService.WEBURL+"services/rest/makeVerificationCode";
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("businessId", PropertiesConstants.dooolyBundle.getString("businessId"));
-				jsonObject.put("storesId", "WX_Reachlife");
+				String storesId = "WX_Reachlife";
+				if(StringUtils.isNotEmpty(data.getString("channel"))){
+					storesId = data.getString("channel");
+				}
+				jsonObject.put("storesId", storesId);
 				jsonObject.put("cardNumber", adUser.getCardNumber());
 				jsonObject.put("isCheck", 0);
                 logger.info("调用获取短信验证码路径: " + url);

@@ -90,7 +90,7 @@
 	<!--*************************************插入************************************* -->
 	<insert id="insert" parameterType="com.doooly.entity.reachad.AdUserPersonalInfo"
 		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO ad_user_personal_info
+		INSERT IGNORE INTO ad_user_personal_info
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="id != null">id,</if>
 			<if test="adGroupDepartment != null and adGroupDepartment.id != null">ad_group_department_id,</if>

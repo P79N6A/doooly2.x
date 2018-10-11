@@ -82,7 +82,6 @@ public class ScanDiscountService implements ScanDiscountServiceI{
 				map.put("userId", userId);
 				map.put("availablePoint",availablePoint!=null ? availablePoint : new BigDecimal("0"));
 			}else {
-				
 				String url = WebService.WEBURL+"services/rest/makeVerificationCode";
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("businessId", PropertiesConstants.dooolyBundle.getString("businessId"));

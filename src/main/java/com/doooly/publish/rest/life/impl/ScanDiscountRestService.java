@@ -78,5 +78,24 @@ public class ScanDiscountRestService implements ScanDiscountRestServiceI{
 		logger.info("扫码优惠详情数据获取时间"+ (System.currentTimeMillis() - start) + " ms");
 		return messageDataBean.toJsonString();
 	}
+	@POST
+	@Path(value = "/getScanDiscountV2")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String getScanDiscountV2(JSONObject data) {
+		logger.info("请求参数：" + data.toString());
+		MessageDataBean messageDataBean = new MessageDataBean();
+		long start = System.currentTimeMillis();
+		try {
+			messageDataBean = scanDiscountServiceI.getScanDiscount(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.info("获取商户列表错误" + e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		logger.info("扫码优惠详情数据获取时间"+ (System.currentTimeMillis() - start) + " ms");
+		return messageDataBean.toJsonString();
+	}
 
 }

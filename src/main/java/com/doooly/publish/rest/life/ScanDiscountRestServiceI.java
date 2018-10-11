@@ -7,4 +7,5 @@ public interface ScanDiscountRestServiceI {
 	public String getBusinessList(JSONObject data);
 	
 	public String getScanDiscount(JSONObject data);
+	public String getScanDiscountV2(JSONObject data);
 }

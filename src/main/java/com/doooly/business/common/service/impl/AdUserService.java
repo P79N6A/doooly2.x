@@ -590,6 +590,7 @@ public class AdUserService implements AdUserServiceI {
 			if (adUserParam.getId() == null) {
 				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
 				adUserParam.setId(userInfo.getId());
+				adUserParam.setCardNumber(userInfo.getCardNumber());
 			} else {
 				// 回传明文密码,发短信
 				adUserParam.setPassword(password);
@@ -1032,7 +1033,8 @@ public class AdUserService implements AdUserServiceI {
 					lifemember.setGender(Integer.valueOf(adUser.getSex()));
 				}
 				lifemember.setIdentityCard(adUser.getIdentityCard());
-				lifemember.setIsEnabled(Integer.parseInt(userdata.getIsActive()));
+				
+				lifemember.setIsEnabled(Integer.valueOf(adUser.getIsActive()));
 				lifemember.setIsLocked(false);
 				lifemember.setLoginFailureCount(0);
 				lifemember.setGroupId(Long.valueOf(lifegroup.getId())); // 获取groupId

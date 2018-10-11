@@ -35,6 +35,7 @@ public class AdCouponActivityConn {
 	private Integer level;
 	private AdBusiness adBusiness; //商家
 	private String isView; //是否被查看(0:未被查看 1:被查看)
+	private int couponCount;
 	
 	public int getId() {
 		return id;
@@ -236,4 +237,12 @@ public class AdCouponActivityConn {
 		this.couponCodeId = couponCodeId;
 	}
 
+	public int getCouponCount() {
+		return couponCount;
+	}
+
+	public void setCouponCount(int couponCount) {
+		this.couponCount = couponCount;
+	}
+	
 }

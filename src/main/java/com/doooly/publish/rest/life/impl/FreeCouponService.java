@@ -1,8 +1,24 @@
 package com.doooly.publish.rest.life.impl;
 
+import java.util.Date;
+import java.util.HashMap;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
+import com.doooly.business.freeCoupon.service.MyCouponsBusinessServiceI;
 import com.doooly.business.touristCard.datacontract.entity.SctcdAccount;
 import com.doooly.common.constants.ConstantsV2;
 import com.doooly.common.dto.BaseReq;
@@ -12,26 +28,14 @@ import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessPrivilegeActivity;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
 import com.doooly.publish.rest.life.FreeCouponServiceI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import java.util.Date;
-import java.util.HashMap;
 
 @Component
 @Path("/freeCoupon")
 public class FreeCouponService implements FreeCouponServiceI {
 	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
-
+	@Autowired
+	private MyCouponsBusinessServiceI myCouponsBusinessServiceI;
 	@Autowired
 	private TouristCardDao touristCardDao;
 	@Autowired
@@ -335,6 +339,31 @@ public class FreeCouponService implements FreeCouponServiceI {
 			e.printStackTrace();
 			messageDataBean.setCode(ConstantsV2.SystemCode.SYSTEM_ERROR.getCode()+"");
 			messageDataBean.setMess(ConstantsV2.SystemCode.SYSTEM_ERROR.getMsg());
+		}
+		return messageDataBean.toJsonString();
+	}
+	
+	/***
+	 *  获取活动卡券
+	 * @param json
+	 * @return
+	 */
+	@POST
+	@Path(value = "/getActivityCoupon")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String getActivityCouponS(JSONObject json) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			logger.info("params = {}",json.toJSONString());
+			String activityId = json.getString("activityId");
+			HashMap<String, Object> map = myCouponsBusinessServiceI.getActivityCouponS(activityId);
+			logger.info("获取活动卡券返回的map:" + map);
+			messageDataBean.setCode(MessageDataBean.success_code);
+			messageDataBean.setData(map);
+		} catch (Exception e) {
+			logger.error("获取活动卡券异常！");
+			messageDataBean.setCode(MessageDataBean.failure_code);
 		}
 		return messageDataBean.toJsonString();
 	}

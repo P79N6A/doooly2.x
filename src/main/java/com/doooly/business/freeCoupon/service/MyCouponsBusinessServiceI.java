@@ -43,4 +43,12 @@ public interface MyCouponsBusinessServiceI {
 	 *            会员id
 	 */
 	HashMap<String, Object> getRechargeCouponNum(String userId);
+	
+	/**
+	 * 获取当前活动的关联卡券
+	 * 
+	 * @param userId
+	 *            会员id
+	 */
+	HashMap<String, Object> getActivityCouponS(String activityId);
 }

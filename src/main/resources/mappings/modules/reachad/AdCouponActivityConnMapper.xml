@@ -451,11 +451,13 @@
 			cac.level AS "level",
 			b.business_id AS "coupon.businessId",
 			c.product_name AS "coupon.productName",
-			cac.coupon_id as 'couponId'
+			cac.coupon_id as 'couponId',
+			ca.coupon_count as 'couponCount'
 		FROM
 			ad_coupon_activity_conn cac
 		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
 		LEFT JOIN ad_business b ON c.business_id = b.id
+		LEFT JOIN ad_coupon_activity ca ON ca.id = cac.activity_id
 		WHERE cac.activity_id = #{activityId} ORDER BY cac.level
 	</select>
 	

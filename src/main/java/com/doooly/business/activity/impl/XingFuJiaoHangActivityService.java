@@ -51,12 +51,12 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		verificationReq.put("storesId", WebService.STOREID);
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
 		verificationReq.put("cardNumber", beforeJson.getString("phone"));
-		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
+//		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
 		// 验证码验证失败
-		if (JSONObject.parseObject(result).getInteger("code") != 0) {
+		/*if (JSONObject.parseObject(result).getInteger("code") != 0) {
 			log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);
 			return new MessageDataBean(ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR);
-		}
+		}*/
 		// 2.插入用户到ad_user表并返回用户ID
 		JSONObject userJson = new JSONObject();
 		String phone = beforeJson.getString("phone");
@@ -64,7 +64,9 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		String groupId = configService.getValueByTypeAndKey("ENTERPRISE", "JIAOHANG_GROUP_ID");
 		userJson.put("groupId", groupId);
 		userJson.put("name", phone);
-		userJson.put("isActive", "1");// 未激活
+		userJson.put("isActive", AdUser.USER_ACTIVATION_OFF);// 未激活
+		userJson.put("dataSource", 0);// 平台导入
+		
 		try {
 			AdUser user = userService.saveUserAndPersonal(userJson);
 			// 3.将用户ID放入请求参数中
@@ -72,9 +74,11 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
+					//员工类型
+					user.setType((short)AdUser.TYPE_EMPLOYEE);
 					userService.syncUserASystem(user);
 				}
-			});
+			}).start();
 		} catch (Exception e) {
 			log.error("交行活动-预保存用户错误", e);
 			return null;

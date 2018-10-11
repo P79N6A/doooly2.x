@@ -563,10 +563,6 @@ public class AdUserService implements AdUserServiceI {
 
 			// 生成密码
 			String password = RandomStringUtils.randomNumeric(6);
-			// Random random = new Random();
-			// for (int i = 0; i < 6; i++) {
-			// password += String.valueOf(random.nextInt(9) + 1);
-			// }
 			String md5Pwd = MD5Utils.encode(password);
 
 			// 新增用户参数
@@ -576,10 +572,10 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setCardNumber(cardNumber);
 			adUserParam.setPassword(md5Pwd);
 			adUserParam.setPayPassword(md5Pwd);
-			adUserParam.setDataSyn("1");
+			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
 			String isActive = jsonParam.getString("isActive");
 			if (StringUtils.isEmpty(isActive)) {
-				adUserParam.setIsActive("2");
+				adUserParam.setIsActive(AdUser.USER_ACTIVATION_ON);
 				adUserParam.setActiveDate(new Date());
 			} else {
 				adUserParam.setIsActive(isActive);
@@ -590,7 +586,6 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setUpdateDate(new Date());
 			// 执行插入
 			adUserDao.saveUser(adUserParam);
-			// if (userCount >=0) {
 			// 若id为空，则说明用户已存在
 			if (adUserParam.getId() == null) {
 				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
@@ -601,7 +596,12 @@ public class AdUserService implements AdUserServiceI {
 				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
 				adUserPersonalInfo.setId(adUserParam.getId());
 				// 数据来源
-				adUserPersonalInfo.setDataSources(2);
+				Integer dataSource = jsonParam.getInteger("dataSource");
+				if(dataSource != null){
+					adUserPersonalInfo.setDataSources(dataSource);
+				}else{
+					adUserPersonalInfo.setDataSources(2);
+				}
 				// 认证标识
 				adUserPersonalInfo.setAuthFlag("0");
 				if (jsonParam.get("workerNumber") != null && !"".equals(jsonParam.get("workerNumber"))) {
@@ -615,10 +615,6 @@ public class AdUserService implements AdUserServiceI {
 					throw new RuntimeException();
 				}
 			}
-			// } else {
-			// logger.info("====【saveUserAndPersonal】保存adUser失败====");
-			// adUserParam = null;
-			// }
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException();

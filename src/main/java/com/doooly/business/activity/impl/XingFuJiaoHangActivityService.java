@@ -51,12 +51,12 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		verificationReq.put("storesId", WebService.STOREID);
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
 		verificationReq.put("cardNumber", beforeJson.getString("phone"));
-//		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
+		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
 		// 验证码验证失败
-		/*if (JSONObject.parseObject(result).getInteger("code") != 0) {
+		if (JSONObject.parseObject(result).getInteger("code") != 0) {
 			log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);
 			return new MessageDataBean(ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR);
-		}*/
+		}
 		// 2.插入用户到ad_user表并返回用户ID
 		JSONObject userJson = new JSONObject();
 		String phone = beforeJson.getString("phone");

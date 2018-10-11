@@ -585,9 +585,9 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setUpdateBy("0");
 			adUserParam.setUpdateDate(new Date());
 			// 执行插入
-			adUserDao.saveUser(adUserParam);
+			int num = adUserDao.saveUser(adUserParam);
 			// 若id为空，则说明用户已存在
-			if (adUserParam.getId() == null) {
+			if (adUserParam.getId() == null || num > 1) {
 				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
 				adUserParam.setId(userInfo.getId());
 				adUserParam.setCardNumber(userInfo.getCardNumber());
@@ -598,9 +598,9 @@ public class AdUserService implements AdUserServiceI {
 				adUserPersonalInfo.setId(adUserParam.getId());
 				// 数据来源
 				Integer dataSource = jsonParam.getInteger("dataSource");
-				if(dataSource != null){
+				if (dataSource != null) {
 					adUserPersonalInfo.setDataSources(dataSource);
-				}else{
+				} else {
 					adUserPersonalInfo.setDataSources(2);
 				}
 				// 认证标识
@@ -611,10 +611,11 @@ public class AdUserService implements AdUserServiceI {
 				adUserPersonalInfo.setIsSetPassword(0);
 				// 执行保存
 				int personalCount = adUserPersonalInfoDao.insert(adUserPersonalInfo);
-				if (personalCount <= 0) {
-					logger.info("====【saveUserAndPersonal】保存adUserPersonalInfo失败====");
-					throw new RuntimeException();
-				}
+				/*
+				 * if (personalCount <= 0) { logger.info(
+				 * "====【saveUserAndPersonal】保存adUserPersonalInfo失败===="); throw
+				 * new RuntimeException(); }
+				 */
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1033,7 +1034,7 @@ public class AdUserService implements AdUserServiceI {
 					lifemember.setGender(Integer.valueOf(adUser.getSex()));
 				}
 				lifemember.setIdentityCard(adUser.getIdentityCard());
-				
+
 				lifemember.setIsEnabled(Integer.valueOf(adUser.getIsActive()));
 				lifemember.setIsLocked(false);
 				lifemember.setLoginFailureCount(0);

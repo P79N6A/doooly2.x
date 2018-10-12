@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +26,6 @@ import com.doooly.common.util.WechatUtil;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.report.WechatEventPush;
 import com.wechat.ThirdPartyWechatUtil;
-import com.wechat.vo.Image;
-import com.wechat.vo.ImageMessage;
 import com.wechat.vo.UserInfo;
 
 /**
@@ -45,6 +42,8 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	// 开发者模式-自行定义Token
 	public static final String token = "doooly";
 	public static final String WECHAT_MSG = "WECHAT_MSG";
+	// 活动分隔符
+	private static final String ACTIVITY_SPLIT = "~";
 	// 开发者模式-活动标记名
 	public static final String RECHARGE_ACTIVITY = "recharge_activity";
 	public static final String WUGANG_SCAN_ACTIVITY = "scan_activity";
@@ -143,6 +142,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					} else if (eventKey.contains(ActivityConstants.FISSION_V1_ACTIVITY)) {
 						// 通过活动标签识别
 						handleIsPush(channel, fromUserName, eventKey);
+					} else if (eventKey.contains(ACTIVITY_SPLIT)) {
+						// 统一组装微信带参二维码客服回复消息列表
+						messageList.addAll(createQrcodeWithParamMsgList(eventKey));
 					}
 
 					break;
@@ -173,12 +175,15 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPushNews(channel, fromUserName, BRING_COLLNESS_ACTIVITY);
 					} else if (eventKey.contains(MU_RECHARGE_ACTIVITY)) {
 						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
+					} else if (eventKey.contains(ACTIVITY_SPLIT)) {
+						// 统一组装微信带参二维码客服回复消息列表
+						messageList.addAll(createQrcodeWithParamMsgList(eventKey));
 					} else {
 						// 微信公众号关注回复信息
-						String msg = createMessageReqJson(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
-//						String msg = createTextMessage(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
-						messageList.add(msg);
-						log.info("====【dealCallback】关注微信公众号后回复客服消息" + msg);
+						List<String> msgJsonList = createMessageReqJsonList(channel, fromUserName,
+								WechatConstants.EVENT_TYPE_SUBSCRIBE);
+						messageList.addAll(msgJsonList);
+						log.info("====【dealCallback】关注微信公众号后回复客服消息" + msgJsonList);
 					}
 
 					break;
@@ -269,13 +274,55 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	private String createMessageReqJson(String channel, String toUserName, String switchType) {
 		String dictKey = channel + "_" + switchType;
 		String msgJson = configService.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
-		// 若为空则默认返回客服中心统一消息
-		if (StringUtils.isBlank(msgJson)) {
-			msgJson = configService.getValueByTypeAndKey(WECHAT_MSG, (channel + "_SERVICE").toUpperCase());
-		}
 		msgJson = msgJson.replace("OPENID", toUserName);
 
 		return msgJson;
+	}
+
+	/**
+	 * 创建客服消息（文本/图片/图文等消息）
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年9月27日 上午9:32:25
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return 客服消息（Json格式）
+	 */
+	private List<String> createMessageReqJsonList(String channel, String toUserName, String switchType) {
+		String dictKey = channel + "_" + switchType;
+		List<String> msgJsonList = new ArrayList<>();
+		List<String> msgJson = configService.getValueListByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		for (String msg : msgJson) {
+			msgJsonList.add(msg.replace("OPENID", toUserName));
+		}
+		return msgJsonList;
+	}
+
+	/**
+	 * 统一组装微信带参二维码客服回复消息（列表）
+	 * 
+	 * @author hutao
+	 * @date 创建时间：2018年10月12日 下午12:56:31
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	private List<String> createQrcodeWithParamMsgList(String eventKey) throws Exception {
+		// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
+		String[] paramArr = eventKey.replace("qrscene_", "").split("~");
+		// 活动标记
+		String activityMark = paramArr[1];
+		// 获取分享人openId
+		String openId = paramArr[2];
+		String dictKey = (paramArr[0] + "_" + activityMark).toUpperCase();
+		List<String> msgJsonList = new ArrayList<>();
+		List<String> msgJson = configService.getValueListByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		for (String msg : msgJson) {
+			msgJsonList.add(msg.replace("OPENID", openId));
+		}
+		return msgJsonList;
 	}
 
 	/**

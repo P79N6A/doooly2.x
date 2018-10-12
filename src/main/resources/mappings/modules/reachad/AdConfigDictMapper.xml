@@ -24,4 +24,12 @@
 		where a.dict_type=#{type} and a.dict_key = #{key}
 
 	</select>
+	<select id="getValueListByTypeAndKey" resultType="java.lang.String">
+		SELECT
+		a.dict_value AS "dictValue"
+		FROM
+		ad_config_dict a
+		where a.dict_type=#{type} and a.dict_key = #{key}
+
+	</select>
 </mapper>

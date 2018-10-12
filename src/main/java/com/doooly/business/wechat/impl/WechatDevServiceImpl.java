@@ -154,8 +154,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					count = this.saveWechatEventPush(json);
 					// 若为0则插入失败，不再执行后续业务
 					if (count == 0) {
-						String msg = createMessageReqJson(channel, fromUserName, WechatConstants.EVENT_TYPE_SUBSCRIBE);
-						messageList.add(msg);
+						List<String> msgJsonList = createMessageReqJsonList(channel, fromUserName,
+								WechatConstants.EVENT_TYPE_SUBSCRIBE);
+						messageList.addAll(msgJsonList);
 						return messageList;
 					}
 					eventKey = json.getString("EventKey").replace("qrscene_", "");

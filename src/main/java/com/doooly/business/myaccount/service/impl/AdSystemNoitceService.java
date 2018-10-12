@@ -234,7 +234,7 @@ public class AdSystemNoitceService implements AdSystemNoticeServiceI {
 
     @Override
     public MessageDataBean sendUrlMessage(String content, String url, String target) {
-        logger.info(String.format("发送系统消息内容为"+content));
+        logger.info("发送系统消息内容为"+content);
         MessageDataBean messageDataBean = new MessageDataBean();
         //先发送iso在发送安卓
         int num = 0;

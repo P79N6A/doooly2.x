@@ -99,6 +99,8 @@ public interface AdCouponActivityConnDao extends BaseDaoI<AdCouponActivityConn> 
 
 	List<AdCouponActivityConn> getActivityConnByActivityId(String activityId);
 
+	List<AdCouponActivityConn> getActivityConnByActivityIdOrIdFlag(@Param("activityId")String activityId,@Param("idFlag")String idFlag);
+	
 	AdCouponActivityConn getByActivityIdAndCouponId(@Param("activityId")String activityId, @Param("couponId")String couponId);
 
 	void BatchreduceRemindQuantity(@Param("couponId")Integer couponId, @Param("activityId")Integer activityId,

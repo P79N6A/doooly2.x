@@ -461,6 +461,38 @@
 		WHERE cac.activity_id = #{activityId} ORDER BY cac.level
 	</select>
 	
+	<select id="getActivityConnByActivityIdOrIdFlag" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
+		SELECT
+			cac.id AS "id",
+			cac.activity_id AS "activityId",
+			cac.coupon_id AS "coupon.id",
+			cac.coupon_quantity AS "couponQuantity",
+			cac.coupon_used_quantity AS "couponUsedQuantity",
+			cac.coupon_remind_quantity AS "couponRemindQuantity",
+			cac.create_date AS "createDate",
+			cac.begin_date AS "beginDate",
+			cac.end_date AS "endDate",
+			cac.level AS "level",
+			b.business_id AS "coupon.businessId",
+			c.product_name AS "coupon.productName",
+			cac.coupon_id as 'couponId',
+			ca.coupon_count as 'couponCount'
+		FROM
+			ad_coupon_activity_conn cac
+		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
+		LEFT JOIN ad_business b ON c.business_id = b.id
+		LEFT JOIN ad_coupon_activity ca ON ca.id = cac.activity_id
+		WHERE 
+		ca.state = 1
+		<if test="activityId!=null">
+			AND cac.activity_id = #{activityId}
+		</if>
+		<if test="idFlag!=null">
+			AND ca.id_flag=#{idFlag}
+		</if>
+		ORDER BY cac.level
+	</select>
+	
 	<select id="getByActivityIdAndCouponId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">
 		SELECT
 			cac.id AS "id",

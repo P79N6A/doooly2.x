@@ -35,6 +35,7 @@ public class OneNumberRestService implements OneNumberRestServiceI{
     @Consumes(MediaType.APPLICATION_JSON)
     public String getTargetUrl(JSONObject json) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        logger.info("请求参数为---->"+ json);
         try {
             String userId = json.getString("userId");
             String businessId = json.getString("businessId");

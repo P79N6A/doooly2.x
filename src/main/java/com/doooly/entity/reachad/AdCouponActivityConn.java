@@ -36,6 +36,7 @@ public class AdCouponActivityConn {
 	private AdBusiness adBusiness; //商家
 	private String isView; //是否被查看(0:未被查看 1:被查看)
 	private int couponCount;
+	private String idFlag;
 	
 	public int getId() {
 		return id;
@@ -243,6 +244,14 @@ public class AdCouponActivityConn {
 
 	public void setCouponCount(int couponCount) {
 		this.couponCount = couponCount;
+	}
+
+	public String getIdFlag() {
+		return idFlag;
+	}
+
+	public void setIdFlag(String idFlag) {
+		this.idFlag = idFlag;
 	}
 	
 }

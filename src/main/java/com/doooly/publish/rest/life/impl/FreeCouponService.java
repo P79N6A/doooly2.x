@@ -357,7 +357,8 @@ public class FreeCouponService implements FreeCouponServiceI {
 		try {
 			logger.info("params = {}",json.toJSONString());
 			String activityId = json.getString("activityId");
-			HashMap<String, Object> map = myCouponsBusinessServiceI.getActivityCouponS(activityId);
+			String idFlag = json.getString("idFlag");
+			HashMap<String, Object> map = myCouponsBusinessServiceI.getActivityCouponS(activityId,idFlag);
 			logger.info("获取活动卡券返回的map:" + map);
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setData(map);

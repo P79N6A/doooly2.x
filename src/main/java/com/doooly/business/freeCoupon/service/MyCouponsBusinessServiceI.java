@@ -50,5 +50,5 @@ public interface MyCouponsBusinessServiceI {
 	 * @param userId
 	 *            会员id
 	 */
-	HashMap<String, Object> getActivityCouponS(String activityId);
+	HashMap<String, Object> getActivityCouponS(String activityId, String idFlag);
 }

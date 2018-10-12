@@ -22,7 +22,7 @@
 		FROM
 		ad_config_dict a
 		where a.dict_type=#{type} and a.dict_key = #{key}
-
+		limit 1
 	</select>
 	<select id="getValueListByTypeAndKey" resultType="java.lang.String">
 		SELECT

@@ -224,9 +224,9 @@
 	</select>
 	
 	<!-- 用户是否已领取活动券码 -->
-	<select id="checkIfSendCodeNoPhone" resultType="Integer" parameterType="com.doooly.entity.reachad.AdCouponCode">
+	<select id="checkIfSendCodeNoPhone" resultType="com.doooly.entity.reachad.AdCouponCode" parameterType="com.doooly.entity.reachad.AdCouponCode">
 		select 
-			 count(a.code)
+			 a.code as 'code'
 		from 
 			ad_coupon_code a 
 		where 

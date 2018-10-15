@@ -60,7 +60,7 @@ public interface AdCouponCodeDao extends BaseDaoI<AdCouponCode> {
 	 * @param activity_id-活动ID
 	 *            coupon_id-优惠券ID 不过滤话费抵扣卷类型
 	 */
-	public int checkIfSendCodeNoPhone(AdCouponCode adCouponCode);
+	public List<AdCouponCode> checkIfSendCodeNoPhone(AdCouponCode adCouponCode);
 	
 	/**
 	 * 更新兑换码为被查看状态

@@ -145,10 +145,11 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 				
 				AdCouponActivity activity = adCouponActivityDao.getActivityById(activityId);
 				if("JHLQ".equals(activity.getIdFlag())) {
-					int count = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
-					if(count >= activity.getCouponCount()) {
+					List<AdCouponCode> codeList = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
+					if(codeList.size() >= activity.getCouponCount()) {
 						// 已领取
 						adCouponCode.setIsReceived(1);
+						adCouponCode.setCode(codeList.get(0).getCode());
 						logger.info("====用户已领取过券码");
 						return adCouponCode;
 					}

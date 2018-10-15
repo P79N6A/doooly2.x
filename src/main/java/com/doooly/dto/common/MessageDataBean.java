@@ -57,7 +57,7 @@ public class MessageDataBean {
 	// 券码库存不足
 	public static String coupon_stock_zero_code = "1015";
 	// 券码库存不足
-	public static String coupon_stock_zero_msg = "抵扣券已领完";
+	public static String coupon_stock_zero_msg = "此礼品已领完";
 
 	// 已领取返回码
 	public static String already_receive_code = "1002";

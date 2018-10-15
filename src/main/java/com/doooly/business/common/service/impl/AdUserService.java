@@ -602,9 +602,9 @@ public class AdUserService implements AdUserServiceI {
 					adUserPersonalInfo.setDataSources(dataSource);
 				} else {
 					adUserPersonalInfo.setDataSources(2);
+					adUserPersonalInfo.setAuthFlag("0");
 				}
 				// 认证标识
-				adUserPersonalInfo.setAuthFlag("0");
 				if (jsonParam.get("workerNumber") != null && !"".equals(jsonParam.get("workerNumber"))) {
 					adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 				}

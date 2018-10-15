@@ -42,6 +42,12 @@ public class Constants {
 	 * 消息响应失败
 	 */
 	public static String MSG_CODE_ERROR = "101";
+	
+	public static class MerchantApiConstants{
+		//商家接口base url
+		public final static String MERCHANT_BASE_URL=PropertiesConstants.dooolyBundle.getString("ws.url");
+		public final static String CHECK_VERIFICATION_CODE_URL = MERCHANT_BASE_URL+"services/rest/checkVerificationCode";
+	}
 
 	/**
 	 * 消息响应处理结果响应码常量类

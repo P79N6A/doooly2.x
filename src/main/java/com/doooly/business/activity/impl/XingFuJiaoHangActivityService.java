@@ -10,7 +10,7 @@ import com.doooly.business.activity.AbstractActivityService;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
-import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.common.constants.Constants.MerchantApiConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dto.common.MessageDataBean;
@@ -44,14 +44,12 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	protected MessageDataBean doBefore(JSONObject beforeJson) {
 		long start = System.currentTimeMillis();
 		// 1.验证短信验证码是否有效
-		String verificationCodeUrl = PropertiesConstants.dooolyBundle.getString("merchant.api.base.url")
-				+ "api/services/rest/checkVerificationCode";
 		JSONObject verificationReq = new JSONObject();
 		verificationReq.put("businessId", WebService.BUSINESSID);
 		verificationReq.put("storesId", WebService.STOREID);
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
 		verificationReq.put("cardNumber", beforeJson.getString("phone"));
-		String result = HTTPSClientUtils.sendPost(verificationReq, verificationCodeUrl);
+		String result = HTTPSClientUtils.sendPost(verificationReq, MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
 		// 验证码验证失败
 		if (JSONObject.parseObject(result).getInteger("code") != 0) {
 			log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);

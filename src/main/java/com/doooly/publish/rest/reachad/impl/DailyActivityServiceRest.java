@@ -15,6 +15,14 @@ import com.doooly.business.activity.impl.XingFuJiaoHangActivityService;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.reachad.DailyActivityServiceI;
 
+/**
+ * 
+    * @ClassName: DailyActivityServiceRest  
+    * @Description: 兜礼日常运营活动发布接口类
+    * @author hutao  
+    * @date 2018年10月15日  
+    *
+ */
 @Component
 @Path("/daily-activity")
 @Produces(MediaType.APPLICATION_JSON)

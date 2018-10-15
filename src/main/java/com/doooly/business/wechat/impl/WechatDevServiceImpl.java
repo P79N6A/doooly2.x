@@ -125,9 +125,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				case WechatConstants.EVENT_TYPE_SCAN:
 					// 存储微信推送信息
 					Long count = this.saveWechatEventPush(json);
-					if (count == 0) {
-						return null;
-					}
+//					if (count == 0) {
+//						return null;
+//					}
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动
 					if (eventKey.contains(RECHARGE_ACTIVITY)) {

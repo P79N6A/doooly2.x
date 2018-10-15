@@ -232,7 +232,6 @@
 		where 
 		a.activity_id = #{activityId} 
 		and a.user_id = #{userId} 
-		)
 	</select>
 	
 	<select id="getCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode" >

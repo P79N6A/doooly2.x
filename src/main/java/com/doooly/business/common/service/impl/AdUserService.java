@@ -554,7 +554,7 @@ public class AdUserService implements AdUserServiceI {
 	/**
 	 * 存储B库ad_user表,ad_user_personal_info数据
 	 */
-	public AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
+	public synchronized AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
 		// 用户信息
 		AdUser adUserParam = new AdUser();
 		try {

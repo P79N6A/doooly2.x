@@ -125,9 +125,9 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 				case WechatConstants.EVENT_TYPE_SCAN:
 					// 存储微信推送信息
 					Long count = this.saveWechatEventPush(json);
-//					if (count == 0) {
-//						return null;
-//					}
+					// if (count == 0) {
+					// return null;
+					// }
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动
 					if (eventKey.contains(RECHARGE_ACTIVITY)) {
@@ -144,7 +144,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPush(channel, fromUserName, eventKey);
 					} else if (eventKey.contains(ACTIVITY_SPLIT)) {
 						// 统一组装微信带参二维码客服回复消息列表
-						messageList.addAll(createQrcodeWithParamMsgList(eventKey));
+						messageList.addAll(createQrcodeWithParamMsgList(eventKey, fromUserName));
 					}
 
 					break;
@@ -178,7 +178,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 						handleIsPushNews(channel, fromUserName, MU_RECHARGE_ACTIVITY);
 					} else if (eventKey.contains(ACTIVITY_SPLIT)) {
 						// 统一组装微信带参二维码客服回复消息列表
-						messageList.addAll(createQrcodeWithParamMsgList(eventKey));
+						messageList.addAll(createQrcodeWithParamMsgList(eventKey, fromUserName));
 					} else {
 						// 微信公众号关注回复信息
 						List<String> msgJsonList = createMessageReqJsonList(channel, fromUserName,
@@ -310,16 +310,19 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	 * @since
 	 * @return
 	 */
-	private List<String> createQrcodeWithParamMsgList(String eventKey) throws Exception {
+	private List<String> createQrcodeWithParamMsgList(String eventKey, String fromUserName) throws Exception {
 		// 二维码参数集合,格式：[渠道,活动标记,分享人openId]
 		String[] paramArr = eventKey.replace("qrscene_", "").split("~");
 		// 活动标记
 		String activityMark = paramArr[1];
 		// 获取分享人openId
-		String openId = paramArr[2];
+		String openId = fromUserName;
+		if (paramArr.length > 2) {
+			openId = paramArr[2];
+		}
 		String dictKey = (paramArr[0] + "_" + activityMark).toUpperCase();
 		List<String> msgJsonList = new ArrayList<>();
-		List<String> msgJson = configService.getValueListByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
+		List<String> msgJson = configService.getValueListByTypeAndKey(WECHAT_MSG, dictKey);
 		for (String msg : msgJson) {
 			msgJsonList.add(msg.replace("OPENID", openId));
 		}

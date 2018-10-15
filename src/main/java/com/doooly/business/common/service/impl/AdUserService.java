@@ -618,8 +618,8 @@ public class AdUserService implements AdUserServiceI {
 				 */
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException();
+			logger.error("保存用户错误", e);
+			throw e;
 		}
 
 		return adUserParam;

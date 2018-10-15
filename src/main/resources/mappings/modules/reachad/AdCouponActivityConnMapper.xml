@@ -484,12 +484,16 @@
 		LEFT JOIN ad_coupon_activity ca ON ca.id = cac.activity_id
 		WHERE 
 		ca.state = 1
+		and cac.activity_id = (select aca.id from ad_coupon_activity aca where 
+		aca.state = 1
 		<if test="activityId!=null">
-			AND cac.activity_id = #{activityId}
+			AND aca.id = #{activityId}
 		</if>
 		<if test="idFlag!=null">
-			AND ca.id_flag=#{idFlag}
+			AND aca.id_flag=#{idFlag}
 		</if>
+		order by aca.create_date DESC limit 1
+		)
 		ORDER BY cac.level
 	</select>
 	

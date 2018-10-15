@@ -40,6 +40,8 @@ public class AdCouponActivity {
 	private String category;// N活动券显示对应一级分类
 	private String description;// 活动描述
 	private Integer userCount;
+	private String idFlag;
+	private int couponCount;
 
 	public int getId() {
 		return id;
@@ -263,6 +265,22 @@ public class AdCouponActivity {
 
 	public void setUserCount(Integer userCount) {
 		this.userCount = userCount;
+	}
+
+	public String getIdFlag() {
+		return idFlag;
+	}
+
+	public void setIdFlag(String idFlag) {
+		this.idFlag = idFlag;
+	}
+
+	public int getCouponCount() {
+		return couponCount;
+	}
+
+	public void setCouponCount(int couponCount) {
+		this.couponCount = couponCount;
 	}
 
 }

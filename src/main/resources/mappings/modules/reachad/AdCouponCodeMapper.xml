@@ -223,6 +223,18 @@
 		)
 	</select>
 	
+	<!-- 用户是否已领取活动券码 -->
+	<select id="checkIfSendCodeNoPhone" resultType="Integer" parameterType="com.doooly.entity.reachad.AdCouponCode">
+		select 
+			 count(a.code)
+		from 
+			ad_coupon_code a 
+		where 
+		a.activity_id = #{activityId} 
+		and a.user_id = #{userId} 
+		)
+	</select>
+	
 	<select id="getCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode" >
 		select 
 			 a.code AS "code",

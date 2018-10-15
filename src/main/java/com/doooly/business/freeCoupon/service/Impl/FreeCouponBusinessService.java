@@ -32,6 +32,7 @@ import com.doooly.dao.reachad.AdIntegralActivityDao;
 import com.doooly.dao.reachad.AdRegisterRecordDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdAvailablePoints;
+import com.doooly.entity.reachad.AdCouponActivity;
 import com.doooly.entity.reachad.AdCouponActivityConn;
 import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdIntegralAcquireRecord;
@@ -141,7 +142,17 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 				adCouponCode.setUserId(Long.valueOf(userId));
 				adCouponCode.setActivityId(Long.valueOf(activityId));
 				adCouponCode.setCoupon(Long.valueOf(couponId));
-
+				
+				AdCouponActivity activity = adCouponActivityDao.getActivityById(activityId);
+				if("JHLQ".equals(activity.getIdFlag())) {
+					int count = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
+					if(count >= activity.getCouponCount()) {
+						// 已领取
+						adCouponCode.setIsReceived(1);
+						logger.info("====用户已领取过券码");
+						return adCouponCode;
+					}
+				}
 				// 用户是否已领取券码
 				String code = adCouponCodeDao.checkIfSendCode(adCouponCode);
 				if (code != null && !"".equals(code)) {

@@ -63,7 +63,9 @@
 		a.option_count as 'optionCount',
 		a.vote_count as 'voteCount',
 		a.pv_count as 'pvCount',
-		a.rule_image as 'ruleImage'
+		a.rule_image as 'ruleImage',
+		a.id_flag as 'idFlag',
+		a.coupon_count as 'couponCount'
 	</sql>
 
 	<!-- 热门活动 -->

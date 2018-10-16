@@ -29,5 +29,8 @@ public interface MyPointServiceI {
 	MessageDataBean getIntegralRechargeListData(Long userId, Integer currentPage, Integer pageSize);
 
 	MessageDataBean doIntegralRecharge(Long userId, String cardPassword)throws Exception;
+	
+	MessageDataBean getUserReturnPoints(Long userId);
 
+	MessageDataBean receiveUserReturnPoints(Long userId);
 }

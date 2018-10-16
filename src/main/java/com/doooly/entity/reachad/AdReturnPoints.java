@@ -23,6 +23,7 @@ public class AdReturnPoints {
     private String storeName;  //门店名称
     private String logo;  //门店logo
     private String createDateStr;  //积分日志字符串格式
+    private String receiveStuts;
 
 	/** 预计积分表 积分交易类型：消费 */
 	public static final String TYPE_CONSUME = "1";
@@ -149,4 +150,12 @@ public class AdReturnPoints {
     public void setCreateDateStr(String createDateStr) {
         this.createDateStr = createDateStr;
     }
+
+	public String getReceiveStuts() {
+		return receiveStuts;
+	}
+
+	public void setReceiveStuts(String receiveStuts) {
+		this.receiveStuts = receiveStuts;
+	}
 }

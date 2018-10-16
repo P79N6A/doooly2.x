@@ -132,4 +132,21 @@
 			amount>0
 		</where>
 	</update>
+	<select id="getListByUserId" resultType="AdReturnPoints">
+		select
+		*
+		from
+		ad_return_points a
+		where
+		a.user_id = #{userId}
+	</select>
+	<update id="receiveUserReturnPoints" parameterType="java.lang.Long">
+		update ad_return_points
+		set receive_stuts=1,update_date=now()
+		<where>
+			user_id=#{userId}
+			and
+			receive_stuts=0
+		</where>
+	</update>
 </mapper>

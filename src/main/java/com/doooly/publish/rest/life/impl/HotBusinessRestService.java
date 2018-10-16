@@ -1,16 +1,5 @@
 package com.doooly.publish.rest.life.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.business.HotBusinessServiceI;
-import com.doooly.common.constants.ConstantsV2.SystemCode;
-import com.doooly.common.dto.BaseReq;
-import com.doooly.dto.common.ConstantsLogin;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.publish.rest.life.HotBusinessRestServiceI;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -18,6 +7,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.business.HotBusinessServiceI;
+import com.doooly.business.mypoint.service.MyPointServiceI;
+import com.doooly.common.constants.ConstantsV2.SystemCode;
+import com.doooly.common.dto.BaseReq;
+import com.doooly.dto.common.ConstantsLogin;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.publish.rest.life.HotBusinessRestServiceI;
 
 /**
  * @Description: 商家
@@ -34,6 +37,8 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	private static Logger logger = Logger.getLogger(HotBusinessRestService.class);
 	@Autowired
 	private HotBusinessServiceI hotBusinessServiceI;
+	@Autowired
+	private MyPointServiceI myPointServiceI;
 
 	@POST
 	@Path(value = "/index")
@@ -209,5 +214,55 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 			messageDataBean.setMess(MessageDataBean.failure_mess);
 		}
 		return messageDataBean.toJSONString();
+	}
+	
+	/***
+	 * 用户预返积分
+	 * 
+	 * @param json
+	 * @return
+	 */
+	@POST
+	@Path(value = "/userReturnPoints")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String userReturnPoints(JSONObject params, @Context HttpServletRequest request) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			String channel = request.getHeader(ConstantsLogin.CHANNEL);
+			params.put(ConstantsLogin.CHANNEL, channel);
+			logger.info("====【businessInfoService】-params:" + params.toJSONString());
+			messageDataBean = myPointServiceI.getUserReturnPoints(params.getLong("userId"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			messageDataBean.setCode(MessageDataBean.failure_code);
+			messageDataBean.setMess(MessageDataBean.failure_mess);
+		}
+		return messageDataBean.toJsonString();
+	}
+	
+	/***
+	 * 领取预返积分
+	 * 
+	 * @param json
+	 * @return
+	 */
+	@POST
+	@Path(value = "/receiveUserReturnPoints")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String receiveUserReturnPoints(JSONObject params, @Context HttpServletRequest request) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			String channel = request.getHeader(ConstantsLogin.CHANNEL);
+			params.put(ConstantsLogin.CHANNEL, channel);
+			logger.info("====【businessInfoService】-params:" + params.toJSONString());
+			messageDataBean = myPointServiceI.receiveUserReturnPoints(params.getLong("userId"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			messageDataBean.setCode(MessageDataBean.failure_code);
+			messageDataBean.setMess(MessageDataBean.failure_mess);
+		}
+		return messageDataBean.toJsonString();
 	}
 }

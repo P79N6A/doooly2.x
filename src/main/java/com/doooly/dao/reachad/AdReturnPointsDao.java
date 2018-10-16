@@ -36,4 +36,13 @@ public interface AdReturnPointsDao {
 	* @return
 	 */
 	Integer cancelRebateByUserId(@Param("userId") Long userId);
+	
+	/**
+	 * 通过userId返回这用户的所有返利积分
+	 * @param userId
+	 * @return
+	 */
+	List<AdReturnPoints> getListByUserId(@Param("userId") Long userId);
+	
+	int receiveUserReturnPoints(@Param("userId") Long userId);
 }

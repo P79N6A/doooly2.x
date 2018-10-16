@@ -1,5 +1,22 @@
 package com.doooly.business.mypoint.service.impl;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.didi.constants.DiDiConstants;
@@ -13,27 +30,24 @@ import com.doooly.common.constants.ConstantsV2.IntegralCode;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.dao.payment.VoucherCardFailRecordDao;
 import com.doooly.dao.payment.VoucherCardRecordDao;
-import com.doooly.dao.reachad.*;
+import com.doooly.dao.reachad.AdAvailablePointsDao;
+import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdIntegralAcquireRecordDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdRechargeDao;
+import com.doooly.dao.reachad.AdReturnPointsDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.payment.VoucherCardFailRecord;
 import com.doooly.entity.payment.VoucherCardRecord;
-import com.doooly.entity.reachad.*;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.doooly.entity.reachad.AdAvailablePoints;
+import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdIntegralAcquireRecord;
+import com.doooly.entity.reachad.AdRecharge;
+import com.doooly.entity.reachad.AdReturnPoints;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.Order;
 
 /**
  * @Description: service实现
@@ -505,5 +519,61 @@ public class MyPoinitService implements MyPointServiceI {
 	        }  
 	    } 
 	    return sb.toString();
+	}
+	
+	@Override
+	public MessageDataBean getUserReturnPoints(Long userId) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		List<AdReturnPoints> returnPointsList = adReturnPointsDao.getListByUserId(userId);
+		BigDecimal notReturnPoints = new BigDecimal("0.00"); //所有订单应付总金额
+		BigDecimal doingReturnPoints = new BigDecimal("0.00"); //所有订单应付总金额
+		BigDecimal isReturnPoints = new BigDecimal("0.00"); //所有订单实付总金额
+		for(AdReturnPoints adReturnPoints : returnPointsList) {
+			if("1".equals(adReturnPoints.getReceiveStuts())) {
+				//已领取已获返利
+				if("3".equals(adReturnPoints.getStatus())) {
+					if("1".equals(adReturnPoints.getType())) {
+						isReturnPoints = isReturnPoints.add(adReturnPoints.getAmount());
+					}else if("5".equals(adReturnPoints.getType())) {
+						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
+					}
+				//已领取返利中
+				}else {
+					if("1".equals(adReturnPoints.getType())) {
+						doingReturnPoints = doingReturnPoints.add(adReturnPoints.getAmount());
+					}else if("5".equals(adReturnPoints.getType())) {
+						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
+					}
+				}
+				//未领取
+			} else {
+				if("1".equals(adReturnPoints.getType())) {
+					notReturnPoints = notReturnPoints.add(adReturnPoints.getAmount());
+				}else if("5".equals(adReturnPoints.getType())) {
+					notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
+				}
+			}
+		}
+		HashMap<String,Object> result = new HashMap<String,Object>();
+		result.put("notReturnPoints", notReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		result.put("isReturnPoints", isReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		result.put("doingReturnPoints", doingReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		messageDataBean.setCode(MessageDataBean.success_code);
+		messageDataBean.setData(result);
+		return messageDataBean;
+	}
+
+	/**
+	 * 领取用户所有未领取的预返积分
+	 */
+	@Override
+	public MessageDataBean receiveUserReturnPoints(Long userId) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		adReturnPointsDao.receiveUserReturnPoints(userId);
+//		HashMap<String,Object> result = new HashMap<String,Object>();
+//		result.put("count", count);
+		messageDataBean.setCode(MessageDataBean.success_code);
+//		messageDataBean.setData(result);
+		return messageDataBean;
 	}
 }

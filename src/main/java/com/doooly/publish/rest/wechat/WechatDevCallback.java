@@ -64,20 +64,27 @@ public class WechatDevCallback {
 	@Path(value = "/callback/{channel}")
 	public String callback(@RequestBody String xmlStr, @PathParam("channel") String channel)
 			throws ServletException, IOException {
-		log.info("微信回调事件-请求参数xml=" + xmlStr);
-		JSONObject accessTokenTicket = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
-		String token = accessTokenTicket.getString(WechatUtil.ACCESS_TOKEN);
+		//针对回复多条消息出现提示（该公众号出现的服务出现故障，请稍后重试），优化为异步线程处理
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				log.info("微信回调事件-请求参数xml=" + xmlStr);
+				JSONObject accessTokenTicket = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
+				String token = accessTokenTicket.getString(WechatUtil.ACCESS_TOKEN);
 
-		List<String> messageList = wechatCallbackService.dealCallback(xmlStr, channel);
-		if (CollectionUtils.isNotEmpty(messageList)) {
-			try {
-				for (String message : messageList) {
-					ThirdPartyWechatUtil.sendCustomMessage(message, token);
+				List<String> messageList = wechatCallbackService.dealCallback(xmlStr, channel);
+				if (CollectionUtils.isNotEmpty(messageList)) {
+					try {
+						for (String message : messageList) {
+							ThirdPartyWechatUtil.sendCustomMessage(message, token);
+						}
+					} catch (Exception e) {
+						log.error("微信回调事件处理失败，error=" + e.getMessage(), e);
+					}
 				}
-			} catch (Exception e) {
-				log.error("微信回调事件处理失败，error=" + e.getMessage(), e);
 			}
-		}
+		}).start();
+
 		return "";
 	}
 }

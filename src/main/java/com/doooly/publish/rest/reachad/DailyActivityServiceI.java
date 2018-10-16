@@ -1,7 +1,6 @@
 package com.doooly.publish.rest.reachad;
 
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.dto.common.MessageDataBean;
 
 /**
  * 
@@ -23,7 +22,18 @@ public interface DailyActivityServiceI {
 	 * @since
 	 * @return
 	 */
-	MessageDataBean commonActivitySendCopuon(JSONObject jsonReq);
+    String commonActivitySendCopuon(JSONObject jsonReq);
+	/**
+	 * 标准（普通）日常运营活动查询可领取优惠券
+	 *
+	 * @author zhangq
+	 * @date 创建时间：2018年10月15日 14:49:51
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+    String commonActivityQueryCopuon(JSONObject jsonReq);
 
 	/**
 	 * 交行活动（定制）发放礼品券
@@ -35,5 +45,5 @@ public interface DailyActivityServiceI {
 	 * @since
 	 * @return
 	 */
-	MessageDataBean jiaoHangActivitySendCopuon(JSONObject jsonReq);
+    String jiaoHangActivitySendCopuon(JSONObject jsonReq);
 }

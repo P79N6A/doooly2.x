@@ -1,14 +1,13 @@
 package com.doooly.dao.reachad;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdCoupon;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public interface AdCouponDao extends BaseDaoI<AdCoupon> {
 
@@ -29,4 +28,6 @@ public interface AdCouponDao extends BaseDaoI<AdCoupon> {
 			@Param("startIndex") int startIndex, @Param("pageSize") int pageSize);
 
 	void updateCouponCount(HashMap<String, Object> param);
+
+    List<AdCoupon> findCoupon(@Param("userId") String userId, @Param("startDate") String startDate, @Param("endDate") String endDate,@Param("activityId") Integer activityId);
 }

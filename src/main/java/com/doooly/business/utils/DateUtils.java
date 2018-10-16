@@ -3,13 +3,14 @@
  */
 package com.doooly.business.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 日期工具类, 继承org.apache.commons.lang.time.DateUtils类
@@ -19,6 +20,17 @@ import org.slf4j.LoggerFactory;
 public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	
 	protected static Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
+    // 一天的开始时间
+    public static String DATE_HH_mm_ss_START = "00:00:00";
+    // 一天的结束时间
+    public static String DATE_HH_mm_ss_END = "23:59:59";
+    public static String DATE_yyyy_MM_dd_HH_mm_ss = "yyyy-MM-dd HH:mm:ss";
+    public static String DATE_yyyyMMdd_HH_mm_ss = "yyyyMMdd HH:mm:ss";
+    public static String DATE_yyyy_MM_dd = "yyyy-MM-dd";
+    public static String DATE_yyyyMMdd = "yyyyMMdd";
+    public static String DATE_yyyyMMddHHmmss = "yyyyMMddHHmmss";
+    // 一天的开始时间
 	
 	public static String[] parsePatterns = {
 		"yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM", 
@@ -192,8 +204,38 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		}
 		return null;
 	}
-	
-	/**
+
+    /**
+     * 获取前一天时间，根据标识生成时间
+     * 若为开始时间类型，根据标识自动生成 2017-04-08 00:00:00
+     * 若为结束时间类型，根据标识自动生成 2017-04-08 23:59:59
+     * @param timeType
+     * @return
+     */
+    public static String getDailyTime(String timeType,int intervalDay){
+        Date nowDate = DateUtils.addDays(new Date(), intervalDay);
+        String date = dateFormatStr(nowDate, DATE_yyyy_MM_dd)+" %s";
+        return TIME_TYPE_START.equals(timeType)?String.format(date,DATE_HH_mm_ss_START):String.format(date,DATE_HH_mm_ss_END);
+    }
+
+    //定义开始时间类型，根据标识自动生成 2017-04-08 00:00:00
+    public static String TIME_TYPE_START="START";
+    //定义结束时间类型，根据标识自动生成 2017-04-08 23:59:59
+    public static String TIME_TYPE_END="END";
+
+    public static String dateFormatStr(Date date, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat();
+        if (date == null || StringUtils.isBlank(format)) {
+            return null;
+        }
+        dateFormat.applyPattern(format);
+        String dateStr = null;
+        dateStr = dateFormat.format(date);
+        return dateStr;
+    }
+
+
+    /**
 	 * @param args
 	 * @throws ParseException
 	 */

@@ -52,7 +52,9 @@ public class AdCoupon {
 	private String businessActivityUrl;//商户活动链接
 	private String couponUserDetail;//卡券使用说明
 	private String couponCategory;//卡券类型
-	
+    private String couponStatus;//卡券状态 1，待领取 ，2 ，待使用 3，敬请期待 4，已领完
+    private String activityId;//活动id
+
 
 	public Long getId() {
 		return id;
@@ -412,7 +414,20 @@ public class AdCoupon {
 				+ businessActivityUrl + ", couponUserDetail="
 				+ couponUserDetail + "]";
 	}
-	
-	
 
+    public String getCouponStatus() {
+        return couponStatus;
+    }
+
+    public void setCouponStatus(String couponStatus) {
+        this.couponStatus = couponStatus;
+    }
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
 }

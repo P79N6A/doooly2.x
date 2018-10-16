@@ -127,5 +127,30 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 			a.remind_quantity = a.remind_quantity + #{count} 
 		where a.id = #{couponId}
 	</update>
+
+    <select id="findCoupon" resultType="com.doooly.entity.reachad.AdCoupon">
+        SELECT
+            a.id AS "id",
+            c.begin_date AS "beginDate",
+            c.end_date AS "endDate",
+            a.product_name AS "productName",
+            a.business_name AS "businessName",
+            a.coupon_value AS "couponValue",
+            d.id AS "activityId",
+            d.introduction AS "introduction",
+            a.description AS "description",
+            CASE
+            WHEN c.coupon_remind_quantity  = 0 THEN '4'
+            WHEN b.user_id = #{userId} THEN '2'
+            WHEN DATE_FORMAT(c.begin_date,'%Y-%m-%d') = DATE_FORMAT(#{startDate},'%Y-%m-%d') THEN '1'
+            WHEN DATE_FORMAT(c.begin_date,'%Y-%m-%d') = DATE_FORMAT(#{endDate},'%Y-%m-%d') THEN '3'
+            end AS couponStatus
+        FROM ad_coupon a
+        LEFT JOIN ad_coupon_code b ON a.id = b.coupon AND b.user_id = #{userId}
+        INNER JOIN ad_coupon_activity_conn c ON a.id = c.coupon_id
+        INNER JOIN ad_coupon_activity d ON d.id = c.activity_id
+        WHERE c.begin_date &gt;=#{startDate}
+              AND c.begin_date &lt;=#{endDate} AND c.activity_id = #{activityId}
+    </select>
 	
 </mapper>

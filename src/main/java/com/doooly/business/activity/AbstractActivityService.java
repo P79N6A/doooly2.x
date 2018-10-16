@@ -1,25 +1,28 @@
 package com.doooly.business.activity;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
+import com.doooly.business.utils.DateUtils;
+import com.doooly.common.constants.ActivityConstants.ActivityEnum;
+import com.doooly.dao.reachad.AdCouponActivityConnDao;
+import com.doooly.dao.reachad.AdCouponActivityDao;
+import com.doooly.dao.reachad.AdCouponCodeDao;
+import com.doooly.dao.reachad.AdCouponDao;
+import com.doooly.dao.reachad.AdGroupActivityConnDao;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdCoupon;
+import com.doooly.entity.reachad.AdCouponActivity;
+import com.doooly.entity.reachad.AdCouponActivityConn;
+import com.doooly.entity.reachad.AdCouponCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
-import com.doooly.common.constants.ActivityConstants.ActivityEnum;
-import com.doooly.dao.reachad.AdCouponActivityConnDao;
-import com.doooly.dao.reachad.AdCouponActivityDao;
-import com.doooly.dao.reachad.AdCouponCodeDao;
-import com.doooly.dao.reachad.AdGroupActivityConnDao;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdCouponActivity;
-import com.doooly.entity.reachad.AdCouponActivityConn;
-import com.doooly.entity.reachad.AdCouponCode;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 @Service
 public abstract class AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -33,8 +36,10 @@ public abstract class AbstractActivityService {
 	private AdCouponActivityDao couponActivityDao;
 	@Autowired
 	private AdCouponCodeDao couponCodeDao;
+	@Autowired
+	private AdCouponDao adCouponDao;
 
-	public AbstractActivityService() {
+    public AbstractActivityService() {
 		super();
 	}
 
@@ -214,4 +219,39 @@ public abstract class AbstractActivityService {
 	 */
 	protected void doAfter(JSONObject beforeJson) {
 	}
+
+    /**
+     * 查询可领取优惠券信息
+     * @param jsonReq
+     * @return
+     */
+    public MessageDataBean query(JSONObject jsonReq){
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            String userId = jsonReq.getString("userId");
+            //根据活动标签获取活动ID
+            String idFlag = jsonReq.getString("idFlag");
+            AdCouponActivity activity = couponActivityDao.getActivityIdByIdFlag(idFlag);
+            if(activity == null){
+                return new MessageDataBean(MessageDataBean.failure_code,"未找到活动,无效的活动标识");
+            }
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            String todayStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,0);
+            String todayEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,0);
+            List<AdCoupon> todayAdCoupons = adCouponDao.findCoupon(userId,todayStartDate,todayEndDate,activity.getId());
+            String tomorrowStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,1);
+            String tomorrowEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,1);
+            List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId());
+            map.put("todayAdCoupons",todayAdCoupons);
+            map.put("tomorrowAdCoupons",tomorrowAdCoupons);
+            map.put("introduction",activity.getIntroduction());
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setData(map);
+        } catch (Exception e) {
+            log.error("获取是否设置过支付密码数据异常！");
+            messageDataBean.setCode(MessageDataBean.failure_code);
+        }
+        log.info(messageDataBean.toJsonString());
+        return messageDataBean;
+    };
 }

@@ -18,7 +18,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.didi.constants.DiDiConstants;
 import com.doooly.business.mypoint.service.MyPointServiceI;
 import com.doooly.business.order.vo.OrderItemVo;
@@ -57,7 +56,7 @@ import com.doooly.entity.reachad.Order;
 @Service
 public class MyPoinitService implements MyPointServiceI {
 	private static final Logger logger = LoggerFactory.getLogger(MyPoinitService.class);
-	private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
+//	private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -78,8 +77,8 @@ public class MyPoinitService implements MyPointServiceI {
 	private VoucherCardRecordDao voucherCardRecordDao;
 	@Autowired
 	private VoucherCardFailRecordDao voucherCardFailRecordDao;
-	@Autowired
-	private AdUserService adUserService;
+//	@Autowired
+//	private AdUserService adUserService;
 	@Autowired
 	protected StringRedisTemplate redisTemplate;
 	/**
@@ -576,4 +575,5 @@ public class MyPoinitService implements MyPointServiceI {
 //		messageDataBean.setData(result);
 		return messageDataBean;
 	}
+	
 }

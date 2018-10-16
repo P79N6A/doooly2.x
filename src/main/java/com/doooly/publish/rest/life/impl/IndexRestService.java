@@ -1,23 +1,10 @@
 package com.doooly.publish.rest.life.impl;
 
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.business.impl.HotBusinessService;
-import com.doooly.common.constants.Constants;
-import com.doooly.common.constants.PropertiesHolder;
-import com.doooly.dao.reachad.AdBasicTypeDao;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdConsumeRechargeDao;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdBasicType;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdConsumeRecharge;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,11 +14,25 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.constants.PropertiesHolder;
+import com.doooly.dao.reachad.AdBasicTypeDao;
+import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdConsumeRechargeDao;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdBasicType;
+import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdConsumeRecharge;
 
 /**
  * app2.1首页接口
@@ -47,8 +48,8 @@ public class IndexRestService {
     private static int DEAL_TYPE_ONLINE  = 0;
     private static int DEAL_TYPE_OFFLINE = 1;
 
-    @Autowired
-    private HotBusinessService hotBusinessService;
+//    @Autowired
+//    private HotBusinessService hotBusinessService;
     @Autowired
     private AdBasicTypeDao adBasicTypeDao;
     @Autowired
@@ -78,10 +79,10 @@ public class IndexRestService {
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000","floors is null").toJsonString();
             }
-            Map data = new HashMap();
-            List ls = new ArrayList();
+            Map<String, Object> data = new HashMap<String, Object>();
+            List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
             for (AdBasicType floor : floors) {
-                Map item = new HashMap();
+                Map<String, Object> item = new HashMap<String, Object>();
                 if (floor.getCode() == 20) {
                     //线上商户
                     List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address, DEAL_TYPE_ONLINE);
@@ -99,6 +100,21 @@ public class IndexRestService {
                         item.put("isOnline", DEAL_TYPE_OFFLINE);
                         item.put("type", "1");
                         item.put("list", getBussiness);
+                    }
+                } else if(floor.getCode() == 23){
+                	//每日特惠数据
+                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(), floor.getFloorId());
+                    if (!CollectionUtils.isEmpty(beans)) {
+                        for (AdConsumeRecharge bean : beans) {
+                            String linkUrl = bean.getLinkUrl();
+                            if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                            }
+                        }
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_OFFLINE);
+                        item.put("type", "3");
+                        item.put("list", beans);
                     }
                 } else {
                     //消费卡券/充值缴费数据表

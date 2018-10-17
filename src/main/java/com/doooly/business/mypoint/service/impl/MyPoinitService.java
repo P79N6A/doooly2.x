@@ -537,7 +537,7 @@ public class MyPoinitService implements MyPointServiceI {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
 					}
 				//已领取返利中
-				}else {
+				} else {
 					if("1".equals(adReturnPoints.getType())) {
 						doingReturnPoints = doingReturnPoints.add(adReturnPoints.getAmount());
 					}else if("5".equals(adReturnPoints.getType())) {
@@ -550,6 +550,7 @@ public class MyPoinitService implements MyPointServiceI {
 					notReturnPoints = notReturnPoints.add(adReturnPoints.getAmount());
 				}else if("5".equals(adReturnPoints.getType())) {
 					notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
+					doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 				}
 			}
 		}
@@ -569,10 +570,7 @@ public class MyPoinitService implements MyPointServiceI {
 	public MessageDataBean receiveUserReturnPoints(Long userId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		adReturnPointsDao.receiveUserReturnPoints(userId);
-//		HashMap<String,Object> result = new HashMap<String,Object>();
-//		result.put("count", count);
-		messageDataBean.setCode(MessageDataBean.success_code);
-//		messageDataBean.setData(result);
+		messageDataBean = getUserReturnPoints(userId);
 		return messageDataBean;
 	}
 	

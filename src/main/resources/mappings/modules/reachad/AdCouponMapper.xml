@@ -130,6 +130,7 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 
     <select id="findCoupon" resultType="com.doooly.entity.reachad.AdCoupon">
         SELECT
+            a.id AS "couponId",
             c.id AS "id",
             c.begin_date AS "beginDate",
             c.end_date AS "endDate",

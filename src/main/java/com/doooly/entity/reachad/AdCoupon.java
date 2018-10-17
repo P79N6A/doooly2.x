@@ -54,6 +54,7 @@ public class AdCoupon {
 	private String couponCategory;//卡券类型
     private String couponStatus;//卡券状态 1，待领取 ，2 ，待使用 3，敬请期待 4，已领完
     private String activityId;//活动id
+    private String couponId;//卡券id
 
 
 	public Long getId() {
@@ -429,5 +430,13 @@ public class AdCoupon {
 
     public void setActivityId(String activityId) {
         this.activityId = activityId;
+    }
+
+    public String getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(String couponId) {
+        this.couponId = couponId;
     }
 }

@@ -3,6 +3,7 @@ package com.doooly.business.myaccount.service.impl;
 import com.doooly.business.myaccount.service.AdSystemNoticeServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.AppConstants;
+import com.doooly.common.util.EmojiUtils;
 import com.doooly.dao.reachad.AdSystemNoticeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdSystemNotice;
@@ -51,6 +52,8 @@ public class AdSystemNoitceService implements AdSystemNoticeServiceI {
                     //将新连接赋值给旧链接
                     adSystemNotice.setTargetUrl(adSystemNotice.getNewTargetUrl());
                 }
+                adSystemNotice.setContent(EmojiUtils.emojiConverterUnicodeStr(adSystemNotice.getContent()));
+                adSystemNotice.setTitle(EmojiUtils.emojiConverterUnicodeStr(adSystemNotice.getTitle()));
             }
             map.put("adSystemNoticeList",adSystemNoticeList);//数据
             map.put("countPage",pagelab.getCountPage());//总页码
@@ -78,6 +81,8 @@ public class AdSystemNoitceService implements AdSystemNoticeServiceI {
                     //将新连接赋值给旧链接
                     adSystemNotice.setTargetUrl(adSystemNotice.getNewTargetUrl());
                 }
+                adSystemNotice.setContent(EmojiUtils.emojiConverterUnicodeStr(adSystemNotice.getContent()));
+                adSystemNotice.setTitle(EmojiUtils.emojiConverterUnicodeStr(adSystemNotice.getTitle()));
             }
             map.put("adSystemNoticeList",adSystemNoticeList);//数据
             map.put("countPage",pagelab.getCountPage());//总页码

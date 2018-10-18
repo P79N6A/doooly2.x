@@ -233,9 +233,9 @@ public abstract class AbstractActivityService {
             String idFlag = jsonReq.getString("idFlag");
             AdCouponActivity activity = couponActivityDao.getActivityIdByIdFlag(idFlag);
             if(activity == null){
-                return new MessageDataBean(MessageDataBean.failure_code,"未找到活动,无效的活动标识");
+                return new MessageDataBean(ActivityEnum.ACTIVITY_ENDED);
             }
-            HashMap<String, Object> map = new HashMap<String, Object>();
+            HashMap<String, Object> map = new HashMap<>();
             String todayStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,0);
             String todayEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,0);
             List<AdCoupon> todayAdCoupons = adCouponDao.findCoupon(userId,todayStartDate,todayEndDate,activity.getId());
@@ -248,7 +248,7 @@ public abstract class AbstractActivityService {
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setData(map);
         } catch (Exception e) {
-            log.error("获取是否设置过支付密码数据异常！");
+            log.error("获取活动可领取优惠券数据异常！");
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
         log.info(messageDataBean.toJsonString());

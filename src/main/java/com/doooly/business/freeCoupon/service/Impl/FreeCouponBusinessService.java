@@ -1,23 +1,9 @@
 package com.doooly.business.freeCoupon.service.Impl;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
+import com.doooly.business.freeCoupon.service.task.GetCouponTask;
 import com.doooly.business.redisUtil.RedisUtilService;
 import com.doooly.common.constants.ConstantsV2.ActivityCode;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
@@ -39,6 +25,23 @@ import com.doooly.entity.reachad.AdIntegralAcquireRecord;
 import com.doooly.entity.reachad.AdIntegralActivityConn;
 import com.doooly.entity.reachad.AdRegisterRecord;
 import com.doooly.entity.reachad.AdUser;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Transactional
@@ -48,7 +51,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 	@Autowired
 	private AdCouponActivityConnDao adCouponActivityConnDao;
 	@Autowired
-	private AdCouponCodeDao adCouponCodeDao;
+    private AdCouponCodeDao adCouponCodeDao;
 	@Autowired
 	private AdCouponDao adCouponDao;
 	@Autowired
@@ -70,12 +73,15 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 	private AdIntegralActivityConnDao adIntegralActivityConnDao;
 	@Autowired
 	private AdAvailablePointsDao adAvailablePointsDao;
+    @Autowired
+    private GetCouponTask getCouponTask;
 
 	// 会员coupon_code，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
 	private static String COUPON_CODE_KEY = "coupon_code:%s";
 	// 会员coupon_code，唯一标识，缓存值4个0（0000）
 	private static String COUPON_CODE_VALUE = "0000";
 	ReentrantLock lock = new ReentrantLock();
+    private static final Integer DEFAULT_MAX_ACTIVE = 10;
 
 	@Override
 	public MessageDataBean receiveCoupon(Integer adId, Integer couponId, Integer activityId, String productSn) {
@@ -144,25 +150,27 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 				adCouponCode.setCoupon(Long.valueOf(couponId));
 				
 				AdCouponActivity activity = adCouponActivityDao.getActivityById(activityId);
-				if("JHLQ".equals(activity.getIdFlag())) {
-					List<AdCouponCode> codeList = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
-					if(codeList.size() >= activity.getCouponCount()) {
-						// 已领取
-						adCouponCode.setIsReceived(1);
-						adCouponCode.setCode(codeList.get(0).getCode());
-						logger.info("====用户已领取过券码");
-						return adCouponCode;
-					}
-				}
-				// 用户是否已领取券码
-				String code = adCouponCodeDao.checkIfSendCode(adCouponCode);
-				if (code != null && !"".equals(code)) {
-					// 已领取
-					adCouponCode.setIsReceived(1);
-					adCouponCode.setCode(code);
-					logger.info("====用户已领取过券码-code:" + code);
-					return adCouponCode;
-				} else {
+                //查询已领取集合
+                List<AdCouponCode> recCodeList = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
+                if(CollectionUtils.isNotEmpty(recCodeList)){
+                    if(recCodeList.size() >= activity.getCouponCount()) {
+                        //领取数量超过活动限制
+                        adCouponCode.setIsReceived(1);
+                        adCouponCode.setCode(recCodeList.get(0).getCode());
+                        logger.info("====用户已领取过券码超过活动限制");
+                        return adCouponCode;
+                    }
+                    // 用户是否已领取券码
+                    for (AdCouponCode couponCode : recCodeList) {
+                        if(couponCode.getCoupon().equals(Long.valueOf(couponId))){
+                            //领取数量超过活动限制
+                            adCouponCode.setIsReceived(1);
+                            adCouponCode.setCode(recCodeList.get(0).getCode());
+                            logger.info("====用户已领取过券码");
+                            return adCouponCode;
+                        }
+                    }
+                }else {
 					// ======redis检测用户是否已领取券码,如已操作中断操作并返回信息-start=====
 					if (!redisTemplate.opsForValue().setIfAbsent(
 							String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId),
@@ -176,7 +184,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 					// ======redis检测用户是否已领取券码,如已操作中断操作并返回信息-end======
 
 					// ==============发放券码-start==============
-					List<String> codeList = redisUtilService
+					/*List<String> codeList = redisUtilService
 							.PopDataFromRedis(businessId + "+" + couponId + "+" + activityId, 1);
 					logger.info("====codeList:" + codeList + ",codeList == null:" + (codeList == null));
 					if (codeList != null) {
@@ -203,8 +211,18 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 					// ==============发放券码-end===============
 
 					// 删除缓存key
-					redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
-					return adCouponCode;
+					redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));*/
+					//采用异步线程处理
+                    // 创建一个线程池
+                    ExecutorService pool = Executors.newFixedThreadPool(DEFAULT_MAX_ACTIVE);
+                    //创建一个又返回值的任务
+                    JSONObject req = new JSONObject();
+                    req.put("businessId",businessId);
+                    req.put("userId",userId);
+                    req.put("couponId",couponId);
+                    req.put("activityId",activityId);
+                    GetCouponTask getCouponTask = new GetCouponTask(req,adCouponCode,redisUtilService,adCouponActivityConnDao,redisTemplate,adCouponCodeDao);
+                    return pool.submit(getCouponTask).get();
 				}
 			}
 		} catch (Exception e) {

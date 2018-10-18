@@ -536,28 +536,32 @@ public class MyPoinitService implements MyPointServiceI {
 		BigDecimal doingReturnPoints = new BigDecimal("0.00"); //所有订单应付总金额
 		BigDecimal isReturnPoints = new BigDecimal("0.00"); //所有订单实付总金额
 		for(AdReturnPoints adReturnPoints : returnPointsList) {
-			if("1".equals(adReturnPoints.getReceiveStuts())) {
+			if(RECEIVE_STATUS.equals(adReturnPoints.getReceiveStuts())) {
 				//已领取已获返利
-				if("3".equals(adReturnPoints.getStatus())) {
-					if("1".equals(adReturnPoints.getType())) {
+				if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+					if(IS_ORDER.equals(adReturnPoints.getType())) {
 						isReturnPoints = isReturnPoints.add(adReturnPoints.getAmount());
-					}else if("5".equals(adReturnPoints.getType())) {
+					}else if(IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
 					}
 				//已领取返利中
 				} else {
-					if("1".equals(adReturnPoints.getType())) {
+					if(IS_ORDER.equals(adReturnPoints.getType())) {
 						doingReturnPoints = doingReturnPoints.add(adReturnPoints.getAmount());
-					}else if("5".equals(adReturnPoints.getType())) {
+					}else if(IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
 						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 					}
 				}
 				//未领取
 			} else {
-				if("1".equals(adReturnPoints.getType())) {
-					notReturnPoints = notReturnPoints.add(adReturnPoints.getAmount());
-				}else if("5".equals(adReturnPoints.getType())) {
-					if("3".equals(adReturnPoints.getStatus())) {
+				if(IS_ORDER.equals(adReturnPoints.getType())) {
+					if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+						isReturnPoints = isReturnPoints.add(adReturnPoints.getAmount());
+					}else {
+						notReturnPoints = notReturnPoints.add(adReturnPoints.getAmount());
+					}
+				}else{
+					if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
 					}else {
 						notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());

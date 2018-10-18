@@ -57,6 +57,14 @@ import com.doooly.entity.reachad.Order;
 public class MyPoinitService implements MyPointServiceI {
 	private static final Logger logger = LoggerFactory.getLogger(MyPoinitService.class);
 //	private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
+	/** 是否点击领取 1 已领取 0 未领取*/
+	private static final String RECEIVE_STATUS = "1";
+	/** 积分是否到账 3 已到账 2 预计到账*/
+	private static final String IS_RETURN_POINTS = "3";
+	/** 是否为退货单 5 退货单*/
+	private static final String IS_RETURN_ORDER = "5";
+	/** 是否为退货单 1 订单*/
+	private static final String IS_ORDER = "1";
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -551,9 +559,10 @@ public class MyPoinitService implements MyPointServiceI {
 				}else if("5".equals(adReturnPoints.getType())) {
 					if("3".equals(adReturnPoints.getStatus())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
+					}else {
+						notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
+						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 					}
-					notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
-					doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 				}
 			}
 		}

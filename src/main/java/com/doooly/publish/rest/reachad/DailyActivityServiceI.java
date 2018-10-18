@@ -1,6 +1,7 @@
 package com.doooly.publish.rest.reachad;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.common.MessageDataBean;
 
 /**
  * 
@@ -22,7 +23,7 @@ public interface DailyActivityServiceI {
 	 * @since
 	 * @return
 	 */
-    String commonActivitySendCopuon(JSONObject jsonReq);
+    MessageDataBean commonActivitySendCopuon(JSONObject jsonReq);
 	/**
 	 * 标准（普通）日常运营活动查询可领取优惠券
 	 *
@@ -45,5 +46,5 @@ public interface DailyActivityServiceI {
 	 * @since
 	 * @return
 	 */
-    String jiaoHangActivitySendCopuon(JSONObject jsonReq);
+    MessageDataBean jiaoHangActivitySendCopuon(JSONObject jsonReq);
 }

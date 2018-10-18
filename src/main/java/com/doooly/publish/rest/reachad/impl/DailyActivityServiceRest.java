@@ -38,9 +38,9 @@ public class DailyActivityServiceRest implements DailyActivityServiceI {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Override
-	public String commonActivitySendCopuon(JSONObject jsonReq) {
+	public MessageDataBean commonActivitySendCopuon(JSONObject jsonReq) {
 		MessageDataBean result = dailyCommonService.send(jsonReq);
-		return result.toJsonString();
+		return result;
 	}
 
 	@POST
@@ -58,9 +58,9 @@ public class DailyActivityServiceRest implements DailyActivityServiceI {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Override
-	public String jiaoHangActivitySendCopuon(JSONObject jsonReq) {
+	public MessageDataBean jiaoHangActivitySendCopuon(JSONObject jsonReq) {
 		MessageDataBean result = jiaohangService.send(jsonReq);
-		return result.toJsonString();
+		return result;
 	}
 
 }

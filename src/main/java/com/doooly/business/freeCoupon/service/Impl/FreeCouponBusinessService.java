@@ -73,8 +73,6 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
 	private AdIntegralActivityConnDao adIntegralActivityConnDao;
 	@Autowired
 	private AdAvailablePointsDao adAvailablePointsDao;
-    @Autowired
-    private GetCouponTask getCouponTask;
 
 	// 会员coupon_code，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
 	private static String COUPON_CODE_KEY = "coupon_code:%s";

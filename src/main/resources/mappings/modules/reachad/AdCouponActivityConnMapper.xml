@@ -486,9 +486,15 @@
 			AND ca.id = #{activityId}
 		</if>
 		<if test="idFlag!=null">
-			AND ca.id_flag=#{idFlag}
+			and cac.activity_id = (
+				select aca.id from ad_coupon_activity aca 
+				where 
+				aca.id_flag=#{idFlag}
+				order by 
+				aca.create_date DESC limit 1
+			)
 		</if>
-		order by ca.create_date DESC limit 1
+		ORDER BY cac.level
 	</select>
 	
 	<select id="getByActivityIdAndCouponId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">

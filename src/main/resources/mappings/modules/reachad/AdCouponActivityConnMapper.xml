@@ -473,28 +473,22 @@
 			cac.begin_date AS "beginDate",
 			cac.end_date AS "endDate",
 			cac.level AS "level",
-			b.business_id AS "coupon.businessId",
 			c.product_name AS "coupon.productName",
 			cac.coupon_id as 'couponId',
 			ca.coupon_count as 'couponCount'
 		FROM
 			ad_coupon_activity_conn cac
 		LEFT JOIN ad_coupon c ON cac.coupon_id = c.id
-		LEFT JOIN ad_business b ON c.business_id = b.id
 		LEFT JOIN ad_coupon_activity ca ON ca.id = cac.activity_id
 		WHERE 
 		ca.state = 1
-		and cac.activity_id = (select aca.id from ad_coupon_activity aca where 
-		aca.state = 1
 		<if test="activityId!=null">
-			AND aca.id = #{activityId}
+			AND ca.id = #{activityId}
 		</if>
 		<if test="idFlag!=null">
-			AND aca.id_flag=#{idFlag}
+			AND ca.id_flag=#{idFlag}
 		</if>
-		order by aca.create_date DESC limit 1
-		)
-		ORDER BY cac.level
+		order by ca.create_date DESC limit 1
 	</select>
 	
 	<select id="getByActivityIdAndCouponId" resultType="com.doooly.entity.reachad.AdCouponActivityConn">

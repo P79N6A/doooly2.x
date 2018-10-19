@@ -564,7 +564,9 @@ public class MyPoinitService implements MyPointServiceI {
 					if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
 					}else {
-//						notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
+						if(notReturnPoints.compareTo(adReturnPoints.getAmount()) >= 0 ) {
+							notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
+						}
 						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 					}
 				}

@@ -56,14 +56,15 @@ import com.doooly.entity.reachad.Order;
 @Service
 public class MyPoinitService implements MyPointServiceI {
 	private static final Logger logger = LoggerFactory.getLogger(MyPoinitService.class);
-//	private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
-	/** 是否点击领取 1 已领取 0 未领取*/
+	// private static final String INTEGRAL_FAIL_COUNT = "integral_fail_count_";
+	/** 是否点击领取 1 已领取 0 未领取 */
 	private static final String RECEIVE_STATUS = "1";
-	/** 积分是否到账 3 已到账 2 预计到账*/
+	/** 积分是否到账 3 已到账 2 预计到账 */
 	private static final String IS_RETURN_POINTS = "3";
-	/** 是否为退货单 5 退货单*/
+	private static final String EXPECT_RETURN_POINTS = "2";
+	/** 是否为退货单 5 退货单 */
 	private static final String IS_RETURN_ORDER = "5";
-	/** 是否为退货单 1 订单*/
+	/** 是否为退货单 1 订单 */
 	private static final String IS_ORDER = "1";
 	@Autowired
 	private AdBusinessDao adBusinessDao;
@@ -85,10 +86,11 @@ public class MyPoinitService implements MyPointServiceI {
 	private VoucherCardRecordDao voucherCardRecordDao;
 	@Autowired
 	private VoucherCardFailRecordDao voucherCardFailRecordDao;
-//	@Autowired
-//	private AdUserService adUserService;
+	// @Autowired
+	// private AdUserService adUserService;
 	@Autowired
 	protected StringRedisTemplate redisTemplate;
+
 	/**
 	 * 通过家属邀请的所有id查询到返利的列表和积分的总和
 	 * 
@@ -154,8 +156,8 @@ public class MyPoinitService implements MyPointServiceI {
 		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
 		// 查询待返积分
 		BigDecimal returnPoint = adUserDao.getReturnPoint(userId);
-		map.put("availablePoint", availablePoint!=null ? availablePoint : new BigDecimal("0"));
-		map.put("returnPoint", returnPoint!=null ? returnPoint : new BigDecimal("0"));
+		map.put("availablePoint", availablePoint != null ? availablePoint : new BigDecimal("0"));
+		map.put("returnPoint", returnPoint != null ? returnPoint : new BigDecimal("0"));
 		messageDataBean.setCode(MessageDataBean.success_code);
 		messageDataBean.setData(map);
 		return messageDataBean;
@@ -236,14 +238,14 @@ public class MyPoinitService implements MyPointServiceI {
 				// 查询订单
 				Order order = orderDao.get(String.valueOf(adAvailablePoint.getOrderId()));
 				if (order != null) {
-                    if(DiDiConstants.DIDI_BUSINESS_ID.equals(order.getBussinessId()) && order.getType()==2){
-                        map.put("type","1");//滴滴专用
-                        messageDataBean.setCode(MessageDataBean.success_code);
-                    }else {
-                        // 查询总金额
-                        getTotalAmountAndTotalPrice(map, order);
-                        messageDataBean.setCode(MessageDataBean.success_code);
-                    }
+					if (DiDiConstants.DIDI_BUSINESS_ID.equals(order.getBussinessId()) && order.getType() == 2) {
+						map.put("type", "1");// 滴滴专用
+						messageDataBean.setCode(MessageDataBean.success_code);
+					} else {
+						// 查询总金额
+						getTotalAmountAndTotalPrice(map, order);
+						messageDataBean.setCode(MessageDataBean.success_code);
+					}
 				} else {
 					messageDataBean.setMess("查无积分订单明细");
 				}
@@ -258,18 +260,18 @@ public class MyPoinitService implements MyPointServiceI {
 				} else {
 					messageDataBean.setMess("查无积分充值明细");
 				}
-			}else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_INTEGRAL_ACTIVITY)) {
+			} else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_INTEGRAL_ACTIVITY)) {
 				AdIntegralAcquireRecord record = adIntegralAcquireRecordDao.checkIsHadProvided(Long.valueOf(userId));
-				if (record !=null) {
+				if (record != null) {
 					map.put("showType", "activity");
 					map.put("integral", adAvailablePoint.getBusinessRebateAmount());
 					map.put("date", DateUtils.formatDate(record.getCreateDate(), "yyyy.MM.dd HH:mm"));
-					map.put("integralName",record.getIntegralName());
+					map.put("integralName", record.getIntegralName());
 					messageDataBean.setCode(MessageDataBean.success_code);
-				}else {
+				} else {
 					messageDataBean.setMess("查无积分活动明细");
 				}
-			}else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_RECHARGE_BY_SELF)) {
+			} else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_RECHARGE_BY_SELF)) {
 				map.put("showType", "integralRecharge");
 				map.put("integral", adAvailablePoint.getBusinessRebateAmount());
 				map.put("date", DateUtils.formatDate(adAvailablePoint.getCreateDate(), "yyyy.MM.dd HH:mm"));
@@ -319,32 +321,34 @@ public class MyPoinitService implements MyPointServiceI {
 	 * @param order
 	 */
 	private void getTotalAmountAndTotalPrice(HashMap<String, Object> map, Order order) {
-		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 begin -----------------------
+		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 begin
+		// -----------------------
 		List<OrderVo> adOrderReportList = adOrderReportDao.getByOrderNum(order.getOrderNumber());
 		if (CollectionUtils.isNotEmpty(adOrderReportList)) {
 			OrderVo orderVo = adOrderReportList.get(0);
-			if(CollectionUtils.isNotEmpty(orderVo.getItems())){
+			if (CollectionUtils.isNotEmpty(orderVo.getItems())) {
 				OrderItemVo orderItemVo = orderVo.getItems().get(0);
 				logger.info("积分关联订单商品类型={},商品名称={}", orderVo.getProductType(), orderItemVo.getGoods());
 				map.put("productType", orderVo.getProductType());
 				map.put("productName", orderItemVo.getGoods());
 			}
 		}
-		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 end -------------------------
+		// ---------------------获取自营商品名称added by yl.zhang 2018.05.09 end
+		// -------------------------
 		// 根据商家编号获取商家名称
 		AdBusiness adBusiness = adBusinessDao.getByBusinessId(order.getBussinessId());
 		Order totalOrder = null;
-		if("来伊份".equals(adBusiness.getCompany())){
+		if ("来伊份".equals(adBusiness.getCompany())) {
 			// 根据流水号查询订单总金额(来伊份特殊处理，因为_order表中type=2的订单号和type=1的订单号不一样)
 			totalOrder = orderDao.getTotalBySerialNumber(order.getSerialNumber());
-		}else{
+		} else {
 			// 根据订单号查询订单总金额
 			totalOrder = orderDao.getTotalByOrderNumber(order.getOrderNumber());
 		}
 		// 查询总金额
-		if (totalOrder==null) {
-			//睿仕之家退单,orderNumber随机为时间戳,并不能取到type为1的总计,则取type为5的总计
-			totalOrder= orderDao.getTotalByOrderNumberByTypeFive(order.getOrderNumber());
+		if (totalOrder == null) {
+			// 睿仕之家退单,orderNumber随机为时间戳,并不能取到type为1的总计,则取type为5的总计
+			totalOrder = orderDao.getTotalByOrderNumberByTypeFive(order.getOrderNumber());
 		}
 		order.setTotalAmount(totalOrder.getTotalAmount());
 		order.setTotalPrice(totalOrder.getTotalPrice());
@@ -359,20 +363,21 @@ public class MyPoinitService implements MyPointServiceI {
 	public MessageDataBean getIntegralRechargeListData(Long userId, Integer currentPage, Integer pageSize) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		Pagelab pagelab = new Pagelab(currentPage,pageSize);
+		Pagelab pagelab = new Pagelab(currentPage, pageSize);
 		// 查询总数
 		int totalNum = voucherCardRecordDao.getTotalCountByUserId(userId);
 		AdUser user = adUserDao.getById(userId.intValue());
-		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId+"");
-		map.put("integral", availablePoint!=null ? availablePoint : new BigDecimal("0"));
+		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId + "");
+		map.put("integral", availablePoint != null ? availablePoint : new BigDecimal("0"));
 		pagelab.setTotalNum(totalNum);
 		Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
 		map.put("failCount", count);
-		List<VoucherCardRecord> merchants = voucherCardRecordDao.findRechargeRecordsByUserId(userId,pagelab.getStartIndex(), pageSize);
+		List<VoucherCardRecord> merchants = voucherCardRecordDao.findRechargeRecordsByUserId(userId,
+				pagelab.getStartIndex(), pageSize);
 		if (!merchants.isEmpty()) {
 			for (VoucherCardRecord record : merchants) {
 				String formatDate = DateUtils.formatDate(record.getCardUseTime(), "yyyy.MM.dd HH:mm:ss");
-				record.setCardUseDate(formatDate.substring(0, formatDate.length()-3));
+				record.setCardUseDate(formatDate.substring(0, formatDate.length() - 3));
 			}
 			map.put("records", merchants);
 			map.put("countPage", pagelab.getCountPage());
@@ -387,7 +392,7 @@ public class MyPoinitService implements MyPointServiceI {
 	}
 
 	@Override
-	public MessageDataBean doIntegralRecharge(Long userId, String cardPassword)throws Exception {
+	public MessageDataBean doIntegralRecharge(Long userId, String cardPassword) throws Exception {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		VoucherCardFailRecord failRecord = new VoucherCardFailRecord();
@@ -398,91 +403,95 @@ public class MyPoinitService implements MyPointServiceI {
 		VoucherCardRecord record = voucherCardRecordDao.checkCardPasswordData(cardPassword);
 		try {
 			Integer count = voucherCardFailRecordDao.find24HourFailDataCount(user.getTelephone());
-			if (count>19) {
+			if (count > 19) {
 				map.put("failCount", count);
-			    messageDataBean.setData(map);
-				messageDataBean.setCode(IntegralCode.MAX_FAIL_COUNT.getCode()+"");
+				messageDataBean.setData(map);
+				messageDataBean.setCode(IntegralCode.MAX_FAIL_COUNT.getCode() + "");
 				return messageDataBean;
 			}
-			if (record!=null) {
-				//判断卡密是否已被使用,卡密是否已激活
+			if (record != null) {
+				// 判断卡密是否已被使用,卡密是否已激活
 				if (record.getCardUseStatus() != 0) {
-					//被使用
+					// 被使用
 					map.put("failCount", count);
-			        messageDataBean.setData(map);
-					messageDataBean.setCode(IntegralCode.IS_USED.getCode()+"");
+					messageDataBean.setData(map);
+					messageDataBean.setCode(IntegralCode.IS_USED.getCode() + "");
 					failRecord.setReason("卡密已使用");
 					addFailRecord(cardPassword, failRecord, user);
 					return messageDataBean;
 				}
-				Date now =new Date();
-				if (record.getCardActivationStatus()==0
-						||record.getApplicationStatus()!=1
-						||now.getTime() <record.getBeginTime().getTime()) {
+				Date now = new Date();
+				if (record.getCardActivationStatus() == 0 || record.getApplicationStatus() != 1
+						|| now.getTime() < record.getBeginTime().getTime()) {
 					map.put("failCount", count);
-			        messageDataBean.setData(map);
-					messageDataBean.setCode(IntegralCode.NOT_ACTIVATE.getCode()+"");
+					messageDataBean.setData(map);
+					messageDataBean.setCode(IntegralCode.NOT_ACTIVATE.getCode() + "");
 					failRecord.setReason("卡密未激活");
 					addFailRecord(cardPassword, failRecord, user);
 					return messageDataBean;
 				}
-				if (record.getCardActivationStatus()==2) {
+				if (record.getCardActivationStatus() == 2) {
 					map.put("failCount", count);
-			        messageDataBean.setData(map);
-					messageDataBean.setCode(IntegralCode.IS_FREEZE.getCode()+"");
+					messageDataBean.setData(map);
+					messageDataBean.setCode(IntegralCode.IS_FREEZE.getCode() + "");
 					failRecord.setReason("已冻结卡密");
 					addFailRecord(cardPassword, failRecord, user);
 					return messageDataBean;
 				}
-				if (now.getTime()>record.getEndTime().getTime()) {
+				if (now.getTime() > record.getEndTime().getTime()) {
 					map.put("failCount", count);
-			        messageDataBean.setData(map);
-					messageDataBean.setCode(IntegralCode.WRONG_TIME.getCode()+"");
+					messageDataBean.setData(map);
+					messageDataBean.setCode(IntegralCode.WRONG_TIME.getCode() + "");
 					failRecord.setReason("卡密已过期");
 					addFailRecord(cardPassword, failRecord, user);
 					return messageDataBean;
 				}
-				//判断userid是否和激活人一致
+				// 判断userid是否和激活人一致
 				if (StringUtils.isBlank(record.getActivationCodeUseUid())) {
 					// 更新充值码状态,在激活码未使用时,同时更新掉激活码状态
 					// 新增充值记录
-					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+record.getId(), String.valueOf(System.currentTimeMillis() + 5*60*1000))){
-						redisTemplate.expire("voucher_card_"+userId+record.getId(), 5*60*1000, TimeUnit.MILLISECONDS);
-			            dealUserIntegralData(userId, messageDataBean, record);
-			            map.put("failCount", count);
-			            messageDataBean.setData(map);
-					}else {
-						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-			        	logger.info("====当前用户二次请求,userId为==="+userId);
+					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_" + userId + record.getId(),
+							String.valueOf(System.currentTimeMillis() + 5 * 60 * 1000))) {
+						redisTemplate.expire("voucher_card_" + userId + record.getId(), 5 * 60 * 1000,
+								TimeUnit.MILLISECONDS);
+						dealUserIntegralData(userId, messageDataBean, record);
+						map.put("failCount", count);
+						messageDataBean.setData(map);
+					} else {
+						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode() + "");
+						logger.info("====当前用户二次请求,userId为===" + userId);
 					}
-					isFailed=false;
-				}else if (StringUtils.isNotBlank(record.getActivationCodeUseUid())&&record.getActivationCodeUseUid().equals(userId.toString())) {
-					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_"+userId+record.getId(), String.valueOf(System.currentTimeMillis() + 5*60*1000))){
-						redisTemplate.expire("voucher_card_"+userId+record.getId(), 5*60*1000, TimeUnit.MILLISECONDS);
-			            dealUserIntegralData(userId, messageDataBean, record);
-			            map.put("failCount", count);
-			            messageDataBean.setData(map);
-					}else {
-						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode()+"");
-			        	logger.info("====当前用户二次请求,userId为==="+userId);
+					isFailed = false;
+				} else if (StringUtils.isNotBlank(record.getActivationCodeUseUid())
+						&& record.getActivationCodeUseUid().equals(userId.toString())) {
+					if (redisTemplate.opsForValue().setIfAbsent("voucher_card_" + userId + record.getId(),
+							String.valueOf(System.currentTimeMillis() + 5 * 60 * 1000))) {
+						redisTemplate.expire("voucher_card_" + userId + record.getId(), 5 * 60 * 1000,
+								TimeUnit.MILLISECONDS);
+						dealUserIntegralData(userId, messageDataBean, record);
+						map.put("failCount", count);
+						messageDataBean.setData(map);
+					} else {
+						messageDataBean.setCode(ActivityCode.HAD_ALREADY.getCode() + "");
+						logger.info("====当前用户二次请求,userId为===" + userId);
 					}
-					isFailed=false;
-				}else {
+					isFailed = false;
+				} else {
 					failRecord.setReason("充值人与激活人不符");
-					messageDataBean.setCode(IntegralCode.INCONFORMITY_USER.getCode()+"");
+					messageDataBean.setCode(IntegralCode.INCONFORMITY_USER.getCode() + "");
 				}
-			}else{
+			} else {
 				failRecord.setReason("卡密不存在或未分配或已过期");
-				messageDataBean.setCode(IntegralCode.NOT_EXIT.getCode()+"");
+				messageDataBean.setCode(IntegralCode.NOT_EXIT.getCode() + "");
 			}
 			if (isFailed) {
 				addFailRecord(cardPassword, failRecord, user);
-				map.put("failCount", count+1);
+				map.put("failCount", count + 1);
 				messageDataBean.setData(map);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			redisTemplate.delete("voucher_card_"+userId+record.getId());
+			redisTemplate.delete("voucher_card_" + userId + record.getId());
 		}
 		return messageDataBean;
 	}
@@ -493,78 +502,78 @@ public class MyPoinitService implements MyPointServiceI {
 		voucherCardFailRecordDao.insert(failRecord);
 	}
 
-	private void dealUserIntegralData(Long userId, MessageDataBean messageDataBean,
-			VoucherCardRecord record) {
-		
-		//更新available和user以及插入ad_integral_acquire_record表
+	private void dealUserIntegralData(Long userId, MessageDataBean messageDataBean, VoucherCardRecord record) {
+
+		// 更新available和user以及插入ad_integral_acquire_record表
 		AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
-		adAvailablePoints.setUserId(userId+"");
+		adAvailablePoints.setUserId(userId + "");
 		adAvailablePoints.setBusinessRebateAmount(new BigDecimal(record.getCardMoney()));
 		adAvailablePoints.setType(AdAvailablePoints.TYPE_RECHARGE_BY_SELF);
 		adAvailablePoints.setStatus(AdAvailablePoints.STATUS_OBTAINED);
 		adAvailablePointsDao.insert(adAvailablePoints);
 		adUserDao.addIntegral(userId, new BigDecimal(record.getCardMoney()));
-		//更新record充值状态
+		// 更新record充值状态
 		AdUser user = adUserDao.getById(userId.intValue());
-		record.setCardUseUid(userId+"");
+		record.setCardUseUid(userId + "");
 		record.setCardUseStatus(1);
 		record.setActivationCodeUseStatus(1);
 		record.setCardUseMobile(user.getTelephone());
 		voucherCardRecordDao.updateRechargeData(record);
-		messageDataBean.setCode(SystemCode.SUCCESS.getCode()+"");
+		messageDataBean.setCode(SystemCode.SUCCESS.getCode() + "");
 	}
-	public String exChange(String str){  
-	    StringBuffer sb = new StringBuffer();  
-	    if(str!=null){  
-	        for(int i=0;i<str.length();i++){  
-	            char c = str.charAt(i);  
-	            if(Character.isLowerCase(c)){  
-	                sb.append(Character.toUpperCase(c));   
-	            }else {
-	            	sb.append(c); 
-				}  
-	        }  
-	    } 
-	    return sb.toString();
+
+	public String exChange(String str) {
+		StringBuffer sb = new StringBuffer();
+		if (str != null) {
+			for (int i = 0; i < str.length(); i++) {
+				char c = str.charAt(i);
+				if (Character.isLowerCase(c)) {
+					sb.append(Character.toUpperCase(c));
+				} else {
+					sb.append(c);
+				}
+			}
+		}
+		return sb.toString();
 	}
-	
+
 	@Override
 	public MessageDataBean getUserReturnPoints(Long userId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		List<AdReturnPoints> returnPointsList = adReturnPointsDao.getListByUserId(userId);
-		BigDecimal notReturnPoints = new BigDecimal("0.00"); //所有订单应付总金额
-		BigDecimal doingReturnPoints = new BigDecimal("0.00"); //所有订单应付总金额
-		BigDecimal isReturnPoints = new BigDecimal("0.00"); //所有订单实付总金额
-		for(AdReturnPoints adReturnPoints : returnPointsList) {
-			if(RECEIVE_STATUS.equals(adReturnPoints.getReceiveStuts())) {
-				//已领取已获返利
-				if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
-					if(IS_ORDER.equals(adReturnPoints.getType())) {
+		BigDecimal notReturnPoints = new BigDecimal("0.00"); // 所有订单应付总金额
+		BigDecimal doingReturnPoints = new BigDecimal("0.00"); // 所有订单应付总金额
+		BigDecimal isReturnPoints = new BigDecimal("0.00"); // 所有订单实付总金额
+		for (AdReturnPoints adReturnPoints : returnPointsList) {
+			if (RECEIVE_STATUS.equals(adReturnPoints.getReceiveStuts())) {
+				// 已领取已获返利
+				if (IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+					if (IS_ORDER.equals(adReturnPoints.getType())) {
 						isReturnPoints = isReturnPoints.add(adReturnPoints.getAmount());
-					}else if(IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
+					} else if (IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
 					}
-				//已领取返利中
-				} else {
-					if(IS_ORDER.equals(adReturnPoints.getType())) {
+					// 已领取返利中
+				} else if (EXPECT_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+					if (IS_ORDER.equals(adReturnPoints.getType())) {
 						doingReturnPoints = doingReturnPoints.add(adReturnPoints.getAmount());
-					}else if(IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
+					} else if (IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
 						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
 					}
 				}
-				//未领取
+				// 未领取
 			} else {
-				if(IS_ORDER.equals(adReturnPoints.getType())) {
-					if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+				if (IS_ORDER.equals(adReturnPoints.getType())) {
+					if (IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
 						isReturnPoints = isReturnPoints.add(adReturnPoints.getAmount());
-					}else {
+					} else if (EXPECT_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
 						notReturnPoints = notReturnPoints.add(adReturnPoints.getAmount());
 					}
-				}else{
-					if(IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+				} else if (IS_RETURN_ORDER.equals(adReturnPoints.getType())) {
+					if (IS_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
 						isReturnPoints = isReturnPoints.subtract(adReturnPoints.getAmount());
-					}else {
-						if(notReturnPoints.compareTo(adReturnPoints.getAmount()) >= 0 ) {
+					} else if (EXPECT_RETURN_POINTS.equals(adReturnPoints.getStatus())) {
+						if (notReturnPoints.compareTo(adReturnPoints.getAmount()) >= 0) {
 							notReturnPoints = notReturnPoints.subtract(adReturnPoints.getAmount());
 						}
 						doingReturnPoints = doingReturnPoints.subtract(adReturnPoints.getAmount());
@@ -572,7 +581,7 @@ public class MyPoinitService implements MyPointServiceI {
 				}
 			}
 		}
-		HashMap<String,Object> result = new HashMap<String,Object>();
+		HashMap<String, Object> result = new HashMap<String, Object>();
 		result.put("notReturnPoints", notReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 		result.put("isReturnPoints", isReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 		result.put("doingReturnPoints", doingReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
@@ -591,5 +600,5 @@ public class MyPoinitService implements MyPointServiceI {
 		messageDataBean = getUserReturnPoints(userId);
 		return messageDataBean;
 	}
-	
+
 }

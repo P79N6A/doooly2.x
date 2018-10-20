@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.EncryptDecryptUtil;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
 import com.doooly.business.utils.MD5Util;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.MessageDataBean;
@@ -67,6 +68,10 @@ public class OneNumberService implements OneNumberServiceI {
 		case 4:
 			resultUrl = getWeiYiUrl(targetUrl, adUser, adBusinessExpandInfo);
 			break;
+		// 一嗨租车专属
+		case 5:
+			resultUrl = getYiHaiUrl(targetUrl, adUser, adBusinessExpandInfo);
+			break;
 		default:
 			resultUrl = "";
 			break;
@@ -79,6 +84,32 @@ public class OneNumberService implements OneNumberServiceI {
 		return messageDataBean;
 	}
 
+	/**
+	 * 一嗨租车专属连接
+	 * 
+	 * @param targetUrl
+	 * @param adUser
+	 * @param adBusinessExpandInfo
+	 * @return
+	 */
+	private String getYiHaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+
+		Map<String, Object> msgMap = new HashMap<String, Object>();
+		msgMap.put("appId", adBusinessExpandInfo.getShopId());
+		msgMap.put("appSecret", adBusinessExpandInfo.getShopKey());
+		msgMap.put("openId", "/fastorder/hospital");
+		msgMap.put("IdType", "0");
+		
+		JSONObject jsonResponse = HttpClientUtil.httpPost("https://m.1hai.cn/MediaPlatform/Hybrid/PreAuthCode", new JSONObject(msgMap));
+		if("0".equals(jsonResponse.getString("Errcode"))) {
+			String preAuthCode = jsonResponse.getString("PreAuthCode");
+			String url = adBusinessExpandInfo.getBusinessUrl();
+			return String.format("%s?appId=%s&preAuthCode=%s", url, adBusinessExpandInfo.getShopId(), preAuthCode);
+		}else {
+			return null;
+		}
+	}
+	
 	/**
 	 * 微医专属连接
 	 * 

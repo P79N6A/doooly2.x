@@ -39,7 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -193,6 +192,23 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                     logger.info("====redis用户已领取过券码-赋默认值COUPON_CODE_VALUE:" + COUPON_CODE_VALUE);
                     return adCouponCode;
                 }
+                List<String> codeList = null;
+                try {
+                    codeList = redisUtilService
+                            .PopDataFromRedis(businessId + "+" + couponId + "+" + activityId, 1);
+                    logger.info("====codeList:" + codeList + ",codeList == null:" + (codeList == null));
+                    adCouponCode.setCode(codeList.get(0));
+                }catch (Exception e){
+                    if(CollectionUtils.isNotEmpty(codeList)){
+                        //将取出的券码放回redis
+                        // 重新放入
+                        redisUtilService.PushDataToRedis(businessId + "+" + couponId + "+" + activityId, codeList);
+                    }
+                    adCouponCode.setCode(null);
+                    logger.info("========获取缓存卡券异常=======",e);
+                }finally {
+                    redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
+                }
                 //采用异步线程处理 发券操作
                 //创建一个有返回值的任务
                 JSONObject req = new JSONObject();
@@ -201,9 +217,9 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 req.put("couponId", couponId);
                 req.put("activityId", activityId);
                 GetCouponTask getCouponTask = new GetCouponTask(req, adCouponCode, redisUtilService, adCouponActivityConnDao, redisTemplate, adCouponCodeDao);
-                Future submit = myThreadPoolService.submitTask(getCouponTask);
+                myThreadPoolService.submitTask(getCouponTask);
                 logger.info("====另起线程发券耗时" + (System.currentTimeMillis()-queryListTime));
-                return (AdCouponCode) submit.get();
+                return adCouponCode;
             }
         } catch (Exception e) {
             redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));

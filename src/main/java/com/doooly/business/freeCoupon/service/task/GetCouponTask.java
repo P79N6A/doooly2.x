@@ -5,12 +5,10 @@ import com.doooly.business.redisUtil.RedisUtilService;
 import com.doooly.dao.reachad.AdCouponActivityConnDao;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.entity.reachad.AdCouponCode;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -51,35 +49,8 @@ public class GetCouponTask implements Callable<AdCouponCode> {
         String userId = req.getString("userId");
         Integer couponId = req.getInteger("couponId");
         Integer activityId = req.getInteger("activityId");
-        List<String> codeList = null;
-        int count = 0;
-        try {
-            codeList = redisUtilService
-                    .PopDataFromRedis(businessId + "+" + couponId + "+" + activityId, 1);
-            logger.info("====codeList:" + codeList + ",codeList == null:" + (codeList == null));
-            if (codeList != null) {
-                adCouponCode.setCode(codeList.get(0));
-                // 同步数据库code
-                count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
-
-            } else {
-                adCouponCode.setCode(null);
-                logger.info("========缓存券码库存不足=======");
-            }
-            // ==============发放券码-end===============
-
-        }catch (Exception e){
-            if(CollectionUtils.isNotEmpty(codeList)){
-                //将取出的券码放回redis
-                // 重新放入
-                redisUtilService.PushDataToRedis(businessId + "+" + couponId + "+" + activityId, codeList);
-            }
-            adCouponCode.setCode(null);
-            logger.info("========获取缓存卡券异常=======",e);
-        }finally {
-            // 删除缓存key
-            redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
-        }
+        // 同步数据库code
+        int count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
         if (count > 0) {
             // 修改关联表中库存,直接领取时点击之后库存减一
             adCouponActivityConnDao.reduceRemindQuantity(couponId, activityId);

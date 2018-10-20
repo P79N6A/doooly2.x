@@ -29,5 +29,5 @@ public interface AdCouponDao extends BaseDaoI<AdCoupon> {
 
 	void updateCouponCount(HashMap<String, Object> param);
 
-    List<AdCoupon> findCoupon(@Param("userId") String userId, @Param("startDate") String startDate, @Param("endDate") String endDate,@Param("activityId") Integer activityId);
+    List<AdCoupon> findCoupon(@Param("userId") String userId, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("activityId") Integer activityId,@Param("couponNumLimit")  int couponNumLimit);
 }

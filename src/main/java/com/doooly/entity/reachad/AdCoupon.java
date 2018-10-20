@@ -58,6 +58,7 @@ public class AdCoupon {
 
     public static final String COUPONSTATUS_TOMORROW = "3";
 
+    public static final int COUPON_NUM_LIMIT = 3;
 
 	public Long getId() {
 		return id;

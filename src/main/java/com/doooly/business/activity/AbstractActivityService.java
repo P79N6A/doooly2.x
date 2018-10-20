@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 @Service
 public abstract class AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -238,12 +239,23 @@ public abstract class AbstractActivityService {
             HashMap<String, Object> map = new HashMap<>();
             String todayStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,0);
             String todayEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,0);
-            List<AdCoupon> todayAdCoupons = adCouponDao.findCoupon(userId,todayStartDate,todayEndDate,activity.getId());
-            if (todayAdCoupons!= null && todayAdCoupons.size()<3){
+            List<AdCoupon> todayAdCoupons = adCouponDao.findCoupon(userId,todayStartDate,todayEndDate,activity.getId(),AdCoupon.COUPON_NUM_LIMIT);
+            if (todayAdCoupons!= null && todayAdCoupons.size()<AdCoupon.COUPON_NUM_LIMIT){
                 //限制3张券，小于3张券查询明天
                 String tomorrowStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,1);
                 String tomorrowEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,1);
-                List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId());
+                List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId(),(AdCoupon.COUPON_NUM_LIMIT-todayAdCoupons.size()));
+                for (AdCoupon tomorrowAdCoupon : tomorrowAdCoupons) {
+                    //明天的同一设置为3
+                    tomorrowAdCoupon.setCouponStatus(AdCoupon.COUPONSTATUS_TOMORROW);
+                }
+                map.put("tomorrowAdCoupons",tomorrowAdCoupons);
+            }else if(todayAdCoupons == null || todayAdCoupons.size()==0){
+                //今天没有优惠券查询明天的
+                //限制3张券，小于3张券查询明天
+                String tomorrowStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,1);
+                String tomorrowEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,1);
+                List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId(),AdCoupon.COUPON_NUM_LIMIT);
                 for (AdCoupon tomorrowAdCoupon : tomorrowAdCoupons) {
                     //明天的同一设置为3
                     tomorrowAdCoupon.setCouponStatus(AdCoupon.COUPONSTATUS_TOMORROW);

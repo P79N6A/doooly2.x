@@ -154,8 +154,12 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 adCouponCode.setCoupon(Long.valueOf(couponId));
 
                 AdCouponActivity activity = adCouponActivityDao.getActivityById(activityId);
+                Long activityTime = System.currentTimeMillis();
+                logger.info("====查询活动耗时" + (activityTime-startTime));
                 //查询已领取集合
                 List<AdCouponCode> recCodeList = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
+                Long queryListTime = System.currentTimeMillis();
+                logger.info("====查询领取卡券耗时" + (queryListTime-activityTime));
                 if (CollectionUtils.isNotEmpty(recCodeList)) {
                     if (recCodeList.size() >= activity.getCouponCount()) {
                         //领取数量超过活动限制
@@ -174,6 +178,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                             return adCouponCode;
                         }
                     }
+                    logger.info("====判读是否领取卡券耗时" + (System.currentTimeMillis()-queryListTime));
                 }
                 // ======redis检测用户是否已领取券码,如已操作中断操作并返回信息-start=====
                 if (!redisTemplate.opsForValue().setIfAbsent(
@@ -198,8 +203,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
             }
         } catch (Exception e) {
             redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
-            logger.info("==========sendCoupon系统错误===============");
-            e.printStackTrace();
+            logger.error("==========sendCoupon系统错误===============",e);
         }
 
         return adCouponCode;

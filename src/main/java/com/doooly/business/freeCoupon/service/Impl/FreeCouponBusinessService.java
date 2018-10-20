@@ -199,6 +199,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 req.put("activityId", activityId);
                 GetCouponTask getCouponTask = new GetCouponTask(req, adCouponCode, redisUtilService, adCouponActivityConnDao, redisTemplate, adCouponCodeDao);
                 Future submit = myThreadPoolService.submitTask(getCouponTask);
+                logger.info("====另起线程发券耗时" + (System.currentTimeMillis()-queryListTime));
                 return (AdCouponCode) submit.get();
             }
         } catch (Exception e) {

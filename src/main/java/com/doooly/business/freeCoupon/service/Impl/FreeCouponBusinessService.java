@@ -90,8 +90,11 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
     @Override
     public MessageDataBean receiveCoupon(Integer adId, Integer couponId, Integer activityId, String productSn) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        Long startTime = System.currentTimeMillis();
         String businessId = adCouponDao.findBusinessIdByCouponId(couponId);
+        logger.info("====查询businessId耗时" + (System.currentTimeMillis()-startTime));
         AdCouponCode adCouponCode = this.sendCoupon(businessId, activityId, adId, couponId);
+        logger.info("====发送券码耗时" + (System.currentTimeMillis()-startTime));
         logger.info("==========获取券码：" + adCouponCode.getCode());
         if (adCouponCode.getCode() != null && !"".equals(adCouponCode.getCode())) {
             messageDataBean.setCode(MessageDataBean.success_code);

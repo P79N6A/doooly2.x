@@ -56,6 +56,8 @@ public class AdCoupon {
     private String activityId;//活动id
     private String couponId;//卡券id
 
+    public static final String COUPONSTATUS_TOMORROW = "3";
+
 
 	public Long getId() {
 		return id;

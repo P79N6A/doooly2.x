@@ -13,6 +13,10 @@ public class AdCouponCode {
 	public static String LOCKED = "1";
 	public static String UNLOCKED = "0";
 
+	public static final int ISRECEIVED_NUMBER_LIMIT_OVER = 2;//领取数量超限
+
+	public static final int ISRECEIVED_NUMBER = 1;//已经领取
+
 	private Long id;
 
 	private Long sysUserId;

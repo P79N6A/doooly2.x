@@ -239,11 +239,18 @@ public abstract class AbstractActivityService {
             String todayStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,0);
             String todayEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,0);
             List<AdCoupon> todayAdCoupons = adCouponDao.findCoupon(userId,todayStartDate,todayEndDate,activity.getId());
-            String tomorrowStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,1);
-            String tomorrowEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,1);
-            List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId());
+            if (todayAdCoupons!= null && todayAdCoupons.size()<3){
+                //限制3张券，小于3张券查询明天
+                String tomorrowStartDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_START,1);
+                String tomorrowEndDate = DateUtils.getDailyTime(DateUtils.TIME_TYPE_END,1);
+                List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId());
+                for (AdCoupon tomorrowAdCoupon : tomorrowAdCoupons) {
+                    //明天的同一设置为3
+                    tomorrowAdCoupon.setCouponStatus(AdCoupon.COUPONSTATUS_TOMORROW);
+                }
+                map.put("tomorrowAdCoupons",tomorrowAdCoupons);
+            }
             map.put("todayAdCoupons",todayAdCoupons);
-            map.put("tomorrowAdCoupons",tomorrowAdCoupons);
             map.put("introduction", activity.getIntroduction());
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setData(map);

@@ -43,6 +43,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.doooly.entity.reachad.AdCouponCode.ISRECEIVED_NUMBER;
+
 @Service
 @Transactional
 public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
@@ -157,7 +159,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 if (CollectionUtils.isNotEmpty(recCodeList)) {
                     if (recCodeList.size() >= activity.getCouponCount()) {
                         //领取数量超过活动限制
-                        adCouponCode.setIsReceived(1);
+                        adCouponCode.setIsReceived(ISRECEIVED_NUMBER);
                         adCouponCode.setCode(recCodeList.get(0).getCode());
                         logger.info("====用户已领取过券码超过活动限制");
                         return adCouponCode;
@@ -165,8 +167,8 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                     // 用户是否已领取券码
                     for (AdCouponCode couponCode : recCodeList) {
                         if (couponCode.getCoupon().equals(Long.valueOf(couponId))) {
-                            //领取数量超过活动限制
-                            adCouponCode.setIsReceived(1);
+                            //已经领取
+                            adCouponCode.setIsReceived(ISRECEIVED_NUMBER);
                             adCouponCode.setCode(recCodeList.get(0).getCode());
                             logger.info("====用户已领取过券码");
                             return adCouponCode;
@@ -178,7 +180,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                         String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId),
                         COUPON_CODE_VALUE)) {
                     // 已领取
-                    adCouponCode.setIsReceived(1);
+                    adCouponCode.setIsReceived(ISRECEIVED_NUMBER);
                     adCouponCode.setCode(COUPON_CODE_VALUE);
                     logger.info("====redis用户已领取过券码-赋默认值COUPON_CODE_VALUE:" + COUPON_CODE_VALUE);
                     return adCouponCode;

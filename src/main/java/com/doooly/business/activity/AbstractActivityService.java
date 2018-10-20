@@ -76,6 +76,8 @@ public abstract class AbstractActivityService {
 		Long couponId = sendJsonReq.getLong("couponId");
 		// 2.验证活动有效性
 		result = validParams(userId, activityId, couponId);
+        log.info("活动发放礼品券验证时间，activityId={}, userId={}, result={}, cost(ms)={}", activityId, userId,
+                JSONObject.toJSONString(result), System.currentTimeMillis() - start);
 		// 2.1若result不为空，则有效性验证失败
 		if (result != null) {
 			log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));

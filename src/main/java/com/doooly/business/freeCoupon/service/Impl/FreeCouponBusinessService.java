@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
 import com.doooly.business.freeCoupon.service.task.GetCouponTask;
+import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
 import com.doooly.business.redisUtil.RedisUtilService;
 import com.doooly.common.constants.ConstantsV2.ActivityCode;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
@@ -38,8 +39,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -75,6 +75,8 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
     private AdIntegralActivityConnDao adIntegralActivityConnDao;
     @Autowired
     private AdAvailablePointsDao adAvailablePointsDao;
+    @Autowired
+    private MyThreadPoolServiceImpl myThreadPoolService;
 
     // 会员coupon_code，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String COUPON_CODE_KEY = "coupon_code:%s";
@@ -181,48 +183,16 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                     logger.info("====redis用户已领取过券码-赋默认值COUPON_CODE_VALUE:" + COUPON_CODE_VALUE);
                     return adCouponCode;
                 }
-                // ======redis检测用户是否已领取券码,如已操作中断操作并返回信息-end======
-
-                // ==============发放券码-start==============
-                    /*List<String> codeList = redisUtilService
-							.PopDataFromRedis(businessId + "+" + couponId + "+" + activityId, 1);
-					logger.info("====codeList:" + codeList + ",codeList == null:" + (codeList == null));
-					if (codeList != null) {
-						adCouponCode.setCode(codeList.get(0));
-						// 同步数据库code
-						int count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
-						if (count > 0) {
-							// 修改关联表中库存,直接领取时点击之后库存减一
-							adCouponActivityConnDao.reduceRemindQuantity(couponId, activityId);
-							// 发券成功后将券的信息放入redis队列-->微信端发送领券成功通知
-							JSONObject data = new JSONObject();
-							data.put("userId", adCouponCode.getUserId());
-							data.put("activityId", adCouponCode.getActivityId());
-							data.put("couponId", adCouponCode.getCoupon());
-							redisTemplate.convertAndSend("COUPON_CHANNEL", data.toString());
-
-							logger.info("====activityId:" + activityId + ",couponId:" + couponId + ",userId:" + userId
-									+ ",成功发券执行耗时：" + (System.currentTimeMillis() - startTime));
-						}
-					} else {
-						adCouponCode.setCode(null);
-						logger.info("========缓存券码库存不足=======");
-					}
-					// ==============发放券码-end===============
-
-					// 删除缓存key
-					redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));*/
-                //采用异步线程处理
-                // 创建一个线程池
-                ExecutorService pool = Executors.newFixedThreadPool(DEFAULT_MAX_ACTIVE);
-                //创建一个又返回值的任务
+                //采用异步线程处理 发券操作
+                //创建一个有返回值的任务
                 JSONObject req = new JSONObject();
                 req.put("businessId", businessId);
                 req.put("userId", userId);
                 req.put("couponId", couponId);
                 req.put("activityId", activityId);
                 GetCouponTask getCouponTask = new GetCouponTask(req, adCouponCode, redisUtilService, adCouponActivityConnDao, redisTemplate, adCouponCodeDao);
-                return pool.submit(getCouponTask).get();
+                Future submit = myThreadPoolService.submitTask(getCouponTask);
+                return (AdCouponCode) submit.get();
             }
         } catch (Exception e) {
             redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));

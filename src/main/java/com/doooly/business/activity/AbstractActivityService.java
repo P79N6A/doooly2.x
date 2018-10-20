@@ -244,7 +244,7 @@ public abstract class AbstractActivityService {
             List<AdCoupon> tomorrowAdCoupons = adCouponDao.findCoupon(userId,tomorrowStartDate,tomorrowEndDate,activity.getId());
             map.put("todayAdCoupons",todayAdCoupons);
             map.put("tomorrowAdCoupons",tomorrowAdCoupons);
-            map.put("introduction",activity.getIntroduction());
+            map.put("introduction", activity.getIntroduction());
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setData(map);
         } catch (Exception e) {

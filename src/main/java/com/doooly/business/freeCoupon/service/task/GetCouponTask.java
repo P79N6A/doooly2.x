@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -27,18 +28,21 @@ public class GetCouponTask implements Callable<AdCouponCode> {
     private AdCouponCodeDao adCouponCodeDao;
     private AdCouponCode adCouponCode;
     private JSONObject req;
+    private List<String> codeList;
 
     public GetCouponTask() {
     }
 
-    public GetCouponTask(JSONObject req, AdCouponCode adCouponCode,RedisUtilService redisUtilService,
-                         AdCouponActivityConnDao adCouponActivityConnDao,StringRedisTemplate redisTemplate,AdCouponCodeDao adCouponCodeDao) {
+    public GetCouponTask(JSONObject req, AdCouponCode adCouponCode, RedisUtilService redisUtilService,
+                         AdCouponActivityConnDao adCouponActivityConnDao, StringRedisTemplate redisTemplate,
+                         AdCouponCodeDao adCouponCodeDao, List<String> codeList) {
         this.req = req;
         this.adCouponCode = adCouponCode;
         this.redisUtilService = redisUtilService;
         this.adCouponActivityConnDao = adCouponActivityConnDao;
         this.redisTemplate = redisTemplate;
         this.adCouponCodeDao = adCouponCodeDao;
+        this.codeList = codeList;
     }
 
     @Override
@@ -49,8 +53,19 @@ public class GetCouponTask implements Callable<AdCouponCode> {
         String userId = req.getString("userId");
         Integer couponId = req.getInteger("couponId");
         Integer activityId = req.getInteger("activityId");
-        // 同步数据库code
-        int count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
+        int count = 0;
+        try {
+            // 同步数据库code
+            count = adCouponCodeDao.updateCouponCode(adCouponCode, businessId);
+        } catch (Exception e) {
+            //将取出的券码放回redis
+            // 重新放入
+            redisUtilService.PushDataToRedis(businessId + "+" + couponId + "+" + activityId, codeList);
+            adCouponCode.setCode(null);
+            logger.info("========获取缓存卡券异常=======", e);
+        } finally {
+            redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
+        }
         if (count > 0) {
             // 修改关联表中库存,直接领取时点击之后库存减一
             adCouponActivityConnDao.reduceRemindQuantity(couponId, activityId);

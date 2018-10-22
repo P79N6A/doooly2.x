@@ -155,7 +155,7 @@
   	where
   		telephone=#{phoneOrCard}
   		or card_number=#{phoneOrCard}
-  		limit 1
+  	limit 1
   </select>
   
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >

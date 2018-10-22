@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
-import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.utils.DateUtils;
@@ -68,6 +67,10 @@ public class AdUserService implements AdUserServiceI {
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
 	private Lock lock = new ReentrantLock();
+
+	@Autowired
+	private StringRedisTemplate stringRedis;
+
 	/** B库用户DAO */
 	@Autowired
 	private AdUserDao adUserDao;
@@ -126,7 +129,7 @@ public class AdUserService implements AdUserServiceI {
 				String channel = request.getHeader(ConstantsLogin.CHANNEL);
 				logger.info("====【getCurrentUser】-token：" + token + ",==channel：" + channel);
 
-				if (!StringUtils.isEmpty(token)) {
+				if (StringUtils.isNotEmpty(token)) {
 					String userId = redisTemplate.opsForValue().get(token);
 					adUser = adUserDao.getCurrentUser(userId);
 					if (adUser != null) {
@@ -591,14 +594,21 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setUpdateDate(adUserParam.getCreateDate());
 			// 回传明文密码,发短信
 			adUserParam.setPassword(password);
+			adUserParam.setGroupNum(jsonParam.getLong("groupId"));
 			// 设置为5秒超时
 			if (lock.tryLock(5, TimeUnit.SECONDS)) {
 				try {
-					// 生成卡号
-					String cardNumber = adUserDao.createCardNumber(jsonParam.get("groupId").toString());
-					adUserParam.setCardNumber(cardNumber);
-					// 执行插入
-					adUserDao.saveUser(adUserParam);
+					String groupMaxCardNumberKey = "group_max_cardNumber:" + adUserParam.getGroupNum();
+					String groupCardNumber = stringRedis.opsForValue().get(groupMaxCardNumberKey);
+					if (StringUtils.isNotEmpty(groupCardNumber)) {
+						groupCardNumber = String.valueOf(stringRedis.opsForValue().increment(groupMaxCardNumberKey, 1));
+					} else {
+						// 生成卡号
+						groupCardNumber = adUserDao.createCardNumber(String.valueOf(adUserParam.getGroupNum()));
+						//设置有效期一天
+						stringRedis.opsForValue().set(groupMaxCardNumberKey, groupCardNumber, 1, TimeUnit.DAYS);
+					}
+					adUserParam.setCardNumber(groupCardNumber);
 				} catch (Exception e) {
 					logger.error("保存用户错误", e);
 					throw e;
@@ -606,6 +616,8 @@ public class AdUserService implements AdUserServiceI {
 					lock.unlock();
 				}
 			}
+			// 执行插入
+			adUserDao.saveUser(adUserParam);
 			// 异步保存用户工号等信息
 			new Thread(new Runnable() {
 				@Override

@@ -144,13 +144,7 @@
 	<update id="updateCouponCode" >
 		update
 			ad_coupon_code a 
-		left join 
-			ad_coupon b 
-		on b.id = a.coupon
-		left join
-			ad_business c
-		on c.id = b.business_id
-		set 
+		set
 			a.user_id = #{adCouponCode.userId},
 			a.activity_id = #{adCouponCode.activityId},
 			a.update_date = now(),
@@ -158,7 +152,7 @@
 		where 
 			a.code = #{adCouponCode.code}
 		and 
-			c.business_id = #{businessId}
+			a.coupon = #{adCouponCode.coupon}
 	</update>
 	<!-- 获取优惠券码 -->
 	<select id="getCodeByCoupon" parameterType="com.doooly.entity.reachad.AdCouponCode" resultType="com.doooly.entity.reachad.AdCouponCode">

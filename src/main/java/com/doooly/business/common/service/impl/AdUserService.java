@@ -68,8 +68,6 @@ public class AdUserService implements AdUserServiceI {
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
 	private Lock lock = new ReentrantLock();
-	@Autowired
-	private MyThreadPoolServiceImpl myThreadPoolService;
 	/** B库用户DAO */
 	@Autowired
 	private AdUserDao adUserDao;
@@ -566,14 +564,16 @@ public class AdUserService implements AdUserServiceI {
 	public AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
 		// 用户信息
 		AdUser adUserParam = new AdUser();
-		try {
+		String telephone = jsonParam.get("mobile").toString();
+		AdUser userInfo = adUserDao.findByMobile(telephone);
+		adUserParam.setGroupNum(Long.valueOf(jsonParam.get("groupId").toString()));
+		if (userInfo == null) {
 			// 生成密码
 			String password = RandomStringUtils.randomNumeric(6);
 			String md5Pwd = MD5Utils.encode(password);
 
 			// 新增用户参数
-			adUserParam.setTelephone(jsonParam.get("mobile").toString());
-			adUserParam.setGroupNum(Long.valueOf(jsonParam.get("groupId").toString()));
+			adUserParam.setTelephone(telephone);
 			adUserParam.setName(jsonParam.get("name").toString());
 			adUserParam.setPassword(md5Pwd);
 			adUserParam.setPayPassword(md5Pwd);
@@ -589,7 +589,8 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setCreateDate(new Date());
 			adUserParam.setUpdateBy("0");
 			adUserParam.setUpdateDate(adUserParam.getCreateDate());
-			int num = 0;
+			// 回传明文密码,发短信
+			adUserParam.setPassword(password);
 			// 设置为5秒超时
 			if (lock.tryLock(5, TimeUnit.SECONDS)) {
 				try {
@@ -597,7 +598,7 @@ public class AdUserService implements AdUserServiceI {
 					String cardNumber = adUserDao.createCardNumber(jsonParam.get("groupId").toString());
 					adUserParam.setCardNumber(cardNumber);
 					// 执行插入
-					num = adUserDao.saveUser(adUserParam);
+					adUserDao.saveUser(adUserParam);
 				} catch (Exception e) {
 					logger.error("保存用户错误", e);
 					throw e;
@@ -605,34 +606,35 @@ public class AdUserService implements AdUserServiceI {
 					lock.unlock();
 				}
 			}
-			// 若id为空，则说明用户已存在
-			if (adUserParam.getId() == null || num > 1) {
-				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
-				adUserParam.setId(userInfo.getId());
-				adUserParam.setCardNumber(userInfo.getCardNumber());
-			} else {
-				// 回传明文密码,发短信
-				adUserParam.setPassword(password);
-				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-				adUserPersonalInfo.setId(adUserParam.getId());
-				// 数据来源
-				Integer dataSource = jsonParam.getInteger("dataSource");
-				if (dataSource != null) {
-					adUserPersonalInfo.setDataSources(dataSource);
-				} else {
-					adUserPersonalInfo.setDataSources(2);
-					adUserPersonalInfo.setAuthFlag("0");
+			// 异步保存用户工号等信息
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+					adUserPersonalInfo.setId(adUserParam.getId());
+					// 数据来源
+					Integer dataSource = jsonParam.getInteger("dataSource");
+					if (dataSource != null) {
+						adUserPersonalInfo.setDataSources(dataSource);
+					} else {
+						adUserPersonalInfo.setDataSources(2);
+						adUserPersonalInfo.setAuthFlag("0");
+					}
+					// 认证标识
+					if (!StringUtils.isEmpty(jsonParam.getString("workerNumber"))) {
+						adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
+					}
+					adUserPersonalInfo.setIsSetPassword(0);
+					adUserPersonalInfoDao.insert(adUserPersonalInfo);
+
 				}
-				// 认证标识
-				if (jsonParam.get("workerNumber") != null && !"".equals(jsonParam.get("workerNumber"))) {
-					adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
-				}
-				adUserPersonalInfo.setIsSetPassword(0);
-				adUserPersonalInfoDao.insert(adUserPersonalInfo);
-			}
-		} catch (Exception e) {
-			logger.error("保存用户错误", e);
-			throw e;
+			}).start();
+		} else {
+			// 如果用户已存在则更新企业ID
+			adUserParam.setId(userInfo.getId());
+			adUserDao.updateByPrimaryKeySelective(adUserParam);
+			logger.info("该用户已存在，更新用户所在企业，telephone={}", telephone);
+			adUserParam.setCardNumber(userInfo.getCardNumber());
 		}
 
 		return adUserParam;
@@ -1031,7 +1033,7 @@ public class AdUserService implements AdUserServiceI {
 	@Override
 	public boolean syncUserASystem(AdUser adUser) {
 		try {
-			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(adUser.getGroupNum() + "");
+			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(String.valueOf(adUser.getGroupNum()));
 			if (lifegroup != null) {
 				AdUser userdata = this.findByCardNumber(adUser.getCardNumber());
 				LifeMember lifemember = new LifeMember();
@@ -1039,25 +1041,25 @@ public class AdUserService implements AdUserServiceI {
 				lifemember.setIsNewRecord(true);
 				lifemember.setId(0L);
 				// }
-				lifemember.setUsername(adUser.getCardNumber());
-				lifemember.setMobile(adUser.getTelephone()); // TODO
-				lifemember.setName(adUser.getName());
-				lifemember.setEmail(adUser.getMailbox());
-				if (org.apache.commons.lang3.StringUtils.isNotBlank(adUser.getSex())) {
-					lifemember.setGender(Integer.valueOf(adUser.getSex()));
+				lifemember.setUsername(userdata.getCardNumber());
+				lifemember.setMobile(userdata.getTelephone()); // TODO
+				lifemember.setName(userdata.getName());
+				lifemember.setEmail(userdata.getMailbox());
+				if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+					lifemember.setGender(Integer.valueOf(userdata.getSex()));
 				}
-				lifemember.setIdentityCard(adUser.getIdentityCard());
+				lifemember.setIdentityCard(userdata.getIdentityCard());
 
-				lifemember.setIsEnabled(Integer.valueOf(adUser.getIsActive()));
+				lifemember.setIsEnabled(Integer.valueOf(userdata.getIsActive()));
 				lifemember.setIsLocked(false);
 				lifemember.setLoginFailureCount(0);
 				lifemember.setGroupId(Long.valueOf(lifegroup.getId())); // 获取groupId
-				lifemember.setMemberType(adUser.getType().intValue());
+				lifemember.setMemberType(userdata.getType().intValue());
 				lifemember.setCreateDate(userdata.getCreateDate());
 				lifemember.setModifyDate(userdata.getUpdateDate());
 				lifemember.setDeleteFlg(userdata.getDelFlag());
 				lifemember.setAdId(userdata.getId() + "");
-				lifemember.setSourceCardNumber(adUser.getSourceCardNumber());
+				lifemember.setSourceCardNumber(userdata.getSourceCardNumber());
 				lifeMemberService.insert(lifemember);
 			}
 		} catch (Exception e) {

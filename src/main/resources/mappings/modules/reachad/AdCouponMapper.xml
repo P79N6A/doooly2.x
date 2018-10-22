@@ -142,7 +142,7 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
             a.description AS "description",
             a.description AS "couponDescription",
             CASE
-            WHEN b.user_id = #{userId} AND c.activity_id = #{activityId} THEN '2'
+            WHEN b.user_id = #{userId} AND b.activity_id = #{activityId} THEN '2'
             WHEN c.coupon_remind_quantity  = 0 THEN '4'
             WHEN DATE_FORMAT(c.begin_date,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d') THEN '1'
             WHEN DATE_FORMAT(c.begin_date,'%Y-%m-%d') = DATE_FORMAT(#{endDate},'%Y-%m-%d') THEN '3'

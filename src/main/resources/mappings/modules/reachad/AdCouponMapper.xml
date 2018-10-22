@@ -148,7 +148,7 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
             WHEN DATE_FORMAT(c.begin_date,'%Y-%m-%d') = DATE_FORMAT(#{endDate},'%Y-%m-%d') THEN '3'
             end AS couponStatus
         FROM ad_coupon a
-        LEFT JOIN ad_coupon_code b ON a.id = b.coupon AND b.user_id = #{userId}
+        LEFT JOIN ad_coupon_code b ON a.id = b.coupon AND b.user_id = #{userId} AND b.activity_id = #{activityId}
         INNER JOIN ad_coupon_activity_conn c ON a.id = c.coupon_id
         INNER JOIN ad_coupon_activity d ON d.id = c.activity_id
         WHERE c.begin_date &gt;=#{startDate}

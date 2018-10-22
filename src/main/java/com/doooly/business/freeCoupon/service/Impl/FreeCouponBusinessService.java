@@ -187,6 +187,8 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                     adCouponCode.setCode(codeList.get(0));
                 }else {
                     adCouponCode.setCode(null);
+                    //删掉redis
+                    redisTemplate.delete(String.format(COUPON_CODE_KEY, activityId + ":" + couponId + ":" + userId));
                     logger.info("========缓存券码库存不足=======");
                     return adCouponCode;
                 }

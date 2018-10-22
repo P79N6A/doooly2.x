@@ -269,6 +269,7 @@ public abstract class AbstractActivityService {
         } catch (Exception e) {
             log.error("获取活动可领取优惠券数据异常！",e);
             messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
         }
         log.info(messageDataBean.toJsonString());
         return messageDataBean;

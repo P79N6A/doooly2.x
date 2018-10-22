@@ -89,11 +89,8 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
     @Override
     public MessageDataBean receiveCoupon(Integer adId, Integer couponId, Integer activityId, String productSn) {
         MessageDataBean messageDataBean = new MessageDataBean();
-        Long startTime = System.currentTimeMillis();
         String businessId = adCouponDao.findBusinessIdByCouponId(couponId);
-        logger.info("====查询businessId耗时" + (System.currentTimeMillis()-startTime));
         AdCouponCode adCouponCode = this.sendCoupon(businessId, activityId, adId, couponId);
-        logger.info("====发送券码耗时" + (System.currentTimeMillis()-startTime));
         logger.info("==========获取券码：" + adCouponCode.getCode());
         if (adCouponCode.getCode() != null && !"".equals(adCouponCode.getCode())) {
             messageDataBean.setCode(MessageDataBean.success_code);
@@ -145,10 +142,6 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
     public AdCouponCode sendCoupon(String businessId, Integer activityId, Integer userId, Integer couponId) {
         // 是否已发放券码
         AdCouponCode adCouponCode = new AdCouponCode();
-        // 方法进入时间
-        Long startTime = System.currentTimeMillis();
-        logger.info("====sendCoupon参数信息-activityId:" + activityId + ",couponId:" + couponId + ",userId:" + userId
-                + ",方法进入时间：" + startTime);
         try {
             if (activityId > 0 && userId > 0 && couponId > 0) {
                 adCouponCode.setUserId(Long.valueOf(userId));
@@ -156,12 +149,8 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 adCouponCode.setCoupon(Long.valueOf(couponId));
 
                 AdCouponActivity activity = adCouponActivityDao.getActivityById(activityId);
-                Long activityTime = System.currentTimeMillis();
-                logger.info("====查询活动耗时" + (activityTime-startTime));
                 //查询已领取集合
                 List<AdCouponCode> recCodeList = adCouponCodeDao.checkIfSendCodeNoPhone(adCouponCode);
-                Long queryListTime = System.currentTimeMillis();
-                logger.info("====查询领取卡券耗时" + (queryListTime-activityTime));
                 if (CollectionUtils.isNotEmpty(recCodeList)) {
                     if (recCodeList.size() >= activity.getCouponCount()) {
                         //领取数量超过活动限制
@@ -180,7 +169,6 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                             return adCouponCode;
                         }
                     }
-                    logger.info("====判读是否领取卡券耗时" + (System.currentTimeMillis()-queryListTime));
                 }
                 // ======redis检测用户是否已领取券码,如已操作中断操作并返回信息-start=====
                 if (!redisTemplate.opsForValue().setIfAbsent(
@@ -211,7 +199,6 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
                 req.put("activityId", activityId);
                 GetCouponTask getCouponTask = new GetCouponTask(req, adCouponCode, redisUtilService, adCouponActivityConnDao, redisTemplate, adCouponCodeDao,codeList);
                 myThreadPoolService.submitTask(getCouponTask);
-                logger.info("====另起线程发券耗时" + (System.currentTimeMillis()-queryListTime));
                 return adCouponCode;
             }
         } catch (Exception e) {

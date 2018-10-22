@@ -4,32 +4,37 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.alibaba.druid.util.StringUtils;
-import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
-import com.doooly.business.utils.DateUtils;
-import com.doooly.common.util.WechatUtil;
-import com.doooly.entity.reachlife.LifeWechatBinding;
-import com.doooly.publish.rest.life.impl.FamilyInviteService;
-
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
+import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.reachLife.LifeGroupService;
+import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.ConstantsV2;
 import com.doooly.common.util.MD5Utils;
 import com.doooly.common.util.ThirdPartySMSUtil;
+import com.doooly.common.util.WechatUtil;
 import com.doooly.dao.payment.VoucherCardRecordDao;
 import com.doooly.dao.reachad.AdActiveCodeDao;
 import com.doooly.dao.reachad.AdGroupDao;
@@ -48,6 +53,8 @@ import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
 import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
+import com.doooly.entity.reachlife.LifeWechatBinding;
+import com.doooly.publish.rest.life.impl.FamilyInviteService;
 
 /**
  * 
@@ -57,10 +64,12 @@ import com.doooly.entity.reachlife.LifeMember;
 @Service
 public class AdUserService implements AdUserServiceI {
 
-	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
-
 	private static final Logger logger = LoggerFactory.getLogger(FamilyInviteService.class);
+	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
+	private Lock lock = new ReentrantLock();
+	@Autowired
+	private MyThreadPoolServiceImpl myThreadPoolService;
 	/** B库用户DAO */
 	@Autowired
 	private AdUserDao adUserDao;
@@ -554,13 +563,10 @@ public class AdUserService implements AdUserServiceI {
 	/**
 	 * 存储B库ad_user表,ad_user_personal_info数据
 	 */
-	public synchronized AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
+	public AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
 		// 用户信息
 		AdUser adUserParam = new AdUser();
 		try {
-			// 生成卡号
-			String cardNumber = adUserDao.createCardNumber(jsonParam.get("groupId").toString());
-
 			// 生成密码
 			String password = RandomStringUtils.randomNumeric(6);
 			String md5Pwd = MD5Utils.encode(password);
@@ -569,7 +575,6 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setTelephone(jsonParam.get("mobile").toString());
 			adUserParam.setGroupNum(Long.valueOf(jsonParam.get("groupId").toString()));
 			adUserParam.setName(jsonParam.get("name").toString());
-			adUserParam.setCardNumber(cardNumber);
 			adUserParam.setPassword(md5Pwd);
 			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
@@ -583,9 +588,23 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setCreateBy("0");
 			adUserParam.setCreateDate(new Date());
 			adUserParam.setUpdateBy("0");
-			adUserParam.setUpdateDate(new Date());
-			// 执行插入
-			int num = adUserDao.saveUser(adUserParam);
+			adUserParam.setUpdateDate(adUserParam.getCreateDate());
+			int num = 0;
+			// 设置为5秒超时
+			if (lock.tryLock(5, TimeUnit.SECONDS)) {
+				try {
+					// 生成卡号
+					String cardNumber = adUserDao.createCardNumber(jsonParam.get("groupId").toString());
+					adUserParam.setCardNumber(cardNumber);
+					// 执行插入
+					num = adUserDao.saveUser(adUserParam);
+				} catch (Exception e) {
+					logger.error("保存用户错误", e);
+					throw e;
+				} finally {
+					lock.unlock();
+				}
+			}
 			// 若id为空，则说明用户已存在
 			if (adUserParam.getId() == null || num > 1) {
 				AdUser userInfo = adUserDao.findByMobile(adUserParam.getTelephone());
@@ -609,13 +628,7 @@ public class AdUserService implements AdUserServiceI {
 					adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 				}
 				adUserPersonalInfo.setIsSetPassword(0);
-				// 执行保存
-				int personalCount = adUserPersonalInfoDao.insert(adUserPersonalInfo);
-				/*
-				 * if (personalCount <= 0) { logger.info(
-				 * "====【saveUserAndPersonal】保存adUserPersonalInfo失败===="); throw
-				 * new RuntimeException(); }
-				 */
+				adUserPersonalInfoDao.insert(adUserPersonalInfo);
 			}
 		} catch (Exception e) {
 			logger.error("保存用户错误", e);

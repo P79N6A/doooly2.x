@@ -140,6 +140,7 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
             d.id AS "activityId",
             d.introduction AS "introduction",
             a.description AS "description",
+            a.description AS "couponDescription",
             CASE
             WHEN b.user_id = #{userId} THEN '2'
             WHEN c.coupon_remind_quantity  = 0 THEN '4'

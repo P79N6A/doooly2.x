@@ -55,6 +55,7 @@ public class AdCoupon {
     private String couponStatus;//卡券状态 1，待领取 ，2 ，待使用 3，敬请期待 4，已领完
     private String activityId;//活动id
     private String couponId;//卡券id
+    private String couponDescription;// 下午茶卡券规则
 
     public static final String COUPONSTATUS_TOMORROW = "3";
 
@@ -441,5 +442,13 @@ public class AdCoupon {
 
     public void setCouponId(String couponId) {
         this.couponId = couponId;
+    }
+
+    public String getCouponDescription() {
+        return couponDescription;
+    }
+
+    public void setCouponDescription(String couponDescription) {
+        this.couponDescription = couponDescription;
     }
 }

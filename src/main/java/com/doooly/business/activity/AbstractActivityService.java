@@ -269,7 +269,7 @@ public abstract class AbstractActivityService {
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setData(map);
         } catch (Exception e) {
-            log.error("获取活动可领取优惠券数据异常！");
+            log.error("获取活动可领取优惠券数据异常！",e);
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
         log.info(messageDataBean.toJsonString());

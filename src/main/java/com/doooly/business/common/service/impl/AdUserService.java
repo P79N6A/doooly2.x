@@ -569,12 +569,12 @@ public class AdUserService implements AdUserServiceI {
 		AdUser adUserParam = new AdUser();
 		String telephone = jsonParam.get("mobile").toString();
 		AdUser userInfo = adUserDao.findByMobile(telephone);
-		adUserParam.setGroupNum(Long.valueOf(jsonParam.get("groupId").toString()));
+		Long newGroupId = jsonParam.getLong("groupId");
+		adUserParam.setGroupNum(newGroupId);
 		if (userInfo == null) {
 			// 生成密码
 			String password = RandomStringUtils.randomNumeric(6);
 			String md5Pwd = MD5Utils.encode(password);
-
 			// 新增用户参数
 			adUserParam.setTelephone(telephone);
 			adUserParam.setName(jsonParam.get("name").toString());
@@ -605,7 +605,7 @@ public class AdUserService implements AdUserServiceI {
 					} else {
 						// 生成卡号
 						groupCardNumber = adUserDao.createCardNumber(String.valueOf(adUserParam.getGroupNum()));
-						//设置有效期一天
+						// 设置有效期一天
 						stringRedis.opsForValue().set(groupMaxCardNumberKey, groupCardNumber, 1, TimeUnit.DAYS);
 					}
 					adUserParam.setCardNumber(groupCardNumber);
@@ -644,9 +644,14 @@ public class AdUserService implements AdUserServiceI {
 		} else {
 			// 如果用户已存在则更新企业ID
 			adUserParam.setId(userInfo.getId());
-			adUserDao.updateByPrimaryKeySelective(adUserParam);
-			logger.info("该用户已存在，更新用户所在企业，telephone={}", telephone);
+			if (userInfo.getGroupNum() != newGroupId) {
+				adUserDao.updateByPrimaryKeySelective(adUserParam);
+				logger.info("该用户已存在，更新用户所在企业，telephone={}", telephone);
+			}
+			// 设置激活状态
+			adUserParam.setIsActive(userInfo.getIsActive());
 			adUserParam.setCardNumber(userInfo.getCardNumber());
+			adUserParam.setOldGroupNum(userInfo.getGroupNum());
 		}
 
 		return adUserParam;

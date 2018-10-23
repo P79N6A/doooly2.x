@@ -25,7 +25,8 @@ public class AdUser {
 	public static final String USER_ACTIVATION_OFF = "1";
 
 	private Long id;
-
+	//迁移前的企业ID
+	private Long oldGroupNum;
 	private Long groupNum;
 
 	private String name;
@@ -100,6 +101,14 @@ public class AdUser {
 
 	/** 激活时间dateStr */
 	private String activeDateStr;
+
+	public Long getOldGroupNum() {
+		return oldGroupNum;
+	}
+
+	public void setOldGroupNum(Long oldGroupNum) {
+		this.oldGroupNum = oldGroupNum;
+	}
 
 	public String getActiveDateStr() {
 		return activeDateStr;

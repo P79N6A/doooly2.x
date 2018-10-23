@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdUserEnterpriseChangeDao">
+
+	<insert id="insert" parameterType="AdUserEnterpriseChange">
+		insert into
+			ad_user_enterprise_change(user_id,old_group_id,new_group_id,is_active)
+		values
+			(#{userId},#{oldGroupId},#{newGroupId},#{isActive})
+	</insert>
+</mapper>

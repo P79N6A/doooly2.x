@@ -13,8 +13,10 @@ import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 import com.doooly.common.constants.Constants.MerchantApiConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.webservice.WebService;
+import com.doooly.dao.reachad.AdUserEnterpriseChangeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserEnterpriseChange;
 
 /**
  * 
@@ -31,6 +33,8 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	private AdUserService userService;
 	@Autowired
 	private ConfigDictServiceI configService;
+	@Autowired
+	private AdUserEnterpriseChangeDao enterpriseChangeDao;
 
 	@Override
 	protected Boolean isDoBefore() {
@@ -50,7 +54,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
 		verificationReq.put("cardNumber", beforeJson.getString("phone"));
 		String result = HTTPSClientUtils.sendPost(verificationReq, MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
-		log.info("交行活动-验证码手机验证码耗时cost={}", System.currentTimeMillis()-start);
+		log.info("交行活动-验证码手机验证码耗时cost={}", System.currentTimeMillis() - start);
 		// 验证码验证失败
 		if (JSONObject.parseObject(result).getInteger("code") != 0) {
 			log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);
@@ -66,19 +70,23 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		userJson.put("name", phone);
 		userJson.put("isActive", AdUser.USER_ACTIVATION_OFF);// 未激活
 		userJson.put("dataSource", 0);// 平台导入
-		
+
 		try {
 			AdUser user = userService.saveUserAndPersonal(userJson);
-			log.info("交行活动-保存用户耗时cost={}", System.currentTimeMillis()-saveStart);
-			
+			log.info("交行活动-保存用户耗时cost={}", System.currentTimeMillis() - saveStart);
+
 			// 3.将用户ID放入请求参数中
 			beforeJson.put("userId", user.getId());
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					//员工类型
-					user.setType((short)AdUser.TYPE_EMPLOYEE);
+					// 员工类型
+					user.setType((short) AdUser.TYPE_EMPLOYEE);
 					userService.syncUserASystem(user);
+					if (user.getOldGroupNum() != null && user.getGroupNum() != user.getOldGroupNum()) {
+						enterpriseChangeDao.insert(new AdUserEnterpriseChange(user.getId(), user.getOldGroupNum(),
+								user.getGroupNum(), Integer.valueOf(user.getIsActive())));
+					}
 				}
 			}).start();
 		} catch (Exception e) {

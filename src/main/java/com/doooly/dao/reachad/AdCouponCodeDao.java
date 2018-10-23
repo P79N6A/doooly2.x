@@ -68,7 +68,7 @@ public interface AdCouponCodeDao extends BaseDaoI<AdCouponCode> {
 	 * @param code 兑换码code
 	 *           
 	 */
-	String updateCodeIsView(String code);
+	int updateCodeIsView(String code);
 
 	/**
 	 * 查询兑换码

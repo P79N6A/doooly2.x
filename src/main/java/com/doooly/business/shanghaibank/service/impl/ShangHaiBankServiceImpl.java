@@ -345,7 +345,7 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             eAcctNo = adInGroupAccount.getEacctNo();
             payAccount = adGroupAccount.getEacctNo();
             payAccountName = adGroupAccount.getEacctName();
-            usage = "轧差账户转发到虚账户";
+            usage = "睿渠专户转发到虚账户";
         }
         long startTime = System.currentTimeMillis();
         messageDataBean = c19VirSReTrigSer(channelFlowNo, eAcctNo, amount, payAccount, payAccountName, usage, platformSummary);

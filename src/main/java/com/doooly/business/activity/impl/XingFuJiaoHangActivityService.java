@@ -83,7 +83,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 					// 员工类型
 					user.setType((short) AdUser.TYPE_EMPLOYEE);
 					userService.syncUserASystem(user);
-					if (user.getOldGroupNum() != null && user.getGroupNum() != user.getOldGroupNum()) {
+					if (user.getOldGroupNum() != null && user.getGroupNum().longValue() != user.getOldGroupNum().longValue()) {
 						enterpriseChangeDao.insert(new AdUserEnterpriseChange(user.getId(), user.getOldGroupNum(),
 								user.getGroupNum(), Integer.valueOf(user.getIsActive())));
 					}

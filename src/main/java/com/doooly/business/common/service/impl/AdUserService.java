@@ -644,7 +644,7 @@ public class AdUserService implements AdUserServiceI {
 		} else {
 			// 如果用户已存在则更新企业ID
 			adUserParam.setId(userInfo.getId());
-			if (userInfo.getGroupNum() != newGroupId) {
+			if (userInfo.getGroupNum().longValue() != newGroupId.longValue()) {
 				adUserDao.updateByPrimaryKeySelective(adUserParam);
 				logger.info("该用户已存在，更新用户所在企业，telephone={}", telephone);
 			}

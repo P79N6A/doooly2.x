@@ -40,6 +40,9 @@
             <if test="type != null and type ==2">
                 AND a.type=#{type} AND a.group_id=#{groupId}
             </if>
+            <if test="type != null and type ==5">
+                AND a.type=2 AND a.group_id=#{businessId}
+            </if>
             <if test="type != null and type ==3">
                 AND a.type=#{type}
             </if>

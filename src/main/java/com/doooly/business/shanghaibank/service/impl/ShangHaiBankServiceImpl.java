@@ -276,15 +276,26 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
         AdShanghaiBankAccount adShanghaiBankAccount = new AdShanghaiBankAccount();
         adShanghaiBankAccount.setBusinessId(businessId);
         adShanghaiBankAccount.setGroupId(Long.valueOf(groupId));
-        //查询轧差账户虚户
+        //查询账户虚户
         AdShanghaiBankAccount offset = new AdShanghaiBankAccount();
         //查询商户虚户
         AdShanghaiBankAccount adBussinessAccount = new AdShanghaiBankAccount();
+        //查询入账企业虚户
+        AdShanghaiBankAccount adInGroupAccount = new AdShanghaiBankAccount();
         if ("3".equals(type)||"4".equals(type)) {
             adShanghaiBankAccount.setType(3);
             //查询轧差账户虚户
             offset = adShanghaiBankAccountDao.getBankAccount(adShanghaiBankAccount);
-        } else {
+        } else if("5".equals(type)){
+            adShanghaiBankAccount.setType(5);
+            //查询商户虚户
+            adInGroupAccount = adShanghaiBankAccountDao.getBankAccount(adShanghaiBankAccount);
+            if (adInGroupAccount == null) {
+                messageDataBean.setCode(MessageDataBean.failure_code);
+                messageDataBean.setMess("该商户未开通上海银行虚账户");
+                return messageDataBean;
+            }
+        }else {
             adShanghaiBankAccount.setType(1);
             //查询商户虚户
             adBussinessAccount = adShanghaiBankAccountDao.getBankAccount(adShanghaiBankAccount);
@@ -328,6 +339,12 @@ public class ShangHaiBankServiceImpl implements ShangHaiBankService {
             eAcctNo = adGroupAccount.getEacctNo();
             payAccount = offset.getEacctNo();
             payAccountName = offset.getEacctName();
+            usage = "轧差账户转发到虚账户";
+        } else if ("5".equals(type)) {
+            //企业到企业
+            eAcctNo = adInGroupAccount.getEacctNo();
+            payAccount = adGroupAccount.getEacctNo();
+            payAccountName = adGroupAccount.getEacctName();
             usage = "轧差账户转发到虚账户";
         }
         long startTime = System.currentTimeMillis();

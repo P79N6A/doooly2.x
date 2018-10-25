@@ -579,7 +579,7 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setTelephone(telephone);
 			adUserParam.setName(jsonParam.get("name").toString());
 			adUserParam.setPassword(md5Pwd);
-			adUserParam.setPayPassword(md5Pwd);
+//			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
 			String isActive = jsonParam.getString("isActive");
 			if (StringUtils.isEmpty(isActive)) {
@@ -592,8 +592,6 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setCreateDate(new Date());
 			adUserParam.setUpdateBy("0");
 			adUserParam.setUpdateDate(adUserParam.getCreateDate());
-			// 回传明文密码,发短信
-			adUserParam.setPassword(password);
 			adUserParam.setGroupNum(jsonParam.getLong("groupId"));
 			// 设置为5秒超时
 			if (lock.tryLock(5, TimeUnit.SECONDS)) {
@@ -618,6 +616,9 @@ public class AdUserService implements AdUserServiceI {
 			}
 			// 执行插入
 			adUserDao.saveUser(adUserParam);
+			// 回传明文密码,发短信
+			adUserParam.setPassword(password);
+			
 			// 异步保存用户工号等信息
 			new Thread(new Runnable() {
 				@Override

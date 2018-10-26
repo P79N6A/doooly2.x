@@ -22,7 +22,7 @@
 		FROM
 			ad_home_template_item it
 		INNER JOIN ad_consume_recharge c ON it.item_id = c.id
-		WHERE it.template_id = #{templateId} and it.floor_id= #{floorId}
+		WHERE it.template_id = #{templateId} and it.floor_id= #{floorId} and c.state = 1
 		ORDER BY c.sort
 
 	</select>

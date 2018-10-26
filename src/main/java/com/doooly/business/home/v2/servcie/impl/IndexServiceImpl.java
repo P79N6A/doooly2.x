@@ -1,21 +1,5 @@
 package com.doooly.business.home.v2.servcie.impl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.home.v2.servcie.IndexServiceI;
 import com.doooly.common.constants.Constants;
@@ -29,6 +13,20 @@ import com.doooly.entity.reachad.AdBasicType;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdConsumeRecharge;
 import com.doooly.publish.rest.life.impl.IndexRestService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class IndexServiceImpl implements IndexServiceI {
@@ -94,7 +92,7 @@ public class IndexServiceImpl implements IndexServiceI {
 						item.put("type", "1");
 						item.put("list", getBussiness);
 					}
-				} else if (floor.getCode() == 23) {
+				} else if (floor.getCode() == 23 || floor.getCode() == 24) {
 					if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
 						// 每日特惠数据
 						List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
@@ -108,8 +106,12 @@ public class IndexServiceImpl implements IndexServiceI {
 							}
 							item.put("title", floor.getName());
 							item.put("isOnline", DEAL_TYPE_OFFLINE);
-							item.put("type", "3");
-							item.put("list", beans);
+                            if(floor.getCode() == 24 ){
+                                item.put("type", "4");
+                            }else {
+                                item.put("type", "3");
+                            }
+                            item.put("list", beans);
 						}
 					}
 				} else {

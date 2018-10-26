@@ -56,6 +56,9 @@ public class AdCoupon {
     private String activityId;//活动id
     private String couponId;//卡券id
     private String couponDescription;// 下午茶卡券规则
+    private String bussinessLogo;//商户logo
+    private String receiveChannel;// 领取方式（0-兜礼领取，1-商家领取）
+    private String couponValueStr;// 优惠券面值字符串
 
     public static final String COUPONSTATUS_TOMORROW = "3";
 
@@ -450,5 +453,29 @@ public class AdCoupon {
 
     public void setCouponDescription(String couponDescription) {
         this.couponDescription = couponDescription;
+    }
+
+    public String getBussinessLogo() {
+        return bussinessLogo;
+    }
+
+    public void setBussinessLogo(String bussinessLogo) {
+        this.bussinessLogo = bussinessLogo;
+    }
+
+    public String getReceiveChannel() {
+        return receiveChannel;
+    }
+
+    public void setReceiveChannel(String receiveChannel) {
+        this.receiveChannel = receiveChannel;
+    }
+
+    public String getCouponValueStr() {
+        return couponValueStr;
+    }
+
+    public void setCouponValueStr(String couponValueStr) {
+        this.couponValueStr = couponValueStr;
     }
 }

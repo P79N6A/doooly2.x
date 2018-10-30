@@ -56,6 +56,30 @@ public class AdArticleRestService implements AdArticleRestServiceI {
         return messageDataBean.toJsonString();
     }
 
+    /**
+     * 获取导购列表v2
+     */
+    @POST
+    @Path(value = "/getGuideProductList/v2")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getGuideProductListv2(JSONObject json, ContainerRequest request) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            String userId = json.getString("userId");
+            String guideCategoryId = json.getString("guideCategoryId");//导购类目
+            String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
+            Integer currentPage = json.getInteger("currentPage");
+            Integer pageSize = json.getInteger("pageSize");
+            messageDataBean = adArticleServiceI.getGuideProductListv2(guideCategoryId, currentPage, pageSize,userId,recommendHomepage);
+        } catch (Exception e) {
+            logger.error("获取导购信息出错", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
+        }
+        return messageDataBean.toJsonString();
+    }
+
 
     /**
      * 获取导购文章列表
@@ -90,6 +114,25 @@ public class AdArticleRestService implements AdArticleRestServiceI {
             messageDataBean = adArticleServiceI.getArticleList();
         } catch (Exception e) {
             logger.error("获取首页超值热卖列表出错", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
+        }
+        return messageDataBean.toJsonString();
+    }
+
+    /**
+     * 获取导购类目
+     */
+    @POST
+    @Path(value = "/getGuideCategaryList")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getGuideCategaryList(JSONObject json) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            messageDataBean = adArticleServiceI.getGuideCategaryList();
+        } catch (Exception e) {
+            logger.error("获取导购类目出错出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);
             messageDataBean.setMess(MessageDataBean.failure_mess);
         }

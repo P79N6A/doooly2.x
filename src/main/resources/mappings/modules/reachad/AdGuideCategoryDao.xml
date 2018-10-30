@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdGuideCategoryDao">
+
+    <sql id="AdGuideCategoryColumns">
+		a.id AS "id",
+		a.id AS "guideCategoryId",
+		a.category_num AS "categoryNum",
+		a.category_name AS "categoryName",
+		a.state AS "state",
+		a.sort AS "sort",
+		a.create_date AS "create_date",
+		a.update_date AS "update_date"
+	</sql>
+	
+	<select id="findList" resultType="com.doooly.entity.reachad.AdGuideCategory">
+		SELECT 
+			<include refid="AdGuideCategoryColumns"/>
+		FROM ad_guide_category a WHERE a.state = 1
+        ORDER BY a.sort
+	</select>
+
+</mapper>

@@ -12,9 +12,13 @@ public interface AdArticleRestServiceI {
 
     String getGuideProductList(JSONObject json, ContainerRequest request);//获取导购信息
 
+    String getGuideProductListv2(JSONObject json, ContainerRequest request);//获取导购信息v2
+
     String getArticleProductList(JSONObject json);//获取导购文章信息
 
     String getArticleList(JSONObject json);//获取超值热卖信息
+
+    String getGuideCategaryList(JSONObject json);//获取导购类目分类信息
 
     String addSellCount(JSONObject json);//立即订购添加售出数
 }

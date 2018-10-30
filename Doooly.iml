@@ -16,6 +16,31 @@
         </sourceRoots>
       </configuration>
     </facet>
+    <facet type="Spring" name="Spring">
+      <configuration>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-mybatis.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/bak/spring-atomiks.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/bak/spring-cxf.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-task.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-mybatis-reachad.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-mybatis-payment.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-mybatis-reachlife.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-jersey.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-mybatis-report.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-hessian.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/conf/spring-redis.xml</file>
+        </fileset>
+      </configuration>
+    </facet>
+    <facet type="jpa" name="JPA">
+      <configuration>
+        <setting name="validation-enabled" value="true" />
+        <setting name="provider-name" value="" />
+        <datasource-mapping />
+        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/resources/persistence.xml" />
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
@@ -24,7 +49,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -77,7 +101,24 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="businessConnector" />
+    <orderEntry type="module-library">
+      <library name="Maven: businessConnector:businessConnector:0.0.1-SNAPSHOT">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/businessConnector-0.0.1-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Maven: com.bank:shanghaibank:1.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/koalii_kgsp_java_v1.0_jdk14.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Maven: jaxen:jaxen:1.1.6" level="project" />
     <orderEntry type="library" name="Maven: jaxme:jaxme-api:0.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.11" level="project" />
@@ -119,7 +160,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.alibaba:jconsole:1.8.0">
         <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0_45/lib/jconsole.jar!/" />
+          <root url="jar://E:/java/jdk1.8.0_45/jre/../lib/jconsole.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -128,7 +169,7 @@
     <orderEntry type="module-library">
       <library name="Maven: com.alibaba:tools:1.8.0">
         <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0_45/lib/tools.jar!/" />
+          <root url="jar://E:/java/jdk1.8.0_45/jre/../lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -137,8 +178,8 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: mysql:mysql-connector-java:5.1.30" level="project" />
     <orderEntry type="library" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.3.6" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.3.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpasyncclient:4.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore-nio:4.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.3.6" level="project" />
@@ -214,5 +255,11 @@
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.3" level="project" />
     <orderEntry type="library" name="Maven: dom4j:dom4j:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.0.b2" level="project" />
+    <orderEntry type="library" name="Maven: com.github.binarywang:java-emoji-converter:0.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.vdurmont:emoji-java:3.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jodd:jodd-http:3.7" level="project" />
+    <orderEntry type="library" name="Maven: org.jodd:jodd-upload:3.7" level="project" />
+    <orderEntry type="library" name="Maven: org.jodd:jodd-core:3.7" level="project" />
+    <orderEntry type="library" name="Maven: joda-time:joda-time:2.7" level="project" />
   </component>
 </module>

@@ -99,6 +99,18 @@ public class AdArticleService implements AdArticleServiceI {
         // 查询总数
         int totalNum = adProductDao.getTotalNum();
         if (totalNum > 0) {
+            HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+            Object o = hashOperations.get(GUIDE_RECORD_KEY, userId);
+            if (o == null) {
+                hashOperations.put(GUIDE_RECORD_KEY, userId, "1");
+                AdPortRecord adPortRecord = new AdPortRecord();
+                adPortRecord.setPortName("getGuideProductList");
+                adPortRecord.setUserId(Long.valueOf(userId));
+                adPortRecordDao.insert(adPortRecord);
+                map.put("isNew", 0);
+            } else {
+                map.put("isNew", 1);
+            }
             pagelab.setTotalNum(totalNum);// 这里会计算总页码
             // 查询详情
             List<AdProduct> adProducts = adProductDao.getGuideProductListv2(guideCategoryId,

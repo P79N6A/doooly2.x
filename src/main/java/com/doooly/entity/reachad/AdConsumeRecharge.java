@@ -14,9 +14,18 @@ public class AdConsumeRecharge {
     private String subUrl; //跳转链接后缀
     /** 是否支持积分*/
     private String isSupportIntegral;
+    //角标
+    private String cornerMark;
 
+    public String getCornerMark() {
+		return cornerMark;
+	}
 
-    public String getMainTitle() {
+	public void setCornerMark(String cornerMark) {
+		this.cornerMark = cornerMark;
+	}
+
+	public String getMainTitle() {
         return mainTitle;
     }
 

@@ -60,9 +60,11 @@ public class HomeCouponRestService implements HomeCouponRestServiceI {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			String businessId = obj.getString("businessId");// 商家表主键
+			String categoryType = obj.getString("categoryType");// 券类型
+			
 			int currentPage = obj.getInteger("currentPage");// 当前页
 			int pageSize = obj.getInteger("pageSize");// 每页显示条数
-			HashMap<String, Object> map = homeCouponService.getCouponListByBusinessId(businessId, currentPage,
+			HashMap<String, Object> map = homeCouponService.getCouponListByBusinessId(businessId,categoryType, currentPage,
 					pageSize);
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setData(map);

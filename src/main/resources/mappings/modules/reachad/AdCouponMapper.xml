@@ -105,6 +105,9 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 			<if test="businessId != null and businessId != '' and businessId != 0">
 				AND b.id = #{businessId}
 			</if>
+			<if test="categoryType != null and categoryType != '' and categoryType != 0">
+				AND c.category_type = #{categoryType}
+			</if>
         LIMIT #{startIndex},#{pageSize}
     </select>
     <!-- APP首页商家优惠券  add by ylzhang end -->

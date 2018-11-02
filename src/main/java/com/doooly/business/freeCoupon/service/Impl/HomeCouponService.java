@@ -43,7 +43,7 @@ public class HomeCouponService implements HomeCouponServiceI {
 	}
 
 	@Override
-	public HashMap<String, Object> getCouponListByBusinessId(String businessId, int currentPage, int pageSize) {
+	public HashMap<String, Object> getCouponListByBusinessId(String businessId,String categoryType, int currentPage, int pageSize) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 查询总数(某商家旗下的优惠券数量)
@@ -52,7 +52,7 @@ public class HomeCouponService implements HomeCouponServiceI {
 				Pagelab pagelab = new Pagelab(currentPage, pageSize);
 				pagelab.setTotalNum(totalNum);
 				// 根据商家id获取旗下的优惠券
-				List<AdCoupon> couponList = adCouponDao.getCouponListByBusinessId(businessId, pagelab.getStartIndex(),
+				List<AdCoupon> couponList = adCouponDao.getCouponListByBusinessId(businessId, categoryType,pagelab.getStartIndex(),
 						pagelab.getPageSize());
 				map.put("couponList", couponList);
 				map.put("countPage", pagelab.getCountPage());// 总页码

@@ -283,7 +283,6 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 		if(StringUtils.isNotBlank(msgJson)){
 			msgJson = msgJson.replace("OPENID", toUserName);
 		}
-
 		return msgJson;
 	}
 

@@ -1,5 +1,6 @@
 package com.doooly.entity.reachad;
 
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  *
@@ -16,8 +17,18 @@ public class AdConsumeRecharge {
     private String isSupportIntegral;
     //角标
     private String cornerMark;
+    //楼层Id
+    private Integer floorId;
+    
+    public Integer getFloorId() {
+		return floorId;
+	}
 
-    public String getCornerMark() {
+	public void setFloorId(Integer floorId) {
+		this.floorId = floorId;
+	}
+
+	public String getCornerMark() {
 		return cornerMark;
 	}
 

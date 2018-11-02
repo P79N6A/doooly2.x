@@ -2,9 +2,6 @@ package com.doooly.business.product.entity;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
-
-import com.google.common.collect.Lists;
 
 /**
  * 企业商品价格配置Entity
@@ -39,6 +36,7 @@ public class AdGroupSelfProductPrice {
 	private Date activityEndDate; // 活动结束时间
 	private String activityName;// 活动名称
 	private String isStart;
+	private String image; //图片
 
 	public int getId() {
 		return id;
@@ -238,6 +236,14 @@ public class AdGroupSelfProductPrice {
 
 	public void setIsStart(String isStart) {
 		this.isStart = isStart;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 

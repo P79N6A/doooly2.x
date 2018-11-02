@@ -37,7 +37,9 @@ public class AdGroupSelfProductPrice {
 	private String activityName;// 活动名称
 	private String isStart;
 	private String image; //图片
-
+	private int produceId;
+	private int businessId;
+	
 	public int getId() {
 		return id;
 	}
@@ -244,6 +246,22 @@ public class AdGroupSelfProductPrice {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public int getProduceId() {
+		return produceId;
+	}
+
+	public void setProduceId(int produceId) {
+		this.produceId = produceId;
+	}
+
+	public int getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(int businessId) {
+		this.businessId = businessId;
 	}
 
 

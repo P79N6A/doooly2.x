@@ -224,7 +224,7 @@ public class AdArticleService implements AdArticleServiceI {
         }
         Double rebate;
         BigDecimal factPrice;//前台根据折扣计算价格
-        BigDecimal marketPrice = adProduct.getMarketPrice();//后台商品配置导购价
+        BigDecimal marketPrice = adProduct.getMarketPrice().setScale(2, BigDecimal.ROUND_DOWN);//后台商品配置导购价
         BigDecimal chu = new BigDecimal("10000");
         AdBusiness adBusiness = adBusinessDao.get(adProduct.getBusinessId());
         if (adBusiness != null) {
@@ -245,9 +245,9 @@ public class AdArticleService implements AdArticleServiceI {
                             .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN).doubleValue();
                 }
                 //前折计算兜礼价
-                adProduct.setPrice(factPrice);
+                adProduct.setPrice(factPrice.setScale(2, BigDecimal.ROUND_DOWN));
                 //设置返利
-                adProduct.setRebate(String.valueOf(rebate));
+                adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
             }
         } else {
             adProduct.setPrice(marketPrice);

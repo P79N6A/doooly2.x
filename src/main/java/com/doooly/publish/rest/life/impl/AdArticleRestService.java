@@ -77,7 +77,7 @@ public class AdArticleRestService implements AdArticleRestServiceI {
             messageDataBean.setCode(MessageDataBean.failure_code);
             messageDataBean.setMess(MessageDataBean.failure_mess);
         }
-        return messageDataBean.toJsonString();
+        return messageDataBean.toFormatJsonString();
     }
 
 

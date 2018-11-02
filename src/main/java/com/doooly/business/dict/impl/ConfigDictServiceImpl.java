@@ -26,7 +26,9 @@ public class ConfigDictServiceImpl implements ConfigDictServiceI {
 		String value = stringRedis.opsForValue().get(dictKey);
 		if (StringUtils.isBlank(value)) {
 			value = dictDao.getValueByTypeAndKey(dictType, dictKey);
+			//若查询结果为空不需要处理
 			if(StringUtils.isNotBlank(value)){
+				//用换行符替换特殊字符\s
 				value = value.replaceAll("%s", "\n");
 				// 设置超时时间，默认1天
 				stringRedis.opsForValue().set(dictKey, value, 1, TimeUnit.DAYS);

@@ -128,7 +128,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							}
 							item.put("title", floor.getName());
 							item.put("isOnline", DEAL_TYPE_OFFLINE);
-                            item.put("type", "5");
+                            item.put("type", "9");
                             item.put("list", beans);
 						}
 					}

@@ -6,11 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.doooly.business.product.entity.*;
-import com.doooly.entity.reachad.AdUser;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,8 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.service.OrderService.ActivityType;
+import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.business.product.entity.AdGroupSelfProductPrice;
+import com.doooly.business.product.entity.AdSelfProduct;
+import com.doooly.business.product.entity.AdSelfProductImage;
+import com.doooly.business.product.entity.AdSelfProductSku;
+import com.doooly.business.product.entity.AdSelfProductType;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.dao.reachad.AdGroupDao;
@@ -30,6 +30,7 @@ import com.doooly.dao.reachad.AdSelfProductImageDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdUser;
 
 @Service
 @Transactional
@@ -269,6 +270,11 @@ public class ProductServiceImpl implements ProductService {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName) {
+		return adSelfProductDao.getSelfProductSkuListByName(activityName);
 	}
 
 }

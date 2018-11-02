@@ -4,11 +4,11 @@
 package com.doooly.dao.reachad;
 
 import java.util.List;
-import java.util.Map;
 
-import com.doooly.business.product.entity.ActivityInfo;
 import org.apache.ibatis.annotations.Param;
 
+import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.business.product.entity.AdGroupSelfProductPrice;
 import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.entity.AdSelfProductType;
@@ -56,5 +56,7 @@ public interface AdSelfProductDao{
 	
 	/** 查询某商品被屏蔽skuIdList */
 	List<String> getLimitSkuIdListByProductId(@Param("productId")String productId,@Param("groupId")Long groupId);
-
+	
+	/** 根据活动名字查询sku */
+	AdGroupSelfProductPrice getSelfProductSkuListByName(@Param("activityName") String activityName);
 }

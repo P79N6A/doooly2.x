@@ -59,6 +59,7 @@ public class AdCoupon {
     private String bussinessLogo;//商户logo
     private String receiveChannel;// 领取方式（0-兜礼领取，1-商家领取）
     private String couponValueStr;// 优惠券面值字符串
+    private String categoryType;
 
     public static final String COUPONSTATUS_TOMORROW = "3";
 
@@ -478,4 +479,12 @@ public class AdCoupon {
     public void setCouponValueStr(String couponValueStr) {
         this.couponValueStr = couponValueStr;
     }
+
+	public String getCategoryType() {
+		return categoryType;
+	}
+
+	public void setCategoryType(String categoryType) {
+		this.categoryType = categoryType;
+	}
 }

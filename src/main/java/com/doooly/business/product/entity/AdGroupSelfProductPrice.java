@@ -39,6 +39,7 @@ public class AdGroupSelfProductPrice {
 	private String image; //图片
 	private int produceId;
 	private int businessId;
+	private String url;
 	
 	public int getId() {
 		return id;
@@ -262,6 +263,14 @@ public class AdGroupSelfProductPrice {
 
 	public void setBusinessId(int businessId) {
 		this.businessId = businessId;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 

@@ -76,7 +76,7 @@ public class IndexServiceImpl implements IndexServiceI {
 		try {
 			logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
 					params, version);
-			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId);
+			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
 			if (CollectionUtils.isEmpty(floors)) {
 				return new MessageDataBean("1000", "floors is null").toJsonString();
 			}
@@ -140,8 +140,8 @@ public class IndexServiceImpl implements IndexServiceI {
 							}
 							item.put("title", floor.getName());
 							item.put("isOnline", DEAL_TYPE_OFFLINE);
-                            item.put("type", "9");
-                            item.put("list", beans);
+							item.put("type", "9");
+							item.put("list", beans);
 						}
 					}
 				} else {
@@ -187,7 +187,7 @@ public class IndexServiceImpl implements IndexServiceI {
 		try {
 			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
 					version);
-			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId);
+			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE);
 			if (CollectionUtils.isEmpty(floors)) {
 				return new MessageDataBean("1000", "floors is null").toJsonString();
 			}
@@ -206,8 +206,8 @@ public class IndexServiceImpl implements IndexServiceI {
 					// 兜礼权益商户（线上/线下）
 					floorJson.put("list",
 							getBussiness(userId, address, Arrays.asList(DEAL_TYPE_ONLINE, DEAL_TYPE_ONLINE), version));
-				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
-					// 导航
+				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
+					// 员工内部专享价
 					MessageDataBean guideData = guideDao.getGuideProductList("0", 1, 10, userId);
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
@@ -233,10 +233,13 @@ public class IndexServiceImpl implements IndexServiceI {
 					for (AdConsumeRecharge recharge : adConsumeRechargeList) {
 						itemJson = new JSONObject();
 						itemJson.put("iconUrl", recharge.getIconUrl());
-						itemJson.put("linkUrl", recharge.getLinkUrl());
+						String linkUrl = recharge.getLinkUrl();
+						itemJson.put("linkUrl", linkUrl);
 						itemJson.put("mainTitle", recharge.getMainTitle());
 						itemJson.put("subTitle", recharge.getSubTitle());
-						itemJson.put("subUrl", recharge.getSubUrl());
+						if (StringUtils.isNotBlank(linkUrl)&& linkUrl.indexOf("#") > -1) {
+							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
 							itemJson.put("cornermakr", recharge.getCornerMark());
 						}
@@ -260,12 +263,12 @@ public class IndexServiceImpl implements IndexServiceI {
 	/**
 	 * 查询热门商户
 	 * 
-	* @author  hutao 
-	* @date 创建时间：2018年11月2日 上午11:23:30 
-	* @version 1.0 
-	* @parameter  
-	* @since  
-	* @return
+	 * @author hutao
+	 * @date 创建时间：2018年11月2日 上午11:23:30
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
 	 */
 	private List<AdConsumeRecharge> getBussiness(String userId, String address, List<Integer> dealTypeList,
 			String version) {

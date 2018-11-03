@@ -7,7 +7,11 @@ package com.doooly.entity.reachad;
  *
  */
 public class AdBasicType {
-
+	//首页楼层类型标识
+	public static final Integer INDEX_TYPE=3;
+	//兜礼权益类型标识
+	public static final Integer DOOOLY_RIGHTS_TYPE=4;
+	
 	private Long id;
 
 	private int code;

@@ -219,7 +219,7 @@
             <if test="guideCategoryId != null">
                 and a.guide_category_id = #{guideCategoryId}
             </if>
-            <if test="recommendHomepage != null">
+            <if test="recommendHomepage != null and recommendHomepage==1">
                 and a.recommend_homepage = #{recommendHomepage}
             </if>
         LIMIT #{startIndex},#{pageSize}

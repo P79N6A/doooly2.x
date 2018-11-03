@@ -15,6 +15,6 @@ public interface AdBasicTypeDao extends BaseDaoI<AdBasicType> {
 
 	List<AdBasicType> getActivityCategoryList();
 
-    List<AdBasicType> getFloors(@Param("userId")String userId);
+	List<AdBasicType> getFloors(@Param("userId") String userId, @Param("type") Integer type);
 
- }
+}

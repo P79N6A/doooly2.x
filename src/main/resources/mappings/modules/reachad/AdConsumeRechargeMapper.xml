@@ -9,6 +9,7 @@
 		c.id id,
 		c.main_title mainTitle,
 		c.sub_title subTitle,
+		c.corner_mark_text cornerMark,
 		c.icon_url iconUrl,
 		c.sort sort,
 		c.state state,

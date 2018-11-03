@@ -22,7 +22,7 @@
 			b.`name`,
 			b.`code`,
 			b.sort sort,
-			b.floor_type floorType,
+			b.sub_title subTitle,
 			b.floor_type floorType,
 			tg.template_id templateId
 		FROM

@@ -182,9 +182,13 @@ public class IndexServiceImpl implements IndexServiceI {
 			return new MessageDataBean("1001", "userToken is null").toJsonString();
 		}
 		String userId = redisTemplate.opsForValue().get(userToken);
-		String address = params.getString("address");
-		// 取有返佣金额的商户
+		String address = null;
 		try {
+
+			// 获取当前城市位置
+			if (params.containsKey("params")) {
+				address = params.getJSONObject("params").getString("address");
+			}
 			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
 					version);
 			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE);
@@ -237,7 +241,7 @@ public class IndexServiceImpl implements IndexServiceI {
 						itemJson.put("linkUrl", linkUrl);
 						itemJson.put("mainTitle", recharge.getMainTitle());
 						itemJson.put("subTitle", recharge.getSubTitle());
-						if (StringUtils.isNotBlank(linkUrl)&& linkUrl.indexOf("#") > -1) {
+						if (StringUtils.isNotBlank(linkUrl) && linkUrl.indexOf("#") > -1) {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {

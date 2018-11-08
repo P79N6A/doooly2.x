@@ -469,15 +469,16 @@ public class NewPaymentService implements NewPaymentServiceI {
             } else {
                 payMsg = queryNewPayResult(param);
                 if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                    Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                     //说明支付成功处理结果
                     JSONObject retJson = new JSONObject();
                     retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                     retJson.put("orderNum", orderNum);
                     retJson.put("payFlowId", flow.getId());
-                    retJson.put("integralPayStatus", retJson.getString("integralPayStatus"));
-                    retJson.put("payAmount", retJson.getString("payAmount"));
-                    retJson.put("payType", retJson.getString("payType"));
-                    retJson.put("realPayType", retJson.getString("realPayType"));
+                    retJson.put("integralPayStatus", data.get("integralPayStatus"));
+                    retJson.put("payAmount", data.get("payAmount"));
+                    retJson.put("payType", data.get("payType"));
+                    retJson.put("realPayType", PayFlowService.PAYTYPE_CASHIER_DESK);
                     //retJson.put("code", MessageDataBean.success_code);
                     payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
                 }

@@ -5,7 +5,6 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.service.OrderService.OrderStatus;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.pay.service.PayFlowService.PayType;
 import com.doooly.dao.reachad.OrderDao;
@@ -22,6 +21,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /***
  * 同步订单到_order
@@ -42,7 +42,7 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 
 	
 	@Override
-	public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
+	public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
 		try {
 			logger.info("同步订单到_order开始. orderNum = {}", order.getOrderNumber());
             BigDecimal amount = new BigDecimal("0");

@@ -474,12 +474,12 @@ public class NewPaymentService implements NewPaymentServiceI {
                     retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                     retJson.put("orderNum", orderNum);
                     retJson.put("payFlowId", flow.getId());
-                    //retJson.put("integralPayStatus", retJson.getString("integralPayStatus"));
-                    //retJson.put("payAmount", retJson.getString("payAmount"));
-                    //retJson.put("payType", retJson.getString("payType"));
+                    retJson.put("integralPayStatus", retJson.getString("integralPayStatus"));
+                    retJson.put("payAmount", retJson.getString("payAmount"));
+                    retJson.put("payType", retJson.getString("payType"));
                     //retJson.put("realPayType", retJson.getString("realPayType"));
                     retJson.put("code", MessageDataBean.success_code);
-                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
                 }
             }
         } else {

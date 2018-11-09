@@ -1,6 +1,7 @@
 package com.doooly.business.mall.service;
 
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdAd;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessGroup;
 import com.doooly.entity.reachad.AdProduct;
@@ -9,6 +10,8 @@ import com.doooly.entity.reachad.AdProductCategory;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 
 public interface MallBusinessServiceI {
 	
@@ -45,5 +48,5 @@ public interface MallBusinessServiceI {
 
 	public AdBusiness getById(String id);
 
-
+	public AdAd findByTypeAndGroup(int groupId ,String title);
 }

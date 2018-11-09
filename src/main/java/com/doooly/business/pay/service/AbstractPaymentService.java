@@ -119,16 +119,17 @@ public abstract class AbstractPaymentService implements PaymentService {
         try {
             if (resultMap != null) {
                 logger.info("handlePayResult() 支付结果验证通过.payType = {}", payType);
-                //String payFlowId = (String) resultMap.get("payFlowId");
+                String payFlowId = (String) resultMap.get("payFlowId");
                 String orderNum = (String) resultMap.get("orderNum");
+                String transNo = (String) resultMap.get("transNo");
                 String realPayType = (String) resultMap.get("realPayType");
                 List<OrderVo> orders = (List<OrderVo>) resultMap.get("orders");
-                //PayFlow payFlow = payFlowService.getById(payFlowId);
+                PayFlow payFlow = payFlowService.getById(payFlowId);
                 long s = System.currentTimeMillis();
-                //logger.info("handlePayResult() s = {},payFlow = {}", s, payFlow);
+                logger.info("handlePayResult() s = {},payFlow = {}", s, payFlow);
                 // 这里需要加分布式锁控制和事务处理
                 // 校验是否已经处理过通知结果
-                /*if (!PayFlowService.PAYMENT_SUCCESS.equals(payFlow.getPayStatus())) {
+                if (!PayFlowService.PAYMENT_SUCCESS.equals(payFlow.getPayStatus())) {
                     logger.info("handlePayResult() 开始修改状态. payFlowId = {},orderNum={}", payFlowId, orderNum);
                     //修改支付状态
                     long s1 = System.currentTimeMillis();
@@ -157,32 +158,11 @@ public abstract class AbstractPaymentService implements PaymentService {
                     logger.info("doProcessor end.cost = {}", System.currentTimeMillis() - s3);
 
                 }
-                logger.info("handlePayResult() cost = {},payFlow = {}", System.currentTimeMillis() - s, payFlow);*/
-                //兜礼收银台调用新的同步 废弃ad_pay_flow表 ==========zhangq20181108
-                OrderVo orderVo = orders.get(0);
-                if (OrderStatus.HAD_FINISHED_ORDER.getCode()!=orderVo.getType()
-                        || OrderService.PayState.PAID.getCode()!=orderVo.getState()){
-                    logger.info("handlePayResult() 开始修改状态.,orderNum={}", orderNum);
-                    // 修改订单状态
-                    long s2 = System.currentTimeMillis();
-                    logger.info("updateOrderSuccess ===>start = {}", s2);
-                    int orderStaus = orderService.updateOrderSuccess(orders, payType);
-                    if (orderStaus == 0) {
-                        logger.info("handlePayResult() orderStaus = {}", orderStaus);
-                        return new PayMsg(PayMsg.failure_code, "修改订单状态失败.");
-                    }
-                    logger.info("updateOrderSuccess end.cost = {},orderStaus = {}", System.currentTimeMillis() - s2, orderStaus);
-                    //这里要重新获取修改后的数据
-                    long s3 = System.currentTimeMillis();
-                    logger.info("doProcessor ===>start = {}", s3);
-                    logger.info("doProcessor ods = {}", orders.get(0));
-                    doProcessor(orders, resultMap, realPayType);
-                    logger.info("doProcessor end.cost = {}", System.currentTimeMillis() - s3);
-
-                }
+                logger.info("handlePayResult() cost = {},payFlow = {}", System.currentTimeMillis() - s, payFlow);
                 return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("handlePayResult() e = {} ,retStr = {}", e, retStr);
         }
         return new PayMsg(PayMsg.failure_code, PayMsg.failure_mess);
@@ -332,11 +312,11 @@ public abstract class AbstractPaymentService implements PaymentService {
      * 执行处理器<br>
      * 1.针对某种商品类型的处理器, 如:流量,话费..<br>
      * 2.所有订单必须执行处理器, 如:订单同步,交易记录同步..<br>
-     *  @param orders
-     * @param resultMap
+     *
+     * @param orders
      * @param realPayType
      */
-    private List<Long> doProcessor(List<OrderVo> orders, final Map<String, Object> resultMap, String realPayType) {
+    private List<Long> doProcessor(List<OrderVo> orders, final PayFlow payFlow, String realPayType) {
         try {
             for (final OrderVo order : orders) {
                 //针对某种商品类型的订单处理器
@@ -358,7 +338,7 @@ public abstract class AbstractPaymentService implements PaymentService {
                         @Override
                         public void run() {
                             logger.info("执行 orderNumber = {},afterPayProcessors class= {}", order.getOrderNumber(), afterPayProcessor);
-                            afterPayProcessor.process(order, resultMap, realPayType);
+                            afterPayProcessor.process(order, payFlow, realPayType);
                         }
                     });
                 }

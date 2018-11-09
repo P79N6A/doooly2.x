@@ -68,7 +68,6 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		homePageData.setAvailablePoints(adUserInfos.getAvailablePoints() == null ? zeroBigDecimal
 				: adUserInfos.getAvailablePoints().setScale(2, BigDecimal.ROUND_DOWN));
 		homePageData.setAuthFlag(adUserInfos.getAuthFlag() == null ? 0 : adUserInfos.getAuthFlag());
-
 		// 查询会员的福利券
 		int expiredNum = 0;
 		List<AdAppUserCoupon> adAppUserCouponList = adAppHomePageDao.getAdUserCouponInfos(request.getUserId());
@@ -402,10 +401,10 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			GetHomePageDataV2Response response) {
 		response = this.getHomePageDataV2(request, response);
 		HomePageDataV2 homePageData = response.getData();
-		if(homePageData!=null){
+		if (homePageData != null) {
 			// 查询待返积分
 			BigDecimal returnPoint = adUserDao.getReturnPoint(String.valueOf(request.getUserId()));
-			homePageData.setReturnPoints(returnPoint != null ? returnPoint : new BigDecimal("0"));
+			homePageData.setReturnPoints(returnPoint != null ? returnPoint.toString() : "0.00");
 		}
 		return response;
 	}

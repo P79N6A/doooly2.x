@@ -19,7 +19,7 @@ public class AdConsumeRecharge {
     private String cornerMark;
     //楼层Id
     private Integer floorId;
-    //导购ICon URL
+    //
     private String guideIconUrl;
     
     public String getGuideIconUrl() {

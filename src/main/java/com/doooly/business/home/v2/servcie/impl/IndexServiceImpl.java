@@ -27,10 +27,12 @@ import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.common.constants.VersionConstants;
 import com.doooly.dao.reachad.AdBasicTypeDao;
 import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdBusinessServicePJDao;
 import com.doooly.dao.reachad.AdConsumeRechargeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBasicType;
 import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdBusinessServicePJ;
 import com.doooly.entity.reachad.AdConsumeRecharge;
 import com.doooly.entity.reachad.AdProduct;
 import com.doooly.publish.rest.life.impl.IndexRestService;
@@ -53,6 +55,8 @@ public class IndexServiceImpl implements IndexServiceI {
 	private AdBusinessDao adBusinessDao;
 	@Autowired
 	private AdArticleServiceI guideDao;
+	@Autowired
+	private AdBusinessServicePJDao adBusinessServicePJDao;
 
 	/**
 	 * 
@@ -129,15 +133,10 @@ public class IndexServiceImpl implements IndexServiceI {
 				} else if (floor.getCode() == 25) {
 					if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
 						// 每日特惠数据
-						List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-								floor.getFloorId());
+//						List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+//								floor.getFloorId());
+						List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
 						if (!CollectionUtils.isEmpty(beans)) {
-							for (AdConsumeRecharge bean : beans) {
-								String linkUrl = bean.getLinkUrl();
-								if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-									bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
-								}
-							}
 							item.put("title", floor.getName());
 							item.put("isOnline", DEAL_TYPE_OFFLINE);
 							item.put("type", "9");
@@ -182,13 +181,9 @@ public class IndexServiceImpl implements IndexServiceI {
 			return new MessageDataBean("1001", "userToken is null").toJsonString();
 		}
 		String userId = redisTemplate.opsForValue().get(userToken);
-		String address = null;
+		String address = params.getString("address");
+		// 取有返佣金额的商户
 		try {
-
-			// 获取当前城市位置
-			if (params.containsKey("params")) {
-				address = params.getJSONObject("params").getString("address");
-			}
 			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
 					version);
 			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE);
@@ -249,7 +244,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
-							itemJson.put("cornerMark", recharge.getCornerMark());
+							itemJson.put("cornermakr", recharge.getCornerMark());
 						}
 						listJson.add(itemJson);
 					}

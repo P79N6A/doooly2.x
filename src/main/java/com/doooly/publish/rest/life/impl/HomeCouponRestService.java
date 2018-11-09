@@ -40,7 +40,8 @@ public class HomeCouponRestService implements HomeCouponRestServiceI {
 	public String getBusinessList(JSONObject obj) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
-			HashMap<String, Object> map = homeCouponService.getBusinessList();
+			String categoryType = obj.getString("categoryType");
+			HashMap<String, Object> map = homeCouponService.getBusinessList(categoryType);
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setData(map);
 		} catch (Exception e) {

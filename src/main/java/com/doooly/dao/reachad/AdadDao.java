@@ -13,4 +13,5 @@ public interface AdadDao extends BaseDaoI<AdAd> {
 
 	List<AdAd> findAllByType(@Param("type") int type,@Param("state") Integer state,@Param("userId") Integer userId);
 
+	AdAd findByTypeAndGroup(@Param("groupId") int groupId,@Param("title") String title);
 }

@@ -19,7 +19,6 @@ import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdUser;
-import org.apache.ibatis.thread.Runnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

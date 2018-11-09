@@ -42,7 +42,7 @@ public class IndexRestService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String indexV2_2(JSONObject params, @Context HttpServletRequest request) {
-		return indexService.selectFloorsByV2_2(params, request, VersionConstants.INTERFACE_VERSION_V2);
+		return indexService.selectFloorsByV2_2(params, request, VersionConstants.INTERFACE_VERSION_V2_2);
 	}
 	
 	/**

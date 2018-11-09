@@ -14,6 +14,6 @@ public class FloorTemplateConstants {
 		//今日品牌特惠
 		public static final Integer FLOOR_TYPE_PINPAITEHUI = 11;
 		//XXX内部价
-		public static final Integer FLOOR_TYPE_NEIBUJIA = 6;
+		public static final Integer FLOOR_TYPE_NEIBUJIA = 12;
 	}
 }

@@ -276,13 +276,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = orderService.getByOrderNum(orderNum);
         Integer isSource = order.getIsSource();
         //自营商品全是兜礼支付
+        /* 20181109 注释掉都走新的 废除ad_pay_flow
         PayMsg payMsg;
         if (isSource == 3) {
             //说明是自营订单
             payMsg = prePay(params);
         } else {
             payMsg = prePayNew(params);
-        }
+        }*/
+        PayMsg payMsg = prePayNew(params);
         //为空或者校验失败直接返回错误信息
         if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
             return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
@@ -457,7 +459,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("nonceStr", RandomStringUtils.random(6, "123456789zxc"));
         param.put("id", business.getId());
         param.put("businessId", business.getBusinessId());
-        if (isSource == 3) {
+        param.put("isSource", 3);//标记是兜礼的查询
+        //20181109注释掉不区分来源都用新的，用订单状态判断废除 ad_pay_flow表
+        /*if (isSource == 3) {
             //说明是自营订单
             PayFlow flow = payFlowService.getByOrderNum(orderNum, payType, null);
             if (flow == null) {
@@ -469,21 +473,49 @@ public class NewPaymentService implements NewPaymentServiceI {
             } else {
                 payMsg = queryNewPayResult(param);
                 if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                    Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
+                    logger.info("查询结果data{}",data);
                     //说明支付成功处理结果
                     JSONObject retJson = new JSONObject();
                     retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                     retJson.put("orderNum", orderNum);
                     retJson.put("payFlowId", flow.getId());
-                    //retJson.put("integralPayStatus", retJson.getString("integralPayStatus"));
-                    //retJson.put("payAmount", retJson.getString("payAmount"));
-                    //retJson.put("payType", retJson.getString("payType"));
-                    //retJson.put("realPayType", retJson.getString("realPayType"));
-                    retJson.put("code", MessageDataBean.success_code);
-                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+                    retJson.put("integralPayStatus", data.get("payStatus"));
+                    retJson.put("payAmount", data.get("orderAmount"));
+                    retJson.put("realPayType", PayFlowService.PAYTYPE_CASHIER_DESK);
+                    //retJson.put("code", MessageDataBean.success_code);
+                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
                 }
             }
         } else {
             payMsg = queryNewPayResult(param);
+            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                //说明支付成功处理结果
+                JSONObject retJson = new JSONObject();
+                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
+                retJson.put("orderNum", orderNum);
+                retJson.put("code", MessageDataBean.success_code);
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+            }
+        }*/
+        if (OrderService.PayState.PAID.getCode()!=order.getState()) {
+            //得到支付平台通知并已经处理过支付结果, 直接返回结果
+            payMsg = ResultModel.ok();
+        } else {
+            payMsg = queryNewPayResult(param);
+            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
+                logger.info("查询结果data{}",data);
+                //说明支付成功处理结果
+                JSONObject retJson = new JSONObject();
+                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
+                retJson.put("orderNum", orderNum);
+                retJson.put("integralPayStatus", data.get("payStatus"));
+                retJson.put("payAmount", data.get("orderAmount"));
+                retJson.put("realPayType", data.get("payType"));
+                //retJson.put("code", MessageDataBean.success_code);
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
+            }
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
@@ -681,6 +713,10 @@ public class NewPaymentService implements NewPaymentServiceI {
      */
     private Long checkOrderStatus(OrderVo order) {
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
+            return order.getOrderId();
+        }
+        if(order.getState() == OrderService.PayState.PAID.getCode()){
+            //状态已完成
             return order.getOrderId();
         }
         return null;

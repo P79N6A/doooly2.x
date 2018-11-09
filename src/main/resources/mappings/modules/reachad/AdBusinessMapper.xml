@@ -380,7 +380,7 @@
 		SELECT
 		a.id AS "id",
 		a.company AS "company",
-		a.sub_title "subTitle",
+		a.remarks "subTitle",
 		a.long_logo AS "logo",
 		a.url AS "url",
 		a.app_url AS "appUrl",

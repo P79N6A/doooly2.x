@@ -254,7 +254,11 @@ public class IndexServiceImpl implements IndexServiceI {
 						itemJson.put("linkUrl", linkUrl);
 						itemJson.put("mainTitle", recharge.getMainTitle());
 						itemJson.put("subTitle", recharge.getSubTitle());
-						if (StringUtils.isNotBlank(linkUrl)&& linkUrl.indexOf("#") > -1) {
+						if (StringUtils.isNotBlank(recharge.getGuideIconUrl())) {
+							// 热销品牌导购图
+							itemJson.put("guideIconUrl", recharge.getGuideIconUrl());
+						}
+						if (StringUtils.isNotBlank(linkUrl) && linkUrl.indexOf("#") > -1) {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
@@ -297,19 +301,25 @@ public class IndexServiceImpl implements IndexServiceI {
 			for (AdBusiness merchant : merchants) {
 				AdConsumeRecharge bean = new AdConsumeRecharge();
 				bean.setMainTitle(merchant.getCompany());
-				StringBuilder sb = new StringBuilder();
+				// 前折信息
+				String promotionInfo = "";
+				// 返利信息
+				String rebateInfo = "";
 				if (merchant.getDiscount() != null && merchant.getDiscount() > 0) {
-					sb.append(merchant.getDiscount() + "折 ");
+					promotionInfo = merchant.getDiscount() + "折 ";
 				}
 				if (!StringUtils.isEmpty(merchant.getMaxUserRebate())
 						&& new BigDecimal(merchant.getMaxUserRebate()).compareTo(BigDecimal.ZERO) == 1) {
-					sb.append("返" + merchant.getMaxUserRebate() + "%");
+					rebateInfo = "返" + merchant.getMaxUserRebate() + "%";
 				}
 				if (VersionConstants.INTERFACE_VERSION_V2_2.equals(version)) {
-					bean.setCornerMark(sb.toString());
-					bean.setSubTitle(merchant.getSubTitle());
+					bean.setCornerMark(rebateInfo);
+					bean.setMainTitle(merchant.getSubTitle());
+					if(StringUtils.isNotBlank(promotionInfo)){
+						bean.setSubTitle(promotionInfo.trim()+"起");
+					}
 				} else {
-					bean.setSubTitle(sb.toString());
+					bean.setSubTitle(promotionInfo+" "+rebateInfo);
 				}
 				bean.setIconUrl(merchant.getLogo());
 

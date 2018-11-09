@@ -1,8 +1,9 @@
 package com.doooly.business.pay.processor.afterpayprocessor;
 
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.dto.common.PayMsg;
+
+import java.util.Map;
 
 /***
  * 支付成功后, 后调用此接口
@@ -13,6 +14,6 @@ import com.doooly.dto.common.PayMsg;
 public interface AfterPayProcessor {
 	
 	
-	public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType);
+	public PayMsg process(OrderVo order, Map<String, Object> payFlow, String realPayType);
 	
 }

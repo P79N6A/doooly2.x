@@ -104,8 +104,11 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
 			int skuId = adGroupSelfProductPrice.getSkuId();
 			ActivityInfo actInfo = orderService.getActivityInfo(groupId, skuId);
-			String actType = actInfo.getActivityName();
-			
+			int num = 0;
+			if(actInfo != null) {
+				String actType = actInfo.getActivityName();
+				num = orderService.getBuyNum(userId, skuId, actType);
+			}
 			String weekList = adGroupSelfProductPrice.getWeekList();
 			weekList = weekList.substring(1, weekList.length()-1).replaceAll(" ", "");
 			List<String> weekLists = Arrays.asList(weekList.split(","));
@@ -114,7 +117,6 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			int startHour = Integer.parseInt(activityOfTimeList.get(0));
 			int endHour = Integer.parseInt(activityOfTimeList.get(1));
 			
-			int num = orderService.getBuyNum(userId, skuId, actType);
 			if(num - adGroupSelfProductPrice.getBuyNumberLimit() >= 0) {
 				adGroupSelfProductPrice.setIsStart("4");
 			}else {

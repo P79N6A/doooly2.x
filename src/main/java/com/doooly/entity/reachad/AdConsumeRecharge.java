@@ -19,18 +19,8 @@ public class AdConsumeRecharge {
     private String cornerMark;
     //楼层Id
     private Integer floorId;
-    //导购ICon URL
-    private String guideIconUrl;
     
-    public String getGuideIconUrl() {
-		return guideIconUrl;
-	}
-
-	public void setGuideIconUrl(String guideIconUrl) {
-		this.guideIconUrl = guideIconUrl;
-	}
-
-	public Integer getFloorId() {
+    public Integer getFloorId() {
 		return floorId;
 	}
 

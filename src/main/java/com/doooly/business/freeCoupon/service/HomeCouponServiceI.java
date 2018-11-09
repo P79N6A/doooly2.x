@@ -14,7 +14,7 @@ public interface HomeCouponServiceI {
 	 * 获取优惠券对应的商家列表
 	 * 
 	 */
-	HashMap<String, Object> getBusinessList();
+	HashMap<String, Object> getBusinessList(String categoryType);
 
 	/**
 	 * 获取商家的优惠券列表

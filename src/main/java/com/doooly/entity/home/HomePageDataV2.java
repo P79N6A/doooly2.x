@@ -32,30 +32,20 @@ public class HomePageDataV2 {
 	private boolean newFinishFlag;
 	private boolean newCancelFlag;
 
-	private String isPayPassword;
-	private String isSetPayPassword;
-	// 会员返利积分
-	private BigDecimal returnPoints;
+    private String isPayPassword;
+    private String isSetPayPassword;
 
-	// /** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
-	// private Integer noviceGuideFinished;
-	// /** 兜礼APP_v2.0.0，积分新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
-	// private Integer integralGuideFinished;
-	// /**
-	// 兜礼APP_v2.0.0，企业员工专属特权的json字符串，{"app-index-privilege":{"business":0,"friends":0,"integral":0,"coupon":0,"birthday":0}}
-	// **/
-	// private JSONObject appIndexPrivilege;
+
+
+//	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
+//	private Integer noviceGuideFinished;
+//	/**  兜礼APP_v2.0.0，积分新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
+//	private Integer integralGuideFinished;
+//	/** 兜礼APP_v2.0.0，企业员工专属特权的json字符串，{"app-index-privilege":{"business":0,"friends":0,"integral":0,"coupon":0,"birthday":0}} **/
+//	private JSONObject appIndexPrivilege;
 
 	public String getMemberName() {
 		return memberName;
-	}
-
-	public BigDecimal getReturnPoints() {
-		return returnPoints;
-	}
-
-	public void setReturnPoints(BigDecimal returnPoints) {
-		this.returnPoints = returnPoints;
 	}
 
 	public void setMemberName(String memberName) {
@@ -150,43 +140,43 @@ public class HomePageDataV2 {
 		this.newCancelFlag = newCancelFlag;
 	}
 
-	public String getIsPayPassword() {
-		return isPayPassword;
-	}
+    public String getIsPayPassword() {
+        return isPayPassword;
+    }
 
-	public void setIsPayPassword(String isPayPassword) {
-		this.isPayPassword = isPayPassword;
-	}
+    public void setIsPayPassword(String isPayPassword) {
+        this.isPayPassword = isPayPassword;
+    }
 
-	public String getIsSetPayPassword() {
-		return isSetPayPassword;
-	}
+    public String getIsSetPayPassword() {
+        return isSetPayPassword;
+    }
 
-	public void setIsSetPayPassword(String isSetPayPassword) {
-		this.isSetPayPassword = isSetPayPassword;
-	}
+    public void setIsSetPayPassword(String isSetPayPassword) {
+        this.isSetPayPassword = isSetPayPassword;
+    }
 
-	// public Integer getNoviceGuideFinished() {
-	// return noviceGuideFinished;
-	// }
-	//
-	// public void setNoviceGuideFinished(Integer noviceGuideFinished) {
-	// this.noviceGuideFinished = noviceGuideFinished;
-	// }
-	//
-	// public Integer getIntegralGuideFinished() {
-	// return integralGuideFinished;
-	// }
-	//
-	// public void setIntegralGuideFinished(Integer integralGuideFinished) {
-	// this.integralGuideFinished = integralGuideFinished;
-	// }
-	//
-	// public JSONObject getAppIndexPrivilege() {
-	// return appIndexPrivilege;
-	// }
-	//
-	// public void setAppIndexPrivilege(JSONObject appIndexPrivilege) {
-	// this.appIndexPrivilege = appIndexPrivilege;
-	// }
+//	public Integer getNoviceGuideFinished() {
+//		return noviceGuideFinished;
+//	}
+//
+//	public void setNoviceGuideFinished(Integer noviceGuideFinished) {
+//		this.noviceGuideFinished = noviceGuideFinished;
+//	}
+//
+//	public Integer getIntegralGuideFinished() {
+//		return integralGuideFinished;
+//	}
+//
+//	public void setIntegralGuideFinished(Integer integralGuideFinished) {
+//		this.integralGuideFinished = integralGuideFinished;
+//	}
+//
+//	public JSONObject getAppIndexPrivilege() {
+//		return appIndexPrivilege;
+//	}
+//
+//	public void setAppIndexPrivilege(JSONObject appIndexPrivilege) {
+//		this.appIndexPrivilege = appIndexPrivilege;
+//	}
 }

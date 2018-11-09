@@ -30,11 +30,11 @@ public class HomeCouponService implements HomeCouponServiceI {
 	private AdCouponDao adCouponDao;
 
 	@Override
-	public HashMap<String, Object> getBusinessList() {
+	public HashMap<String, Object> getBusinessList(String categoryType) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 查询第三方商户优惠券的商家集合
-			List<AdBusiness> businessList = adCouponDao.getThirdBusinessList();
+			List<AdBusiness> businessList = adCouponDao.getThirdBusinessList(categoryType);
 			map.put("businessList", businessList);
 		} catch (Exception e) {
 			logger.error("查询第三方商户优惠券的商家集合异常！！！", e);

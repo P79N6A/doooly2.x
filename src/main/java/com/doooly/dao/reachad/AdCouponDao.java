@@ -18,7 +18,7 @@ public interface AdCouponDao extends BaseDaoI<AdCoupon> {
 	String findBusinessIdByCouponId(Integer couponId);
 
 	/** 查询第三方商户优惠券的商家集合 */
-	List<AdBusiness> getThirdBusinessList();
+	List<AdBusiness> getThirdBusinessList(@Param("categoryType") String categoryType);
 
 	/** 查询总数(某商家旗下的优惠券数量) */
 	int getCouponNumByBusinessId(@Param("businessId") String businessId);

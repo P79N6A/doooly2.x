@@ -12,7 +12,7 @@ import java.util.Date;
 public class AdGroupSelfProductPrice {
 
 	private int id;
-	private String skuId; // 自营商品skuID
+	private int skuId; // 自营商品skuID
 	private String groupId; // 企业ID
 	private BigDecimal specialPrice; // 特惠价格
 	private Date specialStartDate; // 特惠开始时间
@@ -36,11 +36,13 @@ public class AdGroupSelfProductPrice {
 	private Date activityEndDate; // 活动结束时间
 	private String activityName;// 活动名称
 	private String isStart;
-	private String image; //图片
+	private String image; // 图片
 	private int produceId;
 	private int businessId;
 	private String url;
-	
+	private String weekList;
+    private String activityOfTime;
+
 	public int getId() {
 		return id;
 	}
@@ -49,11 +51,11 @@ public class AdGroupSelfProductPrice {
 		this.id = id;
 	}
 
-	public String getSkuId() {
+	public int getSkuId() {
 		return skuId;
 	}
 
-	public void setSkuId(String skuId) {
+	public void setSkuId(int skuId) {
 		this.skuId = skuId;
 	}
 
@@ -273,5 +275,20 @@ public class AdGroupSelfProductPrice {
 		this.url = url;
 	}
 
+	public String getWeekList() {
+		return weekList;
+	}
+
+	public void setWeekList(String weekList) {
+		this.weekList = weekList;
+	}
+
+	public String getActivityOfTime() {
+		return activityOfTime;
+	}
+
+	public void setActivityOfTime(String activityOfTime) {
+		this.activityOfTime = activityOfTime;
+	}
 
 }

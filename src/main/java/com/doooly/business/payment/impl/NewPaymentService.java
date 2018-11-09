@@ -484,14 +484,6 @@ public class NewPaymentService implements NewPaymentServiceI {
             }
         } else {
             payMsg = queryNewPayResult(param);
-            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                //说明支付成功处理结果
-                JSONObject retJson = new JSONObject();
-                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
-                retJson.put("orderNum", orderNum);
-                retJson.put("code", MessageDataBean.success_code);
-                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
-            }
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {

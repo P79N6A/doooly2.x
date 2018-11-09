@@ -160,8 +160,7 @@ public abstract class AbstractPaymentService implements PaymentService {
                 logger.info("handlePayResult() cost = {},payFlow = {}", System.currentTimeMillis() - s, payFlow);*/
                 //兜礼收银台调用新的同步 废弃ad_pay_flow表 ==========zhangq20181108
                 OrderVo orderVo = orders.get(0);
-                if (OrderStatus.HAD_FINISHED_ORDER.getCode()!=orderVo.getType()
-                        || OrderService.PayState.PAID.getCode()!=orderVo.getState()){
+                if (OrderService.PayState.PAID.getCode()!=orderVo.getState()){
                     logger.info("handlePayResult() 开始修改状态.,orderNum={}", orderNum);
                     // 修改订单状态
                     long s2 = System.currentTimeMillis();

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdProductDao">
+	<resultMap id="resultMap" type="com.doooly.entity.reachad.AdProduct">
+	</resultMap>
+
+	<sql id="productColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.name_spell AS "name_spell", 
+		ab.id AS "businessId",
+		a.is_marketable AS "isMarketable",
+		CASE WHEN a.business_price is NULL then a.market_price ELSE a.business_price END AS "marketPrice",
+		CASE WHEN a.hits_count is NULL then 0 ELSE a.hits_count END AS "hitsCount",
+		ab.discount AS "discount",
+		a.link_url_wechat AS "linkUrlWechat",
+		a.tag AS "tag",
+		a.is_hot AS "isHot",
+		a.first_tag AS "firstTag",
+		a.unit AS "unit",
+		a.first_category AS "firstCategory",
+		a.second_category AS "secondCategory",
+		a.buy_upper_limit AS "buyUpperLimit",
+		a.buy_start_time AS "buyStartTime",
+		a.buy_end_time AS "buyEndTime",
+		a.image_wechat AS "imageWechat",
+		a.total_stock AS "totalStock",
+		a.used_stock AS "usedStock",
+		a.remind_stock AS "remindStock",
+		a.description AS "description",
+		a.recommend_reason AS "recommendReason",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.category_id AS "categoryId"
+		
+	</sql>
+	<sql id="productJoins">
+		left join ad_business ab on a.business_id= ab.business_id
+	</sql>
+
+	<select id="getProductsByHotRecommend" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			<include refid="productColumns" />,t.name AS "tagName",ab.company as "businessName"
+		FROM 
+			ad_product a left join ad_tag t on a.tag = t.id
+			<include refid="productJoins" />
+		WHERE 
+			first_tag is not null and a.is_marketable =1 order by first_tag ,tag DESC
+	</select>
+	<select id="get" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			<include refid="productColumns" />,ab.company as "businessName"
+		FROM 
+			ad_product a <include refid="productJoins" />
+		WHERE a.is_marketable =1 and
+			a.id = #{id}
+	</select>
+
+	<select id="findDataByCatagory" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			<include refid="productColumns" />,t.name AS "tagName",ab.company as "businessName"
+		FROM 
+			ad_product a left join ad_tag t on a.tag = t.id <include refid="productJoins" />
+		WHERE a.is_marketable =1 and
+			a.first_category = #{catagoryId} order by a.sort DESC
+	</select>
+	<select id="findDataByCatagorySecondId" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			<include refid="productColumns" />,t.name AS "tagName",ab.company as "businessName"
+		FROM 
+			ad_product a left join ad_tag t on a.tag = t.id <include refid="productJoins" />
+			<!-- left join _orderDetail o ON o.code = a.code -->
+		WHERE a.is_marketable =1 
+			<if test="firstTag == 0">
+			and a.second_category = #{catagoryId} 
+			</if> 
+			<if test="catagoryId == 0">
+			and a.first_tag = #{firstTag} 
+			</if> 
+			<if test="byType == 0">
+			order by a.create_date desc,a.sort DESC
+			</if> 
+			<if test="byType == 1">
+			order by a.buy_end_time desc,a.sort DESC
+			</if> 
+			<if test="byType == 2">
+			order by a.discount,a.sort DESC
+			</if> 
+	</select>
+	
+	<select id="getGuideDetail" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			<include refid="productColumns" />,t.name AS "tagName",ab.company AS "businessName"
+		FROM 
+			ad_product a left join ad_tag t on a.tag = t.id <include refid="productJoins" />
+		WHERE a.id = #{productId} 
+	</select>
+	<select id="getBenefitsProductList" resultType="com.doooly.entity.reachad.AdProduct">
+		SELECT 
+			a.id AS "id",
+		a.name AS "name",
+		a.name_spell AS "name_spell", 
+		ab.id AS "businessId",
+		a.is_marketable AS "isMarketable",
+		CASE WHEN a.business_price is NULL then a.market_price ELSE a.business_price END AS "marketPrice",
+		ab.discount AS "discount",
+		a.link_url_wechat AS "linkUrlWechat",
+		a.tag AS "tag",
+		a.is_hot AS "isHot",
+		a.first_tag AS "firstTag",
+		a.unit AS "unit",
+		a.first_category AS "firstCategory",
+		a.second_category AS "secondCategory",
+		a.buy_upper_limit AS "buyUpperLimit",
+		a.buy_start_time AS "buyStartTime",
+		a.buy_end_time AS "buyEndTime",
+		a.image_wechat AS "imageWechat",
+		a.total_stock AS "totalStock",
+		a.used_stock AS "usedStock",
+		a.remind_stock AS "remindStock",
+		a.description AS "description",
+		a.recommend_reason AS "recommendReason",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.category_id AS "categoryId",ab.company AS "businessName",a.hits_count AS "hitsCount"
+		FROM 
+			ad_product a
+			JOIN ad_business ab ON a.business_id = ab.business_id 
+			join ad_business_area_conn abac on ab.id = abac.business_id 
+			JOIN ad_area aa on abac.area_id = aa.id 
+			where a.is_marketable=1 and a.is_hot =1
+			 and (aa.name =#{address} or aa.id =2) GROUP BY a.id
+			
+	</select>
+	
+	<update id="updateHitsCount" parameterType="com.doooly.entity.reachad.AdProduct">
+		UPDATE ad_product a 
+	        SET a.hits_count = #{hitsCount}
+		WHERE a.id = #{id}
+  	</update>
+
+    <select id="getTotalNum" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ad_product a WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+    </select>
+
+    <select id="getGuideProductList" resultType="com.doooly.entity.reachad.AdProduct">
+        SELECT
+            a.id AS "id",
+            a.image_wechat AS "imageWechat",
+            a.name AS "name",
+            a.market_price AS "marketPrice",
+            a.sell_count AS "sellCount",
+            a.user_rebate AS "userRebate",
+            a.bussiness_rebate AS "bussinesRebate",
+            a.link_url_wechat AS "linkUrlWechat",
+            a.layered_rebate AS "layeredRebate",
+            ab.id AS "businessId",
+            IFNULL(ab.discount,0) AS "discount",
+            ab.logo AS "businessLogo",
+            ab.company AS "businessName",
+            IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
+            ab.deal_type AS "dealType"
+        FROM
+           ad_product a
+           left join ad_business ab on a.business_id= ab.business_id
+           WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+        <choose>
+            <when test="orderType !=null and orderType != '' and orderType ==1">
+                ORDER BY
+                a.create_date DESC
+            </when>
+            <when test="orderType !=null and orderType != '' and orderType ==2">
+                ORDER BY
+                a.market_price ASC
+            </when>
+            <when test="orderType !=null and orderType != '' and orderType ==4">
+                ORDER BY
+                a.market_price DESC
+            </when>
+            <otherwise>
+                ORDER BY a.sell_count DESC
+            </otherwise>
+        </choose>
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+
+    <update id="updateSellCount" parameterType="com.doooly.entity.reachad.AdProduct">
+        UPDATE ad_product a
+        SET a.sell_count = a.sell_count +#{sellCount}
+        WHERE a.id = #{id}
+    </update>
+</mapper>

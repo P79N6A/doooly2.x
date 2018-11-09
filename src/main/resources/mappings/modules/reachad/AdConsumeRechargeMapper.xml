@@ -16,6 +16,7 @@
 		c.link_url linkUrl,
 		c.data_type dataType,
 		c.floor_id floorId,
+		c.shopping_guide_img guideIconUrl,
 		c.create_by createBy,
 		c.create_date createDate,
 		c.update_by updateBy,
@@ -39,7 +40,8 @@
 		c.state state,
 		c.link_url linkUrl,
 		c.data_type dataType,
-		c.floor_id floorId
+		c.floor_id floorId,
+		c.shopping_guide_img guideIconUrl
 		FROM
 		ad_home_template_item it
 		JOIN ad_consume_recharge c ON it.item_id = c.id

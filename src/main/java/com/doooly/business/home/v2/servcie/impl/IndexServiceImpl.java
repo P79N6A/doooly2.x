@@ -241,11 +241,15 @@ public class IndexServiceImpl implements IndexServiceI {
 						itemJson.put("linkUrl", linkUrl);
 						itemJson.put("mainTitle", recharge.getMainTitle());
 						itemJson.put("subTitle", recharge.getSubTitle());
+						if(StringUtils.isNotBlank(recharge.getGuideIconUrl())){
+							//热销品牌导购图
+							itemJson.put("guideIconUrl", recharge.getGuideIconUrl());
+						}
 						if (StringUtils.isNotBlank(linkUrl) && linkUrl.indexOf("#") > -1) {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
-							itemJson.put("cornermakr", recharge.getCornerMark());
+							itemJson.put("cornerMark", recharge.getCornerMark());
 						}
 						listJson.add(itemJson);
 					}

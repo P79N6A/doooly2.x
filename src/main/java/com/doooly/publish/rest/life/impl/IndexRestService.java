@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.alibaba.fastjson.JSONPObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,23 @@ public class IndexRestService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String indexV2_2(JSONObject params, @Context HttpServletRequest request) {
 		return indexService.selectFloorsByV2_2(params, request, VersionConstants.INTERFACE_VERSION_V2_2);
+	}
+
+	/**
+	 * 花积分页面楼层接口
+	 *
+	 * @author wuzhangyi
+	 * @date 2018-11-11
+	 * @param params
+	 * @param request
+	 * @return
+	 */
+	@POST
+	@Path(value = "index/spendIntegral")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String spendIntegral(JSONObject params, @Context HttpServletRequest request) {
+		return indexService.listSpendIntegralFloors(params, request, VersionConstants.INTERFACE_VERSION_V2);
 	}
 	
 	/**

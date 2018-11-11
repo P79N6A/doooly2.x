@@ -58,6 +58,159 @@ public class IndexServiceImpl implements IndexServiceI {
 	@Autowired
 	private AdBusinessServicePJDao adBusinessServicePJDao;
 
+
+    /**
+     *  获得花积分页面楼层
+     * @author wuzhangyi
+     * @date 创建时间：2018-11-11
+     * @version 1.0
+     * @parameter
+     * @since
+     * @return
+     */
+    public String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version) {
+        long start = System.currentTimeMillis();
+        String userToken = request.getHeader(Constants.TOKEN_NAME);
+        logger.info("selectFloorsByVersion() userToken={}", userToken);
+        if (StringUtils.isEmpty(userToken)) {
+            return new MessageDataBean("1001", "userToken is null").toJsonString();
+        }
+        String userId = redisTemplate.opsForValue().get(userToken);
+        String address = params.getString("address");
+        // 取有返佣金额的商户
+        try {
+            logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
+                    params, version);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+            if (CollectionUtils.isEmpty(floors)) {
+                return new MessageDataBean("1000", "floors is null").toJsonString();
+            }
+            Map<String, Object> data = new HashMap<String, Object>();
+            List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
+            for (AdBasicType floor : floors) {
+                Map<String, Object> item = new HashMap<String, Object>();
+                if (floor.getCode() == 20) {
+                    // 线上商户
+                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address,
+                            Arrays.asList(DEAL_TYPE_ONLINE), VersionConstants.INTERFACE_VERSION_V2);
+                    if (!CollectionUtils.isEmpty(getBussiness)) {
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_ONLINE);
+                        item.put("type", "1");
+                        item.put("list", getBussiness);
+                    }
+                } else if (floor.getCode() == 21) {
+                    // 线下商户
+                    List<AdConsumeRecharge> getBussiness = this.getBussiness(userId, address,
+                            Arrays.asList(DEAL_TYPE_OFFLINE), VersionConstants.INTERFACE_VERSION_V2);
+                    if (!CollectionUtils.isEmpty(getBussiness)) {
+                        item.put("title", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_OFFLINE);
+                        item.put("type", "1");
+                        item.put("list", getBussiness);
+                    }
+                } else if (floor.getCode() == 23 || floor.getCode() == 24) {
+                    if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
+                        // 每日特惠数据
+                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                                floor.getFloorId());
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            for (AdConsumeRecharge bean : beans) {
+                                String linkUrl = bean.getLinkUrl();
+                                if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                    bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                                }
+                            }
+                            item.put("title", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            if (floor.getCode() == 24) {
+                                item.put("type", "4");
+                            } else {
+                                item.put("type", "3");
+                            }
+                            item.put("list", beans);
+                        }
+                    }
+                } else if (floor.getCode() == 25) {
+                    if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
+                        // 花积分
+//						List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+//								floor.getFloorId());
+                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            item.put("title", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "9");
+
+                            List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
+
+                            for (AdBusinessServicePJ a : beans) {
+                                AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
+
+                                adConsumeRecharge.setMainTitle(a.getServiceName());
+                                adConsumeRecharge.setIconUrl(a.getLogo());
+                                adConsumeRecharge.setSubUrl(a.getServiceUrl());
+
+                                if (0 != a.getServiceUrl().indexOf("/")) {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                } else {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
+                                }
+
+                                list.add(adConsumeRecharge);
+                            }
+
+                            item.put("list", list);
+                        }
+                    }
+                } else {
+                    if(floor.getFloorId() == 24) {
+                        // 特惠专区
+                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                                floor.getFloorId());
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            for (AdConsumeRecharge bean : beans) {
+                                String linkUrl = bean.getLinkUrl();
+                                if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                    bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                                }
+                            }
+                            item.put("title", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "13");
+                            item.put("list", beans);
+                        }
+                    }else {
+                        // 消费卡券/充值缴费数据表
+                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                                floor.getFloorId());
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            for (AdConsumeRecharge bean : beans) {
+                                String linkUrl = bean.getLinkUrl();
+                                if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                    bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                                }
+                            }
+                            item.put("title", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "2");
+                            item.put("list", beans);
+                        }
+                    }
+                }
+                ls.add(item);
+            }
+            data.put("floors", ls);
+            logger.info("selectFloorsByVersion(), execution time = {}", System.currentTimeMillis() - start);
+            return new MessageDataBean("1000", "success", data).toJsonString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("selectFloorsByVersion() obj={} exception={}", params, e.getMessage());
+            return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
+        }
+    }
+
+
 	/**
 	 * 
 	 * @author hutao

@@ -29,4 +29,16 @@ public interface IndexServiceI {
 	 * @return
 	 */
 	String selectFloorsByVersion(JSONObject params, HttpServletRequest request, String version);
+
+	/**
+	 * 获得花积分楼层信息
+	 *
+	 * @author 吴章义
+	 * @date 创建时间：2018-11-11
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version);
 }

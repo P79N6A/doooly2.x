@@ -140,7 +140,26 @@ public class IndexServiceImpl implements IndexServiceI {
 							item.put("title", floor.getName());
 							item.put("isOnline", DEAL_TYPE_OFFLINE);
 							item.put("type", "9");
-							item.put("list", beans);
+
+							List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
+
+							for (AdBusinessServicePJ a : beans) {
+								AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
+
+								adConsumeRecharge.setMainTitle(a.getServiceName());
+								adConsumeRecharge.setIconUrl(a.getLogo());
+                                adConsumeRecharge.setSubUrl(a.getServiceUrl());
+
+                                if (0 != a.getServiceUrl().indexOf("/")) {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                } else {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
+                                }
+
+                                list.add(adConsumeRecharge);
+							}
+
+							item.put("list", list);
 						}
 					}
 				} else {

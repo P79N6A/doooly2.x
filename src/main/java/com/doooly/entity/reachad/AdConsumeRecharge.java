@@ -1,5 +1,6 @@
 package com.doooly.entity.reachad;
 
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  *
@@ -14,9 +15,38 @@ public class AdConsumeRecharge {
     private String subUrl; //跳转链接后缀
     /** 是否支持积分*/
     private String isSupportIntegral;
+    //角标
+    private String cornerMark;
+    //楼层Id
+    private Integer floorId;
+    //
+    private String guideIconUrl;
+    
+    public String getGuideIconUrl() {
+		return guideIconUrl;
+	}
 
+	public void setGuideIconUrl(String guideIconUrl) {
+		this.guideIconUrl = guideIconUrl;
+	}
 
-    public String getMainTitle() {
+	public Integer getFloorId() {
+		return floorId;
+	}
+
+	public void setFloorId(Integer floorId) {
+		this.floorId = floorId;
+	}
+
+	public String getCornerMark() {
+		return cornerMark;
+	}
+
+	public void setCornerMark(String cornerMark) {
+		this.cornerMark = cornerMark;
+	}
+
+	public String getMainTitle() {
         return mainTitle;
     }
 

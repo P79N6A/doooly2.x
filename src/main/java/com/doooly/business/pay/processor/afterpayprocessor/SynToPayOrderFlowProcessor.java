@@ -3,8 +3,8 @@ package com.doooly.business.pay.processor.afterpayprocessor;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.AdOrderFlow;
-import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.service.PayFlowService;
+import com.doooly.business.utils.DateUtils;
 import com.doooly.dao.reachad.AdOrderFlowDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /***
  * 同步支付记录到ad_order_flow
@@ -33,10 +34,10 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
     private OrderDao orderDao;
 	
 	@Override
-	public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
+	public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
 		AdOrderFlow adOrderFlow = new AdOrderFlow();
 		try {
-			logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> payFlow={}", order, payFlow);
+			logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> resultMap={}", order, resultMap);
             BigDecimal amount = new BigDecimal("0");
             if(realPayType.equals("2")){
                 //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
@@ -49,17 +50,17 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
                 amount = order1.getAmount();
             }
 			adOrderFlow.setOrderReportId(order.getId());
-			adOrderFlow.setSerialNumber(payFlow.getTransNo());
+			adOrderFlow.setSerialNumber(String.valueOf(resultMap.get("outTradeNo")));
 			short payType = getPayType(realPayType);
 			adOrderFlow.setPayType(payType);
 			adOrderFlow.setAmount(order.getTotalMount().subtract(amount));
 			adOrderFlow.setCreateBy(String.valueOf(order.getUserId()));
 			adOrderFlow.setType("1");
 			adOrderFlow.setDelFlag("0");
-			adOrderFlow.setRemarks(String.valueOf(payFlow.getId()));
+			adOrderFlow.setRemarks(String.valueOf(resultMap.get("outTradeNo")));
 			adOrderFlow.setUpdateDate(null);
 			adOrderFlow.setUpdateBy(null);
-			adOrderFlow.setCreateDate(payFlow.getPaySumbitTime());
+			adOrderFlow.setCreateDate(DateUtils.parse(String.valueOf(resultMap.get("payEndTime")),DateUtils.DATE_yyyy_MM_dd_HH_mm_ss));
 			int rows = adOrderFlowDao.insert(adOrderFlow);
 			logger.info("SynToPayOrderFlowProcessor成功. rows = {}", rows);
 			if (rows <= 0) {

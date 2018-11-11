@@ -18,16 +18,19 @@ public interface AdCouponDao extends BaseDaoI<AdCoupon> {
 	String findBusinessIdByCouponId(Integer couponId);
 
 	/** 查询第三方商户优惠券的商家集合 */
-	List<AdBusiness> getThirdBusinessList();
+	List<AdBusiness> getThirdBusinessList(@Param("categoryType") String categoryType);
 
 	/** 查询总数(某商家旗下的优惠券数量) */
-	int getCouponNumByBusinessId(@Param("businessId")String businessId);
+	int getCouponNumByBusinessId(@Param("businessId") String businessId);
 
 	/** 根据商家id获取旗下的优惠券(分页) */
 	List<AdCoupon> getCouponListByBusinessId(@Param("businessId") String businessId,
-			@Param("startIndex") int startIndex, @Param("pageSize") int pageSize);
+			@Param("categoryType") String categoryType, @Param("startIndex") int startIndex,
+			@Param("pageSize") int pageSize);
 
 	void updateCouponCount(HashMap<String, Object> param);
 
-    List<AdCoupon> findCoupon(@Param("userId") String userId, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("activityId") Integer activityId,@Param("couponNumLimit")  int couponNumLimit);
+	List<AdCoupon> findCoupon(@Param("userId") String userId, @Param("startDate") String startDate,
+			@Param("endDate") String endDate, @Param("activityId") Integer activityId,
+			@Param("couponNumLimit") int couponNumLimit);
 }

@@ -28,7 +28,7 @@ public class IndexRestService {
 	/**
 	 * 首页楼层查询
 	 * 
-	 * 接口v2：新增每日特惠
+	 * 接口v2.2:首页接口新增楼层
 	 * 
 	* @author  hutao 
 	* @date 创建时间：2018年10月23日 下午4:13:36 
@@ -36,6 +36,26 @@ public class IndexRestService {
 	* @parameter  
 	* @since  
 	* @return
+	 */
+	@POST
+	@Path(value = "/index/v2_2")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String indexV2_2(JSONObject params, @Context HttpServletRequest request) {
+		return indexService.selectFloorsByV2_2(params, request, VersionConstants.INTERFACE_VERSION_V2_2);
+	}
+	
+	/**
+	 * 首页楼层查询
+	 * 
+	 * 接口v2：新增每日特惠
+	 * 
+	 * @author  hutao 
+	 * @date 创建时间：2018年10月23日 下午4:13:36 
+	 * @version 1.0 
+	 * @parameter  
+	 * @since  
+	 * @return
 	 */
 	@POST
 	@Path(value = "/index/v2")

@@ -34,7 +34,8 @@ public class HomePageDataV2 {
 
     private String isPayPassword;
     private String isSetPayPassword;
-
+    //会员返利积分，精确2位小数
+    private String returnPoints;
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -46,6 +47,14 @@ public class HomePageDataV2 {
 
 	public String getMemberName() {
 		return memberName;
+	}
+
+	public String getReturnPoints() {
+		return returnPoints;
+	}
+
+	public void setReturnPoints(String returnPoints) {
+		this.returnPoints = returnPoints;
 	}
 
 	public void setMemberName(String memberName) {

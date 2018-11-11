@@ -37,6 +37,10 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
 	public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
 		AdOrderFlow adOrderFlow = new AdOrderFlow();
 		try {
+            if(order.getIsSource()!=3){
+                //非自营订单不同步,收银台已经同步了
+                return null;
+            }
 			logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> resultMap={}", order, resultMap);
             BigDecimal amount = new BigDecimal("0");
             if(realPayType.equals("2")){

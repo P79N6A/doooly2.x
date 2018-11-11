@@ -498,7 +498,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
             }
         }*/
-        if (OrderService.PayState.PAID.getCode()!=order.getState()) {
+        if (OrderService.PayState.PAID.getCode()==order.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
         } else {

@@ -430,9 +430,9 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "参数解密失败");
         }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
-        PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
+        //PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();
-        json.put("payFlowId", payFlow.getId());
+        //json.put("payFlowId", payFlow.getId());
         json.put("orderNum", merchantOrderNo);
         json.put("integralPayStatus", retJson.getString("integralPayStatus"));
         json.put("payAmount", retJson.getString("payAmount"));

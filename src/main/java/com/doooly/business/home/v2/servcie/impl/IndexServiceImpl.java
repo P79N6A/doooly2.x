@@ -134,7 +134,13 @@ public class IndexServiceImpl implements IndexServiceI {
                             }
                             item.put("mainTitle", floor.getName());
                             item.put("isOnline", DEAL_TYPE_OFFLINE);
-                            item.put("type", "2");
+
+                            if (floor.getFloorId() == 24) {
+                                item.put("type", "2");
+                            } else {
+                                item.put("type", "13");
+                            }
+                            
                             item.put("list", beans);
                         }
                     }

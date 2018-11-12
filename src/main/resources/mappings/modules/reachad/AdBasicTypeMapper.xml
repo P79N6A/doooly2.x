@@ -39,7 +39,6 @@
 		<if test="type == 4">
 			and tg.template_type = 1
 		</if>
-		and
 		GROUP BY it.floor_id
 		ORDER BY b.sort
 	</select>

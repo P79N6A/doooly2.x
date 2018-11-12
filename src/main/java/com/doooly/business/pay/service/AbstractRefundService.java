@@ -82,7 +82,7 @@ public abstract class AbstractRefundService implements RefundService {
 			}
 			else if(payFlow == null || PayFlowService.PAYTYPE_CASHIER_DESK.equals(payFlow.getPayType())){
                 //兜礼收银台退款
-                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum);
+                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum, orderNum);
                 if(resultModel.getCode()==GlobalResultStatusEnum.SUCCESS.getCode()){
                     //退款成功
                     AdReturnFlow adReturnFlow = new AdReturnFlow();
@@ -99,7 +99,7 @@ public abstract class AbstractRefundService implements RefundService {
 	}
 
 
-	public ResultModel dooolyCashDeskRefund(long userId,String orderNum){
+	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber){
 		try {
             String merchantRefundNo;
             OrderVo order = checkOrderStatus(userId, orderNum);
@@ -107,13 +107,13 @@ public abstract class AbstractRefundService implements RefundService {
 				//表示订单未完成支付，直接返回
 				return new ResultModel(GlobalResultStatusEnum.FAIL,"订单未完成支付，申请退款失败");
             }
-            AdReturnFlow adReturnFlow = returnFlowService.getByOrderId(order.getId());
+            AdReturnFlow adReturnFlow = returnFlowService.getByOrderId(order.getId(),returnFlowNumber);
             if(adReturnFlow != null && adReturnFlow.getType().equals("1")){
                 //表示已经退款
                 return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
             }else if(adReturnFlow != null) {
                 //说明已经申请过退款
-                merchantRefundNo = String.valueOf(adReturnFlow.getReturnFlowSerialnumber());
+                merchantRefundNo = String.valueOf(adReturnFlow.getReturnFlowNumber());
             }else {
                 //说明未申请退
                 ResultModel resultModel = applyRefund(userId, orderNum);
@@ -296,7 +296,7 @@ public abstract class AbstractRefundService implements RefundService {
 	
 	private long saveReturnFlow(OrderVo order,PayFlow payFlow){
 		try {
-            AdReturnFlow returnFlow = returnFlowService.getByOrderId(order.getId());
+            AdReturnFlow returnFlow = returnFlowService.getByOrderId(order.getId(), order.getOrderNumber());
             if(returnFlow != null){
                 //说明已经生成过流水
                 return returnFlow.getId();

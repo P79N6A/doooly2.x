@@ -15,7 +15,7 @@ public interface AdReturnFlowDao  {
 	
 	public int insert(AdReturnFlow adReturnFlow);
 	
-	public AdReturnFlow getByOrderId(long orderId);
+	public AdReturnFlow getByOrderId(long orderId, String returnFlowNumber);
 	
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 	

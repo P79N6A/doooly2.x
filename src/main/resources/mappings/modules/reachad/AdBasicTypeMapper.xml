@@ -33,7 +33,13 @@
 		where 
 		u.id = #{userId} 
 		and b.type = #{type}
-		GROUP BY it.floor_id 
+		<if test="type == 3">
+			and tg.template_type = 0
+		</if>
+		<if test="type == 4">
+			and tg.template_type = 1
+		</if>
+		GROUP BY it.floor_id
 		ORDER BY b.sort
 	</select>
   

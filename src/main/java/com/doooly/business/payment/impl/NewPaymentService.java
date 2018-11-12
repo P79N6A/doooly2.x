@@ -430,14 +430,16 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "参数解密失败");
         }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
-        PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
+        //PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();
-        json.put("payFlowId", payFlow.getId());
+        //json.put("payFlowId", payFlow.getId());
         json.put("orderNum", merchantOrderNo);
         json.put("integralPayStatus", retJson.getString("integralPayStatus"));
         json.put("payAmount", retJson.getString("payAmount"));
         json.put("payType", retJson.getString("payType"));
         json.put("realPayType", retJson.getString("realPayType"));
+        json.put("outTradeNo", retJson.getString("outTradeNo"));
+        json.put("payEndTime", retJson.getString("payEndTime"));
         json.put("code", MessageDataBean.success_code);
         PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
         return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
@@ -498,7 +500,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
             }
         }*/
-        if (OrderService.PayState.PAID.getCode()!=order.getState()) {
+        if (OrderService.PayState.PAID.getCode()==order.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
         } else {
@@ -513,6 +515,8 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("integralPayStatus", data.get("payStatus"));
                 retJson.put("payAmount", data.get("orderAmount"));
                 retJson.put("realPayType", data.get("payType"));
+                retJson.put("outTradeNo", data.get("outTradeNo"));
+                retJson.put("payEndTime", data.get("payEndTime"));
                 //retJson.put("code", MessageDataBean.success_code);
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
             }

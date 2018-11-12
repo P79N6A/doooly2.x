@@ -104,8 +104,8 @@ public abstract class AbstractRefundService implements RefundService {
             String merchantRefundNo;
             OrderVo order = checkOrderStatus(userId, orderNum);
             if(order == null){
-                //表示订单未完成支付，直接返回
-                return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
+				//表示订单未完成支付，直接返回
+				return new ResultModel(GlobalResultStatusEnum.FAIL,"订单未完成支付，申请退款失败");
             }
             AdReturnFlow adReturnFlow = returnFlowService.getByOrderId(order.getId());
             if(adReturnFlow != null && adReturnFlow.getType().equals("1")){

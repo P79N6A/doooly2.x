@@ -308,6 +308,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							itemJson.put("dooolyPrice", product.getPrice());
 							itemJson.put("rebate", product.getRebate());
 							itemJson.put("expressage", product.getBusinessName());
+                            itemJson.put("isHot", product.getIsHot());
 							listJson.add(itemJson);
 						}
 						floorJson.put("list", listJson);

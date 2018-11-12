@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService{
 	
 	private final static String CP_AES_KEY = PropertiesConstants.dooolyBundle.getString("cp_aes_key");
 	
-	private final static String LATEST_ORDER_DAY = PropertiesConstants.dooolyBundle.getString("LATEST_ORDER_DAY");  
+	private final static String LATEST_ORDER_DAY =  "45";
 
 	 @Autowired
 	 private AdOrderReportDao adOrderReportDao;

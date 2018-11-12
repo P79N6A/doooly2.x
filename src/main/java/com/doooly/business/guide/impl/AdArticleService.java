@@ -97,7 +97,7 @@ public class AdArticleService implements AdArticleServiceI {
         HashMap<String, Object> map = new HashMap<String, Object>();
         Pagelab pagelab = new Pagelab(currentPage, pageSize);
         // 查询总数
-        int totalNum = adProductDao.getTotalNum();
+        int totalNum = adProductDao.getTotalNumv2(guideCategoryId,recommendHomepage);
         if (totalNum > 0) {
             HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
             Object o = hashOperations.get(GUIDE_RECORD_KEY, userId);

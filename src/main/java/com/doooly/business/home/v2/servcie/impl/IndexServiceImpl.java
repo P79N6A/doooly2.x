@@ -88,36 +88,12 @@ public class IndexServiceImpl implements IndexServiceI {
             Map<String, Object> data = new HashMap<String, Object>();
             List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
             for (AdBasicType floor : floors) {
-                if (floor.getCode() != 20 && floor.getCode() != 21) {
+                if (floor.getCode() != 20 && floor.getCode() != 21 && floor.getCode() != 23 && floor.getCode() != 24) {
                     Map<String, Object> item = new HashMap<String, Object>();
-                    if (floor.getCode() == 23 || floor.getCode() == 24) {
+                    if (floor.getCode() == 25) {
                         if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
-                            // 每日特惠数据
-                            List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-                                    floor.getFloorId());
-                            if (!CollectionUtils.isEmpty(beans)) {
-                                for (AdConsumeRecharge bean : beans) {
-                                    String linkUrl = bean.getLinkUrl();
-                                    if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-                                        bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
-                                    }
-                                }
-                                item.put("mainTitle", floor.getName());
-                                item.put("isOnline", DEAL_TYPE_OFFLINE);
-                                if (floor.getCode() == 24) {
-                                    item.put("type", "4");
-                                } else {
-                                    item.put("type", "3");
-                                }
-                                item.put("list", beans);
-                            }
-                        }
-                    } else if (floor.getCode() == 25) {
-                        if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
-                            // 花积分
-//						List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-//								floor.getFloorId());
                             List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
+
                             if (!CollectionUtils.isEmpty(beans)) {
                                 item.put("mainTitle", floor.getName());
                                 item.put("isOnline", DEAL_TYPE_OFFLINE);
@@ -127,7 +103,6 @@ public class IndexServiceImpl implements IndexServiceI {
 
                                 for (AdBusinessServicePJ a : beans) {
                                     AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
-
                                     adConsumeRecharge.setMainTitle(a.getServiceName());
                                     adConsumeRecharge.setIconUrl(a.getLogo());
                                     adConsumeRecharge.setSubUrl(a.getServiceUrl());
@@ -145,40 +120,25 @@ public class IndexServiceImpl implements IndexServiceI {
                             }
                         }
                     } else {
-                        if(floor.getFloorId() == 24) {
-                            // 特惠专区
-                            List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-                                    floor.getFloorId());
-                            if (!CollectionUtils.isEmpty(beans)) {
-                                for (AdConsumeRecharge bean : beans) {
-                                    String linkUrl = bean.getLinkUrl();
-                                    if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-                                        bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
-                                    }
+
+                        // 消费卡券/充值缴费数据表
+                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                                floor.getFloorId());
+
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            for (AdConsumeRecharge bean : beans) {
+                                String linkUrl = bean.getLinkUrl();
+                                if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                    bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
                                 }
-                                item.put("mainTitle", floor.getName());
-                                item.put("isOnline", DEAL_TYPE_OFFLINE);
-                                item.put("type", "13");
-                                item.put("list", beans);
                             }
-                        } else {
-                            // 消费卡券/充值缴费数据表
-                            List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-                                    floor.getFloorId());
-                            if (!CollectionUtils.isEmpty(beans)) {
-                                for (AdConsumeRecharge bean : beans) {
-                                    String linkUrl = bean.getLinkUrl();
-                                    if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-                                        bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
-                                    }
-                                }
-                                item.put("mainTitle", floor.getName());
-                                item.put("isOnline", DEAL_TYPE_OFFLINE);
-                                item.put("type", "2");
-                                item.put("list", beans);
-                            }
+                            item.put("mainTitle", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "2");
+                            item.put("list", beans);
                         }
                     }
+
                     ls.add(item);
                 }
             }

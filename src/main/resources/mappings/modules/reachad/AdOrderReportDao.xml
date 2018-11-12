@@ -1035,7 +1035,7 @@
                 AND a.order_date &lt;= #{endOrderDate}
             </if>         
             AND a.type in (99,1,5)              	      	
-            AND a.user_rebate &gt; 0            
+            AND a.user_rebate &lt;= 0            
         </where>
          and a.del_flag = 0
         

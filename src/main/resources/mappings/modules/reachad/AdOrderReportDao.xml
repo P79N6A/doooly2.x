@@ -64,6 +64,62 @@
             <result column="card_oid" property="cardOid" jdbcType="VARCHAR" />
 		</collection>
 	</resultMap>
+	
+	<resultMap id="orderListMap" type="com.doooly.business.myorder.po.OrderPoResp">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_id" property="orderId" jdbcType="BIGINT" />
+		<result column="bussiness_id" property="businessId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
+		
+		<result column="total_mount" property="totalMount" jdbcType="DECIMAL" />
+		<result column="total_price" property="totalPrice" jdbcType="DECIMAL" />
+		<result column="savePrice" property="savePrice" jdbcType="DECIMAL" />
+		
+		<result column="order_date" property="orderDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+		<result column="type" property="type" jdbcType="SMALLINT" />
+		<result column="product_type" property="productType" jdbcType="INTEGER" />
+		<result column="is_user_rebate" property="isUserRebate" jdbcType="CHAR" />
+		<result column="user_rebate" property="userRebate" jdbcType="DECIMAL" />
+	
+		<result column="is_business_rebate" property="isBusinessRebate" jdbcType="CHAR" />
+		
+		<result column="is_source" property="isSource" jdbcType="INTEGER" />
+		
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+	 		<result column="storeName" property="storeName" jdbcType="VARCHAR" />
+	 			<result column="company" property="company" jdbcType="VARCHAR" />
+		
+	</resultMap>
+
+	<resultMap id="orderDetailMap" type="com.doooly.business.myorder.po.OrderDetailReport">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="order_id" property="orderId" jdbcType="BIGINT" />
+		<result column="bussiness_id" property="bussinessId" jdbcType="BIGINT" />
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
+		
+		<result column="total_mount" property="totalMount" jdbcType="DECIMAL" />
+		<result column="total_price" property="totalPrice" jdbcType="DECIMAL" />
+		<result column="savePrice" property="savePrice" jdbcType="DECIMAL" />
+		<result column="order_date" property="orderDate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="CHAR" />
+		<result column="type" property="type" jdbcType="SMALLINT" />
+		<result column="product_type" property="productType" jdbcType="INTEGER" />
+		<result column="is_user_rebate" property="isUserRebate" jdbcType="CHAR" />
+		<result column="user_rebate" property="userRebate" jdbcType="DECIMAL" />
+	
+		<result column="is_business_rebate" property="isBusinessRebate" jdbcType="CHAR" />
+		
+		<result column="is_source" property="isSource" jdbcType="INTEGER" />
+		
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="storeName" property="storeName" jdbcType="VARCHAR" />
+	 			<result column="company" property="company" jdbcType="VARCHAR" />	
+		
+		
+	</resultMap>
 
 	<!-- 注意:以下最好不要使用星号,暂时没有时间调整 -->
 
@@ -787,6 +843,263 @@
         a.id
         FROM ad_order_report a
         WHERE a.order_number = #{orderNumber}
+    </select>
+      <sql id="order_column_sql">
+	        a.id AS "id",
+	        b.logo AS "logo",
+	        abs.store_name AS "storeName",
+	        b.company AS "company",
+	        d.goods AS "goods",
+	        a.user_id AS "userId",
+	        d.product_img AS  "productImg",
+	        d.sku AS "specification",
+	        a.state AS "state",
+	        a.type AS "type",
+	        a.order_number AS "orderNumber",
+	        a.order_date AS "orderDate",
+	        a.bussiness_id AS "businessId",
+	        a.is_user_rebate AS "isUserRebate",
+	        IFNULL(a.user_rebate,0.00) AS "userRebate",
+	        IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",
+	        a.billing_state AS "billingState",
+	        a.is_source AS "isSource",
+	        a.total_mount AS "totalMount",
+	        a.total_price AS "totalPrice",
+	        a.total_price-a.total_mount AS "savePrice",
+	        a.product_type AS "productType"
+	       
+	     </sql>
+    
+      <!--我的订单列表(所有订单，最近订单，最近到账)-->
+    <select id="findALLOrderList" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultMap="orderListMap">
+    	SELECT 
+         <include refid="order_column_sql"/>
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id 
+     	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        <where>
+           1=1 
+           
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>            
+            <if test="isUserRebate !=null and  isUserRebate!=''">
+            	AND  a.is_user_rebate = #{isUserRebate}
+            </if>
+        </where>
+         and a.del_flag = 0
+         ORDER BY a.order_date DESC
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+    
+     <!--我的订单列表(最近到账)-->
+    <select id="findLatestOrderAmountList" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultMap="orderListMap">
+         SELECT 
+         <include refid="order_column_sql"/>
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
+        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
+        <where>
+           1=1 AND a.user_id = #{userId}
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>         
+            AND a.type = 1
+            AND  a.is_user_rebate = 0          	      	
+            AND a.user_rebate &gt; 0
+            
+        </where>
+         and a.del_flag = 0
+         ORDER BY a.order_date DESC
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+       <!--我的订单列表(无返利)-->
+    <select id="findNotRebateOrderList"   parameterType="com.doooly.business.myorder.po.OrderPoReq" resultMap="orderListMap">
+        SELECT 
+         <include refid="order_column_sql"/>
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id      
+        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
+        <where>
+           1=1 AND   a.user_id = #{userId}
+           
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>         
+            AND a.type in (99,1,5)              	      	
+            AND a.user_rebate &gt; 0            
+        </where>
+         and a.del_flag = 0
+         ORDER BY a.order_date DESC
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      <!--统计我的订单列表(所有订单，最近订单，最近到账)-->
+    <select id="countALLOrder" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Long">
+    	SELECT 
+         	count(a.id)
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id 
+     	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        <where>
+           1=1 
+           
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>            
+            <if test="isUserRebate !=null and  isUserRebate!=''">
+            	AND  a.is_user_rebate = #{isUserRebate}
+            </if>
+        </where>
+         and a.del_flag = 0
+       
+    </select>
+    
+     <!--统计我的订单列表(最近到账)-->
+    <select id="countLatestOrderAmount" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Long">
+         SELECT 
+          count(a.id)
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
+        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
+        <where>
+           1=1 AND a.user_id = #{userId}
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>         
+            AND a.type = 1
+            AND  a.is_user_rebate = 0       	      	
+            AND a.user_rebate &gt; 0
+            
+        </where>
+         and a.del_flag = 0
+        
+    </select>
+       <!--统计我的订单列表(无返利)-->
+    <select id="countNotRebateOrder"   parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Long">
+        SELECT 
+        	count(a.id)
+        FROM ad_order_report a
+        LEFT JOIN ad_business b ON b.id = a.bussiness_id
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id      
+        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
+        <where>
+           1=1 AND   a.user_id = #{userId}
+           
+            <if test="beginOrderDate != null and beginOrderDate != ''">
+                AND a.order_date &gt;= #{beginOrderDate}
+            </if>
+            <if test="endOrderDate != null and endOrderDate != ''">
+                AND a.order_date &lt;= #{endOrderDate}
+            </if>         
+            AND a.type in (99,1,5)              	      	
+            AND a.user_rebate &gt; 0            
+        </where>
+         and a.del_flag = 0
+        
+    </select>
+    
+    
+     <sql id="getOrderDetailColumns">
+        a.id AS "id",
+        a.order_number AS "orderNumber",
+        a.total_mount AS "totalMount",
+        a.total_price AS "totalPrice",
+        a.order_date AS "orderDate",
+         a.user_id AS "userId",
+          a.bussiness_id AS "businessId",
+        a.state AS "state",
+        a.type AS "type",
+        a.is_user_rebate AS "isUserRebate",
+         a.bussiness_id AS "businessId",
+        IFNULL(a.user_rebate,0.00) AS "userRebate",
+        IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",
+        a.is_business_rebate AS "isBusinessRebate",
+        IFNULL(a.business_rebate_amount,0.00) AS "businessRebateAmount",
+        a.billing_state AS "billingState",
+        a.del_flag AS "delFlag",
+        a.is_source AS "isSource",
+        b.company AS "company",
+        b.logo AS "logo",
+        abs.store_name AS "storeName",
+        a.total_price-a.total_mount AS "savePrice",
+        a.product_type AS "productType",
+        a.consignee_mobile AS "consigneeMobile",
+        a.service_charge AS "serviceCharge",
+        a.voucher AS "voucher"
+    </sql>
+    
+    
+    
+      <select id="getOrderDetailById" resultType="com.doooly.business.myorder.po.OrderDetailReport">
+        SELECT
+        <include refid="getOrderDetailColumns"/>
+        FROM ad_order_report a
+        <include refid="OrderDetailInfoJoins"/>
+        WHERE a.id = #{orderReportId}
+    </select>
+    
+    
+      <select id="findOrderdDetailSum" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.util.Map">
+        SELECT
+        DATE_FORMAT(order_date,'%Y-%m') 'orderDate',
+        SUM(a.total_mount) AS "totalMonthMount",
+        SUM( a.total_price-a.total_mount) AS "totalMonthsaveMount"
+        FROM ad_order_report a
+        <where>
+           1=1
+           
+            <if test=" userId !=null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>           
+            
+           AND a.type=1 AND 	a.del_flag = 0  
+          
+        </where>
+        GROUP BY YEAR (order_date), MONTH (order_date)
+        ORDER BY a.order_date DESC
     </select>
 
 </mapper>

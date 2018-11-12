@@ -3,14 +3,15 @@
  */
 package com.doooly.business.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * 日期工具类, 继承org.apache.commons.lang.time.DateUtils类
@@ -233,6 +234,40 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         dateStr = dateFormat.format(date);
         return dateStr;
     }
+    
+    /**
+   	 * 获取加上指定天数的日期
+   	 * @param date
+   	 * @param days
+   	 * @return
+   	 */
+   	public static Date addDays(Date date,int days) {
+   		return add(date,Calendar.DATE, days);
+
+   	}
+   	
+       /**
+   	 * 获取减去指定天数的日期
+   	 * @param date
+   	 * @param days
+   	 * @return
+   	 */
+   	public static Date minusDays(Date date,int days) {
+   		return add(date,Calendar.DATE, -1*days);
+   	}
+
+       /**
+   	 * 获取加上指定时间单位的日期
+   	 * @param date
+   	 * @param days
+   	 * @return
+   	 */
+   	private static Date add(Date date,int field,int amount) {
+   		Calendar cad = Calendar.getInstance();
+   		cad.setTime(date);
+   		cad.add(field, amount);
+   		return cad.getTime();
+   	}
 
 
     /**

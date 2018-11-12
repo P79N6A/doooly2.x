@@ -102,7 +102,7 @@ public class IndexServiceImpl implements IndexServiceI {
                                         bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
                                     }
                                 }
-                                item.put("title", floor.getName());
+                                item.put("mainTitle", floor.getName());
                                 item.put("isOnline", DEAL_TYPE_OFFLINE);
                                 if (floor.getCode() == 24) {
                                     item.put("type", "4");
@@ -119,7 +119,7 @@ public class IndexServiceImpl implements IndexServiceI {
 //								floor.getFloorId());
                             List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
                             if (!CollectionUtils.isEmpty(beans)) {
-                                item.put("title", floor.getName());
+                                item.put("mainTitle", floor.getName());
                                 item.put("isOnline", DEAL_TYPE_OFFLINE);
                                 item.put("type", "9");
 
@@ -156,7 +156,7 @@ public class IndexServiceImpl implements IndexServiceI {
                                         bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
                                     }
                                 }
-                                item.put("title", floor.getName());
+                                item.put("mainTitle", floor.getName());
                                 item.put("isOnline", DEAL_TYPE_OFFLINE);
                                 item.put("type", "13");
                                 item.put("list", beans);
@@ -172,7 +172,7 @@ public class IndexServiceImpl implements IndexServiceI {
                                         bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
                                     }
                                 }
-                                item.put("title", floor.getName());
+                                item.put("mainTitle", floor.getName());
                                 item.put("isOnline", DEAL_TYPE_OFFLINE);
                                 item.put("type", "2");
                                 item.put("list", beans);

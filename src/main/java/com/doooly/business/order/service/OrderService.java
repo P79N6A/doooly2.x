@@ -61,7 +61,8 @@ public interface OrderService {
 		SELF_CARDPSW_RECHARGE(6, "自营卡券"),
 		MOBILE_RECHARGE_PREFERENCE(7, "兜礼话费特惠"),
 		MOBIKE_RECHARGE(8, "摩拜充值"),
-		NEXUS_RECHARGE(9, "集享积分充值");
+		NEXUS_RECHARGE(9, "集享积分充值"),
+		NEXUS_RECHARGE_ACTIVITY(10, "集享积分充值活动");
 
 		private int code;
 		private String productTypeName;

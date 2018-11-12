@@ -133,6 +133,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setUserReturnAmount(report.getUserReturnAmount());
 			resp.setVoucher(report.getVoucher());
 			resp.setBusinessId(report.getBusinessId());
+			resp.setIsSource(report.getIsSource());
 			
 			 //查询订单明细
 	        AdOrderDetail adOrderDetailQuery = new AdOrderDetail();

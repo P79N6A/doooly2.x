@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myorder.constant.OrderType;
 import com.doooly.business.myorder.constant.ProductType;
 import com.doooly.business.myorder.dto.OrderDetailReq;
@@ -45,7 +46,7 @@ public class OrderServiceImpl implements OrderService{
 	
 	private final static String CP_AES_KEY = PropertiesConstants.dooolyBundle.getString("cp_aes_key");
 	
-	private final static String LATEST_ORDER_DAY =  "45";
+	private final static int LATEST_ORDER_DAY =  45;
 
 	 @Autowired
 	 private AdOrderReportDao adOrderReportDao;
@@ -59,6 +60,9 @@ public class OrderServiceImpl implements OrderService{
     
     @Autowired
     private AdGroupDao adGroupDao;
+    
+    @Autowired
+    private ConfigDictServiceI configDictServiceI;
 	 
 	@Override
 	public List<OrderPoResp> getOrderList(OrderReq orderReq) {
@@ -82,7 +86,8 @@ public class OrderServiceImpl implements OrderService{
 		if(OrderType.ALL == orderReq.getType()) {
 			return adOrderReportDao.findALLOrderList(orderPoReq);
 		}else if(OrderType.LATEST_ORDER == orderReq.getType()) {//最近订单（45天订单）
-			orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), Integer.parseInt(LATEST_ORDER_DAY)));
+			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+			orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
 			orderPoReq.setEndOrderDate(new Date());
 			return adOrderReportDao.findALLOrderList(orderPoReq);
 		}else if(OrderType.LATEST_AMOUNT == orderReq.getType()) {//最近到账
@@ -128,6 +133,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setUserReturnAmount(report.getUserReturnAmount());
 			resp.setVoucher(report.getVoucher());
 			resp.setBusinessId(report.getBusinessId());
+			resp.setIsSource(report.getIsSource());
 			
 			 //查询订单明细
 	        AdOrderDetail adOrderDetailQuery = new AdOrderDetail();
@@ -247,7 +253,8 @@ public class OrderServiceImpl implements OrderService{
 			if(OrderType.ALL == orderReq.getType()) {
 				return adOrderReportDao.countALLOrder(orderPoReq);
 			}else if(OrderType.LATEST_ORDER == orderReq.getType()) {//最近订单（45天订单）
-				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), Integer.parseInt(LATEST_ORDER_DAY)));
+				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
 				orderPoReq.setEndOrderDate(new Date());
 				return adOrderReportDao.countALLOrder(orderPoReq);
 			}else if(OrderType.LATEST_AMOUNT == orderReq.getType()) {//最近到账

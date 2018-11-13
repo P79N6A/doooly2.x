@@ -751,4 +751,10 @@
 			</plugin>
 		</plugins>
 	</build>
+	<!-- <repositories>
+		<repository>
+			<id>nexus-central</id>
+			<url>http://test1.doooly.com:7777/nexus/content/groups/public/</url>
+		</repository>
+	</repositories> -->
 </project>

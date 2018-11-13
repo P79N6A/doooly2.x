@@ -1007,6 +1007,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
+        logger.info("退款refund:{}",json.toJSONString());
         ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum,returnFlowNumber);
         return resultModel;
     }

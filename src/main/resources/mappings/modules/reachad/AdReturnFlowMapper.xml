@@ -52,7 +52,7 @@
       )
   </insert>
   
-   <select id="getByOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+   <select id="getByOrderId" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
     from ad_return_flow

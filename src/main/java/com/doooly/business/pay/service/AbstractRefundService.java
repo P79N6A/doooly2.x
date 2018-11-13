@@ -129,7 +129,7 @@ public abstract class AbstractRefundService implements RefundService {
             ResultModel resultModel = dooolyPayRefund(order, merchantRefundNo);
             return resultModel;
         } catch (Exception e) {
-			logger.info("autoRefund error! orderNum = {},异常原因", orderNum,e);
+			logger.info("refund error! orderNum = {},异常原因", orderNum,e);
 		}
 		return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
 	}

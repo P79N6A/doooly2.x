@@ -1,22 +1,5 @@
 package com.doooly.business.mypoint.service.impl;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.didi.constants.DiDiConstants;
 import com.doooly.business.mypoint.service.MyPointServiceI;
@@ -47,6 +30,22 @@ import com.doooly.entity.reachad.AdRecharge;
 import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: service实现
@@ -276,7 +275,12 @@ public class MyPoinitService implements MyPointServiceI {
 				map.put("integral", adAvailablePoint.getBusinessRebateAmount());
 				map.put("date", DateUtils.formatDate(adAvailablePoint.getCreateDate(), "yyyy.MM.dd HH:mm"));
 				messageDataBean.setCode(MessageDataBean.success_code);
-			} else {
+			} else if (adAvailablePoint.getType().equals(AdAvailablePoints.TYPE_INTEGRAL_ATTEND)) {
+                map.put("showType", "attend");
+                map.put("integral", adAvailablePoint.getBusinessRebateAmount());
+                map.put("date", DateUtils.formatDate(adAvailablePoint.getCreateDate(), "yyyy.MM.dd HH:mm"));
+                messageDataBean.setCode(MessageDataBean.success_code);
+            }else {
 				messageDataBean.setMess("查无积分明细");
 			}
 		}

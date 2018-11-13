@@ -58,6 +58,8 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 		FROM ad_coupon c
 		INNER JOIN ad_business b
 			ON c.business_id = b.id
+		INNER JOIN ad_coupon_business_sort cbs
+			ON c.business_id = cbs.business_id
 		WHERE NOW() between c.begin_date AND c.end_date
 			AND c.del_flag = 0
 			AND c.is_open = 1
@@ -65,7 +67,7 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 			<if test="categoryType != null and categoryType != '' and categoryType != 0">
 				and c.category_type = #{categoryType}
 			</if>
-		GROUP BY b.id
+		GROUP BY cbs.sort
 	</select>
 	
 	<select id="getCouponNumByBusinessId" resultType="java.lang.Integer">

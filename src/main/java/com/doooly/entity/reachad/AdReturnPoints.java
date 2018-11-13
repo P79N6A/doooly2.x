@@ -37,7 +37,7 @@ public class AdReturnPoints {
 	/** 预计积分表 积分交易类型：积分赠送 */
 	public static final String TYPE_PRESENT  = "4";
 	
-	/** 预计积分表 积分交易类型：积分互换 */
+	/** 预计积分表 积分交易类型：积分互换 ,退货单 */
 	public static final String TYPE_INTERCHANGE = "5";
 	
 	/** 预计积分表 积分交易类型：积分申诉 */

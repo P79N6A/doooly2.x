@@ -2,6 +2,7 @@ package com.doooly.dao.reachad;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -77,4 +78,9 @@ public interface OrderDao extends BaseDaoI<Order> {
 
     //查询已同步订单
     Order getSyncOrder(Order o);
+
+    //计算退货返佣返利
+    void computeRefundRebateAndSyncOrder(Map<String, Object> paramMap);
+
+    List<Order> findList(Order order);
 }

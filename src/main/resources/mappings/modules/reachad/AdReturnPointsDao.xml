@@ -149,4 +149,24 @@
 			receive_stuts=0
 		</where>
 	</update>
+
+    <insert id="insert">
+        INSERT INTO ad_return_points(
+            user_id,
+            order_id,
+            report_id,
+            amount,
+            type,
+            status,
+            create_date
+        ) VALUES (
+            #{userId},
+            #{orderId},
+            #{reportId},
+            #{amount},
+            #{type},
+            #{status},
+            now()
+        )
+    </insert>
 </mapper>

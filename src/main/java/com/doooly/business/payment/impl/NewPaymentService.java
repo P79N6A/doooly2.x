@@ -1004,6 +1004,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel refund(JSONObject json) {
+        logger.info("退款请求参数，json = {}", json);
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");

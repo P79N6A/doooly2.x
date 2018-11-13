@@ -89,6 +89,7 @@ public class AdProduct {
     private String digest;//文章摘要
     private String imgUrl;//分享图标
     private String maxUserRebate;//最高返利
+	private String shippingMethod;      // 发货方式
 
 	public int getId() {
 		return id;
@@ -481,4 +482,12 @@ public class AdProduct {
     public void setMaxUserRebate(String maxUserRebate) {
         this.maxUserRebate = maxUserRebate;
     }
+
+	public String getShippingMethod() {
+		return shippingMethod;
+	}
+
+	public void setShippingMethod(String shippingMethod) {
+		this.shippingMethod = shippingMethod;
+	}
 }

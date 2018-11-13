@@ -151,19 +151,21 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     adOrderSource.setCashDeskSource("d");
                     adOrderSource.setTraceCodeSource("d");
                     adOrderSourceDao.insert(adOrderSource);
+                    // 返回解析结果数据
+                    List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("orderNum", orderNum);
+                    //map.put("payFlowId", payFlowId);
+                    map.put("realPayType", realPayType);
+                    map.put("outTradeNo", outTradeNo);
+                    map.put("payEndTime", payEndTime);
+                    map.put("orders", orders);
+                    // 积分支付没有交易流水号
+                    map.put("transNo", "0");
+                    return map;
+                }else {
+                    return null;
                 }
-                // 返回解析结果数据
-                List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("orderNum", orderNum);
-                //map.put("payFlowId", payFlowId);
-                map.put("realPayType", realPayType);
-                map.put("outTradeNo", outTradeNo);
-                map.put("payEndTime", payEndTime);
-                map.put("orders", orders);
-                // 积分支付没有交易流水号
-                map.put("transNo", "0");
-                return map;
             } else {
                 logger.error("支付失败");
             }

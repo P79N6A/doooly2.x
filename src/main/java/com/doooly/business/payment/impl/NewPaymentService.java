@@ -917,7 +917,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 if(payType1!=0){
                     //非积分需要插入流水
                     payType1 = 3;//微信
-                    saveOneOrder(order, payType1,refundFee,settlementRefundFee);
+                    saveOneOrder(order, payType1,refundFee,settlementRefundFee,outRefundNo);
                 }
             }
             //积分退款要修改businessId一致
@@ -934,7 +934,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         return ResultModel.ok();
     }
 
-    private int saveOneOrder(OrderVo order,int payType,String amount,String price) {
+    private int saveOneOrder(OrderVo order, int payType, String amount, String price, String outRefundNo) {
         try {
             int rows = 0;
             logger.info("同步订单到_order开始. order ={} ===> payType = {}", order, payType);
@@ -953,7 +953,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             //积分是0其他是2现金
             o.setPayType(payType);
             o.setOrderNumber(order.getOrderNumber());
-            o.setSerialNumber(order.getOrderNumber());
+            o.setSerialNumber(outRefundNo);
             o.setOrderDate(order.getOrderDate());
             //o.setOriginOrderNumber(null);
             o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());

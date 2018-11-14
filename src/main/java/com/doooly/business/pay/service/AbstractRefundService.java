@@ -278,7 +278,7 @@ public abstract class AbstractRefundService implements RefundService {
 			OrderVo o = new OrderVo();
 			o.setOrderNumber(orderNum);
 			o.setUserId(userId);
-            o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
 			return orderService.getOrder(o).get(0);
 		} catch (Exception e) {

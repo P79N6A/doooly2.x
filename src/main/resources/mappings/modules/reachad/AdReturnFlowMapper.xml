@@ -58,7 +58,7 @@
     from ad_return_flow
     <where>
         <if test="orderReportId != null">
-            AND order_report_id = #{orderId,jdbcType=BIGINT}
+            AND order_report_id = #{orderReportId,jdbcType=BIGINT}
         </if>
         <if test="returnFlowNumber != null">
             AND return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR}
@@ -76,7 +76,7 @@
     from ad_return_flow
     <where>
         <if test="orderReportId != null">
-            AND order_report_id = #{orderId,jdbcType=BIGINT}
+            AND order_report_id = #{orderReportId,jdbcType=BIGINT}
         </if>
         <if test="returnFlowNumber != null">
             AND return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR}

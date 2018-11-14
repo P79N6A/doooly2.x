@@ -18,9 +18,9 @@ public interface AdReturnFlowDao  {
 	
 	public int insert(AdReturnFlow adReturnFlow);
 	
-	public AdReturnFlow getByOrderId(@Param("orderId") long orderId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
+	public AdReturnFlow getByOrderId(@Param("orderReportId") long orderReportId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
 
-	List<AdReturnFlow> getListByOrderId(@Param("orderId") long orderId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
+	List<AdReturnFlow> getListByOrderId(@Param("orderReportId") long orderReportId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
 
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 	

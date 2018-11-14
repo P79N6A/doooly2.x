@@ -277,7 +277,7 @@
     		bussinessId = #{bussinessId}
     where 
     		orderNumber = #{orderNumber}
-    		and type = '5'
+    		and type = '5' AND payType = 0
   </update>
 
     <select id="findList" parameterType="com.doooly.entity.reachad.Order" resultMap="resultMap">

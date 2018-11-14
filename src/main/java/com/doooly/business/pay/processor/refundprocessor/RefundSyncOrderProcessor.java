@@ -1,6 +1,5 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
-import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.dao.reachad.AdAvailablePointsDao;
@@ -41,18 +40,14 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
     private AdAvailablePointsDao adAvailablePointsDao;
 
     @Override
-    public PayMsg process(OrderVo order) {
+    public PayMsg process(OrderVo order, Order o) {
         if (order.getIsSource() != 3) {
             //非自营订单不同步
             return null;
         }
         logger.info("计算退货返利同步订单到_order开始. orderNum = {}", order.getOrderNumber());
         //查询需要计算的退货订单
-        Order order1 = new Order();
-        order1.setOrderNumber(order.getOrderNumber());
-        order1.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
-        order1.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
-        List<Order> list = orderDao.findList(order1);
+        List<Order> list = orderDao.findList(o);
         if(CollectionUtils.isNotEmpty(list)){
             for (Order order2 : list) {
                 Map<String, Object> map = new HashMap<>();

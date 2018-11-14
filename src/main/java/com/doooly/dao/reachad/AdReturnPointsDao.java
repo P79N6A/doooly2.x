@@ -46,4 +46,12 @@ public interface AdReturnPointsDao {
 	int receiveUserReturnPoints(@Param("userId") Long userId);
 
     void insert(AdReturnPoints adReturnPoints);
+
+    /**
+     * 通过对象查询
+     * @param adReturnPoints
+     * @return
+     */
+    AdReturnPoints get(AdReturnPoints adReturnPoints);
+
 }

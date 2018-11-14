@@ -189,10 +189,10 @@
         <where>
             a.del_flag = 0 AND a.user_id = #{userId}
             <if test="orderId != null and orderId != ''">
-                a.order_id =#{orderId}
+                AND a.order_id =#{orderId}
             </if>
             <if test="type != null and type != ''">
-                a.type =#{type}
+                AND a.type =#{type}
             </if>
         </where>
     </select>

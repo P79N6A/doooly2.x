@@ -50,22 +50,26 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
         List<Order> list = orderDao.findList(o);
         if(CollectionUtils.isNotEmpty(list)){
             for (Order order2 : list) {
+                Order order3 = orderDao.get(String.valueOf(order2.getId()));
+                //插入ad_return_points
+                AdReturnPoints adReturnPoints = new AdReturnPoints();
+                adReturnPoints.setUserId(String.valueOf(order.getUserId()));
+                adReturnPoints.setOrderId(order3.getId());
+                AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
+                if(adReturnPoints1 != null){
+                    //说明已经同步过
+                    continue;
+                }
                 Map<String, Object> map = new HashMap<>();
                 map.put("orderId",order2.getId());
                 map.put("orderNumber",order2.getOrderNumber());
                 map.put("bussinessId",order2.getBussinessId());
                 orderDao.computeRefundRebateAndSyncOrder(map);
-                Order order3 = orderDao.get(String.valueOf(order2.getId()));
                 //计算完返利，同步ad_return_flow表
-                AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order3.getSerialNumber());
+                AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order3.getSerialNumber(), String.valueOf(order3.getPayType()));
                 adReturnFlow.setUserRebate(order3.getUserRebate());
                 adReturnFlow.setBusinessRebateAmount(order3.getBusinessRebate());
-                adReturnFlow.setPayType((short) order3.getPayType().intValue());
                 adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
-                //插入ad_return_points
-                AdReturnPoints  adReturnPoints = new AdReturnPoints();
-                adReturnPoints.setUserId(String.valueOf(order.getUserId()));
-                adReturnPoints.setOrderId(order3.getId());
                 adReturnPoints.setReportId(String.valueOf(order.getId()));
                 adReturnPoints.setAmount(order3.getUserRebate());
                 adReturnPoints.setType(AdReturnPoints.TYPE_INTERCHANGE);

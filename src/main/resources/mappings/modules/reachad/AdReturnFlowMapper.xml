@@ -56,9 +56,37 @@
     select 
     <include refid="Base_Column_List" />
     from ad_return_flow
-    where order_report_id = #{orderId,jdbcType=BIGINT} AND return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR} limit 1
+    <where>
+        <if test="orderReportId != null">
+            AND order_report_id = #{orderId,jdbcType=BIGINT}
+        </if>
+        <if test="returnFlowNumber != null">
+            AND return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR}
+        </if>
+        <if test="payType != null">
+            AND pay_type = #{payType,jdbcType=BIGINT}
+        </if>
+    </where>
+    limit 1
   </select>
-  
+
+   <select id="getListByOrderId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ad_return_flow
+    <where>
+        <if test="orderReportId != null">
+            AND order_report_id = #{orderId,jdbcType=BIGINT}
+        </if>
+        <if test="returnFlowNumber != null">
+            AND return_flow_number = #{returnFlowNumber,jdbcType=VARCHAR}
+        </if>
+        <if test="payType != null">
+            AND pay_type = #{payType,jdbcType=BIGINT}
+        </if>
+    </where>
+  </select>
+
    <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.AdReturnFlow">
     update ad_return_flow
     <set>

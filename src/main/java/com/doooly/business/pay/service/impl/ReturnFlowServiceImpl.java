@@ -44,8 +44,8 @@ public class ReturnFlowServiceImpl implements ReturnFlowService {
 		return 0l;
 	}
 	
-	public AdReturnFlow getByOrderId(long orderId, String returnFlowNumber){
-		return adReturnFlowDao.getByOrderId(orderId,returnFlowNumber);
+	public AdReturnFlow getByOrderId(long orderId, String returnFlowNumber, String payType){
+		return adReturnFlowDao.getByOrderId(orderId,returnFlowNumber,payType);
 	}
 	
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow){

@@ -25,6 +25,6 @@ public interface RefundService {
 
 	public ResultModel applyRefund(long userId, String orderNum);
 
-	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber);//兜礼收银台退款
+	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType);//兜礼收银台退款
 
 }

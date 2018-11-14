@@ -976,7 +976,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                     OrderDetail d = new OrderDetail();
                     d.setOrderid(o.getId().intValue());
                     d.setCode(itVo.getCode());
-                    d.setGoods(itVo.getGoods() + itVo.getSku());
+                    String goods ;
+                    if(itVo.getSku()!=null){
+                        goods = itVo.getGoods() + itVo.getSku();
+                    }else {
+                        goods = itVo.getGoods();
+                    }
+                    d.setGoods(goods);
                     d.setAmount(itVo.getAmount());
                     d.setPrice(itVo.getPrice());
                     d.setNumber(itVo.getNumber());

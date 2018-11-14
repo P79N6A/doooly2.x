@@ -144,6 +144,7 @@ public class OrderServiceImpl implements OrderService {
 						}
 
 						if (orderVo.getProductType() == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+						    sku.setSellPrice(sellPrice.toString());
 							msg = getServiceChargeAndCheckLimit(orderVo, sku);
 							if (OrderMsg.success_code.equals(msg.getCode())) {
 								if(msg.data != null) {

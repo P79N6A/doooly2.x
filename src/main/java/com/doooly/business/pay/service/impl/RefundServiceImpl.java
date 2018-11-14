@@ -126,7 +126,13 @@ public class RefundServiceImpl extends AbstractRefundService {
         for (OrderItemVo item : items) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("code",item.getCode());
-            jsonObject.put("goods",item.getGoods()+"-"+ item.getSku());
+            String goods;
+            if(item.getSku()!= null){
+                goods = item.getGoods()+"-"+ item.getSku();
+            }else {
+                goods = item.getGoods();
+            }
+            jsonObject.put("goods",goods);
             jsonObject.put("number",item.getNumber());
             jsonObject.put("amount",item.getAmount());
             jsonObject.put("category",item.getCategoryId());

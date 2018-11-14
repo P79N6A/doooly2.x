@@ -130,8 +130,8 @@ public abstract class AbstractRefundService implements RefundService {
             return resultModel;
         } catch (Exception e) {
 			logger.info("refund error! orderNum = {},异常原因", orderNum,e);
-		}
-		return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_SUCCESS);
+            return new ResultModel(GlobalResultStatusEnum.REFUND_STATUS_FAIL);
+        }
 	}
 
     private int saveOneOrder(OrderVo order,int payType,String amount,String price) {
@@ -463,7 +463,7 @@ public abstract class AbstractRefundService implements RefundService {
 				@Override
 				public void run() {
 					logger.error("执行afterRefundProcess class = {}",afterRefundProcessor);
-					afterRefundProcessor.process(order);
+					afterRefundProcessor.process(order, new Order());
 				}
 			}).start();
 		}

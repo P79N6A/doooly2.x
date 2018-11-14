@@ -4,11 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.bean.PayFlow;
-import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessor;
-import com.doooly.business.utils.DateUtils;
 import com.doooly.common.util.HTTPSClientUtils;
-import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdCouponCodeDao;
@@ -19,6 +15,7 @@ import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdCoupon;
 import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +44,8 @@ public class CouponReturnProcessor implements AfterRefundProcessor{
     private AdBusinessDao adBusinessDao;
 
     @Override
-    public PayMsg process(OrderVo order) {
-        logger.info("CouponAuthorizationProcessor start. orderNum = {}",order.getOrderNumber());
+    public PayMsg process(OrderVo order, Order payType1) {
+        logger.info("CouponReturnProcessor start. orderNum = {}",order.getOrderNumber());
         try {
             String couponId = order.getCouponId();
             if(StringUtils.isNotEmpty(couponId)){

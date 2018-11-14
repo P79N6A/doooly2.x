@@ -6,7 +6,7 @@ public interface ReturnFlowService {
 	
 	public long insert(AdReturnFlow adReturnFlow);
 	
-	public AdReturnFlow getByOrderId(long orderId, String returnFlowNumber);
+	public AdReturnFlow getByOrderId(long orderId, String returnFlowNumber, String payType);
 	
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 

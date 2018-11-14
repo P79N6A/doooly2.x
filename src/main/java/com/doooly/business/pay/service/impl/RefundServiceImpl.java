@@ -69,13 +69,14 @@ public class RefundServiceImpl extends AbstractRefundService {
      * @param order
      * @return
      */
-    public ResultModel dooolyPayRefund(OrderVo order,String merchantRefundNo) {
+    public ResultModel dooolyPayRefund(OrderVo order,String merchantRefundNo,String refundType) {
         // 积分退款
         AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
         JSONObject params = new JSONObject();
         params.put("businessId", business.getBusinessId());
         params.put("merchantOrderNo", order.getOrderNumber());
         params.put("merchantRefundNo", merchantRefundNo);
+        params.put("refundType", refundType);
         params.put("id", business.getId());
         ResultModel resultModel = newPaymentServiceI.dooolyPayRefund(params);
         logger.info("收银台退款返回结果code:{},info:{},data:{}",resultModel.getCode(),resultModel.getInfo(),resultModel.getData());

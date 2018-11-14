@@ -15,6 +15,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
  * @author: qing.zhang
  * @date: 2018-11-13
  */
+@Component
 public class RefundSyncOrderProcessor implements AfterRefundProcessor {
 
     private Logger logger = LoggerFactory.getLogger(RefundSyncOrderProcessor.class);
@@ -41,7 +43,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
 
     @Override
     public PayMsg process(OrderVo order, Order o) {
-        if (order.getIsSource() != 3) {
+        if (order.getIsSource() == 3) {
             //非自营订单不同步
             return null;
         }

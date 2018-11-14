@@ -142,6 +142,17 @@ public class OrderServiceImpl implements OrderService {
 							actType = (String) msg.data.get("actType");
 							sellPrice = (BigDecimal) msg.data.get("actPrice");
 						}
+
+						if (orderVo.getProductType() == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+							msg = getServiceChargeAndCheckLimit(orderVo, sku);
+							if (OrderMsg.success_code.equals(msg.getCode())) {
+								if(msg.data != null) {
+									orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+								}
+							} else {
+								return msg;
+							}
+						}
 					} else {
 						return msg;
 					}

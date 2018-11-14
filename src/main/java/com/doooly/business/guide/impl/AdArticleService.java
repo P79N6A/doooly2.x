@@ -222,6 +222,7 @@ public class AdArticleService implements AdArticleServiceI {
         if (StringUtils.isBlank(adProduct.getMaxUserRebate())) {
             adProduct.setMaxUserRebate("0");
         }
+        adProduct.setShippingMethod(adProduct.getShippingMethod() != null ? adProduct.getShippingMethod() : "");
         Double rebate;
         BigDecimal factPrice;//前台根据折扣计算价格
         BigDecimal marketPrice = adProduct.getMarketPrice().setScale(2, BigDecimal.ROUND_DOWN);//后台商品配置导购价

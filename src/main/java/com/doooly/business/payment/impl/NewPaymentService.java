@@ -105,6 +105,12 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Autowired
     private RefundService refundService;
 
+    // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
+    private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
+    // 退款同步，唯一标识，缓存值4个0（0000）
+    private static String SYNC_REFUND_CODE_VALUE = "0000";
+
+
     @Override
     public ResultModel authorize(String businessId) {
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
@@ -901,6 +907,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         String refundFee = param.getString("refundFee");
         String settlementRefundFee = param.getString("settlementRefundFee");
         String refundStatus = param.getString("refundStatus");
+        //添加redis锁防止并发同步====redis检测用户是否已签到
+        if (!redisTemplate.opsForValue().setIfAbsent(
+                String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo),
+                SYNC_REFUND_CODE_VALUE)) {
+            //说明今天已经签到过了
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "今天已经签到过了");
+        }
         if (refundStatus.equals(REFUND_STATUS_S)) {
             //说明退款成功
             //在查询下订单
@@ -927,6 +940,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             afterRefundProcess(order,o);
             return ResultModel.ok();
         }
+        //删掉redis锁key
+        redisTemplate.delete(String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo));
         return ResultModel.ok();
     }
 

@@ -1,13 +1,11 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.dao.reachad.AdAvailablePointsDao;
 import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.AdAvailablePoints;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.Order;
@@ -79,17 +77,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                 adReturnPoints.setStatus(AdReturnPoints.STATUS_EXPECTED);
                 adReturnPoints.setCreateDate(new Date());
                 adReturnPointsDao.insert(adReturnPoints);
-                //积分支付记录预计退款积分
-                if(order3.getPayType()== PayConstants.pay_type_0){
-                    AdAvailablePoints adAvailablePoints = new AdAvailablePoints();
-                    adAvailablePoints.setUserId(String.valueOf(order.getUserId()));
-                    adAvailablePoints.setOrderId(order3.getId());
-                    adAvailablePoints.setReportId(order.getId());
-                    adAvailablePoints.setBusinessRebateAmount(order3.getAmount());
-                    adAvailablePoints.setType(AdAvailablePoints.TYPE_RETURN);
-                    adAvailablePoints.setStatus(AdAvailablePoints.STATUS_EXPECTED);
-                    adAvailablePointsDao.insert(adAvailablePoints);
-                }
             }
         }
         return null;

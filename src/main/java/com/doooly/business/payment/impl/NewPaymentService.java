@@ -32,6 +32,8 @@ import com.doooly.dao.reachad.AdPayFlowDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdRefundFlowDao;
+import com.doooly.dao.reachad.AdReturnDetailDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
@@ -42,6 +44,7 @@ import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdRefundFlow;
+import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
@@ -104,6 +107,10 @@ public class NewPaymentService implements NewPaymentServiceI {
     private ReturnFlowService returnFlowService;
     @Autowired
     private RefundService refundService;
+    @Autowired
+    private AdReturnFlowDao adReturnFlowDao;
+    @Autowired
+    private AdReturnDetailDao adReturnDetailDao;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -982,33 +989,36 @@ public class NewPaymentService implements NewPaymentServiceI {
             logger.info("同步订单到_order结束. rows = {}", rows);
             //同步detail
             if (o.getId() != null) {
-                List<OrderItemVo> items = order.getItems();
-                for (int i = 0; i < items.size(); i++) {
-                    OrderItemVo itVo = items.get(i);
-                    OrderDetail d = new OrderDetail();
-                    d.setOrderid(o.getId().intValue());
-                    d.setCode(itVo.getCode());
-                    String goods ;
-                    if(itVo.getSku()!=null){
-                        goods = itVo.getGoods() + itVo.getSku();
-                    }else {
-                        goods = itVo.getGoods();
+                List<AdReturnFlow> listByOrderId = adReturnFlowDao.getListByOrderId(order.getId(), merchantRefundNo, String.valueOf(payType));
+                for (AdReturnFlow adReturnFlow : listByOrderId) {
+                    List<OrderItemVo> items = adReturnDetailDao.getList(adReturnFlow);
+                    for (int i = 0; i < items.size(); i++) {
+                        OrderItemVo itVo = items.get(i);
+                        OrderDetail d = new OrderDetail();
+                        d.setOrderid(o.getId().intValue());
+                        d.setCode(itVo.getCode());
+                        String goods ;
+                        if(itVo.getSku()!=null){
+                            goods = itVo.getGoods() + itVo.getSku();
+                        }else {
+                            goods = itVo.getGoods();
+                        }
+                        d.setGoods(goods);
+                        d.setAmount(itVo.getAmount());
+                        d.setPrice(itVo.getPrice());
+                        d.setNumber(itVo.getNumber());
+                        d.setTax(itVo.getTax());
+                        d.setCategory(itVo.getCategoryId());
+                        d.setFirstCategory(null);
+                        d.setSecondCategory(null);
+                        d.setBrandName(null);
+                        d.setCreatedatetime(new Date());
+                        int r = orderDao.insertDetail(d);
+                        if (r > 0) {
+                            logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
+                        }
+                        rows += r;
                     }
-                    d.setGoods(goods);
-                    d.setAmount(itVo.getAmount());
-                    d.setPrice(itVo.getPrice());
-                    d.setNumber(itVo.getNumber());
-                    d.setTax(new BigDecimal("0"));
-                    d.setCategory(itVo.getCategoryId());
-                    d.setFirstCategory(null);
-                    d.setSecondCategory(null);
-                    d.setBrandName(null);
-                    d.setCreatedatetime(new Date());
-                    int r = orderDao.insertDetail(d);
-                    if (r > 0) {
-                        logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
-                    }
-                    rows += r;
                 }
             }
             return rows;

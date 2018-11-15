@@ -911,8 +911,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (!redisTemplate.opsForValue().setIfAbsent(
                 String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo),
                 SYNC_REFUND_CODE_VALUE)) {
-            //说明今天已经签到过了
-            return new ResultModel(GlobalResultStatusEnum.FAIL, "今天已经签到过了");
+            //说明已经通知了
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "已经收到通知了");
         }
         if (refundStatus.equals(REFUND_STATUS_S)) {
             //说明退款成功

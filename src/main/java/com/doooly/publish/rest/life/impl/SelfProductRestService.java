@@ -130,8 +130,9 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 				if (weekLists.contains(week) && hour >= startHour && hour <= endHour + 1) {
 					if (num - adGroupSelfProductPrice.getBuyNumberLimit() >= 0) {
 						adGroupSelfProductPrice.setIsStart("4");
-					}
-					adGroupSelfProductPrice.setIsStart("2");
+					} else {
+                        adGroupSelfProductPrice.setIsStart("2");
+                    }
 				} else {
 					adGroupSelfProductPrice.setIsStart("1");
 				}

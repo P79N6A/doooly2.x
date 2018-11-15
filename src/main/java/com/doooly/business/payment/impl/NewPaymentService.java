@@ -914,7 +914,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String refundFee = param.getString("refundFee");
         String settlementRefundFee = param.getString("settlementRefundFee");
         String refundStatus = param.getString("refundStatus");
-        //添加redis锁防止并发同步====redis检测用户是否已签到
+        //添加redis锁防止并发同步====redis检测用户是否已经收到通知了
         if (!redisTemplate.opsForValue().setIfAbsent(
                 String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo),
                 SYNC_REFUND_CODE_VALUE)) {
@@ -1046,21 +1046,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum);
         return resultModel;
-    }
-
-    private int updateRefundFlow(String refundFlowId, String refundId, String refundStatus, String errCode, String errReason) {
-        try {
-            AdRefundFlow flow = new AdRefundFlow();
-            flow.setId(Long.valueOf(refundFlowId));
-            flow.setRefundStatus(refundStatus);
-            flow.setRefundId(refundId);
-            flow.setErrorCode(errCode);
-            flow.setErrorReason(errReason);
-            return adRefundFlowDao.updateByPrimaryKeySelective(flow);
-        } catch (Exception e) {
-            logger.error("updateRefundFlow error,e = {}", e);
-        }
-        return 0;
     }
 
     private OrderVo checkOrderStatus(String orderNum) {

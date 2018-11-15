@@ -127,8 +127,8 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 				String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
 				int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
-				if (weekLists.contains(week) && hour >= startHour && hour <= endHour + 1) {
-					if (num - adGroupSelfProductPrice.getBuyNumberLimit() >= 0) {
+				if (weekLists.contains(week) && hour >= startHour && hour < endHour + 1) {
+					if (adGroupSelfProductPrice.getBuyNumberLimit() - num <= 0) {
 						adGroupSelfProductPrice.setIsStart("4");
 					} else {
                         adGroupSelfProductPrice.setIsStart("2");

@@ -1,9 +1,6 @@
 package com.doooly.publish.rest.life.impl;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -97,48 +94,51 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 	public String getSelfProductByName(JSONObject obj) {
 		logger.info("getSelfProductByName = {}"+obj);
 		MessageDataBean messageDataBean = new MessageDataBean();
+
 		try {
 			String activityName = obj.getString("activityName");
 			String groupId = obj.getString("groupId");
 			long userId = obj.getLong("userId");
+
 			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
-			int skuId = adGroupSelfProductPrice.getSkuId();
-			ActivityInfo actInfo = orderService.getActivityInfo(groupId, skuId);
-			int num = 0;
-			if(actInfo != null) {
-				String actType = actInfo.getActivityName();
-				num = orderService.getBuyNum(userId, skuId, actType);
-			}
-			String weekList = adGroupSelfProductPrice.getWeekList();
-			weekList = weekList.substring(1, weekList.length()-1).replaceAll(" ", "");
-			List<String> weekLists = Arrays.asList(weekList.split(","));
-			String activityOfTime = adGroupSelfProductPrice.getActivityOfTime();
-			List<String> activityOfTimeList = Arrays.asList(activityOfTime.split("-"));
-			int startHour = Integer.parseInt(activityOfTimeList.get(0));
-			int endHour = Integer.parseInt(activityOfTimeList.get(1));
-			
-			if(num - adGroupSelfProductPrice.getBuyNumberLimit() >= 0) {
-				adGroupSelfProductPrice.setIsStart("4");
-			}else {
-				Calendar calendar = Calendar.getInstance();
-				String week = calendar.get(Calendar.DAY_OF_WEEK)+"";
+
+			Calendar calendar = Calendar.getInstance();
+			Date now = calendar.getTime();
+
+			// 当前日期小于活动结束日期
+			if (now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) < 0) {
+				int skuId = adGroupSelfProductPrice.getSkuId();
+				ActivityInfo actInfo = orderService.getActivityInfo(groupId, skuId);
+				int num = 0;
+
+				if (actInfo != null) {
+					String actType = actInfo.getActivityName();
+					num = orderService.getBuyNum(userId, skuId, actType);
+				}
+
+				String weekList = adGroupSelfProductPrice.getWeekList();
+				weekList = weekList.substring(1, weekList.length() - 1).replaceAll(" ", "");
+				List<String> weekLists = Arrays.asList(weekList.split(","));
+				String activityOfTime = adGroupSelfProductPrice.getActivityOfTime();
+				List<String> activityOfTimeList = Arrays.asList(activityOfTime.split("-"));
+				int startHour = Integer.parseInt(activityOfTimeList.get(0));
+				int endHour = Integer.parseInt(activityOfTimeList.get(1));
+
+				String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
 				int hour = calendar.get(Calendar.HOUR_OF_DAY);
-				if(weekLists.contains(week) && hour >= startHour && hour <= endHour) {
+
+				if (weekLists.contains(week) && hour >= startHour && hour <= endHour + 1) {
+					if (num - adGroupSelfProductPrice.getBuyNumberLimit() >= 0) {
+						adGroupSelfProductPrice.setIsStart("4");
+					}
 					adGroupSelfProductPrice.setIsStart("2");
-				}else {
+				} else {
 					adGroupSelfProductPrice.setIsStart("1");
 				}
-//				Date now = calendar.getTime();
-//				if(now.compareTo(adGroupSelfProductPrice.getSpecialStartDate()) < 0) {
-//					adGroupSelfProductPrice.setIsStart("1");
-//				} else if(now.compareTo(adGroupSelfProductPrice.getSpecialStartDate()) >= 0 && 
-//						now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) <= 0) {
-//					adGroupSelfProductPrice.setIsStart("2");
-//				} else if(now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) > 0){
-//					adGroupSelfProductPrice.setIsStart("3");
-//				}
+			} else {
+				adGroupSelfProductPrice.setIsStart("3");
 			}
-			
+
 			AdAd ad = mallBusinessService.findByTypeAndGroup(Integer.parseInt(groupId), activityName);
 			adGroupSelfProductPrice.setUrl(ad.getImageLinkUrl());
 			adGroupSelfProductPrice.setImage(ad.getImagePath());

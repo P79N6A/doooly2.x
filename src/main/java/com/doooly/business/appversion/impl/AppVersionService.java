@@ -195,8 +195,8 @@ public class AppVersionService implements AppVersionServiceI {
 			int result = errorLogDao.insert(errorLog);
 		} catch (Exception e) {
 			logger.error("保存app异常日志，error=" + e.getMessage(), e);
-			return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess);
+			return new MessageDataBean(MessageDataBean.failure_code, MessageDataBean.failure_mess);
 		}
-		return new MessageDataBean(MessageDataBean.failure_code, MessageDataBean.failure_mess);
+		return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess);
 	}
 }

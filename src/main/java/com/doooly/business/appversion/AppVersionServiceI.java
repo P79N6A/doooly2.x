@@ -1,5 +1,7 @@
 package com.doooly.business.appversion;
 
+
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 
 /**
@@ -17,4 +19,16 @@ public interface AppVersionServiceI {
     MessageDataBean getStartUpUrl(String groupNum,String versions);
 
     MessageDataBean saveRegistrationID(String uniqueIdentification, String registrationId, String userId, String type);
+    /**
+     * 保存错误日志信息
+    * @author  hutao 
+    * @date 创建时间：2018年11月16日 下午3:02:57 
+    * @version 1.0 
+    * @parameter  
+    * @since  
+    * @return
+     */
+	MessageDataBean saveErrorLog(JSONObject req);
+    
+    
 }

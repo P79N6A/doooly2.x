@@ -59,6 +59,8 @@ public class AdOrderReport {
 	// 订单来源
 	private String orderChannel;
 
+	private String cashDeskSource;	// 订单收银台来源 d:兜礼收银台 m:商户收银台
+
 	private Integer isSource;// 订单来源 0:机票个人 1：机票分销商 2：合作商家 3：睿渠平台
 
 	private String airlinesn; // 吉祥订单编号
@@ -356,6 +358,14 @@ public class AdOrderReport {
 		return null;
 	}
 
+	public String getCashDeskSource() {
+		return cashDeskSource;
+	}
+
+	public void setCashDeskSource(String cashDeskSource) {
+		this.cashDeskSource = cashDeskSource;
+	}
+
 	public String getTotalPriceString() {
 		return new StringBuffer("￥").append(totalPrice).toString();
 	}
@@ -449,6 +459,7 @@ public class AdOrderReport {
 		map.put("serviceCharge", this.getServiceCharge());
 		map.put("voucher", this.getVoucher());
 		map.put("openRebateSwitch", this.isOpenRebateSwitch());
+        map.put("cashDeskSource", this.getCashDeskSource());
 		return map;
 	}
 

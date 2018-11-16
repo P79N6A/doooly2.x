@@ -9,6 +9,8 @@ public class OrderReq extends BaseReq<OrderReq> {
 	private Integer currentPage;
 	private Integer totalPage;
 	private Integer pageSize;
+	private Long businessId;
+	
 	public Integer getType() {
 		return type;
 	}
@@ -46,6 +48,12 @@ public class OrderReq extends BaseReq<OrderReq> {
 	}
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+	public Long getBusinessId() {
+		return businessId;
+	}
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
 	}
 	
 	

@@ -878,12 +878,9 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id 
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
-        <where>
-           1=1 
-           
-            <if test="userId != null and userId != ''">
-                AND a.user_id = #{userId}
-            </if>
+        <where>    
+            a.user_id = #{userId}
+  
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
             </if>
@@ -892,6 +889,11 @@
             </if>            
             <if test="isUserRebate !=null and  isUserRebate!=''">
             	AND  a.is_user_rebate = #{isUserRebate}
+            </if>
+              <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
             </if>
         </where>
          and a.del_flag = 0
@@ -908,7 +910,12 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
         <where>
-           1=1 AND a.user_id = #{userId}
+            a.user_id = #{userId}
+            <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
             </if>
@@ -933,8 +940,12 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id      
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
         <where>
-           1=1 AND   a.user_id = #{userId}
-           
+            a.user_id = #{userId}
+            <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
             </if>
@@ -974,10 +985,11 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id 
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
-           1=1 
-           
-            <if test="userId != null and userId != ''">
-                AND a.user_id = #{userId}
+           a.user_id = #{userId}
+             <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
             </if>
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
@@ -1002,7 +1014,12 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
         <where>
-           1=1 AND a.user_id = #{userId}
+            a.user_id = #{userId}
+            <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
             </if>
@@ -1026,8 +1043,12 @@
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id      
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id            
         <where>
-           1=1 AND   a.user_id = #{userId}
-           
+            a.user_id = #{userId}
+            <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
             <if test="beginOrderDate != null and beginOrderDate != ''">
                 AND a.order_date &gt;= #{beginOrderDate}
             </if>

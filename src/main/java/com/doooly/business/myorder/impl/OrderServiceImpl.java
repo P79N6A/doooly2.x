@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setIsSource(report.getIsSource());
 			resp.setIsUserRebate(report.getIsUserRebate());
 			resp.setLogo(report.getLogo());
-			resp.setOrderDate(com.doooly.business.utils.DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
+			resp.setOrderDate(DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
 			resp.setOrderId(report.getOrderId());
 			resp.setOrderNumber(report.getOrderNumber());
 			resp.setProductType(report.getProductType());
@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setVoucher(report.getVoucher());
 			resp.setBusinessId(report.getBusinessId());
 			resp.setIsSource(report.getIsSource());
+			resp.setSystemDate(DateUtils.formatDate(new Date(), "yyyy.MM.dd HH:mm:ss"));
 			
 			 //查询订单明细
 	        AdOrderDetail adOrderDetailQuery = new AdOrderDetail();

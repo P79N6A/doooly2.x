@@ -8,6 +8,7 @@ public class OrderPoReq extends BasePo{
 	private Date endOrderDate;
 	private Integer isUserRebate;
 	private Integer type;
+	private Long businessId;
 	
 	public Long getUserId() {
 		return userId;
@@ -38,6 +39,12 @@ public class OrderPoReq extends BasePo{
 	}
 	public void setType(Integer type) {
 		this.type = type;
+	}
+	public Long getBusinessId() {
+		return businessId;
+	}
+	public void setBusinessId(Long businessId) {
+		this.businessId = businessId;
 	}
 	
 

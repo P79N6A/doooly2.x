@@ -1,5 +1,8 @@
 package com.doooly.publish.rest.app;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 /**
@@ -23,5 +26,5 @@ public interface AppErrorLogService {
 	* @since  
 	* @return
 	 */
-	MessageDataBean insert(JSONObject params);
+	MessageDataBean insert(JSONObject params,@Context HttpServletRequest request);
 }

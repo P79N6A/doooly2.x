@@ -1,6 +1,8 @@
 package com.doooly.business.appversion;
 
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 
@@ -28,7 +30,7 @@ public interface AppVersionServiceI {
     * @since  
     * @return
      */
-	MessageDataBean saveErrorLog(JSONObject req);
+	MessageDataBean saveErrorLog(JSONObject req, HttpServletRequest request);
     
     
 }

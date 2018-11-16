@@ -1,9 +1,11 @@
 package com.doooly.publish.rest.app.impl;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +44,9 @@ public class AppErrorLogServiceRest implements AppErrorLogService {
 	@Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@Consumes(MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@Override
-	public MessageDataBean insert(JSONObject req) {
-		log.info("保存app异常信息请求参数={}", req);
-		MessageDataBean result = appVersionService.saveErrorLog(req);
+	public MessageDataBean insert(JSONObject reqJson, @Context HttpServletRequest request) {
+		log.info("保存app异常信息请求参数={}", reqJson);
+		MessageDataBean result = appVersionService.saveErrorLog(reqJson, request);
 		return result;
 	}
 

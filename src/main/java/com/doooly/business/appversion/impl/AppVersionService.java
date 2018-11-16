@@ -2,6 +2,8 @@ package com.doooly.business.appversion.impl;
 
 import java.util.HashMap;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,11 +184,14 @@ public class AppVersionService implements AppVersionServiceI {
 	}
 
 	@Override
-	public MessageDataBean saveErrorLog(JSONObject req) {
+	public MessageDataBean saveErrorLog(JSONObject req, HttpServletRequest request) {
 		String channel = req.getString("clientChannel");
 		JSONObject param = req.getJSONObject("param");
 		String logStr = param.getString("logStr");
 		String terminalModel = param.getString("terminalModel");
+		if(StringUtils.isBlank(terminalModel)){
+			terminalModel = request.getHeader("user-agent");
+		}
 		String appVersion = param.getString("appVersion");
 		String pageUrl = param.getString("pageUrl");
 		Long userId = param.getLong("userId");

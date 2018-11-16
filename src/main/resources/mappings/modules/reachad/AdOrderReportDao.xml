@@ -615,6 +615,7 @@
         a.state AS "state",
         a.type AS "type",
         a.order_number AS "orderNumber",
+		IFNULL(aos.cash_desk_source,'m') AS "cashDeskSource"
         a.order_date AS "orderDate",
         IFNULL(a.user_rebate,0.00) AS "userRebate",
         IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",
@@ -627,6 +628,7 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number AND a.bussiness_id = abs.business_id
+		LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.del_flag = 0
             <if test="adBusiness != null and adBusiness.businessId != null and adBusiness.businessId != ''">

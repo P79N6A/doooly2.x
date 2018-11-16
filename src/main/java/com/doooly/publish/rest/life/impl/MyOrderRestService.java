@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myorder.dto.OrderDetailReq;
 import com.doooly.business.myorder.dto.OrderDetailResp;
 import com.doooly.business.myorder.dto.OrderReq;
@@ -53,6 +54,9 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 	
 	@Autowired
 	private OrderService orderservice;
+	
+	 @Autowired
+	 private ConfigDictServiceI configDictServiceI;
 
 	@POST
 	@Path("/getOrders")
@@ -143,6 +147,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		Pagelab pagelab = new Pagelab(req.getCurrentPage(), req.getPageSize());
 		List<OrderPoResp>  orderResultList = orderservice.getOrderList(req);
 		OrderResp resp = null;
+		String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
 		for(OrderPoResp  orderPoResp : orderResultList) {
 			resp = new OrderResp();
 			resp.setAmountPayable(orderPoResp.getTotalPrice());
@@ -166,7 +171,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			resp.setGoods(orderPoResp.getGoods());
 			resp.setSpecification(orderPoResp.getSpecification());
 			resp.setProductImg(orderPoResp.getProductImg());
-			Date intervalDayDate = DateUtils.addDays(orderPoResp.getOrderDate(), 30);//推后30天的日期
+			Date intervalDayDate = DateUtils.addDays(orderPoResp.getOrderDate(), Integer.parseInt(orderDay));//推后30天的日期
 			resp.setIntegrateReturnDate(com.doooly.business.utils.DateUtils.formatDate(intervalDayDate, "yyyy.MM.dd"));		
 			orderList.add(resp);
 		}

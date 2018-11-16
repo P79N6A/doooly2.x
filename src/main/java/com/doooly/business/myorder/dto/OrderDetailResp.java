@@ -45,6 +45,7 @@ public class OrderDetailResp {
 	private String integrateReturnDate;
 	private String businessId;
 	private String groupShortName;
+	private String systemDate;
 	
 	public long getId() {
 		return id;
@@ -282,6 +283,12 @@ public class OrderDetailResp {
 	}
 	public void setGroupShortName(String groupShortName) {
 		this.groupShortName = groupShortName;
+	}
+	public String getSystemDate() {
+		return systemDate;
+	}
+	public void setSystemDate(String systemDate) {
+		this.systemDate = systemDate;
 	}
 
 }

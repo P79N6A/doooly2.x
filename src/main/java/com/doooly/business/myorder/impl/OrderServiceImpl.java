@@ -2,7 +2,6 @@ package com.doooly.business.myorder.impl;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -82,6 +81,7 @@ public class OrderServiceImpl implements OrderService{
 		orderPoReq.setUserId(Long.parseLong(orderReq.getUserId()));
 		orderPoReq.setStartIndex(orderReq.getCurrentPage()*orderReq.getPageSize()-orderReq.getPageSize());
 		orderPoReq.setPageSize(orderReq.getPageSize());
+		orderPoReq.setBusinessId(orderReq.getBusinessId());
 		//所有订单列表
 		if(OrderType.ALL == orderReq.getType()) {
 			return adOrderReportDao.findALLOrderList(orderPoReq);
@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setIsSource(report.getIsSource());
 			resp.setIsUserRebate(report.getIsUserRebate());
 			resp.setLogo(report.getLogo());
-			resp.setOrderDate(com.doooly.business.utils.DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
+			resp.setOrderDate(DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
 			resp.setOrderId(report.getOrderId());
 			resp.setOrderNumber(report.getOrderNumber());
 			resp.setProductType(report.getProductType());
@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setVoucher(report.getVoucher());
 			resp.setBusinessId(report.getBusinessId());
 			resp.setIsSource(report.getIsSource());
+			resp.setSystemDate(DateUtils.formatDate(new Date(), "yyyy.MM.dd HH:mm:ss"));
 			
 			 //查询订单明细
 	        AdOrderDetail adOrderDetailQuery = new AdOrderDetail();
@@ -163,14 +164,12 @@ public class OrderServiceImpl implements OrderService{
 			adOrderReport.setAdUser(adUser);
 			putOrderReportToMapByOrderReportId(resp, adOrderReport);
 			resp.setBillingState(report.getBillingState());		
-			Date intervalDayDate = DateUtils.addDays(report.getOrderDate(), 30);//推后30天的日期
+			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+			Date intervalDayDate = DateUtils.addDays(report.getOrderDate(),  (StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));//
 			resp.setIntegrateReturnDate(com.doooly.business.utils.DateUtils.formatDate(intervalDayDate, "yyyy.MM.dd"));		
 		
 			AdGroup adGroup =adGroupDao.getGroupLogoByUserId(report.getUserId().intValue());
 			resp.setGroupShortName(adGroup != null ? adGroup.getGroupShortName() : "");
-			
-			
-		adGroup.getGroupShortName();
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -249,6 +248,7 @@ public class OrderServiceImpl implements OrderService{
 			orderPoReq.setUserId(Long.parseLong(orderReq.getUserId()));
 			orderPoReq.setStartIndex(orderReq.getCurrentPage()*orderReq.getPageSize()-orderReq.getPageSize());
 			orderPoReq.setPageSize(orderReq.getPageSize());
+			orderPoReq.setBusinessId(orderReq.getBusinessId());
 			//所有订单列表
 			if(OrderType.ALL == orderReq.getType()) {
 				return adOrderReportDao.countALLOrder(orderPoReq);

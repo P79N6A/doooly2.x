@@ -60,8 +60,7 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 			// String uid = request.getRequestHeader("uid").get(0);
 			String userId = redisTemplate.opsForValue().get(userToken);
 			String channel = request.getRequestHeader(Constants.CHANNEL).get(0);
-			log.info(String.format("====【JerseyRequestFilter】Jesery请求拦截器，userId=%s,token=%s,channel=%s", userId,
-					userToken, channel));
+			log.info("====【JerseyRequestFilter】-request headers="+request.getRequestHeaders());
 
 			// 3.验证token有效性
 			boolean validResult = TokenUtil.validUserToken(channel, userId, userToken);

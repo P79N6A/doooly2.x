@@ -240,6 +240,9 @@
 		ad_coupon_activity a
 		WHERE
 		a.id_flag = #{idFlag}
+		AND a.state = '1'
+		AND a.begin_date &lt; NOW()
+		AND a.end_date &gt; NOW()
 		ORDER BY a.create_date DESC
 		limit 1
 	</select>

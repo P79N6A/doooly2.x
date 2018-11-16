@@ -1122,5 +1122,4 @@
         GROUP BY YEAR (order_date), MONTH (order_date)
         ORDER BY a.order_date DESC
     </select>
-
 </mapper>

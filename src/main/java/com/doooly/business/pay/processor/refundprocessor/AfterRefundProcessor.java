@@ -2,6 +2,7 @@ package com.doooly.business.pay.processor.refundprocessor;
 
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.reachad.Order;
 
 /***
  * 退款成功后调用此接口
@@ -11,6 +12,6 @@ import com.doooly.dto.common.PayMsg;
  */
 public interface AfterRefundProcessor {
 
-	public PayMsg process(OrderVo order);
+	public PayMsg process(OrderVo order, Order o);
 	
 }

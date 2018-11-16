@@ -16,6 +16,17 @@
 		abs.store_name AS "storeName"
 	</sql>
 
+	<sql id="adReturnPoints">
+		a.id AS "id",
+		a.user_id AS "userId",
+		a.order_id AS "orderId",
+		a.report_id AS "reportId",
+		a.amount AS "amount",
+		a.type AS "type",
+		a. STATUS AS "status",
+		a.create_date AS "createDate"
+	</sql>
+
 	<sql id="joinTables">
 		LEFT JOIN ad_user u ON a.user_id = u.id
 		LEFT JOIN _order o ON a.order_id = o.id
@@ -149,4 +160,40 @@
 			receive_stuts=0
 		</where>
 	</update>
+
+    <insert id="insert">
+        INSERT INTO ad_return_points(
+            user_id,
+            order_id,
+            report_id,
+            amount,
+            type,
+            status,
+            create_date
+        ) VALUES (
+            #{userId},
+            #{orderId},
+            #{reportId},
+            #{amount},
+            #{type},
+            #{status},
+            now()
+        )
+    </insert>
+
+    <select id="get" resultType="AdReturnPoints">
+        SELECT
+        <include refid="adReturnPoints" />
+        FROM
+        ad_return_points a
+        <where>
+            a.del_flag = 0 AND a.user_id = #{userId}
+            <if test="orderId != null and orderId != ''">
+                AND a.order_id =#{orderId}
+            </if>
+            <if test="type != null and type != ''">
+                AND a.type =#{type}
+            </if>
+        </where>
+    </select>
 </mapper>

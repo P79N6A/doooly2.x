@@ -23,12 +23,14 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdUser;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -67,13 +69,14 @@ public class RefundServiceImpl extends AbstractRefundService {
      * @param order
      * @return
      */
-    public ResultModel dooolyPayRefund(OrderVo order,String merchantRefundNo) {
+    public ResultModel dooolyPayRefund(OrderVo order,String merchantRefundNo,String refundType) {
         // 积分退款
         AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
         JSONObject params = new JSONObject();
         params.put("businessId", business.getBusinessId());
         params.put("merchantOrderNo", order.getOrderNumber());
         params.put("merchantRefundNo", merchantRefundNo);
+        params.put("refundType", refundType);
         params.put("id", business.getId());
         ResultModel resultModel = newPaymentServiceI.dooolyPayRefund(params);
         logger.info("收银台退款返回结果code:{},info:{},data:{}",resultModel.getCode(),resultModel.getInfo(),resultModel.getData());
@@ -87,8 +90,17 @@ public class RefundServiceImpl extends AbstractRefundService {
                 String mobiles = adUser.getTelephone();
                 String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.refund_success_template_code;
                 JSONObject paramSMSJSON = new JSONObject();
-                paramSMSJSON.put("product", orderItem.getGoods() + "-" + orderItem.getSku());
-                paramSMSJSON.put("integral", order.getTotalMount().toString());
+                String product ;
+                if(StringUtils.isNotBlank(orderItem.getSku())){
+                    product = orderItem.getGoods() + "-" + orderItem.getSku();
+                }else {
+                    product = orderItem.getGoods();
+                }
+                Map<String,Object> resultMap = (Map<String, Object>) resultModel.getData();
+                BigDecimal refundFee = (BigDecimal) resultMap.get("refundFee");
+                BigDecimal refundIntegral = (BigDecimal) resultMap.get("refundIntegral");
+                paramSMSJSON.put("product",product );
+                paramSMSJSON.put("integral", refundFee.add(refundIntegral));
                 int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
                 logger.info("sendMsg orderNum = {},i = {}", order.getOrderNumber(), i);
             } catch (Exception e) {
@@ -114,7 +126,13 @@ public class RefundServiceImpl extends AbstractRefundService {
         for (OrderItemVo item : items) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("code",item.getCode());
-            jsonObject.put("goods",item.getGoods()+"-"+ item.getSku());
+            String goods;
+            if(item.getSku()!= null){
+                goods = item.getGoods()+"-"+ item.getSku();
+            }else {
+                goods = item.getGoods();
+            }
+            jsonObject.put("goods",goods);
             jsonObject.put("number",item.getNumber());
             jsonObject.put("amount",item.getAmount());
             jsonObject.put("category",item.getCategoryId());

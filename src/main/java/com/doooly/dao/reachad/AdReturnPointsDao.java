@@ -1,11 +1,10 @@
 package com.doooly.dao.reachad;
 
-import java.util.Date;
-import java.util.List;
-
+import com.doooly.entity.reachad.AdReturnPoints;
 import org.apache.ibatis.annotations.Param;
 
-import com.doooly.entity.reachad.AdReturnPoints;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @Description: 待返积分
@@ -45,4 +44,14 @@ public interface AdReturnPointsDao {
 	List<AdReturnPoints> getListByUserId(@Param("userId") Long userId);
 	
 	int receiveUserReturnPoints(@Param("userId") Long userId);
+
+    void insert(AdReturnPoints adReturnPoints);
+
+    /**
+     * 通过对象查询
+     * @param adReturnPoints
+     * @return
+     */
+    AdReturnPoints get(AdReturnPoints adReturnPoints);
+
 }

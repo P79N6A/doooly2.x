@@ -32,6 +32,8 @@ import com.doooly.dao.reachad.AdPayFlowDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdRefundFlowDao;
+import com.doooly.dao.reachad.AdReturnDetailDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
@@ -42,6 +44,7 @@ import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdRefundFlow;
+import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
@@ -104,6 +107,16 @@ public class NewPaymentService implements NewPaymentServiceI {
     private ReturnFlowService returnFlowService;
     @Autowired
     private RefundService refundService;
+    @Autowired
+    private AdReturnFlowDao adReturnFlowDao;
+    @Autowired
+    private AdReturnDetailDao adReturnDetailDao;
+
+    // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
+    private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
+    // 退款同步，唯一标识，缓存值4个0（0000）
+    private static String SYNC_REFUND_CODE_VALUE = "0000";
+
 
     @Override
     public ResultModel authorize(String businessId) {
@@ -150,7 +163,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -276,13 +289,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = orderService.getByOrderNum(orderNum);
         Integer isSource = order.getIsSource();
         //自营商品全是兜礼支付
+        /* 20181109 注释掉都走新的 废除ad_pay_flow
         PayMsg payMsg;
         if (isSource == 3) {
             //说明是自营订单
             payMsg = prePay(params);
         } else {
             payMsg = prePayNew(params);
-        }
+        }*/
+        PayMsg payMsg = prePayNew(params);
         //为空或者校验失败直接返回错误信息
         if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
             return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
@@ -302,7 +317,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -428,14 +443,16 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "参数解密失败");
         }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
-        PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
+        //PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();
-        json.put("payFlowId", payFlow.getId());
+        //json.put("payFlowId", payFlow.getId());
         json.put("orderNum", merchantOrderNo);
         json.put("integralPayStatus", retJson.getString("integralPayStatus"));
         json.put("payAmount", retJson.getString("payAmount"));
         json.put("payType", retJson.getString("payType"));
         json.put("realPayType", retJson.getString("realPayType"));
+        json.put("outTradeNo", retJson.getString("outTradeNo"));
+        json.put("payEndTime", retJson.getString("payEndTime"));
         json.put("code", MessageDataBean.success_code);
         PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
         return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
@@ -457,7 +474,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("nonceStr", RandomStringUtils.random(6, "123456789zxc"));
         param.put("id", business.getId());
         param.put("businessId", business.getBusinessId());
-        if (isSource == 3) {
+        param.put("isSource", 3);//标记是兜礼的查询
+        //20181109注释掉不区分来源都用新的，用订单状态判断废除 ad_pay_flow表
+        /*if (isSource == 3) {
             //说明是自营订单
             PayFlow flow = payFlowService.getByOrderNum(orderNum, payType, null);
             if (flow == null) {
@@ -469,21 +488,51 @@ public class NewPaymentService implements NewPaymentServiceI {
             } else {
                 payMsg = queryNewPayResult(param);
                 if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                    Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
+                    logger.info("查询结果data{}",data);
                     //说明支付成功处理结果
                     JSONObject retJson = new JSONObject();
                     retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                     retJson.put("orderNum", orderNum);
                     retJson.put("payFlowId", flow.getId());
-                    //retJson.put("integralPayStatus", retJson.getString("integralPayStatus"));
-                    //retJson.put("payAmount", retJson.getString("payAmount"));
-                    //retJson.put("payType", retJson.getString("payType"));
-                    //retJson.put("realPayType", retJson.getString("realPayType"));
-                    retJson.put("code", MessageDataBean.success_code);
-                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+                    retJson.put("integralPayStatus", data.get("payStatus"));
+                    retJson.put("payAmount", data.get("orderAmount"));
+                    retJson.put("realPayType", PayFlowService.PAYTYPE_CASHIER_DESK);
+                    //retJson.put("code", MessageDataBean.success_code);
+                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
                 }
             }
         } else {
             payMsg = queryNewPayResult(param);
+            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                //说明支付成功处理结果
+                JSONObject retJson = new JSONObject();
+                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
+                retJson.put("orderNum", orderNum);
+                retJson.put("code", MessageDataBean.success_code);
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+            }
+        }*/
+        if (OrderService.PayState.PAID.getCode() == order.getState()) {
+            //得到支付平台通知并已经处理过支付结果, 直接返回结果
+            payMsg = ResultModel.ok();
+        } else {
+            payMsg = queryNewPayResult(param);
+            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
+                logger.info("查询结果data{}", data);
+                //说明支付成功处理结果
+                JSONObject retJson = new JSONObject();
+                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
+                retJson.put("orderNum", orderNum);
+                retJson.put("integralPayStatus", data.get("payStatus"));
+                retJson.put("payAmount", data.get("orderAmount"));
+                retJson.put("realPayType", data.get("payType"));
+                retJson.put("outTradeNo", data.get("outTradeNo"));
+                retJson.put("payEndTime", data.get("payEndTime"));
+                //retJson.put("code", MessageDataBean.success_code);
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
+            }
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
@@ -533,7 +582,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -667,7 +716,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //构建收银台接口需要参数
         JSONObject param = new JSONObject();
         param.put("businessId", order.getBussinessId());
-        param.put("isPayPassword", "2".equals(user.getIsPayPassword())?"2":1);//处理密码模式都是验证码模式
+        param.put("isPayPassword", "2".equals(user.getIsPayPassword()) ? "2" : 1);//处理密码模式都是验证码模式
         PayMsg payMsg = new PayMsg(OrderMsg.valid_pass_code, OrderMsg.valid_pass__mess);
         payMsg.setJsonData(param);
         return payMsg;
@@ -681,6 +730,10 @@ public class NewPaymentService implements NewPaymentServiceI {
      */
     private Long checkOrderStatus(OrderVo order) {
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
+            return order.getOrderId();
+        }
+        if (order.getState() == OrderService.PayState.PAID.getCode()) {
+            //状态已完成
             return order.getOrderId();
         }
         return null;
@@ -704,7 +757,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -740,7 +793,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -779,7 +832,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -796,7 +849,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
-        logger.info("退款返回结果",jsonObject.toJSONString());
+        logger.info("退款返回结果", jsonObject.toJSONString());
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
@@ -827,7 +880,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
-            }else {
+            } else {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
             }
         }
@@ -844,12 +897,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_APPLY_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
-        return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"),jsonObject.getString("data"));
+        return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"), jsonObject.getString("data"));
     }
 
     @Override
     public ResultModel dooolyRefundCallback(JSONObject json) {
-        logger.info("退款通知参数：{}",json.toJSONString());
+        logger.info("退款通知参数：{}", json.toJSONString());
         String code = json.getString("code");
         String info = json.getString("info");
         String paramstr = json.getString("param");
@@ -861,40 +914,45 @@ public class NewPaymentService implements NewPaymentServiceI {
         String refundFee = param.getString("refundFee");
         String settlementRefundFee = param.getString("settlementRefundFee");
         String refundStatus = param.getString("refundStatus");
+        //添加redis锁防止并发同步====redis检测用户是否已经收到通知了
+        if (!redisTemplate.opsForValue().setIfAbsent(
+                String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo),
+                SYNC_REFUND_CODE_VALUE)) {
+            //说明已经通知了
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "已经收到通知了");
+        }
         if (refundStatus.equals(REFUND_STATUS_S)) {
             //说明退款成功
+            //在查询下订单
             OrderVo order = checkOrderStatus(merchantOrderNo);
             // 修改订单状态-已退款
-            int u2 = 0;
-            //在查询下订单
-            if(order.getType()!= OrderService.OrderStatus.RETURN_ORDER.getCode()){
-                //说明还没处理
-                // 修改订单状态-已退款
-                u2 = orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
-                //退款成功
-                //退款成功
-                int payType1 = Integer.parseInt(payType);
-                if(payType1!=0){
-                    //非积分需要插入流水
-                    payType1 = 3;//微信
-                    saveOneOrder(order, payType1,refundFee,settlementRefundFee);
-                }
+            // 修改订单状态-已退款
+            orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
+            //退款成功
+            int payType1 = Integer.parseInt(payType);
+            if (payType1 != 0) {
+                //非积分需要插入流水
+                payType1 = 3;//微信
+                saveOneOrder(order, payType1, refundFee, settlementRefundFee, merchantRefundNo);
             }
             //积分退款要修改businessId一致
             updateBusinessId(order);
-            if ( u2 > 0) {
-                //退款后处理
-                afterRefundProcess(order);
-                return ResultModel.ok();
-            } else {
-                logger.error("u2 = {}", u2);
-                return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
-            }
+            //退款后处理
+            Order o = new Order();
+            o.setPayType(payType1);
+            o.setSerialNumber(merchantOrderNo);
+            o.setOrderNumber(order.getOrderNumber());
+            o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
+            afterRefundProcess(order,o);
+            return ResultModel.ok();
         }
+        //删掉redis锁key
+        redisTemplate.delete(String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo));
         return ResultModel.ok();
     }
 
-    private int saveOneOrder(OrderVo order,int payType,String amount,String price) {
+    private int saveOneOrder(OrderVo order, int payType, String amount, String price, String merchantRefundNo) {
         try {
             int rows = 0;
             logger.info("同步订单到_order开始. order ={} ===> payType = {}", order, payType);
@@ -913,7 +971,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             //积分是0其他是2现金
             o.setPayType(payType);
             o.setOrderNumber(order.getOrderNumber());
-            o.setSerialNumber(order.getOrderNumber());
+            o.setSerialNumber(merchantRefundNo);
             o.setOrderDate(order.getOrderDate());
             //o.setOriginOrderNumber(null);
             o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
@@ -930,28 +988,37 @@ public class NewPaymentService implements NewPaymentServiceI {
             rows = orderDao.insert(o);
             logger.info("同步订单到_order结束. rows = {}", rows);
             //同步detail
-            if(o.getId() != null){
-                List<OrderItemVo> items = order.getItems();
-                for (int i = 0; i < items.size(); i++) {
-                    OrderItemVo itVo = items.get(i);
-                    OrderDetail d = new OrderDetail();
-                    d.setOrderid(o.getId().intValue());
-                    d.setCode(itVo.getCode());
-                    d.setGoods(itVo.getGoods() + itVo.getSku());
-                    d.setAmount(itVo.getAmount());
-                    d.setPrice(itVo.getPrice());
-                    d.setNumber(itVo.getNumber());
-                    d.setTax(new BigDecimal("0"));
-                    d.setCategory(itVo.getCategoryId());
-                    d.setFirstCategory(null);
-                    d.setSecondCategory(null);
-                    d.setBrandName(null);
-                    d.setCreatedatetime(new Date());
-                    int r = orderDao.insertDetail(d);
-                    if (r > 0) {
-                        logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
+            if (o.getId() != null) {
+                List<AdReturnFlow> listByOrderId = adReturnFlowDao.getListByOrderId(order.getId(), merchantRefundNo, String.valueOf(payType));
+                for (AdReturnFlow adReturnFlow : listByOrderId) {
+                    List<OrderItemVo> items = adReturnDetailDao.getList(adReturnFlow);
+                    for (int i = 0; i < items.size(); i++) {
+                        OrderItemVo itVo = items.get(i);
+                        OrderDetail d = new OrderDetail();
+                        d.setOrderid(o.getId().intValue());
+                        d.setCode(itVo.getCode());
+                        String goods ;
+                        if(itVo.getSku()!=null){
+                            goods = itVo.getGoods() + itVo.getSku();
+                        }else {
+                            goods = itVo.getGoods();
+                        }
+                        d.setGoods(goods);
+                        d.setAmount(itVo.getAmount());
+                        d.setPrice(itVo.getPrice());
+                        d.setNumber(itVo.getNumber());
+                        d.setTax(itVo.getTax());
+                        d.setCategory(itVo.getCategoryId());
+                        d.setFirstCategory(null);
+                        d.setSecondCategory(null);
+                        d.setBrandName(null);
+                        d.setCreatedatetime(new Date());
+                        int r = orderDao.insertDetail(d);
+                        if (r > 0) {
+                            logger.info("同步订单到_orderDetail结束. index ={},rows = {}", i, rows);
+                        }
+                        rows += r;
                     }
-                    rows += r;
                 }
             }
             return rows;
@@ -964,9 +1031,12 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel refund(JSONObject json) {
+        logger.info("退款请求参数，json = {}", json);
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum);
+        String returnFlowNumber = json.getString("returnFlowNumber");
+        String payType = json.getString("payType");
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber,payType);
         return resultModel;
     }
 
@@ -976,21 +1046,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum);
         return resultModel;
-    }
-
-    private int updateRefundFlow(String refundFlowId, String refundId, String refundStatus, String errCode, String errReason) {
-        try {
-            AdRefundFlow flow = new AdRefundFlow();
-            flow.setId(Long.valueOf(refundFlowId));
-            flow.setRefundStatus(refundStatus);
-            flow.setRefundId(refundId);
-            flow.setErrorCode(errCode);
-            flow.setErrorReason(errReason);
-            return adRefundFlowDao.updateByPrimaryKeySelective(flow);
-        } catch (Exception e) {
-            logger.error("updateRefundFlow error,e = {}", e);
-        }
-        return 0;
     }
 
     private OrderVo checkOrderStatus(String orderNum) {
@@ -1020,10 +1075,10 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     /**
      * 退款成功后执行处理器
-     *
-     * @param order
+     *  @param order ad_order_report对象
+     * @param o _order对象
      */
-    private void afterRefundProcess(OrderVo order) {
+    private void afterRefundProcess(OrderVo order, Order o) {
         List<AfterRefundProcessor> afterPayProcessors = AfterRefundProcessorFactory.getAllProcessors();
         for (AfterRefundProcessor afterRefundProcessor : afterPayProcessors) {
             logger.info("afterRefundProcess() afterRefundProcessor = {}", afterRefundProcessor);
@@ -1031,7 +1086,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 @Override
                 public void run() {
                     logger.error("执行afterRefundProcess class = {}", afterRefundProcessor);
-                    afterRefundProcessor.process(order);
+                    afterRefundProcessor.process(order,o);
                 }
             }).start();
         }

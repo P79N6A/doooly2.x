@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.HTTPSClientUtils;
@@ -23,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 
 /**
@@ -44,7 +45,7 @@ public class CouponAuthorizationProcessor implements AfterPayProcessor{
     private AdBusinessDao adBusinessDao;
 
     @Override
-    public PayMsg process(OrderVo order, PayFlow payFlow, String realPayType) {
+    public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
         logger.info("CouponAuthorizationProcessor start. orderNum = {}",order.getOrderNumber());
         try {
             String couponId = order.getCouponId();

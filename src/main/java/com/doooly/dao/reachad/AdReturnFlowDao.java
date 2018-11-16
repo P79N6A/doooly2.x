@@ -4,6 +4,9 @@
 package com.doooly.dao.reachad;
 
 import com.doooly.entity.reachad.AdReturnFlow;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 商品退货订单 退货流水 DAO
@@ -15,8 +18,10 @@ public interface AdReturnFlowDao  {
 	
 	public int insert(AdReturnFlow adReturnFlow);
 	
-	public AdReturnFlow getByOrderId(long orderId);
-	
+	public AdReturnFlow getByOrderId(@Param("orderReportId") long orderReportId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
+
+	List<AdReturnFlow> getListByOrderId(@Param("orderReportId") long orderReportId, @Param("returnFlowNumber") String returnFlowNumber, @Param("payType") String payType);
+
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 	
 }

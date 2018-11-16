@@ -2,6 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.doooly.dao.reachad.AdReturnDetailDao">
 
+    <sql id="adReturnDetailColumns">
+        a.id AS "id",
+        a.category_id AS "categoryId",
+        a.code AS "code",
+        a.goods AS "goods",
+        a.amount AS "amount",
+        a.number AS "number",
+        a.tax AS "tax",
+        a.create_by AS "createBy",
+        a.del_flag AS "delFlag",
+        a.remarks AS "remarks",
+        a.update_date AS "updateDate",
+        a.update_by AS "updateBy",
+        a.create_date AS "createDate"
+    </sql>
 	
   <insert id="insert" parameterType="com.doooly.entity.reachad.AdReturnDetail" >
     insert into 
@@ -40,5 +55,16 @@
 	      #{createDate,jdbcType=TIMESTAMP} 
      )
   </insert>
+
+    <select id="getList" parameterType="com.doooly.entity.reachad.AdReturnFlow" resultType="com.doooly.business.order.vo.OrderItemVo">
+        SELECT
+        <include refid="adReturnDetailColumns"/>
+        FROM ad_return_detail a
+        <where>
+            <if test="id != ''">
+                AND a.return_flow_id = #{id}
+            </if>
+        </where>
+    </select>
 	
 </mapper>

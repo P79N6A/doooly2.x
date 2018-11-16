@@ -459,6 +459,7 @@ public class AdOrderReport {
 		map.put("serviceCharge", this.getServiceCharge());
 		map.put("voucher", this.getVoucher());
 		map.put("openRebateSwitch", this.isOpenRebateSwitch());
+        map.put("cashDeskSource", this.getCashDeskSource());
 		return map;
 	}
 

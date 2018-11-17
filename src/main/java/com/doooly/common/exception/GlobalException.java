@@ -10,6 +10,7 @@ package com.doooly.common.exception;
 public class GlobalException extends RuntimeException {
 	private static final long serialVersionUID = 6173855747626340068L;
 	public static String TOKEN_CODE = "40001";
+	public static String TOKEN_DESC = "token验证失败或token不存在";
 	private String code="-1";//未捕获异常
     private String msg;
 

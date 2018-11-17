@@ -67,7 +67,7 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 			// 验证失败返回token信息
 			if (!validResult) {
 				log.info("====【JerseyRequestFilter】-validResult：" + validResult + ",token验证失败或token不存在");
-				throw new GlobalException(GlobalException.TOKEN_CODE, "token验证失败或token不存在");
+				throw new GlobalException(GlobalException.TOKEN_CODE, GlobalException.TOKEN_DESC);
 			} else {
 				log.info("====【JerseyRequestFilter】-validResult：" + validResult + ",token验证成功");
 			}

@@ -12,16 +12,15 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
-		http://www.springframework.org/schema/aop 	http://www.springframework.org/schema/aop/spring-aop.xsd  
-		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd"
-	default-lazy-init="true">
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
 
 	<description>mybatis配置</description>
 	<!-- 引入dbconfig.properties属性文件 -->
 	<context:property-placeholder location="classpath:doooly.properties" />
 	<!-- 自动扫描(自动注入)，扫描me.gacl.service这个包以及它的子包的所有使用@Service注解标注的类 -->
-	<context:component-scan base-package="com.doooly.business.*,com.doooly.common.service" />
-
+	<context:component-scan
+		base-package="com.doooly.business.*,com.doooly.common.service" />
 	<!-- JNDI方式配置数据源 -->
 	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
 		<property name="jndiName" value="${jndiName}"></property> </bean> -->
@@ -100,7 +99,8 @@
 	</bean>
 
 	<!-- 注解方式配置事物 -->
-	<tx:annotation-driven transaction-manager="dataSourcetransactionManager" proxy-target-class="true"/>
+	<tx:annotation-driven transaction-manager="dataSourcetransactionManager"
+		proxy-target-class="true" />
 
 	<!-- 配置druid监控spring jdbc -->
 	<bean id="druid-stat-interceptor"
@@ -119,9 +119,7 @@
 			pointcut-ref="druid-stat-pointcut" />
 	</aop:config>
 
-
-	<bean id="autoGenerateSecretKey" class="com.doooly.job.AutoGenerateSecretKey" init-method="generateSecretKey()">
-	</bean>
-	
-
+	<!-- <bean id="autoGenerateSecretKey" class="com.doooly.job.AutoGenerateSecretKey"
+		init-method="generateSecretKey()">
+	</bean> -->
 </beans>

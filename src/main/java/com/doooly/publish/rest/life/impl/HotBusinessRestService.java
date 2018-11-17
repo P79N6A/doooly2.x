@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.mypoint.service.MyPointServiceI;
+import com.doooly.common.annotation.UserToken;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
 import com.doooly.common.dto.BaseReq;
 import com.doooly.dto.common.ConstantsLogin;
@@ -173,7 +174,8 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	@Path(value = "/businessServiceDataV21")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String businessServiceDataV21(JSONObject json) {
+	@UserToken
+	public String businessServiceDataV21(JSONObject json, @Context HttpServletRequest request) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			long start = System.currentTimeMillis();

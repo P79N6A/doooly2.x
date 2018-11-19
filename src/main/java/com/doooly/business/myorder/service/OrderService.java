@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.doooly.business.myorder.dto.HintReq;
 import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
 import com.doooly.business.myorder.dto.OrderDetailReq;
 import com.doooly.business.myorder.dto.OrderDetailResp;
 import com.doooly.business.myorder.dto.OrderReq;
@@ -24,5 +25,7 @@ public interface OrderService {
 	public void  cannelHint(OrderReq req);
 	
 	public HintResp getHint(HintReq req);
+	
+	public boolean deleteOrder(OrderDeleteReq req);
 
 }

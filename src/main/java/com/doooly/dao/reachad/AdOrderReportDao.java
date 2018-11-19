@@ -119,4 +119,6 @@ public interface AdOrderReportDao {
     Integer getLatestAmountTotal(OrderPoReq req);
     
     Integer getNotRebateOrderTotal(OrderPoReq req);
+    
+    Integer deleteOrder(Long orderId);
 }

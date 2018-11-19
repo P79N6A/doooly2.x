@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myorder.dto.HintReq;
 import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
 import com.doooly.business.myorder.dto.OrderDetailReq;
 import com.doooly.business.myorder.dto.OrderDetailResp;
 import com.doooly.business.myorder.dto.OrderReq;
@@ -248,6 +249,30 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			result.setData(resp);
 			
 			logger.info("我的订单(/hint)===> 接口耗时：{}", System.currentTimeMillis()-start);
+			return gson.toJson(result);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return "{}";
+	}
+	
+	@POST
+	@Path("/deleteOrder/v2/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String deleteOrder(JSONObject json) {
+		try {
+			long start = System.currentTimeMillis();
+			BaseRes<Boolean> result = new BaseRes<>(); 
+			logger.info("order.detail.param:{}",json.toJSONString());
+			Gson gson = new Gson();
+			OrderDeleteReq  req = gson.fromJson(json.toJSONString(), OrderDeleteReq.class);
+			
+			boolean flag =  orderservice.deleteOrder(req);
+			result.setCode("1000");
+			result.setData(flag);
+			logger.info("我的订单(/delete)===> 接口耗时：{}", System.currentTimeMillis()-start);
 			return gson.toJson(result);
 			
 		}catch(Exception e) {

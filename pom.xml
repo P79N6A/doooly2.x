@@ -600,12 +600,12 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 		</dependency>
-        <!--java 表情转换-->
-        <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>java-emoji-converter</artifactId>
-            <version>0.0.1</version>
-        </dependency>
+		<!--java 表情转换 -->
+		<dependency>
+			<groupId>com.github.binarywang</groupId>
+			<artifactId>java-emoji-converter</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>Doooly</finalName>

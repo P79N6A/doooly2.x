@@ -72,6 +72,10 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                 //修改订单金额加上手续费
                 logger.info("retStr {}", retStr);
                 OrderVo order = orderService.getByOrderNum(orderNum);
+                if(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode()==order.getState()){
+                    //说明订单已经完成
+                    return null;
+                }
                 if (order.getIsSource() == 3) {
                     //插入订单来源表,非自营会同步已支付订单
                     AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));

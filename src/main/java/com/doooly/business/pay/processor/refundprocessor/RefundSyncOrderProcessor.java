@@ -40,7 +40,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
     @Override
     public PayMsg process(OrderVo order, Order o) {
         if (order.getIsSource() == 3) {
-            //自营订单不同步
+            //自营订单不同步11
             return null;
         }
         logger.info("计算退货返利同步订单到_order开始. orderNum = {}", order.getOrderNumber());

@@ -334,7 +334,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
-							itemJson.put("cornerMakr", recharge.getCornerMark());
+							itemJson.put("cornerMark", recharge.getCornerMark());
 						}
 						listJson.add(itemJson);
 					}

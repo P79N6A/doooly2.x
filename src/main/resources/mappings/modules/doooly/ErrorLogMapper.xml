@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.doooly.ErrorLogDao" >
+  
+  <insert id="insert" parameterType="ErrorLog">
+  	insert into error_log(log_str,terminal_model,channel,user_id,app_version,page_url)
+  	values
+  	(#{logStr},#{terminalModel},#{channel},#{userId},#{appVersion},#{pageUrl})
+  </insert>
+</mapper>

@@ -10,6 +10,7 @@ public class OrderReq extends BaseReq<OrderReq> {
 	private Integer totalPage;
 	private Integer pageSize;
 	private Long businessId;
+	private String  hintState;
 	
 	public Integer getType() {
 		return type;
@@ -55,7 +56,12 @@ public class OrderReq extends BaseReq<OrderReq> {
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
 	}
-	
+	public String getHintState() {
+		return hintState;
+	}
+	public void setHintState(String hintState) {
+		this.hintState = hintState;
+	}
 	
 
 }

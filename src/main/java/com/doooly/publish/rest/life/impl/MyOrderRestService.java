@@ -127,6 +127,9 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			Gson gson = new Gson();
 			OrderReq req = gson.fromJson(json.toJSONString(), OrderReq.class);
 			String result =  list(req);
+			if(req.getHintState() != null) {
+				orderservice.cannelHint(req);
+			}
 			logger.info("我的订单(/list)===> 接口耗时：{}", System.currentTimeMillis()-start);
 			return result;
 		}catch(Exception e) {

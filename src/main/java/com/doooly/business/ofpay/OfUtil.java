@@ -1,6 +1,7 @@
 package com.doooly.business.ofpay;
 
 import com.doooly.common.constants.PropertiesHolder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -125,6 +126,9 @@ public class OfUtil {
 
 	public static Map<String, String> parseOfcardResponse(String xmlString) {
 		try {
+            if(xmlString.contains("&")){
+                xmlString = StringUtils.replace(xmlString,"&","&amp;");
+            }
 			Map<String, String> result = new HashMap<String, String>();
 			StringReader stringReader = new StringReader(xmlString);
 			InputSource inputSource = new InputSource(stringReader);

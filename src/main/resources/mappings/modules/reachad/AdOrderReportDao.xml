@@ -925,7 +925,7 @@
                 AND a.order_date &lt;= #{endOrderDate}
             </if>
             AND a.type = 1
-            AND  a.is_user_rebate = 0
+            
             AND a.user_rebate &gt; 0
 
         </where>
@@ -1029,7 +1029,7 @@
                 AND a.order_date &lt;= #{endOrderDate}
             </if>
             AND a.type = 1
-            AND  a.is_user_rebate = 0
+          
             AND a.user_rebate &gt; 0
 
         </where>
@@ -1125,4 +1125,56 @@
         ORDER BY a.order_date DESC
     </select>
 
+	<select id="getLatestOrderTotal" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Integer">
+  		SELECT
+			count(1) AS "total"
+		FROM ad_order_report a
+		<where>
+             a.user_id = #{userId}
+			<if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
+           
+        </where>
+         and a.del_flag = 0
+
+  	</select>
+  	<select id="getLatestAmountTotal" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Integer">
+  		SELECT
+			 count(1) AS "total"
+		FROM ad_order_report a
+		 <where>
+            a.user_id = #{userId}
+            <if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
+           
+            AND a.type = 1
+          
+            AND a.user_rebate &gt; 0
+
+        </where>
+         and a.del_flag = 0
+  	</select>
+  	<select id="getNotRebateOrderTotal" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Integer">
+  		SELECT
+			 count(1) AS "total"
+		FROM ad_order_report a
+		<where>
+         	 a.user_id = #{userId}
+			<if test="businessId != null and businessId != ''">
+                AND 
+                a.bussiness_id =#{businessId}
+                
+            </if>
+            
+            AND a.type in (99,1,5)
+            AND a.user_rebate &lt;= 0
+        </where>
+         and a.del_flag = 0
+  	</select>
 </mapper>

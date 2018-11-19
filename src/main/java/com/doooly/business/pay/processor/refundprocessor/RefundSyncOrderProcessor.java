@@ -1,5 +1,6 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
+import com.alibaba.fastjson.JSONArray;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.PayMsg;
@@ -46,9 +47,17 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
         logger.info("计算退货返利同步订单到_order开始. orderNum = {}", order.getOrderNumber());
         //查询需要计算的退货订单
         List<Order> list = orderDao.findList(o);
+        logger.info("process orderlist,{},{}",order.getOrderNumber(), JSONArray.toJSONString(list));
         if(CollectionUtils.isNotEmpty(list)){
             for (Order order2 : list) {
                 try {
+
+                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
+                    if (adReturnFlow == null) {
+                        logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getSerialNumber(),order2.getPayType());
+                        continue;
+                    }
+
                     //插入ad_return_points_log
                     AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
                     adReturnPointsLog.setOrderId(order2.getId());
@@ -60,12 +69,11 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
 
                     //插入ad_return_points
                     AdReturnPoints adReturnPoints = new AdReturnPoints();
-                    adReturnPoints.setUserId(String.valueOf(order.getUserId()));
-                    adReturnPoints.setOrderId(order2.getId());
+                    adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
                     AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
                     if(adReturnPoints1 == null){
                         //插入
-                        adReturnPoints.setReportId(String.valueOf(order.getId()));
+                        adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
                         adReturnPoints.setAmount(order2.getUserRebate());
                         adReturnPoints.setType(AdReturnPoints.TYPE_INTERCHANGE);
                         adReturnPoints.setStatus(AdReturnPoints.STATUS_EXPECTED);
@@ -92,7 +100,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
 
                     //计算完返利,重新查询order，同步ad_return_flow表
                     Order order3 = orderDao.get(String.valueOf(order2.getId()));
-                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order3.getSerialNumber(), String.valueOf(order3.getPayType()));
                     adReturnFlow.setUserRebate(order3.getUserRebate());
                     adReturnFlow.setBusinessRebateAmount(order3.getBusinessRebate());
                     adReturnFlow.setType(null);//不更新type值

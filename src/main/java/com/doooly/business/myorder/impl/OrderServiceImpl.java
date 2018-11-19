@@ -7,7 +7,11 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import com.doooly.business.dict.ConfigDictServiceI;
@@ -34,6 +38,7 @@ import com.doooly.entity.reachad.AdOrderDetail;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
+import com.doooly.entity.reachad.AdUserConn;
 
 /**
  * @Description: 我的订单
@@ -43,10 +48,12 @@ import com.doooly.entity.reachad.AdUserBusinessExpansion;
 @Service("OrderServiceImpl")
 public class OrderServiceImpl implements OrderService{
 	
+	private final static Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
+	
 	private final static String CP_AES_KEY = PropertiesConstants.dooolyBundle.getString("cp_aes_key");
 	
 	private final static int LATEST_ORDER_DAY =  45;
-
+	
 	 @Autowired
 	 private AdOrderReportDao adOrderReportDao;
 	 
@@ -62,6 +69,9 @@ public class OrderServiceImpl implements OrderService{
     
     @Autowired
     private ConfigDictServiceI configDictServiceI;
+    
+    @Autowired
+	protected StringRedisTemplate redisTemplate;
 	 
 	@Override
 	public List<OrderPoResp> getOrderList(OrderReq orderReq) {
@@ -172,7 +182,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setGroupShortName(adGroup != null ? adGroup.getGroupShortName() : "");
 			
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return resp;
 	}
@@ -264,5 +274,41 @@ public class OrderServiceImpl implements OrderService{
 			}
 			return 0L;
 		}
-	
+
+		@Override
+		public void cannelHint(OrderReq req) {
+			try {
+				ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+				String[] list = req.getHintState().split(",");
+				for (int i = 0; i < list.length; i++) {
+					Integer state = Integer.parseInt((list[i]));
+					//0,1,2
+					String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":"+state);
+					Integer value = StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal);
+					Integer total = getTotal(req,state);
+					logger.info("orderTotal:{},total:{}",orderTotal,total);
+					if(total > value) {
+						
+						opsForValue.set("ordertotal:"+req.getUserId()+":"+state,String.valueOf(total));
+					}
+				}
+			}catch(Exception e) {
+				logger.error(e.getMessage());
+			}
+			
+		}
+		
+		private int getTotal(OrderReq req,Integer state) {
+			AdUserConn adUser = adUserDao.getOrderTotal(String.valueOf(req.getUserId()));
+			
+			
+			if(0 == state) {
+				return adUser.getOrderTotal();
+			}else if(1 == state) {
+				return adUser.getFinishTotal();
+			}else if(2 ==  state) {
+				return  adUser.getCancelTotal();
+			}
+			return 0;
+		}
 }

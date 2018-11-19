@@ -19,4 +19,7 @@ public interface OrderService {
 	
 	public Long countOrderNum(OrderReq orderReq);
 	
+	public void  cannelHint(OrderReq req);
+	
+
 }

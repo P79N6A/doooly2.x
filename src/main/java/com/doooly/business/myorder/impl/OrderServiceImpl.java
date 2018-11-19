@@ -353,7 +353,7 @@ public class OrderServiceImpl implements OrderService{
 		@Override
 		public boolean deleteOrder(OrderDeleteReq req) {
 			Integer result = adOrderReportDao.deleteOrder(req.getOrderId());
-			if(result != null && result > 1) {
+			if(result != null && result >= 1) {
 				return true;
 			}
 			return false;

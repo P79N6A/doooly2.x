@@ -19,6 +19,7 @@ import com.doooly.business.myorder.constant.OrderType;
 import com.doooly.business.myorder.constant.ProductType;
 import com.doooly.business.myorder.dto.HintReq;
 import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
 import com.doooly.business.myorder.dto.OrderDetailReq;
 import com.doooly.business.myorder.dto.OrderDetailResp;
 import com.doooly.business.myorder.dto.OrderReq;
@@ -347,5 +348,14 @@ public class OrderServiceImpl implements OrderService{
 				hintResp.setNewCancelFlag(false);
 			}
 			return hintResp;
+		}
+
+		@Override
+		public boolean deleteOrder(OrderDeleteReq req) {
+			Integer result = adOrderReportDao.deleteOrder(req.getOrderId());
+			if(result != null && result > 1) {
+				return true;
+			}
+			return false;
 		}
 }

@@ -1176,4 +1176,8 @@
         </where>
          and a.del_flag = 0
   	</select>
+  	<update id="deleteOrder" parameterType="java.lang.Long">
+		update ad_order_report set	del_flag =  1,update_date = now()
+		where id = #{orderId}
+	</update>
 </mapper>

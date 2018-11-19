@@ -114,5 +114,9 @@ public interface AdOrderReportDao {
     
     List<Map<String,String>> findOrderdDetailSum(OrderPoReq req);
     
+    Integer getLatestOrderTotal(OrderPoReq req);
     
+    Integer getLatestAmountTotal(OrderPoReq req);
+    
+    Integer getNotRebateOrderTotal(OrderPoReq req);
 }

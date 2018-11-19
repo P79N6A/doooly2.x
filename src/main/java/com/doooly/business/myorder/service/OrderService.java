@@ -3,6 +3,8 @@ package com.doooly.business.myorder.service;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
 import com.doooly.business.myorder.dto.OrderDetailReq;
 import com.doooly.business.myorder.dto.OrderDetailResp;
 import com.doooly.business.myorder.dto.OrderReq;
@@ -21,5 +23,6 @@ public interface OrderService {
 	
 	public void  cannelHint(OrderReq req);
 	
+	public HintResp getHint(HintReq req);
 
 }

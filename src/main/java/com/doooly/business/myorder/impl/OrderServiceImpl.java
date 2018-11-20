@@ -302,15 +302,17 @@ public class OrderServiceImpl implements OrderService{
 		}
 		
 		private int getTotal(OrderReq req,Integer state) {
-			AdUserConn adUser = adUserDao.getOrderTotal(String.valueOf(req.getUserId()));
-			
-			
+			OrderPoReq orderPoReq = new OrderPoReq();
+			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
 			if(0 == state) {
-				return adUser.getOrderTotal();
+				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
+				orderPoReq.setEndOrderDate(new Date());
+				return  adOrderReportDao.getLatestOrderTotal(orderPoReq);
 			}else if(1 == state) {
-				return adUser.getFinishTotal();
+				return adOrderReportDao.getLatestAmountTotal(orderPoReq);
 			}else if(2 ==  state) {
-				return  adUser.getCancelTotal();
+				return adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
 			}
 			return 0;
 		}
@@ -320,7 +322,6 @@ public class OrderServiceImpl implements OrderService{
 			HintResp hintResp = new HintResp();
 			OrderPoReq orderPoReq = new OrderPoReq();
 			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
-			adOrderReportDao.getLatestOrderTotal(orderPoReq);
 			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 			String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
 			String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
@@ -332,17 +333,17 @@ public class OrderServiceImpl implements OrderService{
 			int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
 			int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
 			// 3.有新订单 设置flag
-			if(StringUtils.isNotEmpty(orderTotal) && orderTotalMap>Integer.valueOf(orderTotal)){
+			if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
 				hintResp.setNewOrderFlag(true);
 			}else{
 				hintResp.setNewOrderFlag(false);
 			}
-			if(StringUtils.isNotEmpty(finishTotal) && finishTotalMap>Integer.valueOf(finishTotal)){
+			if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
 				hintResp.setNewFinishFlag(true);
 			}else{
 				hintResp.setNewFinishFlag(false);
 			}
-			if(StringUtils.isNotEmpty(cancelTotal) && cancelTotalMap>Integer.valueOf(cancelTotal)){
+			if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
 				hintResp.setNewCancelFlag(true);
 			}else{
 				hintResp.setNewCancelFlag(false);

@@ -76,6 +76,13 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     //说明订单已经完成
                     return null;
                 }
+                AdOrderSource adOrderSource1 = new AdOrderSource();
+                adOrderSource1.setOrderNumber(orderNum);
+                adOrderSource1 =  adOrderSourceDao.get(adOrderSource1);
+                if(adOrderSource1 != null){
+                    //说明已经同步过
+                    return null;
+                }
                 if (order.getIsSource() == 3) {
                     //插入订单来源表,非自营会同步已支付订单
                     AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));

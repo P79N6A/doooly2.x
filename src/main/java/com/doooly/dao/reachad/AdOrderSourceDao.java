@@ -6,4 +6,6 @@ public interface AdOrderSourceDao {
 
 	int insert(AdOrderSource adOrderSource);
 
+    AdOrderSource get(AdOrderSource adOrderSource);
+
 }

@@ -41,7 +41,6 @@ import com.doooly.entity.reachad.AdOrderDetail;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
-import com.doooly.entity.reachad.AdUserConn;
 
 /**
  * @Description: 我的订单

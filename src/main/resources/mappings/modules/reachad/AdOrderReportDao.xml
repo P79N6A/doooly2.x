@@ -878,7 +878,7 @@
          <include refid="order_column_sql"/>
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number 
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
            a.user_id = #{userId}
@@ -908,7 +908,7 @@
          <include refid="order_column_sql"/>
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
             a.user_id = #{userId}
@@ -938,7 +938,7 @@
          <include refid="order_column_sql"/>
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
             a.user_id = #{userId}
@@ -983,7 +983,7 @@
          	count(a.id)
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number 
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
              a.user_id = #{userId}
@@ -1012,7 +1012,7 @@
           count(a.id)
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number 
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
             a.user_id = #{userId}
@@ -1041,7 +1041,7 @@
         	count(a.id)
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
-        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number
+        LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         <where>
          	 a.user_id = #{userId}

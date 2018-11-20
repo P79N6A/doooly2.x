@@ -196,4 +196,26 @@
             </if>
         </where>
     </select>
+
+
+	<update id="update" parameterType="com.doooly.entity.reachad.AdReturnPoints">
+		update ad_return_points
+		<set>
+			<if test="null != userId"> user_id = #{ userId ,jdbcType = BIGINT},</if>
+			<if test="null != orderId"> order_id = #{ orderId ,jdbcType = BIGINT},</if>
+			<if test="null != reportId"> report_id = #{ reportId ,jdbcType = BIGINT},</if>
+			<if test="null != amount"> amount = #{ amount ,jdbcType = DECIMAL},</if>
+			<if test="null != type"> type = #{ type ,jdbcType = CHAR},</if>
+			<if test="null != status"> status = #{ status ,jdbcType = CHAR},</if>
+			<if test="null != createBy"> create_by = #{ createBy ,jdbcType = VARCHAR},</if>
+			<if test="null != delFlag"> del_flag = #{ delFlag ,jdbcType = CHAR},</if>
+			<if test="null != remarks"> remarks = #{ remarks ,jdbcType = VARCHAR},</if>
+			<if test="null != updateDate"> update_date = #{ updateDate ,jdbcType = TIMESTAMP},</if>
+			<if test="null != updateBy"> update_by = #{ updateBy ,jdbcType = VARCHAR},</if>
+			<if test="null != createDate"> create_date = #{ createDate ,jdbcType = TIMESTAMP},</if>
+			<if test="null != receiveStuts"> receive_stuts = #{ receiveStuts ,jdbcType = CHAR},</if>
+			<if test="null != id"> id = #{ id ,jdbcType = BIGINT}</if>
+		</set>
+		where ID = #{id,jdbcType=NUMERIC}
+	</update>
 </mapper>

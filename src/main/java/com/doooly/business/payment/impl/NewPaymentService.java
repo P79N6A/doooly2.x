@@ -851,7 +851,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
-        logger.info("退款返回结果", jsonObject.toJSONString());
+        logger.info("退款返回结果,{}", jsonObject.toJSONString());
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");

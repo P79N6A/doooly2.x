@@ -22,15 +22,19 @@
 			b.`name`,
 			b.`code`,
 			b.sort sort,
+			b.floor_type floorType,
+			b.floor_type floorType,
 			tg.template_id templateId
 		FROM
 			ad_user u
 		INNER JOIN ad_home_template_group tg ON u.group_num = tg.group_id
 		INNER JOIN ad_home_template_item it ON it.template_id = tg.template_id
 		INNER JOIN ad_basic_type b ON it.floor_id = b.id
-		where u.id = #{userId} and b.type = 3
-		GROUP BY it.floor_id ORDER BY b.sort;
-
+		where 
+		u.id = #{userId} 
+		and b.type = #{type}
+		GROUP BY it.floor_id 
+		ORDER BY b.sort
 	</select>
   
 </mapper>

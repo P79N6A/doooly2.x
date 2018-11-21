@@ -16,4 +16,6 @@ public interface SelfProductRestServiceI {
 	/** 获取自营商品详情 */
 	String getSelfProductDetail(JSONObject obj);
 
+	/** 根据活动名获取SKU商品*/
+	String getSelfProductByName(JSONObject obj);
 }

@@ -1,6 +1,9 @@
 package com.doooly.common.dto;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.Serializable;
 @XmlRootElement
 public class BaseReq<T> implements Serializable {
@@ -9,13 +12,22 @@ public class BaseReq<T> implements Serializable {
 	private long timestamp;
 	//客户端渠道 wechat/浏览器/IOS/Android
 	private String clientChannel;
-	//接口访问分配ID
-	private String clientId;
 	//接口访问凭证，暂忽略
 	private String accessToken;
 	//接口请求业务参数
 	private T params;
 	
+	public static void main(String[] args) {
+		JSONObject req = new JSONObject();
+		req.put("timestamp", System.currentTimeMillis());
+		req.put("clientChannel", "Android");
+		req.put("accessToken", "1sdfsfsaOOFDOfdfdsa");
+		JSONObject params = new JSONObject();
+		params.put("address", "上海");
+		req.put("params", params);
+		System.out.println(req);
+		
+	}
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -27,12 +39,6 @@ public class BaseReq<T> implements Serializable {
 	}
 	public void setClientChannel(String clientChannel) {
 		this.clientChannel = clientChannel;
-	}
-	public String getClientId() {
-		return clientId;
-	}
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
 	}
 	public String getAccessToken() {
 		return accessToken;

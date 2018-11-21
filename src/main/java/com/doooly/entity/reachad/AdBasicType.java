@@ -2,17 +2,18 @@ package com.doooly.entity.reachad;
 
 /**
  * 活动类目，类型
+ * 
  * @author zhaoyipeng
  *
  */
- public class AdBasicType {
-	
+public class AdBasicType {
+
 	private Long id;
-	
+
 	private int code;
-	
+
 	private String name;
-	
+
 	private String type;
 
 	private String sort;
@@ -20,7 +21,26 @@ package com.doooly.entity.reachad;
 	private int floorId;
 
 	private int templateId;
+	
+	private Integer floorType;
+	//副标题
+	private String subTitle;
 
+	public String getSubTitle() {
+		return subTitle;
+	}
+
+	public void setSubTitle(String subTitle) {
+		this.subTitle = subTitle;
+	}
+
+	public Integer getFloorType() {
+		return floorType;
+	}
+
+	public void setFloorType(Integer floorType) {
+		this.floorType = floorType;
+	}
 
 	public Long getId() {
 		return id;

@@ -1,7 +1,9 @@
 package com.doooly.dto.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
+import com.doooly.common.util.BigDecimalValueFilter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -120,6 +122,15 @@ public class MessageDataBean {
 		json.put("msg", this.getMess());
 		json.put("data", data);
 		return json.toJSONString();
+	}
+
+	/** data-Map<String, Object> 保留2位小数,小数位0不省略*/
+	public String toFormatJsonString() {
+		JSONObject json = new JSONObject();
+		json.put("code", this.getCode());
+		json.put("msg", this.getMess());
+		json.put("data", data);
+		return JSON.toJSONString(json,new BigDecimalValueFilter());
 	}
 
 	/** data-JSONObject */

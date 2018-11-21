@@ -1,5 +1,6 @@
 package com.doooly.publish.rest.life.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.ws.rs.Consumes;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.product.entity.AdGroupSelfProductPrice;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.SelfProductRestServiceI;
@@ -66,6 +68,37 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			String userId = obj.getString("userId");
 			HashMap<String, Object> map = productService.getSelfProductDetail(productId, userId);
 			messageDataBean.setCode((String)map.get("code"));
+			messageDataBean.setData(map);
+		} catch (Exception e) {
+			logger.error("获取卡券商品详情页信息异常！", e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+	
+	@POST
+	@Path(value = "/getSelfProductByName")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String getSelfProductByName(JSONObject obj) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			String activityName = obj.getString("activityName");
+			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
+			Date now = new Date();
+			if(now.compareTo(adGroupSelfProductPrice.getSpecialStartDate()) < 0) {
+				adGroupSelfProductPrice.setIsStart("1");
+			} else if(now.compareTo(adGroupSelfProductPrice.getSpecialStartDate()) >= 0 && 
+					now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) <= 0) {
+				adGroupSelfProductPrice.setIsStart("2");
+			} else if(now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) > 0){
+				adGroupSelfProductPrice.setIsStart("3");
+			}
+			HashMap<String,Object> map = new HashMap<String,Object>();
+			map.put("adGroupSelfProductPrice", adGroupSelfProductPrice);
+			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setData(map);
 		} catch (Exception e) {
 			logger.error("获取卡券商品详情页信息异常！", e);

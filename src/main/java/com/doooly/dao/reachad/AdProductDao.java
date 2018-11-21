@@ -26,7 +26,12 @@ public interface AdProductDao extends BaseDaoI<AdProduct> {
 
     int getTotalNum();//查询上架商品总数
 
-    List<AdProduct> getGuideProductList(@Param("orderType")String orderType,@Param("startIndex")Integer startIndex, @Param("pageSize")Integer pageSize);
+    int getTotalNumv2(@Param("guideCategoryId") String guideCategoryId,@Param("recommendHomepage") String recommendHomepage);//查询上架商品总数
+
+    List<AdProduct> getGuideProductList(@Param("orderType") String orderType, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize);
 
     void updateSellCount(AdProduct adProduct);
+
+    List<AdProduct> getGuideProductListv2(@Param("guideCategoryId") String guideCategoryId, @Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize,@Param("recommendHomepage") String recommendHomepage);
+
 }

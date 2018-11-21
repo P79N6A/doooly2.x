@@ -143,6 +143,17 @@
         SELECT COUNT(1) FROM ad_product a WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
     </select>
 
+    <select id="getTotalNumv2" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM ad_product a
+        WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+        <if test="guideCategoryId != null">
+            and a.guide_category_id = #{guideCategoryId}
+        </if>
+        <if test="recommendHomepage != null and recommendHomepage==1">
+            and a.recommend_homepage = #{recommendHomepage}
+        </if>
+    </select>
+
     <select id="getGuideProductList" resultType="com.doooly.entity.reachad.AdProduct">
         SELECT
             a.id AS "id",
@@ -181,6 +192,36 @@
                 ORDER BY a.sell_count DESC
             </otherwise>
         </choose>
+        LIMIT #{startIndex},#{pageSize}
+    </select>
+
+    <select id="getGuideProductListv2" resultType="com.doooly.entity.reachad.AdProduct">
+        SELECT
+            a.id AS "id",
+            a.image_wechat AS "imageWechat",
+            a.name AS "name",
+            a.market_price AS "marketPrice",
+            a.sell_count AS "sellCount",
+            a.user_rebate AS "userRebate",
+            a.bussiness_rebate AS "bussinesRebate",
+            a.link_url_wechat AS "linkUrlWechat",
+            a.layered_rebate AS "layeredRebate",
+            ab.id AS "businessId",
+            IFNULL(ab.discount,0) AS "discount",
+            ab.logo AS "businessLogo",
+            ab.company AS "businessName",
+            IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
+            ab.deal_type AS "dealType"
+        FROM
+           ad_product a
+           left join ad_business ab on a.business_id= ab.business_id
+           WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+            <if test="guideCategoryId != null">
+                and a.guide_category_id = #{guideCategoryId}
+            </if>
+            <if test="recommendHomepage != null and recommendHomepage==1">
+                and a.recommend_homepage = #{recommendHomepage}
+            </if>
         LIMIT #{startIndex},#{pageSize}
     </select>
 

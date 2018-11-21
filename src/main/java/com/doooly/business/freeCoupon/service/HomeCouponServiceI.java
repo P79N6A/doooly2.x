@@ -27,6 +27,6 @@ public interface HomeCouponServiceI {
 	 *            每页显示条数
 	 * 
 	 */
-	HashMap<String, Object> getCouponListByBusinessId(String businessId, int currentPage, int pageSize);
+	HashMap<String, Object> getCouponListByBusinessId(String businessId,String categoryType, int currentPage, int pageSize);
 
 }

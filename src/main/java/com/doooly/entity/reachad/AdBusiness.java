@@ -11,6 +11,7 @@ import java.util.Date;
 public class AdBusiness {
 	private Long id;
 	private String company; // 商户名称
+	private String subTitle;// 商户副标题
 	private String type; // 商户类型
 	private String logo; // 商户图标
 	private String miniLogo;// 地图小图标
@@ -57,7 +58,15 @@ public class AdBusiness {
 	private String sWechatJumpUrl;// 可用积分服务-微信端跳转地址
 	private String sAppJumpUrl;// 可用积分服务-APP端跳转地址
 	private String storeName;// 门店地址
-	private String upGradeState;//会员商户升级状态(0-升级完成,1-升级失败,2-升级中,3-未升级)
+	private String upGradeState;// 会员商户升级状态(0-升级完成,1-升级失败,2-升级中,3-未升级)
+
+	public String getSubTitle() {
+		return subTitle;
+	}
+
+	public void setSubTitle(String subTitle) {
+		this.subTitle = subTitle;
+	}
 
 	public AdBusiness() {
 

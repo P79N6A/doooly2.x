@@ -17,18 +17,18 @@
 	<update id="update" parameterType="com.doooly.entity.reachad.AdReturnPointsLog">
 	    update ad_return_points_log 
 	    <set>
-				<if test="null != orderId"> order_id = # { orderId ,jdbcType = BIGINT},</if>
-				<if test="null != adReturnPointsId"> ad_return_points_id = # { adReturnPointsId ,jdbcType = BIGINT},</if>
-				<if test="null != operateAmount"> operate_amount = # { operateAmount ,jdbcType = DECIMAL},</if>
-				<if test="null != type"> type = # { type ,jdbcType = CHAR},</if>
-				<if test="null != operateType"> operate_type = # { operateType ,jdbcType = CHAR},</if>
-				<if test="null != delFlag"> del_flag = # { delFlag ,jdbcType = CHAR},</if>
-				<if test="null != remarks"> remarks = # { remarks ,jdbcType = VARCHAR},</if>
-				<if test="null != createDate"> create_date = # { createDate ,jdbcType = TIMESTAMP},</if>
-				<if test="null != updateDate"> update_date = # { updateDate ,jdbcType = TIMESTAMP},</if>
-				<if test="null != id"> id = # { id ,jdbcType = BIGINT}</if>
+				<if test="null != orderId"> order_id = #{ orderId ,jdbcType = BIGINT},</if>
+				<if test="null != adReturnPointsId"> ad_return_points_id = #{ adReturnPointsId ,jdbcType = BIGINT},</if>
+				<if test="null != operateAmount"> operate_amount = #{ operateAmount ,jdbcType = DECIMAL},</if>
+				<if test="null != type"> type = #{ type ,jdbcType = CHAR},</if>
+				<if test="null != operateType"> operate_type = #{ operateType ,jdbcType = CHAR},</if>
+				<if test="null != delFlag"> del_flag = #{ delFlag ,jdbcType = CHAR},</if>
+				<if test="null != remarks"> remarks = #{ remarks ,jdbcType = VARCHAR},</if>
+				<if test="null != createDate"> create_date = #{ createDate ,jdbcType = TIMESTAMP},</if>
+				<if test="null != updateDate"> update_date = #{ updateDate ,jdbcType = TIMESTAMP},</if>
+				<if test="null != id"> id = #{ id ,jdbcType = BIGINT}</if>
 	    </set>
-	    where ID = # {id,jdbcType=NUMERIC}
+	    where ID = #{id,jdbcType=NUMERIC}
 	</update>
 	
 	
@@ -40,16 +40,16 @@
 		insert into ad_return_points_log (
 	               <include refid="Base_Column_List"/>
 		) VALUES (
-				# {orderId,jdbcType=BIGINT},
-				# {adReturnPointsId,jdbcType=BIGINT},
-				# {operateAmount,jdbcType=DECIMAL},
-				# {type,jdbcType=CHAR},
-				# {operateType,jdbcType=CHAR},
-				# {delFlag,jdbcType=CHAR},
-				# {remarks,jdbcType=VARCHAR},
-				# {createDate,jdbcType=TIMESTAMP},
-				# {updateDate,jdbcType=TIMESTAMP},
-				# {id,jdbcType=BIGINT}
+				#{orderId,jdbcType=BIGINT},
+				#{adReturnPointsId,jdbcType=BIGINT},
+				#{operateAmount,jdbcType=DECIMAL},
+				#{type,jdbcType=CHAR},
+				#{operateType,jdbcType=CHAR},
+				#{delFlag,jdbcType=CHAR},
+				#{remarks,jdbcType=VARCHAR},
+				#{createDate,jdbcType=TIMESTAMP},
+				#{updateDate,jdbcType=TIMESTAMP},
+				#{id,jdbcType=BIGINT}
 		)
 	</insert>
 	
@@ -57,16 +57,16 @@
 		select <include refid="Base_Column_List"/> 
 		  from ad_return_points_log
 		 <where>
-				<if test="null != orderId"> and order_id=# {orderId,jdbcType=BIGINT}</if>
-				<if test="null != adReturnPointsId"> and ad_return_points_id=# {adReturnPointsId,jdbcType=BIGINT}</if>
-				<if test="null != operateAmount"> and operate_amount=# {operateAmount,jdbcType=DECIMAL}</if>
-				<if test="null != type"> and type=# {type,jdbcType=CHAR}</if>
-				<if test="null != operateType"> and operate_type=# {operateType,jdbcType=CHAR}</if>
-				<if test="null != delFlag"> and del_flag=# {delFlag,jdbcType=CHAR}</if>
-				<if test="null != remarks"> and remarks=# {remarks,jdbcType=VARCHAR}</if>
-				<if test="null != createDate"> and create_date=# {createDate,jdbcType=TIMESTAMP}</if>
-				<if test="null != updateDate"> and update_date=# {updateDate,jdbcType=TIMESTAMP}</if>
-				<if test="null != id"> and id=# {id,jdbcType=BIGINT}</if>
+				<if test="null != orderId"> and order_id=#{orderId,jdbcType=BIGINT}</if>
+				<if test="null != adReturnPointsId"> and ad_return_points_id=#{adReturnPointsId,jdbcType=BIGINT}</if>
+				<if test="null != operateAmount"> and operate_amount=#{operateAmount,jdbcType=DECIMAL}</if>
+				<if test="null != type"> and type=#{type,jdbcType=CHAR}</if>
+				<if test="null != operateType"> and operate_type=#{operateType,jdbcType=CHAR}</if>
+				<if test="null != delFlag"> and del_flag=#{delFlag,jdbcType=CHAR}</if>
+				<if test="null != remarks"> and remarks=#{remarks,jdbcType=VARCHAR}</if>
+				<if test="null != createDate"> and create_date=#{createDate,jdbcType=TIMESTAMP}</if>
+				<if test="null != updateDate"> and update_date=#{updateDate,jdbcType=TIMESTAMP}</if>
+				<if test="null != id"> and id=#{id,jdbcType=BIGINT}</if>
 		 </where>
 	</select>
 	
@@ -74,16 +74,16 @@
 		select <include refid="Base_Column_List"/> 
 		  from ad_return_points_log
 		 <where>
-				<if test="null != orderId"> and order_id=# {orderId,jdbcType=BIGINT}</if>
-				<if test="null != adReturnPointsId"> and ad_return_points_id=# {adReturnPointsId,jdbcType=BIGINT}</if>
-				<if test="null != operateAmount"> and operate_amount=# {operateAmount,jdbcType=DECIMAL}</if>
-				<if test="null != type"> and type=# {type,jdbcType=CHAR}</if>
-				<if test="null != operateType"> and operate_type=# {operateType,jdbcType=CHAR}</if>
-				<if test="null != delFlag"> and del_flag=# {delFlag,jdbcType=CHAR}</if>
-				<if test="null != remarks"> and remarks=# {remarks,jdbcType=VARCHAR}</if>
-				<if test="null != createDate"> and create_date=# {createDate,jdbcType=TIMESTAMP}</if>
-				<if test="null != updateDate"> and update_date=# {updateDate,jdbcType=TIMESTAMP}</if>
-				<if test="null != id"> and id=# {id,jdbcType=BIGINT}</if>
+				<if test="null != orderId"> and order_id=#{orderId,jdbcType=BIGINT}</if>
+				<if test="null != adReturnPointsId"> and ad_return_points_id=#{adReturnPointsId,jdbcType=BIGINT}</if>
+				<if test="null != operateAmount"> and operate_amount=#{operateAmount,jdbcType=DECIMAL}</if>
+				<if test="null != type"> and type=#{type,jdbcType=CHAR}</if>
+				<if test="null != operateType"> and operate_type=#{operateType,jdbcType=CHAR}</if>
+				<if test="null != delFlag"> and del_flag=#{delFlag,jdbcType=CHAR}</if>
+				<if test="null != remarks"> and remarks=#{remarks,jdbcType=VARCHAR}</if>
+				<if test="null != createDate"> and create_date=#{createDate,jdbcType=TIMESTAMP}</if>
+				<if test="null != updateDate"> and update_date=#{updateDate,jdbcType=TIMESTAMP}</if>
+				<if test="null != id"> and id=#{id,jdbcType=BIGINT}</if>
 		 </where>
 	</select>
 

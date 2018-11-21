@@ -283,7 +283,10 @@ public class MallBusinessService implements MallBusinessServiceI {
 				if (a.getLatitude()!=null&&a.getLatitude()!=""&&a.getLongitude()!=null&&a.getLongitude()!="") {
 					double distance = ComputedRangeUtil.GetDistance(lat, lng, Double.valueOf(a.getLatitude()), Double.valueOf(a.getLongitude()));
 					a.setDistance(distance);
-					result.add(a);
+					//只返回50km以内的
+					if (distance <= 50) {
+						result.add(a);
+					}
 				}
 			}
 			Collections.sort(result,new Comparator<AdBusinessStore>() {

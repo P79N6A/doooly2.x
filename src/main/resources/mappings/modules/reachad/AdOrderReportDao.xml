@@ -1091,7 +1091,8 @@
         a.product_type AS "productType",
         a.consignee_mobile AS "consigneeMobile",
         a.service_charge AS "serviceCharge",
-        a.voucher AS "voucher"
+        a.voucher AS "voucher",
+        a.remarks
     </sql>
 
 

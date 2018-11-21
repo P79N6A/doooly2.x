@@ -174,7 +174,7 @@ public class OrderServiceImpl implements OrderService{
 			AdUser adUser = new AdUser();
 			adUser.setId(report.getUserId());
 			adOrderReport.setAdUser(adUser);
-			putOrderReportToMapByOrderReportId(resp, adOrderReport);
+			putOrderReportToMapByOrderReportId(resp, report);
 			resp.setBillingState(report.getBillingState());		
 			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
 			Date intervalDayDate = DateUtils.addDays(report.getOrderDate(),  (StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));//
@@ -189,10 +189,12 @@ public class OrderServiceImpl implements OrderService{
 		return resp;
 	}
 	
-	 private void putOrderReportToMapByOrderReportId(OrderDetailResp resp, AdOrderReport adOrderReport) {
+	 private void putOrderReportToMapByOrderReportId(OrderDetailResp resp, OrderDetailReport orderDetailReport) {
 	        AdUserBusinessExpansion adUserBusinessExpansion = null;
+	        AdOrderReport adOrderReport = new AdOrderReport();
+			adOrderReport.setId(orderDetailReport.getId());
 	        //都市旅游卡订单信息
-	        if (adOrderReport.getProductType() == 5) {
+	        if (orderDetailReport.getProductType() == 5) {
 	            adUserBusinessExpansion = adOrderReportDao.findSctcdAccount(adOrderReport);
 	        }
 	        AdOrderFlow adOrderFlowQuery = new AdOrderFlow();
@@ -226,8 +228,8 @@ public class OrderServiceImpl implements OrderService{
 	        int resultNum = adUserDao.findOpenRebateSwitchNum(adOrderReport.getAdUser().getId());
 	        adOrderReport.setOpenRebateSwitch(resultNum > 0);*/
 	       
-	        if (adOrderReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
-	        	resp.setSctcdCardno(adOrderReport.getRemarks());
+	        if (orderDetailReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
+	        	resp.setSctcdCardno(orderDetailReport.getRemarks());
 	        }
 	        
 	        if (adUserBusinessExpansion != null) {

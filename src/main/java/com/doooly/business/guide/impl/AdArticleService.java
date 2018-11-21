@@ -4,11 +4,13 @@ import com.doooly.business.guide.service.AdArticleServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.dao.reachad.AdArticleDao;
 import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdGuideCategoryDao;
 import com.doooly.dao.reachad.AdPortRecordDao;
 import com.doooly.dao.reachad.AdProductDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdArticle;
 import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdGuideCategory;
 import com.doooly.entity.reachad.AdPortRecord;
 import com.doooly.entity.reachad.AdProduct;
 import org.apache.commons.collections.CollectionUtils;
@@ -45,6 +47,8 @@ public class AdArticleService implements AdArticleServiceI {
     private AdPortRecordDao adPortRecordDao;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AdGuideCategoryDao adGuideCategoryDao;
 
     private static final String GUIDE_RECORD_KEY = "getGuideProductList";
 
@@ -58,20 +62,59 @@ public class AdArticleService implements AdArticleServiceI {
         if (totalNum > 0) {
             HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
             Object o = hashOperations.get(GUIDE_RECORD_KEY, userId);
-            if(o==null){
-                hashOperations.put(GUIDE_RECORD_KEY,userId,"1");
+            if (o == null) {
+                hashOperations.put(GUIDE_RECORD_KEY, userId, "1");
                 AdPortRecord adPortRecord = new AdPortRecord();
                 adPortRecord.setPortName("getGuideProductList");
                 adPortRecord.setUserId(Long.valueOf(userId));
                 adPortRecordDao.insert(adPortRecord);
-                map.put("isNew",0);
-            }else {
-                map.put("isNew",1);
+                map.put("isNew", 0);
+            } else {
+                map.put("isNew", 1);
             }
             pagelab.setTotalNum(totalNum);// 这里会计算总页码
             // 查询详情
             List<AdProduct> adProducts = adProductDao.getGuideProductList(orderType,
                     pagelab.getStartIndex(), pagelab.getPageSize());
+            for (AdProduct adProduct : adProducts) {
+                calculate(adProduct);
+            }
+            map.put("adProducts", adProducts);// 数据
+            map.put("countPage", pagelab.getCountPage());// 总页码
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setData(map);
+        } else {
+            messageDataBean.setCode(MessageDataBean.no_data_code);
+            messageDataBean.setMess("查询导购商品数据为空");
+        }
+        return messageDataBean;
+    }
+
+
+    @Override
+    public MessageDataBean getGuideProductListv2(String guideCategoryId, Integer currentPage, Integer pageSize, String userId, String recommendHomepage) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Pagelab pagelab = new Pagelab(currentPage, pageSize);
+        // 查询总数
+        int totalNum = adProductDao.getTotalNumv2(guideCategoryId,recommendHomepage);
+        if (totalNum > 0) {
+            HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+            Object o = hashOperations.get(GUIDE_RECORD_KEY, userId);
+            if (o == null) {
+                hashOperations.put(GUIDE_RECORD_KEY, userId, "1");
+                AdPortRecord adPortRecord = new AdPortRecord();
+                adPortRecord.setPortName("getGuideProductList");
+                adPortRecord.setUserId(Long.valueOf(userId));
+                adPortRecordDao.insert(adPortRecord);
+                map.put("isNew", 0);
+            } else {
+                map.put("isNew", 1);
+            }
+            pagelab.setTotalNum(totalNum);// 这里会计算总页码
+            // 查询详情
+            List<AdProduct> adProducts = adProductDao.getGuideProductListv2(guideCategoryId,
+                    pagelab.getStartIndex(), pagelab.getPageSize(), recommendHomepage);
             for (AdProduct adProduct : adProducts) {
                 calculate(adProduct);
             }
@@ -110,7 +153,7 @@ public class AdArticleService implements AdArticleServiceI {
         MessageDataBean messageDataBean = new MessageDataBean();
         HashMap<String, Object> map = new HashMap<String, Object>();
         AdArticle adArticle = adArticleDao.getNewArticle();
-        if(adArticle == null){
+        if (adArticle == null) {
             messageDataBean.setCode(MessageDataBean.no_data_code);
             messageDataBean.setMess("暂无数据");
             return messageDataBean;
@@ -123,12 +166,12 @@ public class AdArticleService implements AdArticleServiceI {
                 BigDecimal discount = (BigDecimal) map1.get("discount");
                 BigDecimal factPrice;
                 //如果价格算出来为0
-                if(discount.equals(BigDecimal.ZERO)){
+                if (discount.equals(BigDecimal.ZERO)) {
                     factPrice = marketPrice;
-                }else {
+                } else {
                     factPrice = marketPrice.multiply(discount).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
                 }
-                if(StringUtils.isBlank(maxUserRebate)){
+                if (StringUtils.isBlank(maxUserRebate)) {
                     maxUserRebate = "0";
                 }
                 map1.put("price", factPrice.doubleValue());
@@ -141,6 +184,17 @@ public class AdArticleService implements AdArticleServiceI {
             messageDataBean.setCode(MessageDataBean.no_data_code);
             messageDataBean.setMess("暂无数据");
         }
+        return messageDataBean;
+    }
+
+    @Override
+    public MessageDataBean getGuideCategaryList() {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        HashMap<String, Object> map = new HashMap<>();
+        List<AdGuideCategory> adGuideCategoryList = adGuideCategoryDao.findList();
+        map.put("adGuideCategoryList", adGuideCategoryList);
+        messageDataBean.setData(map);
+        messageDataBean.setCode(MessageDataBean.success_code);
         return messageDataBean;
     }
 
@@ -161,41 +215,41 @@ public class AdArticleService implements AdArticleServiceI {
     /**
      * 计算兜礼价和用户返利积分
      *
-     * @param adProduct   商品
+     * @param adProduct 商品
      * @return
      */
     public void calculate(AdProduct adProduct) {
-        if(StringUtils.isBlank(adProduct.getMaxUserRebate())){
+        if (StringUtils.isBlank(adProduct.getMaxUserRebate())) {
             adProduct.setMaxUserRebate("0");
         }
         Double rebate;
         BigDecimal factPrice;//前台根据折扣计算价格
-        BigDecimal marketPrice = adProduct.getMarketPrice();//后台商品配置导购价
+        BigDecimal marketPrice = adProduct.getMarketPrice().setScale(2, BigDecimal.ROUND_DOWN);//后台商品配置导购价
         BigDecimal chu = new BigDecimal("10000");
         AdBusiness adBusiness = adBusinessDao.get(adProduct.getBusinessId());
-        if(adBusiness != null){
-            if ( adBusiness.getBussinessRebate() != null && adBusiness.getUserRebate() != null) {
+        if (adBusiness != null) {
+            if (adBusiness.getBussinessRebate() != null && adBusiness.getUserRebate() != null) {
                 BigDecimal userRebate = adProduct.getUserRebate();
                 //前折计算兜礼价 折扣0保持原价
-                if(new BigDecimal(adProduct.getDiscount()).equals(BigDecimal.ZERO)){
+                if (new BigDecimal(adProduct.getDiscount()).equals(BigDecimal.ZERO)) {
                     factPrice = marketPrice;
-                }else {
+                } else {
                     factPrice = marketPrice.multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
                 }
-                if("京东返利".equals(adBusiness.getCompany())){
+                if ("京东返利".equals(adBusiness.getCompany())) {
                     //京东开普勒订单实际分层比例
                     rebate = marketPrice.multiply(adProduct.getBussinesRebate()).multiply(adProduct.getLayeredRebate())
                             .divide(chu, 2, BigDecimal.ROUND_DOWN).doubleValue();
-                }else {
+                } else {
                     rebate = marketPrice.multiply(userRebate)
                             .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN).doubleValue();
                 }
                 //前折计算兜礼价
-                adProduct.setPrice(factPrice);
+                adProduct.setPrice(factPrice.setScale(2, BigDecimal.ROUND_DOWN));
                 //设置返利
-                adProduct.setRebate(String.valueOf(rebate));
+                adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
             }
-        }else{
+        } else {
             adProduct.setPrice(marketPrice);
             adProduct.setRebate("0.00");
         }

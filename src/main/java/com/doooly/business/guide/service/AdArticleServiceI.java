@@ -11,9 +11,13 @@ public interface AdArticleServiceI {
 
     MessageDataBean getGuideProductList(String orderType, Integer currentPage, Integer pageSize, String userId);
 
+    MessageDataBean getGuideProductListv2(String guideCategoryId, Integer currentPage, Integer pageSize, String userId, String recommendHomepage);
+
     MessageDataBean getArticleProductList(String articleId);
 
     MessageDataBean getArticleList();
+
+    MessageDataBean getGuideCategaryList();
 
     MessageDataBean addSellCount(String productId);
 

@@ -380,6 +380,7 @@
 		SELECT
 		a.id AS "id",
 		a.company AS "company",
+		a.sub_title "subTitle",
 		a.long_logo AS "logo",
 		a.url AS "url",
 		a.app_url AS "appUrl",
@@ -400,7 +401,10 @@
 		and a.is_active=2
 		and a.del_flag=0
 		and (aa.name =#{address} or aa.name ="全国")
-		AND a.deal_type = #{dealType}
+		AND a.deal_type in
+		<foreach collection="list" separator="," item="item" open="(" close=")">
+			#{item}
+		</foreach>
 		and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
 		<if test="type != null and type != ''">
 			AND a.type = #{type}

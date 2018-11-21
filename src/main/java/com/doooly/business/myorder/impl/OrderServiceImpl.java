@@ -41,7 +41,6 @@ import com.doooly.entity.reachad.AdOrderDetail;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
-import com.doooly.entity.reachad.AdUserConn;
 
 /**
  * @Description: 我的订单
@@ -175,7 +174,7 @@ public class OrderServiceImpl implements OrderService{
 			AdUser adUser = new AdUser();
 			adUser.setId(report.getUserId());
 			adOrderReport.setAdUser(adUser);
-			putOrderReportToMapByOrderReportId(resp, adOrderReport);
+			putOrderReportToMapByOrderReportId(resp, report);
 			resp.setBillingState(report.getBillingState());		
 			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
 			Date intervalDayDate = DateUtils.addDays(report.getOrderDate(),  (StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));//
@@ -190,10 +189,12 @@ public class OrderServiceImpl implements OrderService{
 		return resp;
 	}
 	
-	 private void putOrderReportToMapByOrderReportId(OrderDetailResp resp, AdOrderReport adOrderReport) {
+	 private void putOrderReportToMapByOrderReportId(OrderDetailResp resp, OrderDetailReport orderDetailReport) {
 	        AdUserBusinessExpansion adUserBusinessExpansion = null;
+	        AdOrderReport adOrderReport = new AdOrderReport();
+			adOrderReport.setId(orderDetailReport.getId());
 	        //都市旅游卡订单信息
-	        if (adOrderReport.getProductType() == 5) {
+	        if (orderDetailReport.getProductType() == 5) {
 	            adUserBusinessExpansion = adOrderReportDao.findSctcdAccount(adOrderReport);
 	        }
 	        AdOrderFlow adOrderFlowQuery = new AdOrderFlow();
@@ -227,8 +228,8 @@ public class OrderServiceImpl implements OrderService{
 	        int resultNum = adUserDao.findOpenRebateSwitchNum(adOrderReport.getAdUser().getId());
 	        adOrderReport.setOpenRebateSwitch(resultNum > 0);*/
 	       
-	        if (adOrderReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
-	        	resp.setSctcdCardno(adOrderReport.getRemarks());
+	        if (orderDetailReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
+	        	resp.setSctcdCardno(orderDetailReport.getRemarks());
 	        }
 	        
 	        if (adUserBusinessExpansion != null) {
@@ -302,15 +303,17 @@ public class OrderServiceImpl implements OrderService{
 		}
 		
 		private int getTotal(OrderReq req,Integer state) {
-			AdUserConn adUser = adUserDao.getOrderTotal(String.valueOf(req.getUserId()));
-			
-			
+			OrderPoReq orderPoReq = new OrderPoReq();
+			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
 			if(0 == state) {
-				return adUser.getOrderTotal();
+				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
+				orderPoReq.setEndOrderDate(new Date());
+				return  adOrderReportDao.getLatestOrderTotal(orderPoReq);
 			}else if(1 == state) {
-				return adUser.getFinishTotal();
+				return adOrderReportDao.getLatestAmountTotal(orderPoReq);
 			}else if(2 ==  state) {
-				return  adUser.getCancelTotal();
+				return adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
 			}
 			return 0;
 		}
@@ -320,7 +323,6 @@ public class OrderServiceImpl implements OrderService{
 			HintResp hintResp = new HintResp();
 			OrderPoReq orderPoReq = new OrderPoReq();
 			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
-			adOrderReportDao.getLatestOrderTotal(orderPoReq);
 			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 			String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
 			String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
@@ -332,17 +334,17 @@ public class OrderServiceImpl implements OrderService{
 			int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
 			int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
 			// 3.有新订单 设置flag
-			if(StringUtils.isNotEmpty(orderTotal) && orderTotalMap>Integer.valueOf(orderTotal)){
+			if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
 				hintResp.setNewOrderFlag(true);
 			}else{
 				hintResp.setNewOrderFlag(false);
 			}
-			if(StringUtils.isNotEmpty(finishTotal) && finishTotalMap>Integer.valueOf(finishTotal)){
+			if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
 				hintResp.setNewFinishFlag(true);
 			}else{
 				hintResp.setNewFinishFlag(false);
 			}
-			if(StringUtils.isNotEmpty(cancelTotal) && cancelTotalMap>Integer.valueOf(cancelTotal)){
+			if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
 				hintResp.setNewCancelFlag(true);
 			}else{
 				hintResp.setNewCancelFlag(false);

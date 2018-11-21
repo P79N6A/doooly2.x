@@ -37,6 +37,7 @@ public class OrderDetailReport {
 	private Long userId;
     private String storeName;
     private String businessId;
+    private String remarks;
     
 	public long getId() {
 		return id;
@@ -193,6 +194,12 @@ public class OrderDetailReport {
 	}
 	public void setBusinessId(String businessId) {
 		this.businessId = businessId;
+	}
+	public String getRemarks() {
+		return remarks;
+	}
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
 
  

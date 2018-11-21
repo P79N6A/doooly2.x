@@ -43,7 +43,6 @@ import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
-import com.doooly.entity.reachad.AdRefundFlow;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
@@ -1040,6 +1039,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
         ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber,payType);
+        logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }
 

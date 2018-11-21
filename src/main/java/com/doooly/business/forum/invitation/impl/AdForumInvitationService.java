@@ -33,7 +33,7 @@ public class AdForumInvitationService implements AdForumInvitationServiceI {
                 String id = adForumInvitationActivityDao.getByPhone(phone);
 
                 if (id != null) {
-                    res.setCode("10001");
+                    res.setCode("1001");
                     res.setMess("该手机号已报名");
                 } else {
                     AdForumInvitationActivity adForumInvitation = new AdForumInvitationActivity();
@@ -45,17 +45,17 @@ public class AdForumInvitationService implements AdForumInvitationServiceI {
                     adForumInvitation.setCreateDate(now);
                     adForumInvitationActivityDao.insert(adForumInvitation);
 
-                    res.setCode("10000");
+                    res.setCode("1000");
                     res.setMess("报名成功");
                 }
             } else {
-                res.setCode("10003");
+                res.setCode("1003");
                 res.setMess("参数错误");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            res.setCode("10002");
+            res.setCode("1002");
             res.setMess("服务异常，请稍后再试");
         }
 

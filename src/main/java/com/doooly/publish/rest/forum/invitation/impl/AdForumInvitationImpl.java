@@ -44,6 +44,6 @@ public class AdForumInvitationImpl implements AdForumInvitationI {
         log.info("论坛邀请报名参数={}", paramJSON);
         MessageDataBean messageDataBean= new MessageDataBean();
         messageDataBean = adForumInvitationServiceI.registerForum(paramJSON);
-        return messageDataBean.toJSONString();
+        return messageDataBean.toJsonString();
     }
 }

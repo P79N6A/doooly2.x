@@ -36,9 +36,13 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 		log.info("====【JerseyRequestFilter】-reqUrl：" + request.getRequestUri() + ",==headers数据:"
 				+ request.getRequestHeaders() + ",==cookie数据：" + request.getCookieNameValueMap());
 
-		// 对于登录请求不拦截、设置专属优惠券id的请求不拦截
-		if (reqUrl.contains("/login") || reqUrl.contains("/exclusiveCoupon/setActivityId")
-				|| reqUrl.contains("/token/validateUserToken") || reqUrl.contains("/share/getFamilyInviteInfoRestFul")) {
+		// 对于登录请求不拦截、设置专属优惠券id的请求不拦截、论坛活动邀请报名不拦截
+		if (reqUrl.contains("/login")
+				|| reqUrl.contains("/exclusiveCoupon/setActivityId")
+				|| reqUrl.contains("/token/validateUserToken")
+				|| reqUrl.contains("/share/getFamilyInviteInfoRestFul")
+				|| reqUrl.contains("/forumInvitation/registerForum")
+		) {
 			return request;
 		}
 

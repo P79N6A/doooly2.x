@@ -142,6 +142,18 @@ public class OrderServiceImpl implements OrderService {
 							actType = (String) msg.data.get("actType");
 							sellPrice = (BigDecimal) msg.data.get("actPrice");
 						}
+
+						if (orderVo.getProductType() == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+						    sku.setSellPrice(sellPrice.toString());
+							msg = getServiceChargeAndCheckLimit(orderVo, sku);
+							if (OrderMsg.success_code.equals(msg.getCode())) {
+								if(msg.data != null) {
+									orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+								}
+							} else {
+								return msg;
+							}
+						}
 					} else {
 						return msg;
 					}
@@ -156,7 +168,11 @@ public class OrderServiceImpl implements OrderService {
 					int rows = productService.decInventory(skuId);
 					logger.info("decInventory() skuId={},inventor={},rows={}", skuId, inventory, rows);
 					if (rows == 0) {
-						return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+						if (orderVo.getProductType() == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+							return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
+						} else {
+							return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+						}
 					}
 				}
 				BigDecimal marketPrice = new BigDecimal(sku.getMarketPrice());
@@ -349,7 +365,7 @@ public class OrderServiceImpl implements OrderService {
 		int rows = productService.decStock(number, skuId);
 		logger.info("decStock() skuId={},inventor={},rows = {}", skuId,oldNum, rows);
 		if (rows == 0) {
-			return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+			return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
 		}
 		return null;
 	}

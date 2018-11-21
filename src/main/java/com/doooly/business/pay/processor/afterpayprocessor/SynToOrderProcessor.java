@@ -42,7 +42,7 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 
 	
 	@Override
-	public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
+	public PayMsg process(OrderVo order, Map<String, Object> payFlow, String realPayType) {
 		try {
             if(order.getIsSource()!=3){
                 //非自营订单不同步

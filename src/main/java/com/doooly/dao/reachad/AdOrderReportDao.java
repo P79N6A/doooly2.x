@@ -3,14 +3,18 @@
  */
 package com.doooly.dao.reachad;
 
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.entity.reachad.AdOrderReport;
-import com.doooly.entity.reachad.AdUserBusinessExpansion;
-import org.apache.ibatis.annotations.Param;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.doooly.business.myorder.po.OrderDetailReport;
+import com.doooly.business.myorder.po.OrderPoReq;
+import com.doooly.business.myorder.po.OrderPoResp;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.entity.reachad.AdOrderReport;
+import com.doooly.entity.reachad.AdUserBusinessExpansion;
 
 public interface AdOrderReportDao {
 	/**
@@ -66,4 +70,55 @@ public interface AdOrderReportDao {
      * @return
      */
     AdOrderReport getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
+    
+    /**
+     * 订单列表
+     * @param orderReq
+     * @return
+     */
+    List<OrderPoResp> findALLOrderList(OrderPoReq orderReq);
+    /**
+     * 最近到账订单
+     * @param orderReq
+     * @return
+     */
+    List<OrderPoResp> findLatestOrderAmountList(OrderPoReq orderReq);
+    /**
+     * 无返利订单
+     * @param orderReq
+     * @return
+     */
+    List<OrderPoResp> findNotRebateOrderList(OrderPoReq orderReq);
+    
+    /**
+     * 订单列表
+     * @param orderReq
+     * @return
+     */
+    Long countALLOrder(OrderPoReq orderReq);
+    /**
+     * 最近到账订单
+     * @param orderReq
+     * @return
+     */
+    Long countLatestOrderAmount(OrderPoReq orderReq);
+    /**
+     * 无返利订单
+     * @param orderReq
+     * @return
+     */
+    Long countNotRebateOrder(OrderPoReq orderReq);
+    
+    OrderDetailReport getOrderDetailById(String orderReportId);
+    
+    
+    List<Map<String,String>> findOrderdDetailSum(OrderPoReq req);
+    
+    Integer getLatestOrderTotal(OrderPoReq req);
+    
+    Integer getLatestAmountTotal(OrderPoReq req);
+    
+    Integer getNotRebateOrderTotal(OrderPoReq req);
+    
+    Integer deleteOrder(Long orderId);
 }

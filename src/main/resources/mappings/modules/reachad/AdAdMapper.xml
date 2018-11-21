@@ -64,5 +64,20 @@
 			limit 8
 	</select>
 	
+	<select id="findByTypeAndGroup" resultType="com.doooly.entity.reachad.AdAd">
+		SELECT 
+			a.image_path AS "imagePath", 
+			a.image_link_url AS "imageLinkUrl"
+		FROM 
+			ad_ad a left join ad_ad_group_conn agc on a.id =agc.ad_id
+			left join ad_group g on agc.group_id = g.id
+			where a.state =1 
+			and g.id = #{groupId}
+			and a.title = #{title}
+			and a.type = 11
+			order by a.create_date
+			limit 1
+	</select>
+	
 	
 </mapper>

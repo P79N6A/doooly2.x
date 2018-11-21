@@ -228,11 +228,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("productImg", item.getProductImg());
         retJson.put("supportPayType", o.getSupportPayType());
         retJson.put("orderNum", orderNum);
-        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode() && o.getServiceCharge() != null) {
+        if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
+                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
+                ) && o.getServiceCharge() != null) {
             retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
         }
         //话费充值需要校验积分消费金额,用到此参数
-        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()) {
+        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
+                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
             //用户消费金额
             BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
             retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);

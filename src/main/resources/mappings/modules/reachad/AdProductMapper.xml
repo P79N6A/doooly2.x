@@ -31,7 +31,8 @@
 		a.recommend_reason AS "recommendReason",
 		a.create_date AS "createDate",
 		a.update_date AS "updateDate",
-		a.category_id AS "categoryId"
+		a.category_id AS "categoryId"，
+		a.shipping_method AS "shippingMethod"
 		
 	</sql>
 	<sql id="productJoins">
@@ -122,7 +123,10 @@
 		a.recommend_reason AS "recommendReason",
 		a.create_date AS "createDate",
 		a.update_date AS "updateDate",
-		a.category_id AS "categoryId",ab.company AS "businessName",a.hits_count AS "hitsCount"
+		a.category_id AS "categoryId",
+		ab.company AS "businessName",
+		a.hits_count AS "hitsCount",
+		a.shipping_method AS "shippingMethod"
 		FROM 
 			ad_product a
 			JOIN ad_business ab ON a.business_id = ab.business_id 
@@ -165,6 +169,7 @@
             a.bussiness_rebate AS "bussinesRebate",
             a.link_url_wechat AS "linkUrlWechat",
             a.layered_rebate AS "layeredRebate",
+			a.shipping_method AS "shippingMethod",
             ab.id AS "businessId",
             IFNULL(ab.discount,0) AS "discount",
             ab.logo AS "businessLogo",
@@ -206,6 +211,7 @@
             a.bussiness_rebate AS "bussinesRebate",
             a.link_url_wechat AS "linkUrlWechat",
             a.layered_rebate AS "layeredRebate",
+			a.shipping_method AS "shippingMethod",
             ab.id AS "businessId",
             IFNULL(ab.discount,0) AS "discount",
             ab.logo AS "businessLogo",

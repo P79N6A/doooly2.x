@@ -491,4 +491,11 @@ public class MallBusinessService implements MallBusinessServiceI {
 	public AdBusiness getById(String id) {
 		return adBusinessDao.getById(id);
 	}
+
+	@Override
+	public AdAd findByTypeAndGroup(int groupId, String title) {
+		return adAdDao.findByTypeAndGroup(groupId, title);
+	}
+	
+	
 }

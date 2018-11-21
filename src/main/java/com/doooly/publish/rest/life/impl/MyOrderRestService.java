@@ -1,6 +1,9 @@
 package com.doooly.publish.rest.life.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -15,10 +18,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
+import com.doooly.business.myorder.dto.OrderDetailReq;
+import com.doooly.business.myorder.dto.OrderDetailResp;
+import com.doooly.business.myorder.dto.OrderReq;
+import com.doooly.business.myorder.dto.OrderResp;
 import com.doooly.business.myorder.dto.OrderResult;
+import com.doooly.business.myorder.po.OrderPoReq;
+import com.doooly.business.myorder.po.OrderPoResp;
 import com.doooly.business.myorder.service.MyOrderServiceI;
+import com.doooly.business.myorder.service.OrderService;
+import com.doooly.business.myorder.vo.OrderVoResp;
+import com.doooly.business.utils.DateUtils;
+import com.doooly.business.utils.Pagelab;
+import com.doooly.common.dto.BaseRes;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.MyOrderRestServiceI;
+import com.google.gson.Gson;
+
+import cn.jiguang.common.utils.StringUtils;
 
 /**
  * @Description: 我的订单
@@ -33,6 +54,12 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 
 	@Autowired
 	private MyOrderServiceI myOrderServiceI;
+	
+	@Autowired
+	private OrderService orderservice;
+	
+	 @Autowired
+	 private ConfigDictServiceI configDictServiceI;
 
 	@POST
 	@Path("/getOrders")
@@ -86,5 +113,171 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		}
 		return messageDataBean.toJsonString();
 	}
+	
+	/**
+	 * 我的订单-订单列表
+	 * @param json
+	 * @return
+	 */
+	@POST
+	@Path("/list/v2/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String list(JSONObject json) {
+		try {
+			long start = System.currentTimeMillis();
+			logger.info("order.list.param:{}",json.toJSONString());
+			Gson gson = new Gson();
+			OrderReq req = gson.fromJson(json.toJSONString(), OrderReq.class);
+			String result =  list(req);
+			if(req.getHintState() != null) {
+				orderservice.cannelHint(req);
+			}
+			logger.info("我的订单(/list)===> 接口耗时：{}", System.currentTimeMillis()-start);
+			return result;
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return "{}";
+	}
+	
+	/**
+	 * 订单列表
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	public String list(OrderReq req) {
+		 Gson gson = new Gson();  
+		List<OrderResp> orderList = new ArrayList<>();
+		Pagelab pagelab = new Pagelab(req.getCurrentPage(), req.getPageSize());
+		List<OrderPoResp>  orderResultList = orderservice.getOrderList(req);
+		OrderResp resp = null;
+		String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+		for(OrderPoResp  orderPoResp : orderResultList) {
+			resp = new OrderResp();
+			resp.setAmountPayable(orderPoResp.getTotalPrice());
+			resp.setIsSource(orderPoResp.getIsSource());
+			resp.setIsUserRebate(Integer.parseInt(orderPoResp.getIsUserRebate()));
+			resp.setOrderDate(DateUtils.formatDate(orderPoResp.getOrderDate(), "yyyy-MM-dd HH:mm:ss"));
+			resp.setOrderDateStr(DateUtils.formatDate(orderPoResp.getOrderDate(), "M-d HH:mm"));
+			resp.setOrderId(orderPoResp.getId());
+			resp.setOrderNumber(orderPoResp.getOrderNumber());
+			resp.setPayAmount(orderPoResp.getTotalMount());
+			resp.setState(String.valueOf(orderPoResp.getState()));
+			resp.setType(String.valueOf(orderPoResp.getType()));
+			resp.setStoreName(orderPoResp.getStoreName());
+			resp.setUserId(orderPoResp.getUserId());
+			resp.setUserRebate(orderPoResp.getUserRebate());
+			resp.setProductType(orderPoResp.getProductType());
+			resp.setLogo(orderPoResp.getLogo());
+			resp.setBusinessId(orderPoResp.getBusinessId());
+			resp.setSavePrice(orderPoResp.getSavePrice());
+			resp.setCompany(orderPoResp.getCompany());
+			resp.setGoods(orderPoResp.getGoods());
+			resp.setSpecification(orderPoResp.getSpecification());
+			resp.setProductImg(orderPoResp.getProductImg());
+			Date intervalDayDate = DateUtils.addDays(orderPoResp.getOrderDate(), Integer.parseInt(orderDay));//推后30天的日期
+			resp.setIntegrateReturnDate(com.doooly.business.utils.DateUtils.formatDate(intervalDayDate, "yyyy.MM.dd"));		
+			orderList.add(resp);
+		}
+		Long countOrderNum = orderservice.countOrderNum(req);
+		pagelab.setTotalNum(countOrderNum.intValue());
+		OrderPoReq orderPoReq = new OrderPoReq();
+		orderPoReq.setUserId(Long.parseLong(req.getUserId()));
+		List<Map<String,String>> listMap = orderservice.getOrderdDetailSum(orderPoReq);
 
+		OrderVoResp orderVoResp = new OrderVoResp();
+		orderVoResp.setCurrentPage(pagelab.getCountPage());
+		orderVoResp.setOrderDataList(listMap);
+		orderVoResp.setPage(orderList);
+		orderVoResp.setTotalNum(pagelab.getTotalNum());
+		orderVoResp.setTotalPage(pagelab.getCountPage());
+		
+		
+		BaseRes<OrderVoResp> baseRes = new BaseRes<>();
+		baseRes.setCode("1000");
+		baseRes.setData(orderVoResp);
+		return gson.toJson(baseRes);
+	}
+	
+	
+	@POST
+	@Path("/detail/v2/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String detail(JSONObject json) {
+		try {
+			long start = System.currentTimeMillis();
+			BaseRes<OrderDetailResp> result = new BaseRes<>(); 
+			logger.info("order.detail.param:{}",json.toJSONString());
+			Gson gson = new Gson();
+			OrderDetailReq req = gson.fromJson(json.toJSONString(), OrderDetailReq.class);
+			if(StringUtils.isEmpty(req.getOrderId())) {
+				result.setCode("1002");
+				return gson.toJson(result);
+			}
+			
+			OrderDetailResp resp =  orderservice.getOrderDetail(req);
+			result.setCode("1000");
+			result.setData(resp);
+			
+			logger.info("我的订单(/detail)===> 接口耗时：{}", System.currentTimeMillis()-start);
+			return gson.toJson(result);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return "{}";
+	}
+
+	
+	@POST
+	@Path("/hint/v2/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String hint(JSONObject json) {
+		try {
+			long start = System.currentTimeMillis();
+			BaseRes<HintResp> result = new BaseRes<>(); 
+			logger.info("order.detail.param:{}",json.toJSONString());
+			Gson gson = new Gson();
+			HintReq req = gson.fromJson(json.toJSONString(), HintReq.class);
+			
+			HintResp resp =  orderservice.getHint(req);
+			result.setCode("1000");
+			result.setData(resp);
+			
+			logger.info("我的订单(/hint)===> 接口耗时：{}", System.currentTimeMillis()-start);
+			return gson.toJson(result);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return "{}";
+	}
+	
+	@POST
+	@Path("/deleteOrder/v2/")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String deleteOrder(JSONObject json) {
+		try {
+			long start = System.currentTimeMillis();
+			BaseRes<Boolean> result = new BaseRes<>(); 
+			logger.info("order.detail.param:{}",json.toJSONString());
+			Gson gson = new Gson();
+			OrderDeleteReq  req = gson.fromJson(json.toJSONString(), OrderDeleteReq.class);
+			
+			boolean flag =  orderservice.deleteOrder(req);
+			result.setCode("1000");
+			result.setData(flag);
+			logger.info("我的订单(/delete)===> 接口耗时：{}", System.currentTimeMillis()-start);
+			return gson.toJson(result);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return "{}";
+	}
 }

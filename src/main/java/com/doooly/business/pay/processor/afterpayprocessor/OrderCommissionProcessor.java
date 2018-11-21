@@ -29,7 +29,7 @@ public class OrderCommissionProcessor implements AfterPayProcessor {
     private MallBusinessService mallBusinessService;
 
     @Override
-    public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
+    public PayMsg process(OrderVo order, Map<String, Object> payFlow, String realPayType) {
         try {
             logger.info("OrderCommissionProcessor orderNum = {}",order.getOrderNumber());
             //旅游卡计算返佣返利

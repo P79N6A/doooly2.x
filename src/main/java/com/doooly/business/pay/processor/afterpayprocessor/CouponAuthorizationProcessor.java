@@ -45,7 +45,7 @@ public class CouponAuthorizationProcessor implements AfterPayProcessor{
     private AdBusinessDao adBusinessDao;
 
     @Override
-    public PayMsg process(OrderVo order, Map<String, Object> resultMap, String realPayType) {
+    public PayMsg process(OrderVo order, Map<String, Object> payFlow, String realPayType) {
         logger.info("CouponAuthorizationProcessor start. orderNum = {}",order.getOrderNumber());
         try {
             String couponId = order.getCouponId();

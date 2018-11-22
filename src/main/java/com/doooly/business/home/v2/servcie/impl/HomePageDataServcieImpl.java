@@ -3,6 +3,9 @@ package com.doooly.business.home.v2.servcie.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
 import com.doooly.business.home.v2.servcie.HomePageDataServcie;
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.service.OrderService;
 import com.doooly.common.DooolyResponseStatus;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdAppHomePageDao;
@@ -50,6 +53,9 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	private AdUserDao adUserDao;
 	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
+	
+	@Autowired
+	private OrderService orderservice;
 
 	@Override
 	public GetHomePageDataV2Response getHomePageDataV2(GetHomePageDataV2Request request, GetHomePageDataV2Response response) {
@@ -390,6 +396,54 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		AdCouponActivityInfos adCouponActivityInfos = adAppHomePageDao.getAdCouponActivityInfos(activityId);
 		response.setStatus(DooolyResponseStatus.SUCCESS);
 		response.setData(adCouponActivityInfos);
+		return response;
+	}
+
+	@Override
+	public GetHomePageDataV2Response getHomePageDataV2_2(GetHomePageDataV2Request request,
+			GetHomePageDataV2Response response) {
+		Integer userId = request.getUserId();
+		HomePageDataV2 homePageData = new HomePageDataV2();
+		BigDecimal zeroBigDecimal = new BigDecimal(0.00).setScale(2, BigDecimal.ROUND_DOWN);
+		//查询会员名字、会员所属企业、会员头像、会员可用积分、是否为认证会员
+		AdAppUserInfos adUserInfos = adAppHomePageDao.findAdUserInfos(request.getUserId());
+		homePageData.setMemberName(adUserInfos.getMemberName());
+        homePageData.setIsPayPassword(adUserInfos.getIsPayPassword());
+        homePageData.setIsSetPayPassword(adUserInfos.getIsSetPayPassword());
+		homePageData.setMemberCompanyName(adUserInfos.getEnterpriseName());
+		homePageData.setMemberHeadImgUrl(
+				StringUtils.isBlank(adUserInfos.getMemberHeadImgURL()) ?
+						adUserInfos.getEnterpriseLogoURL() : adUserInfos.getMemberHeadImgURL());
+		homePageData.setAvailablePoints(adUserInfos.getAvailablePoints() == null ?
+				zeroBigDecimal : adUserInfos.getAvailablePoints().setScale(2, BigDecimal.ROUND_DOWN));
+		homePageData.setAuthFlag(adUserInfos.getAuthFlag() == null ? 0 : adUserInfos.getAuthFlag());
+		//查询会员的福利券
+		int expiredNum = 0;
+		List<AdAppUserCoupon> adAppUserCouponList = adAppHomePageDao.getAdUserCouponInfos(request.getUserId());
+		for (AdAppUserCoupon coupon : adAppUserCouponList) {
+			if (coupon.getExpiredDays() <= 3) {
+				expiredNum += 1;
+			}
+		}
+		homePageData.setCouponNum(adAppUserCouponList.size());
+		homePageData.setCouponExpireNum(expiredNum);
+
+		//查询会员购物节省金额
+		AdAppUserShoppingThrift adAppUserShoppingThrift = adAppHomePageDao.getAdUserThirftInfos(request.getUserId());
+		homePageData.setThriftTotal(adAppUserShoppingThrift.getThriftTotal());
+		homePageData.setThriftAmount(adAppUserShoppingThrift.getThriftAmount() == null ?
+				zeroBigDecimal : adAppUserShoppingThrift.getThriftAmount().setScale(2, BigDecimal.ROUND_DOWN));
+		
+		
+		HintReq req = new HintReq();
+		req.setUserId(String.valueOf(userId));
+		HintResp resp = orderservice.getHint(req);
+		homePageData.setNewOrderFlag(resp.isNewOrderFlag());
+		homePageData.setNewFinishFlag(resp.isNewFinishFlag());
+		homePageData.setNewCancelFlag(resp.isNewCancelFlag());
+		
+		response.setData(homePageData);
+		response.setStatus(DooolyResponseStatus.SUCCESS);
 		return response;
 	}
 }

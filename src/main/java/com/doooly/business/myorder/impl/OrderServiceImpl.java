@@ -41,6 +41,7 @@ import com.doooly.entity.reachad.AdOrderDetail;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
+import com.doooly.entity.reachad.AdUserConn;
 
 /**
  * @Description: 我的订单
@@ -321,33 +322,40 @@ public class OrderServiceImpl implements OrderService{
 		@Override
 		public HintResp getHint(HintReq req) {
 			HintResp hintResp = new HintResp();
-			OrderPoReq orderPoReq = new OrderPoReq();
-			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
-			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
-			String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
-			String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
-			String cancelTotal = opsForValue.get("ordertotal:"+req.getUserId()+":2");//已取消
-			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
-			orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
-			orderPoReq.setEndOrderDate(new Date());
-			int orderTotalMap = adOrderReportDao.getLatestOrderTotal(orderPoReq);
-			int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
-			int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
-			// 3.有新订单 设置flag
-			if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
-				hintResp.setNewOrderFlag(true);
-			}else{
-				hintResp.setNewOrderFlag(false);
-			}
-			if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
-				hintResp.setNewFinishFlag(true);
-			}else{
-				hintResp.setNewFinishFlag(false);
-			}
-			if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
-				hintResp.setNewCancelFlag(true);
-			}else{
-				hintResp.setNewCancelFlag(false);
+			try {
+				OrderPoReq orderPoReq = new OrderPoReq();
+				orderPoReq.setUserId(Long.parseLong(req.getUserId()));
+				ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+				String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
+				String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
+				String cancelTotal = opsForValue.get("ordertotal:"+req.getUserId()+":2");//已取消
+				logger.info(String.format("用户 %s redis中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotal,finishTotal,cancelTotal));
+				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
+				orderPoReq.setEndOrderDate(new Date());
+				int orderTotalMap = adOrderReportDao.getLatestOrderTotal(orderPoReq);
+				int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
+				int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
+				logger.info(String.format("用户 %s DB中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotalMap,finishTotalMap,cancelTotalMap));
+				
+				// 3.有新订单 设置flag
+				if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
+					hintResp.setNewOrderFlag(true);
+				}else{
+					hintResp.setNewOrderFlag(false);
+				}
+				if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
+					hintResp.setNewFinishFlag(true);
+				}else{
+					hintResp.setNewFinishFlag(false);
+				}
+				if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
+					hintResp.setNewCancelFlag(true);
+				}else{
+					hintResp.setNewCancelFlag(false);
+				}
+			}catch(Exception e) {
+				logger.error(e.getMessage());
 			}
 			return hintResp;
 		}

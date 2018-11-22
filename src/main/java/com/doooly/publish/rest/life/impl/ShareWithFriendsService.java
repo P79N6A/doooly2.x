@@ -30,6 +30,7 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 	@GET
 	@Path(value = "/commonShareJSONPConfig")
 	@Produces("application/json;charset=UTF-8")
+	@Consumes("application/json;charset=UTF-8")
 	public String commonShareJSONPConfig(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		setAccessControl(request, response);
 		return "jsonpCallback("+  commonShareConfig(request,response)+ ");";

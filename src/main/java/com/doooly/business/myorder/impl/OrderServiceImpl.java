@@ -176,7 +176,7 @@ public class OrderServiceImpl implements OrderService{
 			AdUser adUser = new AdUser();
 			adUser.setId(report.getUserId());
 			adOrderReport.setAdUser(adUser);
-			putOrderReportToMapByOrderReportId(resp, report);
+			putOrderInfo(resp, report);
 			resp.setBillingState(report.getBillingState());		
 			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
 			Date intervalDayDate = DateUtils.addDays(report.getOrderDate(),  (StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));//
@@ -191,7 +191,7 @@ public class OrderServiceImpl implements OrderService{
 		return resp;
 	}
 	
-	 private void putOrderReportToMapByOrderReportId(OrderDetailResp resp, OrderDetailReport orderDetailReport) {
+	 private void putOrderInfo(OrderDetailResp resp, OrderDetailReport orderDetailReport) {
 	        AdUserBusinessExpansion adUserBusinessExpansion = null;
 	        AdOrderReport adOrderReport = new AdOrderReport();
 			adOrderReport.setId(orderDetailReport.getId());

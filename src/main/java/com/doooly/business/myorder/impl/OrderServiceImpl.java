@@ -196,7 +196,7 @@ public class OrderServiceImpl implements OrderService{
 	        AdOrderReport adOrderReport = new AdOrderReport();
 			adOrderReport.setId(orderDetailReport.getId());
 	        //都市旅游卡订单信息
-	        if (orderDetailReport.getProductType() == 5) {
+	        if (orderDetailReport.getProductType() != null && orderDetailReport.getProductType() == 5) {
 	            adUserBusinessExpansion = adOrderReportDao.findSctcdAccount(adOrderReport);
 	        }
 	        AdOrderFlow adOrderFlowQuery = new AdOrderFlow();
@@ -230,7 +230,7 @@ public class OrderServiceImpl implements OrderService{
 	        int resultNum = adUserDao.findOpenRebateSwitchNum(adOrderReport.getAdUser().getId());
 	        adOrderReport.setOpenRebateSwitch(resultNum > 0);*/
 	       
-	        if (orderDetailReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
+	        if (orderDetailReport.getProductType() != null && orderDetailReport.getProductType() == ProductType.SWISS_CARD.getValue()) {//旅游卡
 	        	resp.setSctcdCardno(orderDetailReport.getRemarks());
 	        }
 	        

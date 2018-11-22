@@ -868,7 +868,8 @@
 	        a.total_mount AS "totalMount",
 	        a.total_price AS "totalPrice",
 	        a.total_price-a.total_mount AS "savePrice",
-	        a.product_type AS "productType"
+	        a.product_type AS "productType",
+	        IFNULL(aos.cash_desk_source,'m') AS "cashDeskSource"
 
 	     </sql>
 
@@ -880,6 +881,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+     	 LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
            a.user_id = #{userId}
             <if test="beginOrderDate != null and beginOrderDate != ''">
@@ -910,6 +912,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
              <if test="businessId != null and businessId != ''">
@@ -940,6 +943,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
   			<if test="businessId != null and businessId != ''">
@@ -985,6 +989,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
      	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+     	 LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
              a.user_id = #{userId}
 			<if test="businessId != null and businessId != ''">
@@ -1014,6 +1019,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
             <if test="businessId != null and businessId != ''">
@@ -1043,6 +1049,7 @@
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
         LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
+        LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
          	 a.user_id = #{userId}
 			<if test="businessId != null and businessId != ''">
@@ -1091,7 +1098,8 @@
         a.consignee_mobile AS "consigneeMobile",
         a.service_charge AS "serviceCharge",
         a.voucher AS "voucher",
-        a.remarks
+        a.remarks,
+        IFNULL(aos.cash_desk_source,'m') AS "cashDeskSource"
     </sql>
 
 
@@ -1100,6 +1108,7 @@
         SELECT
         <include refid="getOrderDetailColumns"/>
         FROM ad_order_report a
+        LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <include refid="OrderDetailInfoJoins"/>
         WHERE a.id = #{orderReportId}
     </select>

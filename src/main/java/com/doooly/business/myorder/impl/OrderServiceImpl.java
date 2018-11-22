@@ -148,6 +148,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setBusinessId(report.getBusinessId());
 			resp.setIsSource(report.getIsSource());
 			resp.setSystemDate(DateUtils.formatDate(new Date(), "yyyy.MM.dd HH:mm:ss"));
+			resp.setCashDeskSource(report.getCashDeskSource());
 			
 			 //查询订单明细
 	        AdOrderDetail adOrderDetailQuery = new AdOrderDetail();

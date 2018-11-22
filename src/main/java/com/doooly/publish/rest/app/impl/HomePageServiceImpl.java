@@ -53,7 +53,7 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
-<<<<<<< .mine
+
 	@POST
 	@Path(value = "/user/profile/v2_2")
 	@Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -76,32 +76,9 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
-
-=======
 	
-	@POST
-	@Path(value = "/user/profile/v2_2")
-	@Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
-	@Consumes(MediaType.APPLICATION_JSON_UTF8_VALUE)
-	@Override
-	public Response getUserProfile2_2(JSONObject json) {
-		Long startTime = System.currentTimeMillis();
-		log.info("getUserProfile() json = {}, startTime = {}", json, startTime);
-		GetHomePageDataV2Response response = new GetHomePageDataV2Response();
-		try {
-			GetHomePageDataV2Request request = new GetHomePageDataV2Request(json);
-			response = homePageDataServcie.getHomePageDataV2(request, response);
-		} catch (Exception e) {
-			log.error("获取兜礼APP首页，会员信息概要时，程序异常。", e);
-			response.setStatus(DooolyResponseStatus.SYSTEM_ERROR);
-		} finally {
-			log.info("getUserProfile() response = " + JSONObject.toJSONString(response));
-			Long endTime = System.currentTimeMillis();
-			log.info("getUserProfile() endTime = {}, 调用接口总耗时：{}", endTime, (endTime - startTime) + "ms");
-		}
-		return Response.ok(response).build();
-	}
->>>>>>> .theirs
+
+
 
 	@POST
 	@Path(value = "/guide/flow")

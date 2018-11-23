@@ -38,6 +38,7 @@ public class OrderResp {
 	private String company;
 	private String productImg;
 	private String integrateReturnDate;
+	private String cashDeskSource;
 	
 	public Long getOrderId() {
 		return orderId;
@@ -170,6 +171,12 @@ public class OrderResp {
 	}
 	public void setIntegrateReturnDate(String integrateReturnDate) {
 		this.integrateReturnDate = integrateReturnDate;
+	}
+	public String getCashDeskSource() {
+		return cashDeskSource;
+	}
+	public void setCashDeskSource(String cashDeskSource) {
+		this.cashDeskSource = cashDeskSource;
 	}
 	
 

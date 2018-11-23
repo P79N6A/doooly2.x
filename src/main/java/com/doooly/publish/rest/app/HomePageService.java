@@ -13,6 +13,7 @@ public interface HomePageService {
 	 */
 	Response getUserProfile(JSONObject json);
 	Response getUserProfileV2_2(JSONObject json);
+
 	/**
 	 * 查询用户的新手引导完成进度
 	 */

@@ -1,21 +1,5 @@
 package com.doooly.publish.rest.life.impl;
 
-import java.util.Arrays;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.util.AppShareUtil;
@@ -23,6 +7,19 @@ import com.doooly.common.util.WechatUtil;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.ShareRetMsg;
 import com.doooly.publish.rest.life.ShareWithFriendsServiceI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import java.util.Arrays;
+import java.util.Map;
 
 @Component
 @Path("/share")
@@ -32,7 +29,8 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 	
 	@GET
 	@Path(value = "/commonShareJSONPConfig")
-	@Produces("application/json")  
+	@Produces("application/json;charset=UTF-8")
+	@Consumes("application/json;charset=UTF-8")
 	public String commonShareJSONPConfig(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		setAccessControl(request, response);
 		return "jsonpCallback("+  commonShareConfig(request,response)+ ");";
@@ -40,7 +38,8 @@ public class ShareWithFriendsService implements ShareWithFriendsServiceI {
 	
 	@GET
 	@Path(value = "/commonShareConfig")
-	@Produces("application/json")  
+	@Produces("application/json;charset=UTF-8")
+	@Consumes("application/json;charset=UTF-8")
 	public String commonShareConfig(@Context HttpServletRequest request,@Context HttpServletResponse response) {
 		String client = request.getParameter("client");
 		String prefix = request.getParameter("prefix");

@@ -230,7 +230,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("orderNum", orderNum);
         if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
-                ) && o.getServiceCharge() != null) {
+        ) && o.getServiceCharge() != null) {
             retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
         }
         //话费充值需要校验积分消费金额,用到此参数
@@ -851,7 +851,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
-        logger.info("退款返回结果", jsonObject.toJSONString());
+        logger.info("退款返回结果,{}", jsonObject.toJSONString());
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
@@ -916,41 +916,45 @@ public class NewPaymentService implements NewPaymentServiceI {
         String refundFee = param.getString("refundFee");
         String settlementRefundFee = param.getString("settlementRefundFee");
         String refundStatus = param.getString("refundStatus");
-        //添加redis锁防止并发同步====redis检测用户是否已经收到通知了
-        if (!redisTemplate.opsForValue().setIfAbsent(
-                String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo),
-                SYNC_REFUND_CODE_VALUE)) {
-            //说明已经通知了
-            return new ResultModel(GlobalResultStatusEnum.FAIL, "已经收到通知了");
-        }
-        if (refundStatus.equals(REFUND_STATUS_S)) {
-            //说明退款成功
-            //在查询下订单
-            OrderVo order = checkOrderStatus(merchantOrderNo);
-            // 修改订单状态-已退款
-            // 修改订单状态-已退款
-            orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
-            //退款成功
-            int payType1 = Integer.parseInt(payType);
-            if (payType1 != 0) {
-                //非积分需要插入流水
-                payType1 = 3;//微信
-                saveOneOrder(order, payType1, refundFee, settlementRefundFee, merchantRefundNo);
+        try {
+            //添加redis锁防止并发同步====redis检测用户是否已经收到通知了
+            if (!redisTemplate.opsForValue().setIfAbsent(
+                    String.format(SYNC_REFUND_CODE_KEY, outRefundNo + ":" + payType + ":" + merchantRefundNo),
+                    SYNC_REFUND_CODE_VALUE)) {
+                //说明已经通知了
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "已经收到通知了");
             }
-            //积分退款要修改businessId一致
-            updateBusinessId(order);
-            //退款后处理
-            Order o = new Order();
-            o.setPayType(payType1);
-            o.setSerialNumber(merchantOrderNo);
-            o.setOrderNumber(order.getOrderNumber());
-            o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
-            o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
-            afterRefundProcess(order,o);
-            return ResultModel.ok();
+            if (refundStatus.equals(REFUND_STATUS_S)) {
+                //说明退款成功
+                //在查询下订单
+                OrderVo order = checkOrderStatus(merchantOrderNo);
+                // 修改订单状态-已退款
+                // 修改订单状态-已退款
+                orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
+                //退款成功
+                int payType1 = Integer.parseInt(payType);
+                if (payType1 != 0) {
+                    //非积分需要插入流水
+                    payType1 = 3;//微信
+                    saveOneOrder(order, payType1, refundFee, settlementRefundFee, merchantRefundNo);
+                }
+                //积分退款要修改businessId一致
+                updateBusinessId(order);
+                //退款后处理
+                Order o = new Order();
+                o.setPayType(payType1);
+                o.setSerialNumber(merchantOrderNo);
+                o.setOrderNumber(order.getOrderNumber());
+                o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+                o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());
+                afterRefundProcess(order, o);
+            }
+        } catch (NumberFormatException e) {
+            logger.info("退款通知异常：{}", e);
+        } finally {
+            //删掉redis锁key
+            redisTemplate.delete(String.format(SYNC_REFUND_CODE_KEY, outRefundNo + ":" + payType + ":" + merchantRefundNo));
         }
-        //删掉redis锁key
-        redisTemplate.delete(String.format(SYNC_REFUND_CODE_KEY, outRefundNo+":"+payType+":"+merchantRefundNo));
         return ResultModel.ok();
     }
 
@@ -999,10 +1003,10 @@ public class NewPaymentService implements NewPaymentServiceI {
                         OrderDetail d = new OrderDetail();
                         d.setOrderid(o.getId().intValue());
                         d.setCode(itVo.getCode());
-                        String goods ;
-                        if(itVo.getSku()!=null){
+                        String goods;
+                        if (itVo.getSku() != null) {
                             goods = itVo.getGoods() + itVo.getSku();
-                        }else {
+                        } else {
                             goods = itVo.getGoods();
                         }
                         d.setGoods(goods);
@@ -1038,7 +1042,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber,payType);
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType);
         logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }
@@ -1078,8 +1082,9 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     /**
      * 退款成功后执行处理器
-     *  @param order ad_order_report对象
-     * @param o _order对象
+     *
+     * @param order ad_order_report对象
+     * @param o     _order对象
      */
     private void afterRefundProcess(OrderVo order, Order o) {
         List<AfterRefundProcessor> afterPayProcessors = AfterRefundProcessorFactory.getAllProcessors();
@@ -1089,7 +1094,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 @Override
                 public void run() {
                     logger.error("执行afterRefundProcess class = {}", afterRefundProcessor);
-                    afterRefundProcessor.process(order,o);
+                    afterRefundProcessor.process(order, o);
                 }
             }).start();
         }

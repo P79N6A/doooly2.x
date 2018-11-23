@@ -74,6 +74,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
                     if(adReturnPoints1 == null){
                         //插入
+                        adReturnPoints.setUserId(String.valueOf(order.getUserId()));
                         adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
                         adReturnPoints.setAmount(order2.getUserRebate());
                         adReturnPoints.setType(AdReturnPoints.TYPE_INTERCHANGE);

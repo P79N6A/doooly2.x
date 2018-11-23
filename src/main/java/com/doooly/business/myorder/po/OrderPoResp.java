@@ -42,6 +42,8 @@ public class OrderPoResp {
 		private String goods;
 		// 规格
 		private String specification;
+		private String cashDeskSource;
+		
 		
 					   
 		public Long getOrderId() {
@@ -171,6 +173,12 @@ public class OrderPoResp {
 		}
 		public void setSpecification(String specification) {
 			this.specification = specification;
+		}
+		public String getCashDeskSource() {
+			return cashDeskSource;
+		}
+		public void setCashDeskSource(String cashDeskSource) {
+			this.cashDeskSource = cashDeskSource;
 		}
 	
 		

@@ -156,12 +156,12 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     //PayFlow payFlow = payFlowService.getById(payFlowId);
                     //payFlow.setPayType(PayFlowService.PAYTYPE_CASHIER_DESK);
                     //payFlowService.update(payFlow);
-                    AdOrderSource adOrderSource = new AdOrderSource();
-                    adOrderSource.setOrderNumber(orderNum);
-                    adOrderSource.setBusinessId(business.getId());
-                    adOrderSource.setCashDeskSource("d");
-                    adOrderSource.setTraceCodeSource("d");
-                    adOrderSourceDao.insert(adOrderSource);
+                    //AdOrderSource adOrderSource = new AdOrderSource();
+                    //adOrderSource.setOrderNumber(orderNum);
+                    //adOrderSource.setBusinessId(business.getId());
+                    //adOrderSource.setCashDeskSource("d");
+                    //adOrderSource.setTraceCodeSource("d");
+                    //adOrderSourceDao.insert(adOrderSource);
                     // 返回解析结果数据
                     List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
                     Map<String, Object> map = new HashMap<String, Object>();

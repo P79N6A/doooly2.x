@@ -50,13 +50,13 @@ public class AdForumInvitationService implements AdForumInvitationServiceI {
                 }
             } else {
                 res.setCode("1003");
-                res.setMess("参数错误");
+//                res.setMess("参数错误");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             res.setCode("1002");
-            res.setMess("服务异常，请稍后再试");
+//            res.setMess("服务异常，请稍后再试");
         }
 
         return res;

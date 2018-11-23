@@ -8,6 +8,7 @@
         a.code AS "code",
         a.goods AS "goods",
         a.amount AS "amount",
+        a.price AS "price",
         a.number AS "number",
         a.tax AS "tax",
         a.create_by AS "createBy",

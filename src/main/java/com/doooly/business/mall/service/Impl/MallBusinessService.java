@@ -278,7 +278,6 @@ public class MallBusinessService implements MallBusinessServiceI {
 		List<AdBusinessStore> resultPage = new ArrayList<AdBusinessStore>();
 		List<AdBusinessStore> list = adBusinessStoreDao.findAddressList(businessId);
 		if (!list.isEmpty()) {
-			pagelab.setTotalNum(list.size());
 			for (AdBusinessStore a : list) {
 				if (a.getLatitude()!=null&&a.getLatitude()!=""&&a.getLongitude()!=null&&a.getLongitude()!="") {
 					double distance = ComputedRangeUtil.GetDistance(lat, lng, Double.valueOf(a.getLatitude()), Double.valueOf(a.getLongitude()));
@@ -289,6 +288,7 @@ public class MallBusinessService implements MallBusinessServiceI {
 					}
 				}
 			}
+			pagelab.setTotalNum(result.size());
 			Collections.sort(result,new Comparator<AdBusinessStore>() {
 				@Override
 				public int compare(AdBusinessStore o1, AdBusinessStore o2) {

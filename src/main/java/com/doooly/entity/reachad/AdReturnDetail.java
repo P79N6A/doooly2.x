@@ -17,6 +17,8 @@ public class AdReturnDetail implements Serializable {
 
     private BigDecimal amount;
 
+    private BigDecimal price;
+
     private BigDecimal number;
 
     private String createBy;
@@ -83,6 +85,14 @@ public class AdReturnDetail implements Serializable {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public BigDecimal getNumber() {

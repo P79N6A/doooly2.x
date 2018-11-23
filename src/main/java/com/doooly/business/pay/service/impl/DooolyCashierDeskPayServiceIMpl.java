@@ -5,7 +5,6 @@ import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.AdOrderFlow;
-import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.business.pay.bean.PayFlow;
 import com.doooly.business.pay.service.AbstractPaymentService;
 import com.doooly.business.pay.service.PayFlowService;
@@ -76,13 +75,13 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     //说明订单已经完成
                     return null;
                 }
-                AdOrderSource adOrderSource1 = new AdOrderSource();
-                adOrderSource1.setOrderNumber(orderNum);
-                adOrderSource1 =  adOrderSourceDao.get(adOrderSource1);
-                if(adOrderSource1 != null){
-                    //说明已经同步过
-                    return null;
-                }
+                //AdOrderSource adOrderSource1 = new AdOrderSource();
+                //adOrderSource1.setOrderNumber(orderNum);
+                //adOrderSource1 =  adOrderSourceDao.get(adOrderSource1);
+                //if(adOrderSource1 != null){
+                //    //说明已经同步过
+                //    return null;
+                //}
                 if (order.getIsSource() == 3) {
                     //插入订单来源表,非自营会同步已支付订单
                     AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));

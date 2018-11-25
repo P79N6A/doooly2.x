@@ -1,10 +1,9 @@
 /**
  * Copyright &copy; 2012-2016 <a href="https://github.com/thinkgem/jeesite">JeeSite</a> All rights reserved.
  */
-package com.doooly.entity.forum.invitation;
+package com.doooly.entity.reachad;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 
 /**

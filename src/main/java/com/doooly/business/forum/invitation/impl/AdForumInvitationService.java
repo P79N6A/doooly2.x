@@ -3,8 +3,6 @@ package com.doooly.business.forum.invitation.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.forum.invitation.AdForumInvitationServiceI;
 import com.doooly.business.guide.impl.AdArticleService;
-import com.doooly.common.constants.ThirdPartySMSConstatns;
-import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.dao.reachad.AdForumInvitationActivityDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdForumInvitationActivity;
@@ -54,20 +52,20 @@ public class AdForumInvitationService implements AdForumInvitationServiceI {
                     res.setCode("1000");
                     res.setMess("报名成功");
 
-                    try {
-                        //报名成功发送短信
-                        String mobiles = adForumInvitation.getPhone();
-                        String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.sign_up_success_template_code;
-                        JSONObject paramSMSJSON = new JSONObject();
-                        paramSMSJSON.put("name", adForumInvitation.getName());
-                        paramSMSJSON.put("activityName", "《新费税的政治解读及应对方案》");
-                        paramSMSJSON.put("date", "2018-12-12 13:30");
-                        paramSMSJSON.put("address", "上海南苏州路1247号3层八号桥艺术空间1908粮仓");
-                        int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
-                        logger.info("报名成功发送短信. i = {}", i);
-                    } catch (Exception e) {
-                        logger.error("sendMsg has an error. e = {}", e);
-                    }
+//                    try {
+//                        //报名成功发送短信
+//                        String mobiles = adForumInvitation.getPhone();
+//                        String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.sign_up_success_template_code;
+//                        JSONObject paramSMSJSON = new JSONObject();
+//                        paramSMSJSON.put("name", adForumInvitation.getName());
+//                        paramSMSJSON.put("activityName", "《新费税的政治解读及应对方案》");
+//                        paramSMSJSON.put("date", "2018-12-12 13:30");
+//                        paramSMSJSON.put("address", "上海南苏州路1247号3层八号桥艺术空间1908粮仓");
+//                        int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
+//                        logger.info("报名成功发送短信. i = {}", i);
+//                    } catch (Exception e) {
+//                        logger.error("sendMsg has an error. e = {}", e);
+//                    }
                 }
             } else {
                 res.setCode("1003");

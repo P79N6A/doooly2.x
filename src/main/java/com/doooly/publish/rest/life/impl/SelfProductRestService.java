@@ -1,17 +1,5 @@
 package com.doooly.publish.rest.life.impl;
 
-import java.util.*;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
@@ -21,6 +9,16 @@ import com.doooly.business.product.service.ProductService;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdAd;
 import com.doooly.publish.rest.life.SelfProductRestServiceI;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.*;
 
 /**
  * 自营商品 REST Service实现
@@ -124,7 +122,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 				int startHour = Integer.parseInt(activityOfTimeList.get(0));
 				int endHour = Integer.parseInt(activityOfTimeList.get(1));
 
-				String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
+				String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 == 0 ? (7 + "") : calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
 				int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
 				if (weekLists.contains(week) && hour >= startHour && hour < endHour + 1) {

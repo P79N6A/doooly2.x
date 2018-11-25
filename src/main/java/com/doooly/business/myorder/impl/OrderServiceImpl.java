@@ -75,7 +75,12 @@ public class OrderServiceImpl implements OrderService{
     
     @Autowired
 	protected StringRedisTemplate redisTemplate;
-	 
+
+	/**
+	 * 订单列表
+	 * @param orderReq
+	 * @return
+	 */
 	@Override
 	public List<OrderPoResp> getOrderList(OrderReq orderReq) {
 		if(orderReq.getType() == null) {
@@ -85,7 +90,7 @@ public class OrderServiceImpl implements OrderService{
 		return handlerOrderList(orderReq);
 	}
 
-	/**
+	/**订单列表
 	 * @param orderReq
 	 * @return
 	 */
@@ -281,7 +286,11 @@ public class OrderServiceImpl implements OrderService{
 			return 0L;
 		}
 
-		@Override
+	/**
+	 * 取消订单提醒
+	 * @param req
+	 */
+	@Override
 		public void cannelHint(OrderReq req) {
 			try {
 				ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
@@ -303,7 +312,13 @@ public class OrderServiceImpl implements OrderService{
 			}
 			
 		}
-		
+
+	/**
+	 * 获取订单总数
+	 * @param req
+	 * @param state
+	 * @return
+	 */
 		private int getTotal(OrderReq req,Integer state) {
 			OrderPoReq orderPoReq = new OrderPoReq();
 			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
@@ -320,7 +335,12 @@ public class OrderServiceImpl implements OrderService{
 			return 0;
 		}
 
-		@Override
+	/**
+	 * 获取订单提醒
+	 * @param req
+	 * @return
+	 */
+	@Override
 		public HintResp getHint(HintReq req) {
 			HintResp hintResp = new HintResp();
 			try {
@@ -361,6 +381,11 @@ public class OrderServiceImpl implements OrderService{
 			return hintResp;
 		}
 
+	/**
+	 * 删除订单
+	 * @param req
+	 * @return
+	 */
 		@Override
 		public boolean deleteOrder(OrderDeleteReq req) {
 			Integer result = adOrderReportDao.deleteOrder(req.getOrderId());

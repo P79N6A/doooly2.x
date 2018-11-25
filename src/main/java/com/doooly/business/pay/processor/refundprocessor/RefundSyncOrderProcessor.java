@@ -62,6 +62,9 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
                     adReturnPointsLog.setOrderId(order2.getId());
                     adReturnPointsLog.setType(AdReturnPoints.TYPE_INTERCHANGE);
+                    adReturnPointsLog.setDelFlag("0");
+                    adReturnPointsLog.setCreateDate(new Date());
+                    adReturnPointsLog.setUpdateDate(new Date());
                     AdReturnPointsLog adReturnPointsLog1 = adReturnPointsLogDao.getByCondition(adReturnPointsLog);
                     if (adReturnPointsLog1 != null) {
                         logger.info("AdReturnPointsLog已经存在：orderId：{}，type：{}",order2.getId(),AdReturnPoints.TYPE_INTERCHANGE);

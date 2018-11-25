@@ -1,4 +1,4 @@
-package com.doooly.publish.rest.forum.invitation;
+package com.doooly.publish.rest.life;
 
 import com.alibaba.fastjson.JSONObject;
 

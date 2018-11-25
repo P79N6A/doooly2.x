@@ -16,6 +16,24 @@
 		abs.store_name AS "storeName"
 	</sql>
 
+
+	<sql id="Base_Column_List">
+		user_id,
+		order_id,
+		report_id,
+		amount,
+		type,
+		status,
+		create_by,
+		del_flag,
+		remarks,
+		update_date,
+		update_by,
+		create_date,
+		receive_stuts,
+		id
+	</sql>
+
 	<sql id="adReturnPoints">
 		a.id AS "id",
 		a.user_id AS "userId",
@@ -218,4 +236,44 @@
 		</set>
 		where ID = #{id,jdbcType=NUMERIC}
 	</update>
+
+
+	<resultMap type="com.doooly.entity.reachad.AdReturnPoints" id="BaseResultMap">
+		<result column="user_id" property="userId" jdbcType="BIGINT" />
+		<result column="order_id" property="orderId" jdbcType="BIGINT" />
+		<result column="report_id" property="reportId" jdbcType="BIGINT" />
+		<result column="amount" property="amount" jdbcType="DECIMAL" />
+		<result column="type" property="type" jdbcType="CHAR" />
+		<result column="status" property="status" jdbcType="CHAR" />
+		<result column="create_by" property="createBy" jdbcType="VARCHAR" />
+		<result column="del_flag" property="delFlag" jdbcType="CHAR" />
+		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
+		<result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+		<result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="receive_stuts" property="receiveStuts" jdbcType="CHAR" />
+		<result column="id" property="id" jdbcType="BIGINT" />
+	</resultMap>
+
+
+	<select id="getByCondition" parameterType="com.doooly.entity.reachad.AdReturnPoints" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"/>
+		from ad_return_points
+		<where>
+			<if test="null != userId"> and user_id=#{userId,jdbcType=BIGINT}</if>
+			<if test="null != orderId"> and order_id=#{orderId,jdbcType=BIGINT}</if>
+			<if test="null != reportId"> and report_id=#{reportId,jdbcType=BIGINT}</if>
+			<if test="null != amount"> and amount=#{amount,jdbcType=DECIMAL}</if>
+			<if test="null != type"> and type=#{type,jdbcType=CHAR}</if>
+			<if test="null != status"> and status=#{status,jdbcType=CHAR}</if>
+			<if test="null != createBy"> and create_by=#{createBy,jdbcType=VARCHAR}</if>
+			<if test="null != delFlag"> and del_flag=#{delFlag,jdbcType=CHAR}</if>
+			<if test="null != remarks"> and remarks=#{remarks,jdbcType=VARCHAR}</if>
+			<if test="null != updateDate"> and update_date=#{updateDate,jdbcType=TIMESTAMP}</if>
+			<if test="null != updateBy"> and update_by=#{updateBy,jdbcType=VARCHAR}</if>
+			<if test="null != createDate"> and create_date=#{createDate,jdbcType=TIMESTAMP}</if>
+			<if test="null != receiveStuts"> and receive_stuts=#{receiveStuts,jdbcType=CHAR}</if>
+			<if test="null != id"> and id=#{id,jdbcType=BIGINT}</if>
+		</where>
+	</select>
 </mapper>

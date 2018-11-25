@@ -59,4 +59,10 @@ public interface AdReturnPointsDao {
 	 */
 	Integer update(AdReturnPoints model);
 
+
+	/**
+	 *获取单个对象,未经校验,禁止直接调用
+	 */
+	AdReturnPoints getByCondition(AdReturnPoints model);
+
 }

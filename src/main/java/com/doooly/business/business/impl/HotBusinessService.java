@@ -322,7 +322,6 @@ public class HotBusinessService implements HotBusinessServiceI {
 	/**
 	 * 2.0可用积分服务-商户详情
 	 * 
-	 * @param userId
 	 * @return
 	 */
 	@Override

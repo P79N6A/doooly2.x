@@ -3,6 +3,9 @@ package com.doooly.business.home.v2.servcie.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
 import com.doooly.business.home.v2.servcie.HomePageDataServcie;
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.service.OrderService;
 import com.doooly.common.DooolyResponseStatus;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdAppHomePageDao;
@@ -50,6 +53,9 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	private AdUserDao adUserDao;
 	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
+	
+	@Autowired
+	private OrderService orderservice;
 
 	@Override
 	public GetHomePageDataV2Response getHomePageDataV2(GetHomePageDataV2Request request,
@@ -396,6 +402,7 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		return response;
 	}
 
+
 	@Override
 	public GetHomePageDataV2Response getHomePageDataV2_2(GetHomePageDataV2Request request,
 			GetHomePageDataV2Response response) {
@@ -405,7 +412,16 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			// 查询待返积分
 			BigDecimal returnPoint = adUserDao.getReturnPoint(String.valueOf(request.getUserId()));
 			homePageData.setReturnPoints(returnPoint != null ? returnPoint.toString() : "0.00");
+			HintReq req = new HintReq();
+			req.setUserId(String.valueOf(request.getUserId()));
+			HintResp resp = orderservice.getHint(req);
+			homePageData.setNewOrderFlag(resp.isNewOrderFlag());
+			homePageData.setNewFinishFlag(resp.isNewFinishFlag());
+			homePageData.setNewCancelFlag(resp.isNewCancelFlag());
 		}
 		return response;
 	}
+	
+
+
 }

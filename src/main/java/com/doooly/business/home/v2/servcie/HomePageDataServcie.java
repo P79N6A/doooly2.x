@@ -16,6 +16,7 @@ public interface HomePageDataServcie {
 	 * 获取兜礼APP首页数据
 	 */
 	GetHomePageDataV2Response getHomePageDataV2(GetHomePageDataV2Request request, GetHomePageDataV2Response response);
+
 	/**
 	 * 获取个人中心数据
 	 * 

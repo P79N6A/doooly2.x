@@ -1,22 +1,5 @@
 package com.doooly.business.home.v2.servcie.impl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.guide.service.AdArticleServiceI;
@@ -30,12 +13,19 @@ import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessServicePJDao;
 import com.doooly.dao.reachad.AdConsumeRechargeDao;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdBasicType;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdBusinessServicePJ;
-import com.doooly.entity.reachad.AdConsumeRecharge;
-import com.doooly.entity.reachad.AdProduct;
+import com.doooly.entity.reachad.*;
 import com.doooly.publish.rest.life.impl.IndexRestService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 public class IndexServiceImpl implements IndexServiceI {
@@ -82,14 +72,18 @@ public class IndexServiceImpl implements IndexServiceI {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
             }
+
             Map<String, Object> data = new HashMap<String, Object>();
             List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
+
             for (AdBasicType floor : floors) {
                 if (floor.getCode() != 20 && floor.getCode() != 21 && floor.getCode() != 23 && floor.getCode() != 24) {
                     Map<String, Object> item = new HashMap<String, Object>();
+
                     if (floor.getCode() == 25) {
                         if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
                             List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");

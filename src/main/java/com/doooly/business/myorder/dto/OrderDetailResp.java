@@ -46,6 +46,7 @@ public class OrderDetailResp {
 	private String businessId;
 	private String groupShortName;
 	private String systemDate;
+	private String cashDeskSource;
 	
 	public long getId() {
 		return id;
@@ -289,6 +290,12 @@ public class OrderDetailResp {
 	}
 	public void setSystemDate(String systemDate) {
 		this.systemDate = systemDate;
+	}
+	public String getCashDeskSource() {
+		return cashDeskSource;
+	}
+	public void setCashDeskSource(String cashDeskSource) {
+		this.cashDeskSource = cashDeskSource;
 	}
 
 }

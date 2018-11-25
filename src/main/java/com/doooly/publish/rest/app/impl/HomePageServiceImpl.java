@@ -53,6 +53,7 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
+
 	@POST
 	@Path(value = "/user/profile/v2_2")
 	@Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -75,6 +76,9 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
+	
+
+
 
 	@POST
 	@Path(value = "/guide/flow")

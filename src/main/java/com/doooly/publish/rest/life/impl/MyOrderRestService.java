@@ -179,6 +179,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			resp.setProductImg(orderPoResp.getProductImg());
 			Date intervalDayDate = DateUtils.addDays(orderPoResp.getOrderDate(), Integer.parseInt(orderDay));//推后30天的日期
 			resp.setIntegrateReturnDate(com.doooly.business.utils.DateUtils.formatDate(intervalDayDate, "yyyy.MM.dd"));		
+			resp.setCashDeskSource(orderPoResp.getCashDeskSource());
 			orderList.add(resp);
 		}
 		Long countOrderNum = orderservice.countOrderNum(req);

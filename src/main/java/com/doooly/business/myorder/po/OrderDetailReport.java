@@ -38,6 +38,7 @@ public class OrderDetailReport {
     private String storeName;
     private String businessId;
     private String remarks;
+    private String cashDeskSource;
     
 	public long getId() {
 		return id;
@@ -200,6 +201,12 @@ public class OrderDetailReport {
 	}
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+	public String getCashDeskSource() {
+		return cashDeskSource;
+	}
+	public void setCashDeskSource(String cashDeskSource) {
+		this.cashDeskSource = cashDeskSource;
 	}
 
  

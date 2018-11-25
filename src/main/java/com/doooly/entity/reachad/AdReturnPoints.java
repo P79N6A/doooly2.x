@@ -15,15 +15,25 @@ public class AdReturnPoints {
     private String userId;//adUserId
     private Long orderId;   //订单编号
     private String reportId ;
-	private BigDecimal amount;		// 预计返利
-	private String type;		// 积分交易类型
-	private String status;		// 状态标识
-	private Date createDate;	// 时间
+    private BigDecimal amount;		// 预计返利
+    private String type;		// 积分交易类型
+    private String status;		// 状态标识
+    private Date createDate;	// 时间
     private String company;  //商户名称
     private String storeName;  //门店名称
     private String logo;  //门店logo
     private String createDateStr;  //积分日志字符串格式
     private String receiveStuts;
+    /** create_by - 创建者 */
+    private String createBy;
+    /** del_flag - 删除标记 */
+    private String delFlag;
+    /** remarks - 备注信息 */
+    private String remarks;
+    /** update_date - 更新时间 */
+    private Date updateDate;
+    /** update_by - 更新者 */
+    private String updateBy;
 
 	/** 预计积分表 积分交易类型：消费 */
 	public static final String TYPE_CONSUME = "1";
@@ -54,6 +64,46 @@ public class AdReturnPoints {
 	
 	/** 预计积分表 状态标识：失效 */
 	public static final String STATUS_INVALID = "3";
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    public String getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(String delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public String getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
+    }
 
     public String getId() {
         return id;

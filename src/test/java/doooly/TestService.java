@@ -5,7 +5,9 @@ package doooly;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdReturnPointsLogDao;
+import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.AdReturnPointsLog;
+import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,15 @@ public class TestService {
         adReturnPoints.setReportId("121");
        adReturnPoints = adReturnPointsDao.getByCondition(adReturnPoints);
         System.out.println(new Gson().toJson(adReturnPoints));*/
-        synAdReturnPointsLog("199295666","vipte00001223","TEST_14754724c5a9067880bafaa4d046be9e","1");
+        //synAdReturnPointsLog("199295666","vipte00001223","TEST_14754724c5a9067880bafaa4d046be9e","1");
+
+
+        //插入ad_return_points
+        AdReturnPoints adReturnPoints = new AdReturnPoints();
+        adReturnPoints.setReportId("199295818");
+        AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
+        adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
+        System.out.println(new Gson().toJson(adReturnPoints1));
     }
 
 

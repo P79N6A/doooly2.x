@@ -179,6 +179,11 @@ public class MyPoinitService implements MyPointServiceI {
 				// 日期处理
 				adAvailablePoint.setCreateDateStr(
 						DateUtils.formatDate(adAvailablePoint.getCreateDate(), "yyyy年MM月dd日 HH:mm:ss"));
+                if(AdAvailablePoints.TYPE_INTEGRAL_ATTEND.equals(adAvailablePoint.getType())){
+                    //签到兼容老版本前端取值
+                    adAvailablePoint.setCompany("兜礼签到领积分");
+                    adAvailablePoint.setOrderId(0L);
+                }
 			}
 			map.put("adAvailablePoints", adAvailablePoints);// 数据
 			map.put("countPage", pagelab.getCountPage());// 总页码

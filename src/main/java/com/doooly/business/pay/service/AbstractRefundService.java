@@ -264,7 +264,7 @@ public abstract class AbstractRefundService implements RefundService {
 			adReturnFlow.setPayType((short) PayType.getCodeByName(payFlow.getPayType()));
 			adReturnFlow.setAmount(order.getTotalMount());
 			adReturnFlow.setType("0");// 0:未审核 1：已审核
-			adReturnFlow.setUserRebate(new BigDecimal(order.getUserRebate()));
+			adReturnFlow.setUserRebate(order.getUserRebate());
 			adReturnFlow.setUserReturnAmount(order.getUserReturnAmount());
 			adReturnFlow.setBusinessRebateAmount(order.getBusinessRebateAmount());
 			adReturnFlow.setBillingState(String.valueOf(order.getBillingState()));

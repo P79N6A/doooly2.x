@@ -52,8 +52,7 @@ public class TestService {
         //插入ad_return_points
         AdReturnPoints adReturnPoints = new AdReturnPoints();
         adReturnPoints.setReportId("199295818");
-        AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
-        adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
+        AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
         System.out.println(new Gson().toJson(adReturnPoints1));
     }
 

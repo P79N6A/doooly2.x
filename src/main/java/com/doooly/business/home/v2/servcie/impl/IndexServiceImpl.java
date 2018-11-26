@@ -229,6 +229,7 @@ public class IndexServiceImpl implements IndexServiceI {
                                 floor.getFloorId());
                         if (!CollectionUtils.isEmpty(beans)) {
                             for (AdConsumeRecharge bean : beans) {
+                                bean.setIconUrl(bean.getGuideIconUrl());
                                 String linkUrl = bean.getLinkUrl();
                                 if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
                                     bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));

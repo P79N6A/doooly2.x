@@ -373,6 +373,11 @@ public class OrderServiceImpl implements OrderService{
 				}else{
 					hintResp.setNewCancelFlag(false);
 				}
+
+				if(orderTotalMap<(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
+					opsForValue.set("ordertotal:"+req.getUserId()+":0",String.valueOf(orderTotal));
+				}
+
 			}catch(Exception e) {
 				logger.error(e.getMessage());
 			}

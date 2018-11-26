@@ -616,7 +616,6 @@
         a.state AS "state",
         a.type AS "type",
         a.order_number AS "orderNumber",
-		IFNULL(aos.cash_desk_source,'m') AS "cashDeskSource"
         a.order_date AS "orderDate",
         IFNULL(a.user_rebate,0.00) AS "userRebate",
         IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",

@@ -12,6 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.doooly.business.myorder.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.dict.ConfigDictServiceI;
-import com.doooly.business.myorder.dto.HintReq;
-import com.doooly.business.myorder.dto.HintResp;
-import com.doooly.business.myorder.dto.OrderDeleteReq;
-import com.doooly.business.myorder.dto.OrderDetailReq;
-import com.doooly.business.myorder.dto.OrderDetailResp;
-import com.doooly.business.myorder.dto.OrderReq;
-import com.doooly.business.myorder.dto.OrderResp;
-import com.doooly.business.myorder.dto.OrderResult;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
 import com.doooly.business.myorder.service.MyOrderServiceI;
@@ -131,7 +124,10 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			OrderReq req = gson.fromJson(json.toJSONString(), OrderReq.class);
 			String result =  list(req);
 			if(req.getHintState() != null) {
-				orderservice.cannelHint(req);
+				OrderHintReq orderHintReq = new OrderHintReq();
+				orderHintReq.setHintState(req.getHintState());
+				orderHintReq.setUserId(Long.parseLong(req.getUserId()));
+				orderservice.cannelHint(orderHintReq);
 			}
 			logger.info("我的订单(/list)===> 接口耗时：{}", System.currentTimeMillis()-start);
 			return result;
@@ -143,8 +139,6 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 	
 	/**
 	 * 订单列表
-	 * @param request
-	 * @param response
 	 * @return
 	 */
 	public String list(OrderReq req) {
@@ -271,6 +265,12 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			OrderDeleteReq  req = gson.fromJson(json.toJSONString(), OrderDeleteReq.class);
 			
 			boolean flag =  orderservice.deleteOrder(req);
+			if(req.getHintState() != null) {
+				OrderHintReq orderHintReq = new OrderHintReq();
+				orderHintReq.setHintState(req.getHintState());
+				orderHintReq.setUserId(req.getUserId());
+				orderservice.cannelHint(orderHintReq);
+			}
 			result.setCode("1000");
 			result.setData(flag);
 			logger.info("我的订单(/delete)===> 接口耗时：{}", System.currentTimeMillis()-start);

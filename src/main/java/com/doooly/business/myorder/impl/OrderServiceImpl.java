@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.myorder.dto.*;
 import com.doooly.business.myorder.po.OrderDetailPoReq;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,12 +19,6 @@ import org.springframework.stereotype.Service;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myorder.constant.OrderType;
 import com.doooly.business.myorder.constant.ProductType;
-import com.doooly.business.myorder.dto.HintReq;
-import com.doooly.business.myorder.dto.HintResp;
-import com.doooly.business.myorder.dto.OrderDeleteReq;
-import com.doooly.business.myorder.dto.OrderDetailReq;
-import com.doooly.business.myorder.dto.OrderDetailResp;
-import com.doooly.business.myorder.dto.OrderReq;
 import com.doooly.business.myorder.po.OrderDetailReport;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
@@ -295,7 +290,7 @@ public class OrderServiceImpl implements OrderService{
 	 * @param req
 	 */
 	@Override
-		public void cannelHint(OrderReq req) {
+		public void cannelHint(OrderHintReq req) {
 			try {
 				ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 				String[] list = req.getHintState().split(",");
@@ -305,9 +300,8 @@ public class OrderServiceImpl implements OrderService{
 					String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":"+state);
 					Integer value = StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal);
 					Integer total = getTotal(req,state);
-					logger.info("orderTotal:{},total:{}",orderTotal,total);
-					if(total > value) {
-						
+					logger.info("total:{}",total);
+					if(total != value) {
 						opsForValue.set("ordertotal:"+req.getUserId()+":"+state,String.valueOf(total));
 					}
 				}
@@ -323,9 +317,9 @@ public class OrderServiceImpl implements OrderService{
 	 * @param state
 	 * @return
 	 */
-		private int getTotal(OrderReq req,Integer state) {
+		private int getTotal(OrderHintReq req,Integer state) {
 			OrderPoReq orderPoReq = new OrderPoReq();
-			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
+			orderPoReq.setUserId(req.getUserId());
 			if(0 == state) {
 				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
 				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));

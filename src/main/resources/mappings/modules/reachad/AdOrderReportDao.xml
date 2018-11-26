@@ -1000,6 +1000,7 @@
             <if test="isUserRebate !=null and  isUserRebate!=''">
             	AND  a.is_user_rebate = #{isUserRebate}
             </if>
+            and a.del_flag = 0
         </where>
 
     </select>

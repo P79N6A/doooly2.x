@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.myorder.po.OrderDetailPoReq;
 import org.apache.ibatis.annotations.Param;
 
 import com.doooly.business.myorder.po.OrderDetailReport;
@@ -109,7 +110,7 @@ public interface AdOrderReportDao {
      */
     Long countNotRebateOrder(OrderPoReq orderReq);
     
-    OrderDetailReport getOrderDetailById(String orderReportId);
+    OrderDetailReport getOrderDetail(OrderDetailPoReq req);
     
     
     List<Map<String,String>> findOrderdDetailSum(OrderPoReq req);
@@ -120,5 +121,5 @@ public interface AdOrderReportDao {
     
     Integer getNotRebateOrderTotal(OrderPoReq req);
     
-    Integer deleteOrder(Long orderId);
+    Integer deleteOrder(OrderDetailPoReq req);
 }

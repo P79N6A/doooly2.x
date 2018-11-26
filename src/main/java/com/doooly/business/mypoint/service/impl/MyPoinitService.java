@@ -182,6 +182,7 @@ public class MyPoinitService implements MyPointServiceI {
                 if(AdAvailablePoints.TYPE_INTEGRAL_ATTEND.equals(adAvailablePoint.getType())){
                     //签到兼容老版本前端取值
                     adAvailablePoint.setCompany("兜礼签到领积分");
+                    adAvailablePoint.setOrderId(0L);
                 }
 			}
 			map.put("adAvailablePoints", adAvailablePoints);// 数据

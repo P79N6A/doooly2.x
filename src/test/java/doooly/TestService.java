@@ -2,11 +2,18 @@ package doooly;
 
 //package com.redis;package com.redis.test;
 
+import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
+import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
+import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdReturnPointsLogDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.AdReturnPointsLog;
+import com.doooly.entity.reachad.Order;
 import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 //package com.redis;
 
@@ -36,6 +44,15 @@ public class TestService {
     @Autowired
     private AdReturnPointsLogDao adReturnPointsLogDao;
 
+    @Autowired
+    private OrderService  orderService;
+
+    @Autowired
+    private OrderDao orderDao;
+
+    @Autowired
+    private RefundSyncOrderProcessor refundSyncOrderProcessor;
+
     @Test
     public void test(){
        /* ValueOperations<String, String> ops = redis.opsForValue();
@@ -50,10 +67,20 @@ public class TestService {
 
 
         //插入ad_return_points
-        AdReturnPoints adReturnPoints = new AdReturnPoints();
+        /*AdReturnPoints adReturnPoints = new AdReturnPoints();
         adReturnPoints.setReportId("199295818");
         AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
-        System.out.println(new Gson().toJson(adReturnPoints1));
+        System.out.println(new Gson().toJson(adReturnPoints1));*/
+
+        OrderVo o = new OrderVo();
+        o.setOrderNumber("xip09359811");
+        o = orderService.getOrder(o).get(0);
+
+        Order order = new Order();
+        order = orderDao.get("199295819");
+
+        refundSyncOrderProcessor.process(o,order);
+        //afterRefundProcess(o,order);
     }
 
 
@@ -87,6 +114,19 @@ public class TestService {
         adReturnPointsLog.setUpdateDate(new Date());
         adReturnPointsLogDao.save(adReturnPointsLog);
 
+    }
+
+
+    private void afterRefundProcess(OrderVo order, Order o) {
+        List<AfterRefundProcessor> afterPayProcessors = AfterRefundProcessorFactory.getAllProcessors();
+        for (AfterRefundProcessor afterRefundProcessor : afterPayProcessors) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    afterRefundProcessor.process(order, o);
+                }
+            }).start();
+        }
     }
 }
 

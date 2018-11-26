@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.myorder.po.OrderDetailPoReq;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -122,8 +123,11 @@ public class OrderServiceImpl implements OrderService{
 	public OrderDetailResp getOrderDetail(OrderDetailReq req) {
 		OrderDetailResp resp = new OrderDetailResp();
 		try {
+			OrderDetailPoReq orderDetailPoReq = new OrderDetailPoReq();
+			orderDetailPoReq.setOrderId(Long.parseLong(req.getOrderId()));
+			orderDetailPoReq.setUserId(req.getUserId());
 			//查询订单信息
-			OrderDetailReport report =  adOrderReportDao.getOrderDetailById(req.getOrderId());
+			OrderDetailReport report =  adOrderReportDao.getOrderDetail(orderDetailPoReq);
 			AdOrderReport adOrderReport = new AdOrderReport();
 			adOrderReport.setId(Long.parseLong(req.getOrderId()));
 			resp.setId(report.getId());
@@ -388,7 +392,10 @@ public class OrderServiceImpl implements OrderService{
 	 */
 		@Override
 		public boolean deleteOrder(OrderDeleteReq req) {
-			Integer result = adOrderReportDao.deleteOrder(req.getOrderId());
+			OrderDetailPoReq orderDetailPoReq = new OrderDetailPoReq();
+			orderDetailPoReq.setOrderId(req.getOrderId());
+			orderDetailPoReq.setUserId(req.getUserId());
+			Integer result = adOrderReportDao.deleteOrder(orderDetailPoReq);
 			if(result != null && result >= 1) {
 				return true;
 			}

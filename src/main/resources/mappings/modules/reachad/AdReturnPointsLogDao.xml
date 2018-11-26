@@ -33,7 +33,7 @@
 	
 	
 	<insert id="save" parameterType="com.doooly.entity.reachad.AdReturnPointsLog">
-		<selectKey resultType="int" keyProperty="id" order="AFTER">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
 			SELECT
 			LAST_INSERT_ID()
 		</selectKey>

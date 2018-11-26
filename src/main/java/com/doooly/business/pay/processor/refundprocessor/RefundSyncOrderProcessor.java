@@ -1,6 +1,7 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
 import com.alibaba.fastjson.JSONArray;
+import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.PayMsg;
@@ -37,6 +38,8 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
     private AdReturnPointsDao adReturnPointsDao;
     @Autowired
     private AdReturnPointsLogDao adReturnPointsLogDao;
+    @Autowired
+    private AdOrderReportDao adOrderReportDao;
 
     @Override
     public PayMsg process(OrderVo order, Order o) {
@@ -62,6 +65,9 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
                     adReturnPointsLog.setOrderId(order2.getId());
                     adReturnPointsLog.setType(AdReturnPoints.TYPE_INTERCHANGE);
+                    adReturnPointsLog.setDelFlag("0");
+                    adReturnPointsLog.setCreateDate(new Date());
+                    adReturnPointsLog.setUpdateDate(new Date());
                     AdReturnPointsLog adReturnPointsLog1 = adReturnPointsLogDao.getByCondition(adReturnPointsLog);
                     if (adReturnPointsLog1 != null) {
                         logger.info("AdReturnPointsLog已经存在：orderId：{}，type：{}",order2.getId(),AdReturnPoints.TYPE_INTERCHANGE);
@@ -71,7 +77,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     //插入ad_return_points
                     AdReturnPoints adReturnPoints = new AdReturnPoints();
                     adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
-                    AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
+                    AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
                     if(adReturnPoints1 == null){
                         //插入
                         adReturnPoints.setUserId(String.valueOf(order.getUserId()));
@@ -82,7 +88,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                         adReturnPoints.setCreateDate(new Date());
                         adReturnPointsDao.insert(adReturnPoints);
                     }
-                    adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
+                    adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
 
                     adReturnPointsLog.setAdReturnPointsId(Long.parseLong(adReturnPoints1.getId()));
                     adReturnPointsLog.setOperateAmount(order2.getUserRebate());
@@ -106,6 +112,12 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     adReturnFlow.setBusinessRebateAmount(order3.getBusinessRebate());
                     adReturnFlow.setType(null);//不更新type值
                     adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
+
+                    OrderVo o1 = new OrderVo();
+                    o1.setId(order.getId());
+                    o1.setUserRebate(order.getUserRebate() - adReturnPointsLog.getOperateAmount().intValue());
+                    o1.setUpdateDate(new Date());
+                    adOrderReportDao.update(order);
                 } catch (Exception e) {
                     logger.error("processor退款回调异常：{} ",order2.getOrderNumber(),e);
                 }

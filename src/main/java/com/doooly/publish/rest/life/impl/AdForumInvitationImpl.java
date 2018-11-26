@@ -1,9 +1,9 @@
-package com.doooly.publish.rest.forum.invitation.impl;
+package com.doooly.publish.rest.life.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.forum.invitation.AdForumInvitationServiceI;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.publish.rest.forum.invitation.AdForumInvitationI;
+import com.doooly.publish.rest.life.AdForumInvitationI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

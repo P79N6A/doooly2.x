@@ -711,14 +711,8 @@
             </if>
             <if test="delFlagUser != null and delFlagUser != ''"> AND a.del_flag_user = #{delFlagUser} </if>
         </where>
-        <choose>
-            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
-                ORDER BY ${page.orderBy}
-            </when>
-            <otherwise>
                 ORDER BY a.order_date DESC
-            </otherwise>
-        </choose>
+
     </select>
 
     <select id="findOrderSumByMonth" resultType="java.util.Map">

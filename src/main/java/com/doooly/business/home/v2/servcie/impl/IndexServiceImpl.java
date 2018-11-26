@@ -121,6 +121,7 @@ public class IndexServiceImpl implements IndexServiceI {
 
                         if (!CollectionUtils.isEmpty(beans)) {
                             for (AdConsumeRecharge bean : beans) {
+                                bean.setIconUrl(bean.getGuideIconUrl());
                                 String linkUrl = bean.getLinkUrl();
                                 if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
                                     bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
@@ -229,7 +230,6 @@ public class IndexServiceImpl implements IndexServiceI {
                                 floor.getFloorId());
                         if (!CollectionUtils.isEmpty(beans)) {
                             for (AdConsumeRecharge bean : beans) {
-                                bean.setIconUrl(bean.getGuideIconUrl());
                                 String linkUrl = bean.getLinkUrl();
                                 if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
                                     bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
@@ -290,7 +290,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							getBussiness(userId, address, Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE), version));
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
-					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 10, userId, "1");
+					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();

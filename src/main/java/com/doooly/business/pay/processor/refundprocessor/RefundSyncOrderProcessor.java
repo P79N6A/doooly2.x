@@ -1,6 +1,7 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
 import com.alibaba.fastjson.JSONArray;
+import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.PayMsg;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,8 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
     private AdReturnPointsDao adReturnPointsDao;
     @Autowired
     private AdReturnPointsLogDao adReturnPointsLogDao;
+    @Autowired
+    private AdOrderReportDao adOrderReportDao;
 
     @Override
     public PayMsg process(OrderVo order, Order o) {
@@ -47,14 +51,14 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
         logger.info("计算退货返利同步订单到_order开始. orderNum = {}", order.getOrderNumber());
         //查询需要计算的退货订单
         List<Order> list = orderDao.findList(o);
-        logger.info("process orderlist,{},{}",order.getOrderNumber(), JSONArray.toJSONString(list));
+        //logger.info("process orderlist,{},{}",order.getOrderNumber(), JSONArray.toJSONString(list));
         if(CollectionUtils.isNotEmpty(list)){
             for (Order order2 : list) {
                 try {
 
-                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
+                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getOrderNumber(), String.valueOf(order2.getPayType()));
                     if (adReturnFlow == null) {
-                        logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getSerialNumber(),order2.getPayType());
+                        logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getOrderNumber(),order2.getPayType());
                         continue;
                     }
 
@@ -62,9 +66,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
                     adReturnPointsLog.setOrderId(order2.getId());
                     adReturnPointsLog.setType(AdReturnPoints.TYPE_INTERCHANGE);
-                    adReturnPointsLog.setDelFlag("0");
-                    adReturnPointsLog.setCreateDate(new Date());
-                    adReturnPointsLog.setUpdateDate(new Date());
                     AdReturnPointsLog adReturnPointsLog1 = adReturnPointsLogDao.getByCondition(adReturnPointsLog);
                     if (adReturnPointsLog1 != null) {
                         logger.info("AdReturnPointsLog已经存在：orderId：{}，type：{}",order2.getId(),AdReturnPoints.TYPE_INTERCHANGE);
@@ -74,7 +75,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     //插入ad_return_points
                     AdReturnPoints adReturnPoints = new AdReturnPoints();
                     adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
-                    AdReturnPoints adReturnPoints1 = adReturnPointsDao.get(adReturnPoints);
+                    AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
                     if(adReturnPoints1 == null){
                         //插入
                         adReturnPoints.setUserId(String.valueOf(order.getUserId()));
@@ -84,17 +85,24 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                         adReturnPoints.setStatus(AdReturnPoints.STATUS_EXPECTED);
                         adReturnPoints.setCreateDate(new Date());
                         adReturnPointsDao.insert(adReturnPoints);
+                    } else {
+                        //更新adReturnPoints
+                        adReturnPoints1.setAmount(adReturnPoints1.getAmount().subtract(order2.getUserRebate()));
+                        adReturnPointsDao.update(adReturnPoints1);
                     }
-                    adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
+
+                    AdReturnPoints adReturnPoints2 = new AdReturnPoints();
+                    adReturnPoints2.setReportId(adReturnFlow.getOrderReportId()+"");
+                    adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints2);
 
                     adReturnPointsLog.setAdReturnPointsId(Long.parseLong(adReturnPoints1.getId()));
                     adReturnPointsLog.setOperateAmount(order2.getUserRebate());
                     adReturnPointsLog.setOperateType("2");
+                    adReturnPointsLog.setDelFlag("0");
+                    adReturnPointsLog.setCreateDate(new Date());
+                    adReturnPointsLog.setUpdateDate(new Date());
                     adReturnPointsLogDao.save(adReturnPointsLog);
 
-                    //更新adReturnPoints
-                    adReturnPoints1.setAmount(adReturnPoints1.getAmount().subtract(adReturnPointsLog.getOperateAmount()));
-                    adReturnPointsDao.update(adReturnPoints1);
 
                     //计算返利
                     Map<String, Object> map = new HashMap<>();
@@ -109,6 +117,13 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     adReturnFlow.setBusinessRebateAmount(order3.getBusinessRebate());
                     adReturnFlow.setType(null);//不更新type值
                     adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
+
+                    OrderVo o1 = new OrderVo();
+                    o1.setId(order.getId());
+                    BigDecimal userRebate = order.getUserRebate().subtract(adReturnPointsLog.getOperateAmount()) ;
+                    o1.setUserRebate(userRebate);
+                    o1.setUpdateDate(new Date());
+                    adOrderReportDao.update(o1);
                 } catch (Exception e) {
                     logger.error("processor退款回调异常：{} ",order2.getOrderNumber(),e);
                 }

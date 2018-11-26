@@ -41,7 +41,7 @@ public class OrderVo {
 	// 是否返利
 	private char isUserRebate;
 	// 预积分返还数量
-	private int userRebate;
+	private BigDecimal userRebate;
 	// 返还积分数量
 	private BigDecimal userReturnAmount;
 	// 是否返佣
@@ -207,11 +207,15 @@ public class OrderVo {
 		this.isUserRebate = isUserRebate;
 	}
 
-	public int getUserRebate() {
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public BigDecimal getUserRebate() {
 		return userRebate;
 	}
 
-	public void setUserRebate(int userRebate) {
+	public void setUserRebate(BigDecimal userRebate) {
 		this.userRebate = userRebate;
 	}
 

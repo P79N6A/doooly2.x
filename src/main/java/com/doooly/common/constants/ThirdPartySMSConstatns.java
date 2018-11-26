@@ -88,6 +88,6 @@ public class ThirdPartySMSConstatns {
 		/** 发送卡号卡密模板 */
 		public static String send_card_template_code = "SMS_124330065";
 		/** 发送活动报名成功短信模版 */
-		public static String sign_up_success_template_code = "SMS_124330065";
+		public static String sign_up_success_template_code = "SMS_151768751";
 	}
 }

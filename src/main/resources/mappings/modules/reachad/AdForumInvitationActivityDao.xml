@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.doooly.dao.reachad.AdForumInvitationActivityDao">
-    
+
 	<sql id="adForumInvitationActivityColumns">
 		a.id AS "id",
 		a.name AS "name",
@@ -33,8 +33,7 @@
 		)
 	</insert>
 
-
-	<select id="getByPhone" resultType="java.lang.String">
+	<select id="getByPhone" resultType="java.lang.Integer">
 		SELECT
 			id
 		FROM
@@ -42,5 +41,20 @@
 		WHERE
 			phone = #{phone }
 	</select>
+
+	<select id="getAllBySendState">
+		SELECT
+			a.id AS "id",
+			a.name AS "name",
+			a.phone AS "phone"
+		FROM
+			ad_forum_invitation_activity
+		WHERE
+			has_send_msg = 0
+	</select>
+
+	<update id="updateMsgState" parameterType="java.lang.Integer">
+		UPDATE ad_forum_invitation_activity SET has_send_msg = 1 WHERE id = #{id}
+	</update>
 
 </mapper>

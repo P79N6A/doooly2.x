@@ -375,7 +375,7 @@ public class OrderServiceImpl implements OrderService{
 				}
 
 				if(orderTotalMap<(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
-					opsForValue.set("ordertotal:"+req.getUserId()+":0",String.valueOf(orderTotal));
+					opsForValue.set("ordertotal:"+req.getUserId()+":0",String.valueOf(orderTotalMap));
 				}
 
 			}catch(Exception e) {

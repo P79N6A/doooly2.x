@@ -1102,13 +1102,13 @@
 
 
 
-      <select id="getOrderDetailById" resultType="com.doooly.business.myorder.po.OrderDetailReport">
+      <select id="getOrderDetail"  parameterType="com.doooly.business.myorder.po.OrderDetailPoReq"  resultType="com.doooly.business.myorder.po.OrderDetailReport">
         SELECT
         <include refid="getOrderDetailColumns"/>
         FROM ad_order_report a
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <include refid="OrderDetailInfoJoins"/>
-        WHERE a.id = #{orderReportId}
+        WHERE  a.id = #{orderId} and a.user_id=#{userId}
     </select>
 
 
@@ -1184,8 +1184,8 @@
         </where>
          and a.del_flag = 0
   	</select>
-  	<update id="deleteOrder" parameterType="java.lang.Long">
+  	<update id="deleteOrder" parameterType="com.doooly.business.myorder.po.OrderDetailPoReq">
 		update ad_order_report set	del_flag =  1,update_date = now()
-		where id = #{orderId}
+		where id = #{orderId} and user_id=#{userId}
 	</update>
 </mapper>

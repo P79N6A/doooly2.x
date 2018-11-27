@@ -15,7 +15,7 @@
 		a.update_by AS "updateBy.id"
 	</sql>
 
-	<insert id="insert">
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO ad_forum_invitation_activity(
 			name,
 			phone,

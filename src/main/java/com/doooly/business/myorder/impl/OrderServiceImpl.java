@@ -361,27 +361,34 @@ public class OrderServiceImpl implements OrderService{
 				if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
 					hintResp.setNewOrderFlag(true);
 				}else{
+					resetRedis(orderTotalMap,orderTotal,opsForValue,req.getUserId(),0);
 					hintResp.setNewOrderFlag(false);
 				}
 				if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
 					hintResp.setNewFinishFlag(true);
 				}else{
+					resetRedis(finishTotalMap,finishTotal,opsForValue,req.getUserId(),1);
 					hintResp.setNewFinishFlag(false);
 				}
 				if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
 					hintResp.setNewCancelFlag(true);
 				}else{
+					resetRedis(cancelTotalMap,cancelTotal,opsForValue,req.getUserId(),2);
 					hintResp.setNewCancelFlag(false);
 				}
 
-				if(orderTotalMap<(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
-					opsForValue.set("ordertotal:"+req.getUserId()+":0",String.valueOf(orderTotalMap));
-				}
+
 
 			}catch(Exception e) {
 				logger.error(e.getMessage());
 			}
 			return hintResp;
+		}
+
+		private void resetRedis(int value1,String value2,ValueOperations<String, String> opsForValue,String  userId,int state){
+			if(value1<(StringUtils.isEmpty(value2) ? 0 : Integer.parseInt(value2))){
+				opsForValue.set("ordertotal:"+userId+":"+state,String.valueOf(value1));
+			}
 		}
 
 	/**

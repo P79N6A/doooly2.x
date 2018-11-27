@@ -13,7 +13,6 @@ import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFac
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.pay.service.PaymentService;
 import com.doooly.business.pay.service.RefundService;
-import com.doooly.business.pay.service.ReturnFlowService;
 import com.doooly.business.pay.service.impl.PaymentServiceFactory;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
@@ -28,10 +27,8 @@ import com.doooly.common.util.RandomUtil;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdPayFlowDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
-import com.doooly.dao.reachad.AdRefundFlowDao;
 import com.doooly.dao.reachad.AdReturnDetailDao;
 import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
@@ -93,17 +90,11 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Autowired
     private AdBusinessDao adBusinessDao;
     @Autowired
-    private AdPayFlowDao payFlowDao;
-    @Autowired
     protected PayFlowService payFlowService;
     @Autowired
     protected AdRechargeRecordDao adRechargeRecordDao;
     @Autowired
-    private AdRefundFlowDao adRefundFlowDao;
-    @Autowired
     private MallBusinessService mallBusinessService;
-    @Autowired
-    private ReturnFlowService returnFlowService;
     @Autowired
     private RefundService refundService;
     @Autowired
@@ -289,16 +280,7 @@ public class NewPaymentService implements NewPaymentServiceI {
     public ResultModel getPayForm(JSONObject params) {
         String orderNum = params.getString("orderNum");
         OrderVo order = orderService.getByOrderNum(orderNum);
-        Integer isSource = order.getIsSource();
         //自营商品全是兜礼支付
-        /* 20181109 注释掉都走新的 废除ad_pay_flow
-        PayMsg payMsg;
-        if (isSource == 3) {
-            //说明是自营订单
-            payMsg = prePay(params);
-        } else {
-            payMsg = prePayNew(params);
-        }*/
         PayMsg payMsg = prePayNew(params);
         //为空或者校验失败直接返回错误信息
         if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
@@ -445,9 +427,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "参数解密失败");
         }
         String merchantOrderNo = retJson.getString("merchantOrderNo");//商户订单号
-        //PayFlow payFlow = payFlowDao.getByOrderNum(merchantOrderNo, null, null);
         JSONObject json = new JSONObject();
-        //json.put("payFlowId", payFlow.getId());
         json.put("orderNum", merchantOrderNo);
         json.put("integralPayStatus", retJson.getString("integralPayStatus"));
         json.put("payAmount", retJson.getString("payAmount"));
@@ -462,10 +442,8 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel getPayResult(JSONObject json) {
-        String payType = PayFlowService.PAYTYPE_CASHIER_DESK;
         String orderNum = json.getString("orderNum");
         OrderVo order = orderService.getByOrderNum(orderNum);
-        Integer isSource = order.getIsSource();
         //自营商品全是兜礼支付
         ResultModel payMsg = null;
         //调用支付平台查询API,查询结果并处理支付记录
@@ -478,43 +456,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("businessId", business.getBusinessId());
         param.put("isSource", 3);//标记是兜礼的查询
         //20181109注释掉不区分来源都用新的，用订单状态判断废除 ad_pay_flow表
-        /*if (isSource == 3) {
-            //说明是自营订单
-            PayFlow flow = payFlowService.getByOrderNum(orderNum, payType, null);
-            if (flow == null) {
-                return new ResultModel(GlobalResultStatusEnum.SELECT_DATA_INFO, "未找到支付记录.");
-            }
-            if (PayFlowService.PAYMENT_SUCCESS.equals(flow.getPayStatus())) {
-                //得到支付平台通知并已经处理过支付结果, 直接返回结果
-                payMsg = ResultModel.ok();
-            } else {
-                payMsg = queryNewPayResult(param);
-                if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                    Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
-                    logger.info("查询结果data{}",data);
-                    //说明支付成功处理结果
-                    JSONObject retJson = new JSONObject();
-                    retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
-                    retJson.put("orderNum", orderNum);
-                    retJson.put("payFlowId", flow.getId());
-                    retJson.put("integralPayStatus", data.get("payStatus"));
-                    retJson.put("payAmount", data.get("orderAmount"));
-                    retJson.put("realPayType", PayFlowService.PAYTYPE_CASHIER_DESK);
-                    //retJson.put("code", MessageDataBean.success_code);
-                    payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
-                }
-            }
-        } else {
-            payMsg = queryNewPayResult(param);
-            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                //说明支付成功处理结果
-                JSONObject retJson = new JSONObject();
-                retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
-                retJson.put("orderNum", orderNum);
-                retJson.put("code", MessageDataBean.success_code);
-                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
-            }
-        }*/
         if (OrderService.PayState.PAID.getCode() == order.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
@@ -532,7 +473,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("realPayType", data.get("payType"));
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
-                //retJson.put("code", MessageDataBean.success_code);
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
             }
         }
@@ -905,8 +845,6 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel dooolyRefundCallback(JSONObject json) {
         logger.info("退款通知参数：{}", json.toJSONString());
-        String code = json.getString("code");
-        String info = json.getString("info");
         String paramstr = json.getString("param");
         JSONObject param = JSONObject.parseObject(paramstr);
         String merchantOrderNo = param.getString("merchantOrderNo");
@@ -928,7 +866,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 //说明退款成功
                 //在查询下订单
                 OrderVo order = checkOrderStatus(merchantOrderNo);
-                // 修改订单状态-已退款
                 // 修改订单状态-已退款
                 orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
                 //退款成功
@@ -979,7 +916,6 @@ public class NewPaymentService implements NewPaymentServiceI {
             o.setOrderNumber(order.getOrderNumber());
             o.setSerialNumber(merchantRefundNo);
             o.setOrderDate(order.getOrderDate());
-            //o.setOriginOrderNumber(null);
             o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setOrderType(1);
             o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());

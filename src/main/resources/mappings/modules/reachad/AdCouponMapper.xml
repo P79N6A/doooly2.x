@@ -67,7 +67,8 @@ from ad_coupon ac join ad_business ab on ac.business_id = ab.id where ac.id = #{
 			<if test="categoryType != null and categoryType != '' and categoryType != 0">
 				and c.category_type = #{categoryType}
 			</if>
-		GROUP BY cbs.sort
+		GROUP BY b.id
+		ORDER BY cbs.sort
 	</select>
 	
 	<select id="getCouponNumByBusinessId" resultType="java.lang.Integer">

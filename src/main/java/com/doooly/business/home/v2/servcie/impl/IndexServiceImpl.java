@@ -71,7 +71,7 @@ public class IndexServiceImpl implements IndexServiceI {
         try {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
@@ -175,7 +175,7 @@ public class IndexServiceImpl implements IndexServiceI {
         // 取有返佣金额的商户
         try {
             logger.info("index() userToken={},userId={},params={},version={}", userToken, userId, params, version);
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 2);
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
             }
@@ -269,7 +269,7 @@ public class IndexServiceImpl implements IndexServiceI {
 		try {
 			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
 					version);
-			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE);
+			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
 			if (CollectionUtils.isEmpty(floors)) {
 				return new MessageDataBean("1000", "floors is null").toJsonString();
 			}
@@ -290,7 +290,7 @@ public class IndexServiceImpl implements IndexServiceI {
 							getBussiness(userId, address, Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE), version));
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
-					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 10, userId, "1");
+					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();
@@ -402,7 +402,7 @@ public class IndexServiceImpl implements IndexServiceI {
 
     private List<AdConsumeRecharge> getBussiness(String userId, String address, int dealType) {
         List<AdBusiness> merchants = adBusinessDao.findHotMerchantsByDealType(Integer.valueOf(userId), null, address,
-                Arrays.asList(DEAL_TYPE_ONLINE));
+                Arrays.asList(dealType));
         List<AdConsumeRecharge> beans = null;
         if (!CollectionUtils.isEmpty(merchants)) {
             beans = new ArrayList<AdConsumeRecharge>();

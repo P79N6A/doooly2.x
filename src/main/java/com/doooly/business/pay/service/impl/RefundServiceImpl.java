@@ -146,10 +146,10 @@ public class RefundServiceImpl extends AbstractRefundService {
         params.put("cardNumber", adUser.getCardNumber());
         params.put("merchantOrderNo", order.getOrderNumber());
         params.put("orderDetail", jsonArray.toJSONString());
-        params.put("merchantRefundNo", order.getOrderNumber());
+        params.put("merchantRefundNo", UUID.randomUUID().toString().replace("-", ""));
         params.put("refundPrice",  String.valueOf(order.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN)));
         params.put("refundAmount",  String.valueOf(order.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN)));
-        params.put("notifyUrl", PaymentConstants.PAYMENT_REFUND_NOTIFY_URL);
+        params.put("notifyUrl", order.getIsSource()==3?PaymentConstants.PAYMENT_REFUND_NOTIFY_URL:null);
         params.put("nonceStr", UUID.randomUUID().toString().replace("-", ""));
         params.put("id", business.getId());
         ResultModel resultModel = newPaymentServiceI.dooolyApplyPayRefund(params);

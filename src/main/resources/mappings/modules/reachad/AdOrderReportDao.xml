@@ -616,7 +616,6 @@
         a.state AS "state",
         a.type AS "type",
         a.order_number AS "orderNumber",
-		IFNULL(aos.cash_desk_source,'m') AS "cashDeskSource"
         a.order_date AS "orderDate",
         IFNULL(a.user_rebate,0.00) AS "userRebate",
         IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",
@@ -669,6 +668,7 @@
         LIMIT #{startIndex},#{pageSize}
     </select>
 
+
     <!--app月份金额统计接口-->
     <select id="findOrderSum" resultType="com.doooly.entity.reachad.AdOrderReport">
         SELECT
@@ -711,14 +711,8 @@
             </if>
             <if test="delFlagUser != null and delFlagUser != ''"> AND a.del_flag_user = #{delFlagUser} </if>
         </where>
-        <choose>
-            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
-                ORDER BY ${page.orderBy}
-            </when>
-            <otherwise>
                 ORDER BY a.order_date DESC
-            </otherwise>
-        </choose>
+
     </select>
 
     <select id="findOrderSumByMonth" resultType="java.util.Map">
@@ -1006,6 +1000,7 @@
             <if test="isUserRebate !=null and  isUserRebate!=''">
             	AND  a.is_user_rebate = #{isUserRebate}
             </if>
+            and a.del_flag = 0
         </where>
 
     </select>
@@ -1178,9 +1173,8 @@
                 a.bussiness_id =#{businessId}
                 
             </if>
-            
-            AND a.type in (99,1,5)
-            AND a.user_rebate &lt;= 0
+
+			AND (a.type in (99,5) or (a.type  = 1 AND a.user_rebate &lt;= 0 ))
         </where>
          and a.del_flag = 0
   	</select>

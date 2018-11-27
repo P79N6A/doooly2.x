@@ -12,4 +12,5 @@ public interface AdForumInvitationI {
      * @param paramJSON
      */
     public String registerForum(JSONObject paramJSON);
+
 }

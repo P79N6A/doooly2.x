@@ -30,6 +30,9 @@ public class AdBasicType {
 	//副标题
 	private String subTitle;
 
+	// 模版类型（0：花积分，1：首页新模版，2：首页模版（旧版））
+	private String templateType;
+
 	public String getSubTitle() {
 		return subTitle;
 	}

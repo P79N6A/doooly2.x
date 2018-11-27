@@ -23,7 +23,7 @@ public interface RefundService {
 	
 	public PayMsg refund(OrderVo order,PayFlow payFlow);
 
-	public ResultModel applyRefund(long userId, String orderNum);
+	public ResultModel applyRefund(long userId, String orderNum, String totalAmount);
 
 	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType);//兜礼收银台退款
 

@@ -402,7 +402,7 @@ public class IndexServiceImpl implements IndexServiceI {
 
     private List<AdConsumeRecharge> getBussiness(String userId, String address, int dealType) {
         List<AdBusiness> merchants = adBusinessDao.findHotMerchantsByDealType(Integer.valueOf(userId), null, address,
-                Arrays.asList(DEAL_TYPE_ONLINE));
+                Arrays.asList(dealType));
         List<AdConsumeRecharge> beans = null;
         if (!CollectionUtils.isEmpty(merchants)) {
             beans = new ArrayList<AdConsumeRecharge>();

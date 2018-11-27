@@ -257,11 +257,11 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String deleteOrder(JSONObject json) {
+		Gson gson = new Gson();
+		BaseRes<Boolean> result = new BaseRes<>();
 		try {
 			long start = System.currentTimeMillis();
-			BaseRes<Boolean> result = new BaseRes<>(); 
 			logger.info("order.detail.param:{}",json.toJSONString());
-			Gson gson = new Gson();
 			OrderDeleteReq  req = gson.fromJson(json.toJSONString(), OrderDeleteReq.class);
 			
 			boolean flag =  orderservice.deleteOrder(req);
@@ -279,6 +279,8 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 		}
-		return "{}";
+		result.setCode("1002");
+		result.setData(false);
+		return gson.toJson(result);
 	}
 }

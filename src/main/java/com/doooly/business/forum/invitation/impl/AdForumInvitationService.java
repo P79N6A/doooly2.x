@@ -55,8 +55,8 @@ public class AdForumInvitationService implements AdForumInvitationServiceI {
                     res.setCode("1000");
                     res.setMess("报名成功");
 
-//                    sendMsg(adForumInvitation);
-//                    adForumInvitationActivityDao.updateMsgState(adForumInvitation.getId());
+                    sendMsg(adForumInvitation);
+                    adForumInvitationActivityDao.updateMsgState(adForumInvitation.getId());
                 }
             } else {
                 res.setCode("1003");

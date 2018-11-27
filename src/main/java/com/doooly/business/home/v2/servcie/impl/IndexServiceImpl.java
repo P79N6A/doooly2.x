@@ -71,7 +71,7 @@ public class IndexServiceImpl implements IndexServiceI {
         try {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
@@ -175,7 +175,7 @@ public class IndexServiceImpl implements IndexServiceI {
         // 取有返佣金额的商户
         try {
             logger.info("index() userToken={},userId={},params={},version={}", userToken, userId, params, version);
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 2);
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
             }
@@ -269,7 +269,7 @@ public class IndexServiceImpl implements IndexServiceI {
 		try {
 			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
 					version);
-			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE);
+			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
 			if (CollectionUtils.isEmpty(floors)) {
 				return new MessageDataBean("1000", "floors is null").toJsonString();
 			}

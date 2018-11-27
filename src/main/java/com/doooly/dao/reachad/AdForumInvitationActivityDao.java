@@ -6,6 +6,11 @@ import org.apache.ibatis.annotations.Param;
 
 public interface AdForumInvitationActivityDao extends BaseDaoI<AdForumInvitationActivity> {
 
-    String getByPhone(@Param("phone") String phone);
+    /**
+     * 通过手机号获得数据
+     * @param phone
+     * @return
+     */
+    Integer getByPhone(@Param("phone") String phone);
 
 }

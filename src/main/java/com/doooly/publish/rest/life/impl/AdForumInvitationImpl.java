@@ -46,4 +46,5 @@ public class AdForumInvitationImpl implements AdForumInvitationI {
         messageDataBean = adForumInvitationServiceI.registerForum(paramJSON);
         return messageDataBean.toJsonString();
     }
+
 }

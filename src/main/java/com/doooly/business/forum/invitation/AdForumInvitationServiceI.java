@@ -16,4 +16,5 @@ public interface AdForumInvitationServiceI {
      * @return
      */
     public MessageDataBean registerForum(JSONObject jsonReq);
+
 }

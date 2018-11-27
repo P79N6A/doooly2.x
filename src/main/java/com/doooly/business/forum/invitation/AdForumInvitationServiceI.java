@@ -17,8 +17,4 @@ public interface AdForumInvitationServiceI {
      */
     public MessageDataBean registerForum(JSONObject jsonReq);
 
-    /**
-     * 批量发送短信（一次性接口）
-     */
-    public void batchSendMsg();
 }

@@ -47,21 +47,4 @@ public class AdForumInvitationImpl implements AdForumInvitationI {
         return messageDataBean.toJsonString();
     }
 
-    /**
-     * 批量发送短信，一次性接口
-     * @return
-     */
-    @POST
-    @Path(value = "/batchSendMsg")
-    @Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @Consumes(MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @Override
-    public String batchSendMsg() {
-        log.info("论坛邀请批量发送短信");
-        MessageDataBean messageDataBean= new MessageDataBean();
-        adForumInvitationServiceI.batchSendMsg();
-        messageDataBean.setCode("1000");
-        messageDataBean.setMess("调用成功");
-        return messageDataBean.toJsonString();
-    }
 }

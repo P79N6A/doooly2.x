@@ -13,9 +13,4 @@ public interface AdForumInvitationI {
      */
     public String registerForum(JSONObject paramJSON);
 
-    /**
-     * 批量发送短信
-     * @return
-     */
-    public String batchSendMsg();
 }

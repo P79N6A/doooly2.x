@@ -42,19 +42,4 @@
 			phone = #{phone }
 	</select>
 
-	<select id="getAllBySendState">
-		SELECT
-			a.id AS "id",
-			a.name AS "name",
-			a.phone AS "phone"
-		FROM
-			ad_forum_invitation_activity
-		WHERE
-			has_send_msg = 0
-	</select>
-
-	<update id="updateMsgState" parameterType="java.lang.Integer">
-		UPDATE ad_forum_invitation_activity SET has_send_msg = 1 WHERE id = #{id}
-	</update>
-
 </mapper>

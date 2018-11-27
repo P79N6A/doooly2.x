@@ -1,9 +1,11 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
-import com.alibaba.fastjson.JSONArray;
-import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.dao.reachad.*;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
+import com.doooly.dao.reachad.AdReturnPointsDao;
+import com.doooly.dao.reachad.AdReturnPointsLogDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdReturnPoints;
@@ -56,7 +58,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
             for (Order order2 : list) {
                 try {
 
-                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getOrderNumber(), String.valueOf(order2.getPayType()));
+                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
                     if (adReturnFlow == null) {
                         logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getOrderNumber(),order2.getPayType());
                         continue;

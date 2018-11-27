@@ -134,7 +134,7 @@ public abstract class AbstractRefundService implements RefundService {
                 resultModel = dooolyPayRefund(order, merchantRefundNo,payType);
             }else {
                 //说明未申请退
-                resultModel = applyRefund(userId, orderNum);
+                resultModel = applyRefund(userId, orderNum, null);
                 if(resultModel.getCode()==GlobalResultStatusEnum.SUCCESS.getCode()){
                     //说明申请成功
                     Map<String,Object> map = (Map<String, Object>) resultModel.getData();
@@ -212,11 +212,15 @@ public abstract class AbstractRefundService implements RefundService {
 	}
 
     @Override
-    public ResultModel applyRefund(long userId, String orderNum) {
+    public ResultModel applyRefund(long userId, String orderNum, String totalAmount) {
         OrderVo order = checkOrderStatus(userId, orderNum);
         if(order == null){
             //表示订单未完成支付，直接返回
             return new ResultModel(GlobalResultStatusEnum.FAIL,"订单未完成支付，申请退款失败");
+        }
+        if(totalAmount != null){
+            //设置应退金额
+            order.setTotalMount(new BigDecimal(totalAmount));
         }
         return dooolyApplyRefund(order);
     }

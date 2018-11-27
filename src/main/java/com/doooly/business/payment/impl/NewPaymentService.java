@@ -987,7 +987,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     public ResultModel applyRefund(JSONObject json) {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
-        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum);
+        String totalAmount = json.getString("totalAmount");
+        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum,totalAmount);
         return resultModel;
     }
 

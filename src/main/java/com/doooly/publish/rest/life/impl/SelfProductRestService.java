@@ -100,55 +100,64 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 
 			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
 
+			// 是否有话费活动
 			if (adGroupSelfProductPrice != null) {
-				Calendar calendar = Calendar.getInstance();
-				Date now = calendar.getTime();
+				AdAd ad = mallBusinessService.findByTypeAndGroup(Integer.parseInt(groupId), activityName);
 
-				// 当前日期小于活动结束日期
-				if (now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) < 0) {
-					int skuId = adGroupSelfProductPrice.getSkuId();
-					ActivityInfo actInfo = orderService.getActivityInfo(groupId, skuId);
-					int num = 0;
+				// 此活动是否配置广告位
+				if (ad != null) {
+					Calendar calendar = Calendar.getInstance();
+					Date now = calendar.getTime();
 
-					if (actInfo != null) {
-						String actType = actInfo.getActivityName();
-						num = orderService.getBuyNum(userId, skuId, actType);
-					}
+					// 当前日期小于活动结束日期
+					if (now.compareTo(adGroupSelfProductPrice.getSpecialEndDate()) < 0) {
+						int skuId = adGroupSelfProductPrice.getSkuId();
+						ActivityInfo actInfo = orderService.getActivityInfo(groupId, skuId);
+						int num = 0;
 
-					String weekList = adGroupSelfProductPrice.getWeekList();
-					weekList = weekList.substring(1, weekList.length() - 1).replaceAll(" ", "");
-					List<String> weekLists = Arrays.asList(weekList.split(","));
-					String activityOfTime = adGroupSelfProductPrice.getActivityOfTime();
-					List<String> activityOfTimeList = Arrays.asList(activityOfTime.split("-"));
-					int startHour = Integer.parseInt(activityOfTimeList.get(0));
-					int endHour = Integer.parseInt(activityOfTimeList.get(1));
+						if (actInfo != null) {
+							String actType = actInfo.getActivityName();
+							num = orderService.getBuyNum(userId, skuId, actType);
+						}
 
-					String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 == 0 ? (7 + "") : calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
-					int hour = calendar.get(Calendar.HOUR_OF_DAY);
+						String weekList = adGroupSelfProductPrice.getWeekList();
+						weekList = weekList.substring(1, weekList.length() - 1).replaceAll(" ", "");
+						List<String> weekLists = Arrays.asList(weekList.split(","));
+						String activityOfTime = adGroupSelfProductPrice.getActivityOfTime();
+						List<String> activityOfTimeList = Arrays.asList(activityOfTime.split("-"));
+						int startHour = Integer.parseInt(activityOfTimeList.get(0));
+						int endHour = Integer.parseInt(activityOfTimeList.get(1));
 
-					if (weekLists.contains(week) && hour >= startHour && hour < endHour + 1) {
-						if (adGroupSelfProductPrice.getBuyNumberLimit() - num <= 0) {
-							adGroupSelfProductPrice.setIsStart("4");
+						String week = calendar.get(Calendar.DAY_OF_WEEK) - 1 == 0 ? (7 + "") : calendar.get(Calendar.DAY_OF_WEEK) - 1 + "";
+						int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+						if (weekLists.contains(week) && hour >= startHour && hour < endHour + 1) {
+							if (adGroupSelfProductPrice.getBuyNumberLimit() - num <= 0) {
+								adGroupSelfProductPrice.setIsStart("4");
+							} else {
+								adGroupSelfProductPrice.setIsStart("2");
+							}
 						} else {
-							adGroupSelfProductPrice.setIsStart("2");
+							adGroupSelfProductPrice.setIsStart("1");
 						}
 					} else {
-						adGroupSelfProductPrice.setIsStart("1");
+						adGroupSelfProductPrice.setIsStart("3");
 					}
+
+					adGroupSelfProductPrice.setUrl(ad.getImageLinkUrl());
+					adGroupSelfProductPrice.setImage(ad.getImagePath());
+					HashMap<String,Object> map = new HashMap<String,Object>();
+					map.put("adGroupSelfProductPrice", adGroupSelfProductPrice);
+					messageDataBean.setCode(MessageDataBean.success_code);
+					messageDataBean.setData(map);
 				} else {
-					adGroupSelfProductPrice.setIsStart("3");
+					messageDataBean.setCode(MessageDataBean.null_code);
+					logger.info("当前企业ID：" + groupId + "--未配置<" + activityName + ">广告位");
 				}
 
-				AdAd ad = mallBusinessService.findByTypeAndGroup(Integer.parseInt(groupId), activityName);
-				adGroupSelfProductPrice.setUrl(ad.getImageLinkUrl());
-				adGroupSelfProductPrice.setImage(ad.getImagePath());
-				HashMap<String,Object> map = new HashMap<String,Object>();
-				map.put("adGroupSelfProductPrice", adGroupSelfProductPrice);
-				messageDataBean.setCode(MessageDataBean.success_code);
-				messageDataBean.setData(map);
 			} else {
 				messageDataBean.setCode(MessageDataBean.null_code);
-				logger.info("无话费充值活动");
+				logger.info("无话费充值活动：" + activityName);
 			}
 		} catch (Exception e) {
 			logger.error("获取卡券商品详情页信息异常！", e);

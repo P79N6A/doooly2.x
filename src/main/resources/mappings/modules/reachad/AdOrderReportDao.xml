@@ -846,10 +846,10 @@
 	        b.logo AS "logo",
 	        abs.store_name AS "storeName",
 	        b.company AS "company",
-	        d.goods AS "goods",
+
 	        a.user_id AS "userId",
-	        d.product_img AS  "productImg",
-	        d.sku AS "specification",
+
+
 	        a.state AS "state",
 	        a.type AS "type",
 	        a.order_number AS "orderNumber",
@@ -875,7 +875,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-     	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
      	 LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
            a.user_id = #{userId}
@@ -906,7 +905,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
@@ -937,7 +935,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
@@ -982,7 +979,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-     	 LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
      	 LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
              a.user_id = #{userId}
@@ -1012,7 +1008,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
             a.user_id = #{userId}
@@ -1042,7 +1037,6 @@
         FROM ad_order_report a
         LEFT JOIN ad_business b ON b.id = a.bussiness_id
         LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
-        LEFT JOIN  ad_order_detail d    ON d.order_report_id = a.id
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
         <where>
          	 a.user_id = #{userId}

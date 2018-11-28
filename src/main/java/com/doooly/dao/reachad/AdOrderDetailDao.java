@@ -15,4 +15,6 @@ public interface AdOrderDetailDao {
 	public int bantchInsert(@Param("orderId")long orderId,@Param("items")List<OrderItemVo> items);
 
     List<AdOrderDetail> findListByAdOrderReport(AdOrderDetail adOrderDetailQuery);
+
+	List<AdOrderDetail> finDetailByOrder(List<Long> list);
 }

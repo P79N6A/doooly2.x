@@ -1,5 +1,6 @@
 package com.doooly.publish.rest.life.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,7 +13,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.doooly.business.myorder.constant.OrderType;
 import com.doooly.business.myorder.dto.*;
+import com.doooly.entity.reachad.AdOrderDetail;
+import com.doooly.entity.reachad.AdReturnFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +152,10 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		List<OrderPoResp>  orderResultList = orderservice.getOrderList(req);
 		OrderResp resp = null;
 		String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+		List<AdReturnFlow> adReturnFlowList = orderservice.getOrderList(getOrderList(orderResultList));
+		List<AdOrderDetail> adOrderDetailList = orderservice.finDetailByOrder(getOrderAllList(orderResultList));
+		Map<Long,AdReturnFlow> flowDetail = listFlowConvetMap(adReturnFlowList);
+		Map<Long,AdOrderDetail>  orderDetailMap = listDetailConvetMap(adOrderDetailList);
 		for(OrderPoResp  orderPoResp : orderResultList) {
 			resp = new OrderResp();
 			resp.setAmountPayable(orderPoResp.getTotalPrice());
@@ -162,15 +170,24 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			resp.setType(String.valueOf(orderPoResp.getType()));
 			resp.setStoreName(orderPoResp.getStoreName());
 			resp.setUserId(orderPoResp.getUserId());
-			resp.setUserRebate(orderPoResp.getUserRebate());
+			if(flowDetail != null && flowDetail.containsKey(orderPoResp.getId())) {
+				resp.setUserRebate(orderPoResp.getUserRebate().subtract(flowDetail.get(orderPoResp.getId()).getUserRebate()));
+			}else{
+				resp.setUserRebate(orderPoResp.getUserRebate());
+			}
+			if(resp.getUserRebate().doubleValue() < 0){
+				resp.setUserRebate(new BigDecimal(0));
+			}
+
+
 			resp.setProductType(orderPoResp.getProductType());
 			resp.setLogo(orderPoResp.getLogo());
 			resp.setBusinessId(orderPoResp.getBusinessId());
 			resp.setSavePrice(orderPoResp.getSavePrice());
 			resp.setCompany(orderPoResp.getCompany());
-			resp.setGoods(orderPoResp.getGoods());
-			resp.setSpecification(orderPoResp.getSpecification());
-			resp.setProductImg(orderPoResp.getProductImg());
+			resp.setGoods(getMap(orderDetailMap,orderPoResp.getId()).getGoods());
+			resp.setSpecification(getMap(orderDetailMap,orderPoResp.getId()).getSpecification());
+			resp.setProductImg(getMap(orderDetailMap,orderPoResp.getId()).getProductImg());
 			Date intervalDayDate = DateUtils.addDays(orderPoResp.getOrderDate(), Integer.parseInt(orderDay));//推后30天的日期
 			resp.setIntegrateReturnDate(com.doooly.business.utils.DateUtils.formatDate(intervalDayDate, "yyyy.MM.dd"));		
 			resp.setCashDeskSource(orderPoResp.getCashDeskSource());
@@ -194,6 +211,53 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		baseRes.setCode("1000");
 		baseRes.setData(orderVoResp);
 		return gson.toJson(baseRes);
+	}
+
+	private AdOrderDetail getMap(Map<Long,AdOrderDetail> map,Long key){
+		return map.containsKey(key) ? map.get(key) : new AdOrderDetail();
+	}
+
+	private Map<Long,AdReturnFlow> listFlowConvetMap(List<AdReturnFlow> adReturnFlowList){
+		if(adReturnFlowList == null || adReturnFlowList.size() <=0){
+			return null;
+		}
+
+		Map<Long,AdReturnFlow> map = new HashMap<>();
+		for(AdReturnFlow flow : adReturnFlowList){
+			map.put(flow.getOrderReportId(),flow);
+		}
+		return map;
+	}
+
+	private Map<Long,AdOrderDetail> listDetailConvetMap(List<AdOrderDetail> adOrderDetailList){
+		if(adOrderDetailList == null || adOrderDetailList.size() <=0){
+			return null;
+		}
+
+		Map<Long,AdOrderDetail> map = new HashMap<>();
+		for(AdOrderDetail detail : adOrderDetailList){
+			map.put(detail.getOrderId(),detail);
+		}
+		return map;
+	}
+
+	private List<Long> getOrderAllList(List<OrderPoResp>  orderResultList){
+		List<Long> list = new ArrayList<>();
+		for(OrderPoResp orderPoResp : orderResultList){
+			list.add(orderPoResp.getId());
+		}
+		return list;
+	}
+
+	private List<Long> getOrderList(List<OrderPoResp>  orderResultList){
+		List<Long> list = new ArrayList<>();
+		for(OrderPoResp orderPoResp : orderResultList){
+			//退货
+			if(5 == orderPoResp.getType()) {
+				list.add(orderPoResp.getId());
+			}
+		}
+		return list;
 	}
 	
 	

@@ -21,7 +21,7 @@ public class OrderPoResp {
 		//是否返利 0:是   1：否
 		private String isUserRebate;
 		//预返积分
-		private Double userRebate;
+		private BigDecimal userRebate;
 		//实付金额
 		private BigDecimal totalPrice;
 		//应付金额
@@ -76,10 +76,10 @@ public class OrderPoResp {
 		public void setIsUserRebate(String isUserRebate) {
 			this.isUserRebate = isUserRebate;
 		}
-		public Double getUserRebate() {
+		public BigDecimal getUserRebate() {
 			return userRebate;
 		}
-		public void setUserRebate(Double userRebate) {
+		public void setUserRebate(BigDecimal userRebate) {
 			this.userRebate = userRebate;
 		}
 		

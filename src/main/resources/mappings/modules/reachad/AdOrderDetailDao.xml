@@ -242,4 +242,22 @@
     </select>
 
 
+	<select id="finDetailByOrder" resultType="com.doooly.entity.reachad.AdOrderDetail">
+		SELECT
+		a.order_report_id AS "orderId",
+		a.code AS "code",
+		a.goods AS "goods",
+		a.sku AS "specification",
+		a.product_img AS "productImg",
+		a.duihuan_url AS "duihuanUrl"
+		FROM ad_order_detail a
+		<where>
+			a.order_report_id in
+			<foreach collection="list" item="id" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+		</where>
+		group by order_report_id
+	</select>
+
 </mapper>

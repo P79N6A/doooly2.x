@@ -16,6 +16,7 @@ import java.util.Map;
 public class AdOrderDetail {
 	
 	private static final long serialVersionUID = 1L;
+	private Long orderId;
 	private AdOrderReport adOrderReport;		// 订单报表编号
 	private AdBusinessCategory adBusinessCategory;		// 商品品类
 	private String code;		// 商品编号
@@ -33,6 +34,14 @@ public class AdOrderDetail {
 	private String retState;// 充值平台处理状态
     private String duihuanUrl;// 虚拟产品兑换地址
 	private String productSkuId;
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public Long getOrderId() {
+		return orderId;
+	}
 
 	public void setProductSkuId(String productSkuId) {
 		this.productSkuId = productSkuId;

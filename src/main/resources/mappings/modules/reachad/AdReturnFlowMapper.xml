@@ -153,5 +153,18 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-	
+
+    <select id="getOrderList" resultMap="BaseResultMap">
+        select
+         order_report_id,
+        type, sum(user_rebate) AS "userRebate"
+        from ad_return_flow r
+        <where>
+            r.order_report_id in
+            <foreach collection="list" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+        group by order_report_id
+    </select>
 </mapper>

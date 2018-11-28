@@ -1,12 +1,11 @@
 package com.doooly.business.myorder.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.doooly.business.myorder.dto.*;
 import com.doooly.business.myorder.po.OrderDetailPoReq;
+import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,17 +26,6 @@ import com.doooly.business.pay.bean.AdOrderFlow;
 import com.doooly.business.pay.utils.AESTool;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdOrderDetailDao;
-import com.doooly.dao.reachad.AdOrderFlowDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdOrderDetail;
-import com.doooly.entity.reachad.AdOrderReport;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserBusinessExpansion;
-import com.doooly.entity.reachad.AdUserConn;
 
 /**
  * @Description: 我的订单
@@ -71,6 +59,8 @@ public class OrderServiceImpl implements OrderService{
     
     @Autowired
 	protected StringRedisTemplate redisTemplate;
+    @Autowired
+    private AdReturnFlowDao adReturnFlowDao;
 
 	/**
 	 * 订单列表
@@ -146,7 +136,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setAmountPayable(report.getTotalPrice());
 			resp.setType(report.getType());
 			resp.setUserId(report.getUserId());
-			resp.setUserRebate(report.getUserRebate());
+
 			resp.setUserReturnAmount(report.getUserReturnAmount());
 			resp.setVoucher(report.getVoucher());
 			resp.setBusinessId(report.getBusinessId());
@@ -197,7 +187,17 @@ public class OrderServiceImpl implements OrderService{
 			if(orderDetailList != null && orderDetailList.size() > 0){
 				resp.setProductId(orderDetailList.get(0).getProductSkuId());
 			}
-			
+
+			//减返利积分
+			if(5 == report.getType()) {
+				List<Long> orderList = Arrays.asList(new Long[]{resp.getId()});
+				List<AdReturnFlow> orderFlow = this.getOrderList(orderList);
+				if (orderFlow != null && orderFlow.size() > 0) {
+					resp.setUserRebate(report.getUserRebate().subtract(orderFlow.get(0).getUserRebate()));
+				}
+			}else {
+				resp.setUserRebate(report.getUserRebate());
+			}
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -417,4 +417,17 @@ public class OrderServiceImpl implements OrderService{
 			}
 			return false;
 		}
+
+	@Override
+	public List<AdReturnFlow> getOrderList(List<Long> orderList) {
+		if(orderList == null || orderList.size() <=0){
+			return null;
+		}
+		return adReturnFlowDao.getOrderList(orderList);
+	}
+
+	@Override
+	public List<AdOrderDetail> finDetailByOrder(List<Long> list) {
+		return this.adOrderDetailDao.finDetailByOrder(list);
+	}
 }

@@ -16,7 +16,7 @@ public class OrderResp {
 	//是否返利 0:是   1：否
 	private Integer isUserRebate;
 	//预返积分
-	private Double userRebate;
+	private BigDecimal userRebate;
 	//实付金额
 	private BigDecimal payAmount;
 	//应付金额
@@ -70,10 +70,10 @@ public class OrderResp {
 	public void setIsUserRebate(Integer isUserRebate) {
 		this.isUserRebate = isUserRebate;
 	}
-	public Double getUserRebate() {
+	public BigDecimal getUserRebate() {
 		return userRebate;
 	}
-	public void setUserRebate(Double userRebate) {
+	public void setUserRebate(BigDecimal userRebate) {
 		this.userRebate = userRebate;
 	}
 	public BigDecimal getPayAmount() {

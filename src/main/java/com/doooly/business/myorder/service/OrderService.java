@@ -6,6 +6,8 @@ import java.util.Map;
 import com.doooly.business.myorder.dto.*;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
+import com.doooly.entity.reachad.AdOrderDetail;
+import com.doooly.entity.reachad.AdReturnFlow;
 
 public interface OrderService {
 	/**
@@ -55,5 +57,10 @@ public interface OrderService {
 	 * @return
 	 */
 	public boolean deleteOrder(OrderDeleteReq req);
+
+
+	List<AdReturnFlow> getOrderList(List<Long> orderList);
+
+	List<AdOrderDetail> finDetailByOrder(List<Long> list);
 
 }

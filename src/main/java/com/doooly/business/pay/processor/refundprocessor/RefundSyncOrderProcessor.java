@@ -1,11 +1,9 @@
 package com.doooly.business.pay.processor.refundprocessor;
 
+import com.alibaba.fastjson.JSONArray;
+import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdReturnFlowDao;
-import com.doooly.dao.reachad.AdReturnPointsDao;
-import com.doooly.dao.reachad.AdReturnPointsLogDao;
-import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdReturnPoints;
@@ -59,10 +57,26 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                 try {
 
                     AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
+                    //计算返利
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("orderId",order2.getId());
+                    map.put("orderNumber",order2.getOrderNumber());
+                    map.put("bussinessId",order2.getBussinessId());
+                    orderDao.computeRefundRebateAndSyncOrder(map);
+
+                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getOrderNumber(), String.valueOf(order2.getPayType()));
                     if (adReturnFlow == null) {
                         logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getOrderNumber(),order2.getPayType());
                         continue;
                     }
+
+                    //计算完返利,重新查询order，同步ad_return_flow表
+                    order2 = orderDao.get(String.valueOf(order2.getId()));
+                    adReturnFlow.setUserRebate(order2.getUserRebate());
+                    adReturnFlow.setBusinessRebateAmount(order2.getBusinessRebate());
+                    adReturnFlow.setType(null);//不更新type值
+                    adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
+
 
                     //插入ad_return_points_log
                     AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
@@ -104,21 +118,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     adReturnPointsLog.setCreateDate(new Date());
                     adReturnPointsLog.setUpdateDate(new Date());
                     adReturnPointsLogDao.save(adReturnPointsLog);
-
-
-                    //计算返利
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("orderId",order2.getId());
-                    map.put("orderNumber",order2.getOrderNumber());
-                    map.put("bussinessId",order2.getBussinessId());
-                    orderDao.computeRefundRebateAndSyncOrder(map);
-
-                    //计算完返利,重新查询order，同步ad_return_flow表
-                    Order order3 = orderDao.get(String.valueOf(order2.getId()));
-                    adReturnFlow.setUserRebate(order3.getUserRebate());
-                    adReturnFlow.setBusinessRebateAmount(order3.getBusinessRebate());
-                    adReturnFlow.setType(null);//不更新type值
-                    adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
 
                     OrderVo o1 = new OrderVo();
                     o1.setId(order.getId());

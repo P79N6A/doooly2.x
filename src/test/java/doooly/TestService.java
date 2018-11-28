@@ -72,15 +72,23 @@ public class TestService {
         AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
         System.out.println(new Gson().toJson(adReturnPoints1));*/
 
-        OrderVo o = new OrderVo();
+        /*OrderVo o = new OrderVo();
         o.setOrderNumber("xip09359811");
         o = orderService.getOrder(o).get(0);
 
         Order order = new Order();
         order = orderDao.get("199295819");
 
-        refundSyncOrderProcessor.process(o,order);
+        refundSyncOrderProcessor.process(o,order);*/
         //afterRefundProcess(o,order);
+
+        //dly006861034619425(String), 1(Integer), 5(Integer)
+        Order order = new Order();
+        order.setOrderNumber("dly006861034619425");
+        order.setState(1);
+        order.setType(5);
+        List<Order> list = orderDao.findList(order);
+        System.out.println(new Gson().toJson(list));
     }
 
 

@@ -47,7 +47,16 @@ public class OrderDetailResp {
 	private String groupShortName;
 	private String systemDate;
 	private String cashDeskSource;
-	
+	private  String productId;
+
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+
+	public String getProductId() {
+		return productId;
+	}
+
 	public long getId() {
 		return id;
 	}

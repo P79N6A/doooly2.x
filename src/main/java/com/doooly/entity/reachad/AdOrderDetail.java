@@ -32,7 +32,15 @@ public class AdOrderDetail {
     private String retCode;// 充值平台返回code
 	private String retState;// 充值平台处理状态
     private String duihuanUrl;// 虚拟产品兑换地址
-	
+	private String productSkuId;
+
+	public void setProductSkuId(String productSkuId) {
+		this.productSkuId = productSkuId;
+	}
+
+	public String getProductSkuId() {
+		return productSkuId;
+	}
 
 	public AdOrderReport getAdOrderReport() {
 		return adOrderReport;

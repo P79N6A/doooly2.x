@@ -302,7 +302,7 @@
     </select>
 
     <select id="computeRefundRebateAndSyncOrder" statementType="CALLABLE" parameterType="java.util.Map">
-        {#{result,mode=OUT,jdbcType=INTEGER}=call F_RefundIntegralRebateNew(
+        {#{result,mode=OUT,jdbcType=INTEGER}=call F_RefundIntegralRebateNewV2(
         #{orderId,mode=IN,jdbcType=INTEGER},
         #{orderNumber,mode=IN,jdbcType=VARCHAR},
         #{bussinessId,mode=IN,jdbcType=VARCHAR}

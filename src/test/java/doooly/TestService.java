@@ -72,14 +72,14 @@ public class TestService {
         AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
         System.out.println(new Gson().toJson(adReturnPoints1));*/
 
-        OrderVo o = new OrderVo();
-        o.setOrderNumber("dly006861034619425");
+        /*OrderVo o = new OrderVo();
+        o.setOrderNumber("dly006867648905842");
         o = orderService.getOrder(o).get(0);
 
         Order order = new Order();
-        order = orderDao.get("199296196");
+        order = orderDao.get("199296320");
 
-        refundSyncOrderProcessor.process(o,order);
+        refundSyncOrderProcessor.process(o,order);*/
         //afterRefundProcess(o,order);
 
         //dly006861034619425(String), 1(Integer), 5(Integer)
@@ -89,6 +89,15 @@ public class TestService {
         order.setType(5);
         List<Order> list = orderDao.findList(order);
         System.out.println(new Gson().toJson(list));*/
+
+
+        OrderVo o1 = new OrderVo();
+        o1.setId(199296251L);
+        BigDecimal userRebate = BigDecimal.ZERO ;
+        o1.setUserRebate(BigDecimal.ZERO);
+        o1.setActType("100");
+        o1.setUpdateDate(new Date());
+        adOrderReportDao.update(o1);
     }
 
 

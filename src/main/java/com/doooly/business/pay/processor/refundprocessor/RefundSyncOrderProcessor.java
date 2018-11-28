@@ -89,41 +89,28 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
 
                     //插入ad_return_points
                     AdReturnPoints adReturnPoints = new AdReturnPoints();
+                    adReturnPoints.setOrderId(order2.getId());
+                    adReturnPoints.setUserId(String.valueOf(order.getUserId()));
                     adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
-                    AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
-                    if(adReturnPoints1 == null){
-                        //插入
-                        adReturnPoints.setUserId(String.valueOf(order.getUserId()));
-                        adReturnPoints.setReportId(adReturnFlow.getOrderReportId()+"");
-                        adReturnPoints.setAmount(order2.getUserRebate());
-                        adReturnPoints.setType(AdReturnPoints.TYPE_INTERCHANGE);
-                        adReturnPoints.setStatus(AdReturnPoints.STATUS_EXPECTED);
-                        adReturnPoints.setCreateDate(new Date());
-                        adReturnPointsDao.insert(adReturnPoints);
-                    } else {
-                        //更新adReturnPoints
-                        adReturnPoints1.setAmount(adReturnPoints1.getAmount().subtract(order2.getUserRebate()));
-                        adReturnPointsDao.update(adReturnPoints1);
-                    }
+                    adReturnPoints.setAmount(order2.getUserRebate());
+                    adReturnPoints.setType(AdReturnPoints.TYPE_INTERCHANGE);
+                    adReturnPoints.setStatus(AdReturnPoints.STATUS_EXPECTED);
+                    adReturnPoints.setCreateDate(new Date());
+                    adReturnPointsDao.insert(adReturnPoints);
 
-                    AdReturnPoints adReturnPoints2 = new AdReturnPoints();
-                    adReturnPoints2.setReportId(adReturnFlow.getOrderReportId()+"");
-                    adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints2);
-
-                    adReturnPointsLog.setAdReturnPointsId(Long.parseLong(adReturnPoints1.getId()));
+                    //插入adReturnPointsLog
+                    AdReturnPoints adReturnPoints1 = new AdReturnPoints();
+                    adReturnPoints1.setReportId(adReturnFlow.getOrderReportId()+"");
+                    adReturnPoints1.setOrderId(order2.getId());
+                    adReturnPoints1.setType(AdReturnPoints.TYPE_INTERCHANGE);
+                    adReturnPoints = adReturnPointsDao.getByCondition(adReturnPoints1);
+                    adReturnPointsLog.setAdReturnPointsId(Long.parseLong(adReturnPoints.getId()));
                     adReturnPointsLog.setOperateAmount(order2.getUserRebate());
                     adReturnPointsLog.setOperateType("2");
                     adReturnPointsLog.setDelFlag("0");
                     adReturnPointsLog.setCreateDate(new Date());
                     adReturnPointsLog.setUpdateDate(new Date());
                     adReturnPointsLogDao.save(adReturnPointsLog);
-
-                    OrderVo o1 = new OrderVo();
-                    o1.setId(order.getId());
-                    BigDecimal userRebate = order.getUserRebate().subtract(adReturnPointsLog.getOperateAmount()) ;
-                    o1.setUserRebate(userRebate);
-                    o1.setUpdateDate(new Date());
-                    adOrderReportDao.update(o1);
                 } catch (Exception e) {
                     logger.error("processor退款回调异常：{} ",order2.getOrderNumber(),e);
                 }

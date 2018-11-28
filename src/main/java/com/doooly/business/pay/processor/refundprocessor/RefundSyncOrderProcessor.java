@@ -69,7 +69,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                         continue;
                     }
 
-
                     //计算完返利,重新查询order，同步ad_return_flow表
                     order2 = orderDao.get(String.valueOf(order2.getId()));
                     adReturnFlow.setUserRebate(order2.getUserRebate());

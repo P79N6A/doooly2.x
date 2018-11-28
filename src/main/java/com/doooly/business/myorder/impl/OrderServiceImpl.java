@@ -188,6 +188,15 @@ public class OrderServiceImpl implements OrderService{
 		
 			AdGroup adGroup =adGroupDao.getGroupLogoByUserId(report.getUserId().intValue());
 			resp.setGroupShortName(adGroup != null ? adGroup.getGroupShortName() : "");
+			//获取productId
+			AdOrderDetail detail =  new AdOrderDetail();
+			AdOrderReport adOrderReport1 = new AdOrderReport();
+			adOrderReport1.setId(report.getId());
+			detail.setAdOrderReport(adOrderReport1);
+			List<AdOrderDetail>  orderDetailList = adOrderDetailDao.findListByAdOrderReport(detail);
+			if(orderDetailList != null && orderDetailList.size() > 0){
+				resp.setProductId(orderDetailList.get(0).getProductSkuId());
+			}
 			
 		}catch(Exception e) {
 			logger.error(e.getMessage());

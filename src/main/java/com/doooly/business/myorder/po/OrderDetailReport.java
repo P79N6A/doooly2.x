@@ -39,6 +39,15 @@ public class OrderDetailReport {
     private String businessId;
     private String remarks;
     private String cashDeskSource;
+	private  String productId;
+
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+
+	public String getProductId() {
+		return productId;
+	}
     
 	public long getId() {
 		return id;

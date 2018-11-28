@@ -56,7 +56,6 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
             for (Order order2 : list) {
                 try {
 
-                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
                     //计算返利
                     Map<String, Object> map = new HashMap<>();
                     map.put("orderId",order2.getId());
@@ -64,7 +63,7 @@ public class RefundSyncOrderProcessor implements AfterRefundProcessor {
                     map.put("bussinessId",order2.getBussinessId());
                     orderDao.computeRefundRebateAndSyncOrder(map);
 
-                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getOrderNumber(), String.valueOf(order2.getPayType()));
+                    AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(order.getId(), order2.getSerialNumber(), String.valueOf(order2.getPayType()));
                     if (adReturnFlow == null) {
                         logger.info("adReturnFlow为空，orderId：{}，serialnumber：{}，paytype：{}",order.getId(),order2.getOrderNumber(),order2.getPayType());
                         continue;

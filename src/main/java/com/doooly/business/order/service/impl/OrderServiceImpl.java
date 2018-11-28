@@ -8,6 +8,7 @@ import com.doooly.business.order.vo.OrderExtVo;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.order.vo.ProductSkuVo;
+import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdSelfProduct;
@@ -19,6 +20,7 @@ import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdOrderSourceDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdSelfProductImageDao;
@@ -78,7 +80,8 @@ public class OrderServiceImpl implements OrderService {
 	private AdRechargeConfDao adRechargeConfDao;
     @Autowired
     private RefundService refundService;
-
+    @Autowired
+    private AdOrderSourceDao adOrderSourceDao;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -536,6 +539,12 @@ public class OrderServiceImpl implements OrderService {
 			rows += saveOrderExt(order.getId(),orderExt);
 		}
 		rows += saveOrderItem(order.getId(), orderItem);
+        AdOrderSource adOrderSource = new AdOrderSource();
+        adOrderSource.setOrderNumber(order.getOrderNumber());
+        adOrderSource.setBusinessId(order.getBussinessId());
+        adOrderSource.setCashDeskSource("d");
+        adOrderSource.setTraceCodeSource("d");
+        adOrderSourceDao.insert(adOrderSource);
 		return rows;
 	}
 

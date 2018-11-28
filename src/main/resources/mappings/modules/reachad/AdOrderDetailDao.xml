@@ -223,7 +223,8 @@
         a.create_date AS "createDate",
         r.order_number AS "adOrderReport.orderNumber",
         c.category_id AS "adBusinessCategory.categoryId",
-        c.category_name AS "adBusinessCategory.categoryName"
+        c.category_name AS "adBusinessCategory.categoryName",
+        a.product_sku_id  AS "productSkuId"
     </sql>
 
     <sql id="adOrderDetailJoins">

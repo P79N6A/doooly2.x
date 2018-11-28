@@ -89,7 +89,7 @@
 			<if test="income != null and income == 1">
 				AND a.type = 1
 			</if>
-			and a.status = 2
+			and a.status = 2 AND a.amount>0
 		</where>
 		ORDER BY
 		a.create_date DESC

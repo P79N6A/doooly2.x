@@ -1168,7 +1168,7 @@
                 
             </if>
 
-			AND (a.type in (99,5) or (a.type  = 1 AND a.user_rebate &lt;= 0 ))
+			AND (a.type in (99,5) or (a.type  = 1 AND (a.user_rebate &lt;= 0  or  a.user_rebate is null) ))
         </where>
          and a.del_flag = 0
   	</select>

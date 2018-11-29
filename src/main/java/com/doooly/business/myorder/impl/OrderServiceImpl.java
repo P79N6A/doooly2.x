@@ -433,6 +433,9 @@ public class OrderServiceImpl implements OrderService{
 
 	@Override
 	public List<AdOrderDetail> finDetailByOrder(List<Long> list) {
+		if(list == null || list.size() <=0){
+			return null;
+		}
 		return this.adOrderDetailDao.finDetailByOrder(list);
 	}
 }

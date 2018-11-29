@@ -1,5 +1,6 @@
 package com.doooly.business.myorder.impl;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import com.doooly.business.myorder.dto.*;
@@ -197,6 +198,10 @@ public class OrderServiceImpl implements OrderService{
 				}
 			}else {
 				resp.setUserRebate(report.getUserRebate());
+			}
+
+			if(resp.getUserRebate() == null || resp.getUserRebate().doubleValue() < 0){
+				resp.setUserRebate(new BigDecimal(0));
 			}
 		}catch(Exception e) {
 			logger.error(e.getMessage());

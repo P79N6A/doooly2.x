@@ -175,7 +175,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			}else{
 				resp.setUserRebate(orderPoResp.getUserRebate());
 			}
-			if(resp.getUserRebate().doubleValue() < 0){
+			if(resp.getUserRebate() == null || resp.getUserRebate().doubleValue() < 0){
 				resp.setUserRebate(new BigDecimal(0));
 			}
 

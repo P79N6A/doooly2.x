@@ -30,18 +30,6 @@
 			AND it.floor_id = #{floorId}
 			and it.item_id IS NOT NULL
 		ORDER BY c.sort asc
-
--- 		FROM
--- 		ad_home_template_item it
--- 		JOIN ad_consume_recharge c ON it.item_id = c.id
--- 		WHERE
--- 		it.template_id = #{templateId}
--- 		and it.floor_id= #{floorId}
--- 		AND b.item_id NOT NULL
--- -- 		and c.state = 1
--- 		ORDER BY c.sort
-
-
 	</select>
 	<select id="getConsumeRechargesByFloors" resultType="com.doooly.entity.reachad.AdConsumeRecharge">
 		SELECT

@@ -22,13 +22,26 @@
 		c.update_date updateDate,
 		c.shopping_guide_img guideIconUrl
 		FROM
-		ad_home_template_item it
-		JOIN ad_consume_recharge c ON it.item_id = c.id
+			ad_consume_recharge c
+		LEFT JOIN ad_home_template_item it ON c.id = it.item_id
+			and it.template_id = #{templateId}
 		WHERE
-		it.template_id = #{templateId}
-		and it.floor_id= #{floorId}
-		and c.state = 1
-		ORDER BY c.sort
+			1=1
+			AND it.floor_id = #{floorId}
+			and it.item_id IS NOT NULL
+		ORDER BY c.sort asc
+
+-- 		FROM
+-- 		ad_home_template_item it
+-- 		JOIN ad_consume_recharge c ON it.item_id = c.id
+-- 		WHERE
+-- 		it.template_id = #{templateId}
+-- 		and it.floor_id= #{floorId}
+-- 		AND b.item_id NOT NULL
+-- -- 		and c.state = 1
+-- 		ORDER BY c.sort
+
+
 	</select>
 	<select id="getConsumeRechargesByFloors" resultType="com.doooly.entity.reachad.AdConsumeRecharge">
 		SELECT

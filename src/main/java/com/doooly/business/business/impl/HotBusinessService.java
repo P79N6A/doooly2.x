@@ -274,7 +274,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 	public MessageDataBean getBusinessServiceData(Long userId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		List<AdBusinessServicePJ> adBusinessServicePJs = adBusinessServicePJDao.getDataByUserId(userId, null);
+		List<AdBusinessServicePJ> adBusinessServicePJs = adBusinessServicePJDao.getDataByUserId(userId, null, null);
 		if (!adBusinessServicePJs.isEmpty()) {
 			map.put("adBusinessServices", adBusinessServicePJs);
 			messageDataBean.setData(map);
@@ -299,8 +299,8 @@ public class HotBusinessService implements HotBusinessServiceI {
 	public MessageDataBean getBusinessServiceDataV21(Long userId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		List<AdBusinessServicePJ> list1 = adBusinessServicePJDao.getDataByUserId(userId, "1");
-		List<AdBusinessServicePJ> list2 = adBusinessServicePJDao.getDataByUserId(userId, "2");
+		List<AdBusinessServicePJ> list1 = adBusinessServicePJDao.getDataByUserId(userId, "1", null);
+		List<AdBusinessServicePJ> list2 = adBusinessServicePJDao.getDataByUserId(userId, "2", null);
 		if (!CollectionUtils.isEmpty(list1) || !CollectionUtils.isEmpty(list2)) {
 			map.put("list1", list1);
 			map.put("list2", list2);

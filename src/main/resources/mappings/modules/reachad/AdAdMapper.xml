@@ -78,6 +78,24 @@
 			order by a.create_date
 			limit 1
 	</select>
-	
+
+	<select id="getActivityByTypeAndGroup" resultType="com.doooly.entity.reachad.AdAd">
+		SELECT
+			a.image_path AS "imagePath",
+			a.image_link_url AS "imageLinkUrl",
+			a.title as "title"
+		FROM
+			ad_ad a
+			LEFT JOIN ad_ad_group_conn agc
+			ON agc.ad_id = a.id
+		WHERE
+			agc.group_id = #{groupId }
+			AND a.type = #{type }
+			AND a.state = 1
+			AND a.begin_date &lt; NOW()
+			AND a.end_date &gt; NOW()
+			ORDER BY a.create_date DESC
+			LIMIT 1
+	</select>
 	
 </mapper>

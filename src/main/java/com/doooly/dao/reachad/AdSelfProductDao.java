@@ -3,15 +3,10 @@
  */
 package com.doooly.dao.reachad;
 
-import java.util.List;
-
+import com.doooly.business.product.entity.*;
 import org.apache.ibatis.annotations.Param;
 
-import com.doooly.business.product.entity.ActivityInfo;
-import com.doooly.business.product.entity.AdGroupSelfProductPrice;
-import com.doooly.business.product.entity.AdSelfProduct;
-import com.doooly.business.product.entity.AdSelfProductSku;
-import com.doooly.business.product.entity.AdSelfProductType;
+import java.util.List;
 
 /**
  * 商品管理DAO接口
@@ -58,5 +53,5 @@ public interface AdSelfProductDao{
 	List<String> getLimitSkuIdListByProductId(@Param("productId")String productId,@Param("groupId")Long groupId);
 	
 	/** 根据活动名字查询sku */
-	AdGroupSelfProductPrice getSelfProductSkuListByName(@Param("activityName") String activityName);
+	AdGroupSelfProductPrice getSelfProductSkuListByName(@Param("activityName") String activityName, @Param("groupId")Integer groupId);
 }

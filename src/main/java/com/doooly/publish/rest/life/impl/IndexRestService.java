@@ -1,5 +1,11 @@
 package com.doooly.publish.rest.life.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.home.v2.servcie.IndexServiceI;
+import com.doooly.common.constants.VersionConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -7,14 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import com.alibaba.fastjson.JSONPObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.home.v2.servcie.IndexServiceI;
-import com.doooly.common.constants.VersionConstants;
 
 /**
  * 兜礼首页接口（微信端/app）
@@ -60,7 +58,7 @@ public class IndexRestService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String spendIntegral(JSONObject params, @Context HttpServletRequest request) {
-		return indexService.listSpendIntegralFloors(params, request, VersionConstants.INTERFACE_VERSION_V2);
+		return indexService.listSpendIntegralFloors(params, request, VersionConstants.INTERFACE_VERSION_V2_2);
 	}
 	
 	/**

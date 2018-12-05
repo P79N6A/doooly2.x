@@ -870,7 +870,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
                 //退款成功
                 int payType1 = Integer.parseInt(payType);
-                if (payType1 != 0) {
+                if (payType1 != 0 && refundFee != null && settlementRefundFee != null && (new BigDecimal(settlementRefundFee).compareTo(new BigDecimal("0"))>0)) {
                     //非积分需要插入流水
                     payType1 = 3;//微信
                     saveOneOrder(order, payType1, refundFee, settlementRefundFee, merchantRefundNo);
@@ -915,7 +915,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             o.setPayType(payType);
             o.setOrderNumber(order.getOrderNumber());
             o.setSerialNumber(merchantRefundNo);
-            o.setOrderDate(order.getOrderDate());
+            o.setOrderDate(new Date());
             o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setOrderType(1);
             o.setType(OrderService.OrderStatus.RETURN_ORDER.getCode());

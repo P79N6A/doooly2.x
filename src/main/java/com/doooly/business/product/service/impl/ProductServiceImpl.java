@@ -277,4 +277,8 @@ public class ProductServiceImpl implements ProductService {
 		return adSelfProductDao.getSelfProductSkuListByName(activityName);
 	}
 
+	@Override
+	public List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName) {
+		return adSelfProductDao.getSelfProductAirport(activityName);
+	}
 }

@@ -75,13 +75,20 @@
 		<property name="mapperLocations" value="classpath:mappings/modules/reachad/*.xml" />
 		<property name="configLocation" value="classpath:conf/mybatis-config.xml" />
 		<property name="plugins">
-			<list>
+			<array>
 				<bean
 					class="com.github.miemiedev.mybatis.paginator.OffsetLimitInterceptor">
 					<property name="dialectClass"
 						value="com.github.miemiedev.mybatis.paginator.dialect.MySQLDialect"></property>
 				</bean>
-			</list>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							dialect=mysql
+						</value>
+					</property>
+				</bean>
+			</array>
 		</property>
 	</bean>
 	<!-- 配置扫描器 -->

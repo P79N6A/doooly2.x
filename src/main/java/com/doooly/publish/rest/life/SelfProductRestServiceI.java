@@ -19,6 +19,8 @@ public interface SelfProductRestServiceI {
 	/** 根据活动名获取SKU商品*/
 	String getSelfProductByName(JSONObject obj);
 
+	String getActivityByType(JSONObject obj);
+
 	/**
 	 * 机场活动
 	 * @param obj

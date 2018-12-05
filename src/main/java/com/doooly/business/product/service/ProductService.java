@@ -52,6 +52,8 @@ public interface ProductService {
 	
 	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName);
 
+	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName, Integer groupId);
+
 	List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName);
 
 }

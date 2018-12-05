@@ -352,4 +352,47 @@
 		LIMIT 1
     </select>
 
+
+	<select id="getSelfProductAirport" resultType="com.doooly.business.product.entity.AdGroupSelfProductPrice">
+		SELECT
+		a.id AS "id",
+		a.sku_id AS "skuId",
+		a.group_id AS "groupId",
+		a.special_price AS "specialPrice",
+		a.special_start_date AS "specialStartDate",
+		a.special_end_date AS "specialEndDate",
+		a.tag AS "tag",
+		a.discount AS "discount",
+		c.inventory AS "inventory",
+		a.number AS "number",
+		a.status AS "status",
+		a.type AS "type",
+		a.buy_number_limit AS "buyNumberLimit",
+		b.specification AS "specification",
+		b.number AS "productNumber",
+		b.title AS "title",
+		b.market_price AS "marketPrice",
+		b.supply_price AS "supplyPrice",
+		b.inventory AS "skuInventory",
+		b.sell_price AS "sellPrice",
+		a.activity_start_date as "activityStartDate",
+		a.activity_end_date as "activityEndDate",
+		b.self_product_id as "produceId",
+		e.business_id as "businessId" ,
+		a.week_list as "weekList",
+		a.activity_of_time as "activityOfTime"
+		FROM ad_group_self_product_price a
+		INNER JOIN ad_self_product_sku b ON a.sku_id = b.id AND b.del_flag =0
+		LEFT JOIN ad_group_self_product_price_expand c ON a.sku_id = c.sku_id AND a.number = c.number
+		LEFT JOIN ad_self_product_image d ON d.self_product_id = b.self_product_id
+		inner join ad_self_product e on e.id = b.self_product_id
+		<where>
+			<if test="activityName != null and activityName != ''">
+				and a.activity_name = #{activityName} and b.state != 7 and a.status = 1
+			</if>
+		</where>
+	</select>
+
+
+
 </mapper>

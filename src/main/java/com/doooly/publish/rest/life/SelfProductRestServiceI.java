@@ -19,6 +19,10 @@ public interface SelfProductRestServiceI {
 	/** 根据活动名获取SKU商品*/
 	String getSelfProductByName(JSONObject obj);
 
-	/** 根据广告类型获得广告配置信息 */
-	String getActivityByType(JSONObject obj);
+	/**
+	 * 机场活动
+	 * @param obj
+	 * @return
+	 */
+	String getSelfProductAirport(JSONObject obj);
 }

@@ -9,6 +9,7 @@ import com.doooly.business.product.service.ProductService;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdAd;
 import com.doooly.publish.rest.life.SelfProductRestServiceI;
+import com.github.pagehelper.PageHelper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -98,7 +99,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			String groupId = obj.getString("groupId");
 			long userId = obj.getLong("userId");
 
-			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName, Integer.parseInt(groupId));
+			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
 
 			// 是否有话费活动
 			if (adGroupSelfProductPrice != null) {
@@ -182,4 +183,54 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 
         return result;
     }
+
+
+
+	@POST
+	@Path(value = "/getSelfProductAirport")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String getSelfProductAirport(JSONObject obj) {
+		logger.info("getSelfProductAirport = {}"+obj);
+		MessageDataBean messageDataBean = new MessageDataBean();
+		HashMap<String,Object> map = new HashMap<>();
+		try {
+			String activityName = obj.getString("activityName");
+            int pageNum = getPageNum(obj);
+            int pageSize = getPageSize(obj);
+			PageHelper.startPage(pageNum,pageSize);
+            List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName);
+			map.put("adGroupSelfProductPriceList", adGroupSelfProductPriceList);
+			messageDataBean.setData(map);
+		} catch (Exception e) {
+			logger.error("获取卡券商品详情页信息异常！", e);
+			messageDataBean.setCode(MessageDataBean.failure_code);
+		}
+		logger.info(messageDataBean.toJsonString());
+		return messageDataBean.toJsonString();
+	}
+
+
+	private int getPageSize(JSONObject jsonObject) {
+	    int pageSize = 2;
+	    try {
+            pageSize = Integer.parseInt(jsonObject.getString("pageSize"));
+        } catch (Exception e) {
+	        e.printStackTrace();
+        }
+        return pageSize;
+    }
+
+
+    private int getPageNum(JSONObject jsonObject) {
+        int pageNum = 1;
+        try {
+            pageNum = Integer.parseInt(jsonObject.getString("pageNum"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return pageNum;
+    }
+
 }

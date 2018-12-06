@@ -606,6 +606,13 @@
 			<artifactId>java-emoji-converter</artifactId>
 			<version>0.0.1</version>
 		</dependency>
+
+		<!-- redis 缓存 -->
+		<dependency>
+			<groupId>com.reach</groupId>
+			<artifactId>redis-cache</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>Doooly</finalName>

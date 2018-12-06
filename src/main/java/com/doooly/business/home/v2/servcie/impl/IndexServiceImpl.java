@@ -15,6 +15,7 @@ import com.doooly.dao.reachad.AdConsumeRechargeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
 import com.doooly.publish.rest.life.impl.IndexRestService;
+import com.reach.redis.annotation.EnableCaching;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
+@EnableCaching
 public class IndexServiceImpl implements IndexServiceI {
 	private static Logger logger = LoggerFactory.getLogger(IndexRestService.class);
 

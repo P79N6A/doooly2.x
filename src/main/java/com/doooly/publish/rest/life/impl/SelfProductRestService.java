@@ -99,7 +99,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			String groupId = obj.getString("groupId");
 			long userId = obj.getLong("userId");
 
-			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName, groupId);
+			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName, Integer.parseInt(groupId));
 
 			// 是否有话费活动
 			if (adGroupSelfProductPrice != null) {

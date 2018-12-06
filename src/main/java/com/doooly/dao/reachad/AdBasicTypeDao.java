@@ -3,6 +3,7 @@ package com.doooly.dao.reachad;
 import com.doooly.common.dao.BaseDaoI;
 import com.doooly.entity.reachad.AdBasicType;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * @author: zhaoyipeng
  * 
  */
+@Repository
 public interface AdBasicTypeDao extends BaseDaoI<AdBasicType> {
 
 	List<AdBasicType> getActivityCategoryList();

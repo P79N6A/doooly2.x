@@ -3,7 +3,7 @@ package com.doooly.business.home.v2.servcie.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.guide.service.AdArticleServiceI;
-import com.doooly.business.home.v2.servcie.IAdBasicTypeService;
+import com.doooly.business.home.v2.servcie.AdBasicTypeServiceI;
 import com.doooly.business.home.v2.servcie.IndexServiceI;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.FloorTemplateConstants.DooolyRightConstants;
@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,12 +42,12 @@ public class IndexServiceImpl implements IndexServiceI {
 
 	@Autowired
 	private AdBasicTypeDao adBasicTypeDao;
-	//@Autowired
-	//private IAdBasicTypeService adBasicTypeService;
+	@Autowired
+	private AdBasicTypeServiceI adBasicTypeService;
 	@Autowired
 	private AdConsumeRechargeDao adConsumeRechargeDao;
 	@Autowired
-	private StringRedisTemplate redisTemplate;
+	private RedisTemplate<String,Object> redisTemplate;
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -71,14 +72,14 @@ public class IndexServiceImpl implements IndexServiceI {
         if (StringUtils.isEmpty(userToken)) {
             return new MessageDataBean("1001", "userToken is null").toJsonString();
         }
-        String userId = redisTemplate.opsForValue().get(userToken);
+        String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
         String address = params.getString("address");
         // 取有返佣金额的商户
         try {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
-            IAdBasicTypeService  adBasicTypeService = (IAdBasicTypeService) CacheBean.get("adBasicTypeService");
-            List<AdBasicType> floors = adBasicTypeService.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
+            AdBasicTypeServiceImpl adBasicTypeServiceImpl = (AdBasicTypeServiceImpl) CacheBean.get("adBasicTypeServiceImpl");
+            List<AdBasicType> floors = adBasicTypeServiceImpl.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
@@ -177,7 +178,7 @@ public class IndexServiceImpl implements IndexServiceI {
         if (StringUtils.isEmpty(userToken)) {
             return new MessageDataBean("1001", "userToken is null").toJsonString();
         }
-        String userId = redisTemplate.opsForValue().get(userToken);
+        String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
         String address = params.getString("address");
         // 取有返佣金额的商户
         try {
@@ -270,7 +271,7 @@ public class IndexServiceImpl implements IndexServiceI {
 		if (StringUtils.isEmpty(userToken)) {
 			return new MessageDataBean("1001", "userToken is null").toJsonString();
 		}
-		String userId = redisTemplate.opsForValue().get(userToken);
+		String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
 		String address = params.getString("address");
 		// 取有返佣金额的商户
 		try {

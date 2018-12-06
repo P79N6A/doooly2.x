@@ -27,6 +27,8 @@ public class AdGroupSelfProductPrice {
 	private String specification; // SKU规格
 	private String productNumber; // SKU编号
 	private String title; // 标题
+	private String detail;//商品详情
+	private String introduction;//商品简述
 	private BigDecimal marketPrice; // 市场价
 	private BigDecimal supplyPrice; // 供货价
 	private BigDecimal sellPrice; // 销售价
@@ -42,6 +44,22 @@ public class AdGroupSelfProductPrice {
 	private String url;
 	private String weekList;
     private String activityOfTime;
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
 
 	public int getId() {
 		return id;

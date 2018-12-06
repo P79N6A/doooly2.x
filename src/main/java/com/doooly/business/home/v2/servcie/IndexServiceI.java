@@ -1,8 +1,11 @@
 package com.doooly.business.home.v2.servcie;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.entity.reachad.AdBasicType;
 
 public interface IndexServiceI {
 
@@ -41,4 +44,6 @@ public interface IndexServiceI {
 	 * @return
 	 */
 	String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version);
+	
+
 }

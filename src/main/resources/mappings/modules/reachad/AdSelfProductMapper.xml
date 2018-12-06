@@ -364,6 +364,7 @@
 		a.tag AS "tag",
 		a.discount AS "discount",
 		c.inventory AS "inventory",
+		a.inventory_init as "inventoryInit",
 		a.number AS "number",
 		a.status AS "status",
 		a.type AS "type",

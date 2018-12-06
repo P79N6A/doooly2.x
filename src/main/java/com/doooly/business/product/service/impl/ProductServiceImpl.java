@@ -259,8 +259,8 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName) {
-		return adSelfProductDao.getSelfProductSkuListByName(activityName);
+	public AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName, Integer groupId) {
+		return adSelfProductDao.getSelfProductSkuListByName(activityName, groupId);
 	}
 
 	@Override

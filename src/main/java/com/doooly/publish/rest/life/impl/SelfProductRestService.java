@@ -104,7 +104,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			String groupId = obj.getString("groupId");
 			long userId = obj.getLong("userId");
 
-			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName);
+			AdGroupSelfProductPrice adGroupSelfProductPrice = productService.getSelfProductSkuListByName(activityName, Integer.parseInt(groupId));
 
 			// 是否有话费活动
 			if (adGroupSelfProductPrice != null) {
@@ -172,6 +172,22 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();
 	}
+
+    @POST
+    @Path(value = "/getActivityByType")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Override
+    public String getActivityByType(JSONObject obj) {
+        logger.info("getActivityByType = {}"+obj);
+        MessageDataBean messageDataBean = new MessageDataBean();
+        String type = obj.getString("type");
+        String groupId = obj.getString("groupId");
+
+        String result = mallBusinessService.getActivityByTypeAndGroup(Integer.parseInt(type), Integer.parseInt(groupId));
+
+        return result;
+    }
 
 
 

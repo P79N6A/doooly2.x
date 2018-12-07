@@ -61,7 +61,6 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, type, templateType")
     public String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version) {
         long start = System.currentTimeMillis();
         String userToken = request.getHeader(Constants.TOKEN_NAME);
@@ -75,86 +74,92 @@ public class IndexServiceImpl implements IndexServiceI {
         try {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
-            if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean("1000", "floors is null").toJsonString();
-            }
-
-            Map<String, Object> data = new HashMap<String, Object>();
-            List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
-
-            for (AdBasicType floor : floors) {
-                if (floor.getCode() != 20 && floor.getCode() != 21 && floor.getCode() != 23 && floor.getCode() != 24) {
-                    Map<String, Object> item = new HashMap<String, Object>();
-
-                    if (floor.getCode() == 25) {
-                        if (VersionConstants.INTERFACE_VERSION_V2_2.equalsIgnoreCase(version)) {
-                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
-
-                            if (!CollectionUtils.isEmpty(beans)) {
-                                item.put("mainTitle", floor.getName());
-                                item.put("isOnline", DEAL_TYPE_OFFLINE);
-                                item.put("type", "9");
-
-                                List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
-
-                                for (AdBusinessServicePJ a : beans) {
-                                    AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
-                                    adConsumeRecharge.setMainTitle(a.getServiceName());
-                                    adConsumeRecharge.setIconUrl(a.getLogo());
-                                    adConsumeRecharge.setSubUrl(a.getServiceUrl());
-
-                                    if (0 != a.getServiceUrl().indexOf("/")) {
-                                        adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
-                                    } else {
-                                        adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
-                                    }
-
-                                    list.add(adConsumeRecharge);
-                                }
-
-                                item.put("list", list);
-                            }
-                        }
-                    } else {
-
-                        // 消费卡券/充值缴费数据表
-                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
-                                floor.getFloorId());
-
-                        if (!CollectionUtils.isEmpty(beans)) {
-                            for (AdConsumeRecharge bean : beans) {
-                                bean.setIconUrl(bean.getGuideIconUrl());
-                                String linkUrl = bean.getLinkUrl();
-                                if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
-                                    bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
-                                }
-                            }
-                            item.put("mainTitle", floor.getName());
-                            item.put("isOnline", DEAL_TYPE_OFFLINE);
-
-                            if (floor.getFloorId() == 24) {
-                                item.put("type", "13");
-                            } else {
-                                item.put("type", "2");
-                            }
-                            
-                            item.put("list", beans);
-                        }
-                    }
-
-                    ls.add(item);
-                }
-            }
-            data.put("floors", ls);
-            logger.info("selectFloorsByVersion(), execution time = {}", System.currentTimeMillis() - start);
-            return new MessageDataBean("1000", "success", data).toJsonString();
+            return getListSpendIntegralFloorsData(userId, address, version, start);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("selectFloorsByVersion() obj={} exception={}", params, e.getMessage());
             return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
         }
+    }
+
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address")
+    public String getListSpendIntegralFloorsData(String userId, String address, String version, long start) {
+        List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
+
+        if (CollectionUtils.isEmpty(floors)) {
+            return new MessageDataBean("1000", "floors is null").toJsonString();
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
+
+        for (AdBasicType floor : floors) {
+            if (floor.getCode() != 20 && floor.getCode() != 21 && floor.getCode() != 23 && floor.getCode() != 24) {
+                Map<String, Object> item = new HashMap<String, Object>();
+
+                if (floor.getCode() == 25) {
+                    if (VersionConstants.INTERFACE_VERSION_V2_2.equalsIgnoreCase(version)) {
+                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
+
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            item.put("mainTitle", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "9");
+
+                            List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
+
+                            for (AdBusinessServicePJ a : beans) {
+                                AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
+                                adConsumeRecharge.setMainTitle(a.getServiceName());
+                                adConsumeRecharge.setIconUrl(a.getLogo());
+                                adConsumeRecharge.setSubUrl(a.getServiceUrl());
+
+                                if (0 != a.getServiceUrl().indexOf("/")) {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                } else {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
+                                }
+
+                                list.add(adConsumeRecharge);
+                            }
+
+                            item.put("list", list);
+                        }
+                    }
+                } else {
+
+                    // 消费卡券/充值缴费数据表
+                    List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                            floor.getFloorId());
+
+                    if (!CollectionUtils.isEmpty(beans)) {
+                        for (AdConsumeRecharge bean : beans) {
+                            bean.setIconUrl(bean.getGuideIconUrl());
+                            String linkUrl = bean.getLinkUrl();
+                            if (!StringUtils.isEmpty(bean.getLinkUrl()) && linkUrl.indexOf("#") > -1) {
+                                bean.setSubUrl(linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                            }
+                        }
+                        item.put("mainTitle", floor.getName());
+                        item.put("isOnline", DEAL_TYPE_OFFLINE);
+
+                        if (floor.getFloorId() == 24) {
+                            item.put("type", "13");
+                        } else {
+                            item.put("type", "2");
+                        }
+
+                        item.put("list", beans);
+                    }
+                }
+
+                ls.add(item);
+            }
+        }
+        data.put("floors", ls);
+        logger.info("selectFloorsByVersion(), execution time = {}", System.currentTimeMillis() - start);
+        return new MessageDataBean("1000", "success", data).toJsonString();
     }
 
 

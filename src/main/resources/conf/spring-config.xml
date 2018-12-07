@@ -9,7 +9,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<property name="beanNames">
 			<list>
-				<value>baiduGeocoderService</value><!-- 添加需要拦截的service bean-->
+				<value>indexServiceImpl</value><!-- 添加需要拦截的service bean-->
 			</list>
 		</property>
  		

@@ -1,11 +1,8 @@
 package com.doooly.business.home.v2.servcie;
 
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.entity.reachad.AdBasicType;
 
 public interface IndexServiceI {
 
@@ -19,7 +16,7 @@ public interface IndexServiceI {
 	* @since  
 	* @return
 	 */
-	String selectFloorsByV2_2(JSONObject params, HttpServletRequest request, String version);
+	String selectFloorsByV2_2(String userId, String address);
 
 	/**
 	 * 根据接口版本查询首页楼层信息
@@ -43,7 +40,7 @@ public interface IndexServiceI {
 	 * @since
 	 * @return
 	 */
-	String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version);
+	String listSpendIntegralFloors(String userId, String address);
 	
 
 }

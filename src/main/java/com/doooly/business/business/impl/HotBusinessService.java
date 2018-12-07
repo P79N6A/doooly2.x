@@ -11,6 +11,7 @@ import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
 import com.doooly.entity.report.EnterpriseAccountResult;
+import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,8 @@ public class HotBusinessService implements HotBusinessServiceI {
 	private int INDEXADS = 2;
 	// private int HOTMERCHATADS = 3;
 
+
+	@Cacheable(module = "HotBusiness", event = "getIndexData", key = "userId, type, adType")
 	@Override
 	public MessageDataBean getIndexData(Integer userId, Integer type, Integer adType) {
 		MessageDataBean messageDataBean = new MessageDataBean();

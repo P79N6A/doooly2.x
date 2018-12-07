@@ -2,8 +2,11 @@ package com.doooly.business.home.v2.servcie.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.business.AdBusinessServicePJI;
+import com.doooly.business.business.impl.AdBusinessServicePJImpl;
 import com.doooly.business.guide.service.AdArticleServiceI;
 import com.doooly.business.home.v2.servcie.AdBasicTypeServiceI;
+import com.doooly.business.home.v2.servcie.AdConsumeRechargeServiceI;
 import com.doooly.business.home.v2.servcie.IndexServiceI;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.FloorTemplateConstants.DooolyRightConstants;
@@ -22,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -47,13 +49,17 @@ public class IndexServiceImpl implements IndexServiceI {
 	@Autowired
 	private AdConsumeRechargeDao adConsumeRechargeDao;
 	@Autowired
-	private RedisTemplate<String,Object> redisTemplate;
+    private StringRedisTemplate redisTemplate;
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
 	private AdArticleServiceI guideService;
 	@Autowired
 	private AdBusinessServicePJDao adBusinessServicePJDao;
+	@Autowired
+	private AdBusinessServicePJI adBusinessServicePJI;
+    @Autowired
+    private AdConsumeRechargeServiceI adConsumeRechargeI;
 
 
     /**
@@ -94,7 +100,8 @@ public class IndexServiceImpl implements IndexServiceI {
 
                     if (floor.getCode() == 25) {
                         if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
-                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
+                            AdBusinessServicePJImpl adBusinessServicePJImpl = (AdBusinessServicePJImpl) CacheBean.get("adBusinessServicePJImpl");
+                            List<AdBusinessServicePJ> beans = adBusinessServicePJImpl.getDataByUserId(Long.valueOf(userId), "2");
 
                             if (!CollectionUtils.isEmpty(beans)) {
                                 item.put("mainTitle", floor.getName());
@@ -124,7 +131,8 @@ public class IndexServiceImpl implements IndexServiceI {
                     } else {
 
                         // 消费卡券/充值缴费数据表
-                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
+                        AdConsumeRechargeServiceImpl adConsumeRechargeService = (AdConsumeRechargeServiceImpl) CacheBean.get("adConsumeRechargeServiceImpl");
+                        List<AdConsumeRecharge> beans = adConsumeRechargeService.getConsumeRecharges(floor.getTemplateId(),
                                 floor.getFloorId());
 
                         if (!CollectionUtils.isEmpty(beans)) {

@@ -228,9 +228,9 @@
 			<!-- 这个判断条件必须在最后，因为有排序方式-->
             <if test="recommendHomepage != null and recommendHomepage==1">
                 and a.recommend_homepage = #{recommendHomepage}
-				ORDER BY a.update_date DESC
             </if>
-        LIMIT #{startIndex},#{pageSize}
+		ORDER BY a.update_date DESC
+		LIMIT #{startIndex},#{pageSize}
     </select>
 
     <update id="updateSellCount" parameterType="com.doooly.entity.reachad.AdProduct">

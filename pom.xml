@@ -610,8 +610,8 @@
 		<!-- redis 缓存 -->
 		<dependency>
 			<groupId>com.reach</groupId>
-			<artifactId>redis-cache</artifactId>
-			<version>1.0.9</version>
+			<artifactId>spring-redis-cache</artifactId>
+			<version>1.0.2</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -2,11 +2,7 @@ package com.doooly.business.home.v2.servcie.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.business.AdBusinessServicePJI;
-import com.doooly.business.business.impl.AdBusinessServicePJImpl;
 import com.doooly.business.guide.service.AdArticleServiceI;
-import com.doooly.business.home.v2.servcie.AdBasicTypeServiceI;
-import com.doooly.business.home.v2.servcie.AdConsumeRechargeServiceI;
 import com.doooly.business.home.v2.servcie.IndexServiceI;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.FloorTemplateConstants.DooolyRightConstants;
@@ -19,8 +15,8 @@ import com.doooly.dao.reachad.AdConsumeRechargeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
 import com.doooly.publish.rest.life.impl.IndexRestService;
+import com.reach.redis.annotation.Cacheable;
 import com.reach.redis.annotation.EnableCaching;
-import com.reach.redis.bean.CacheBean;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +41,6 @@ public class IndexServiceImpl implements IndexServiceI {
 	@Autowired
 	private AdBasicTypeDao adBasicTypeDao;
 	@Autowired
-	private AdBasicTypeServiceI adBasicTypeService;
-	@Autowired
 	private AdConsumeRechargeDao adConsumeRechargeDao;
 	@Autowired
     private StringRedisTemplate redisTemplate;
@@ -56,10 +50,6 @@ public class IndexServiceImpl implements IndexServiceI {
 	private AdArticleServiceI guideService;
 	@Autowired
 	private AdBusinessServicePJDao adBusinessServicePJDao;
-	@Autowired
-	private AdBusinessServicePJI adBusinessServicePJI;
-    @Autowired
-    private AdConsumeRechargeServiceI adConsumeRechargeI;
 
 
     /**
@@ -71,6 +61,7 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, type, templateType")
     public String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version) {
         long start = System.currentTimeMillis();
         String userToken = request.getHeader(Constants.TOKEN_NAME);
@@ -84,8 +75,7 @@ public class IndexServiceImpl implements IndexServiceI {
         try {
             logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
                     params, version);
-            AdBasicTypeServiceImpl adBasicTypeServiceImpl = (AdBasicTypeServiceImpl) CacheBean.get("adBasicTypeServiceImpl");
-            List<AdBasicType> floors = adBasicTypeServiceImpl.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
                 return new MessageDataBean("1000", "floors is null").toJsonString();
@@ -100,8 +90,7 @@ public class IndexServiceImpl implements IndexServiceI {
 
                     if (floor.getCode() == 25) {
                         if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
-                            AdBusinessServicePJImpl adBusinessServicePJImpl = (AdBusinessServicePJImpl) CacheBean.get("adBusinessServicePJImpl");
-                            List<AdBusinessServicePJ> beans = adBusinessServicePJImpl.getDataByUserId(Long.valueOf(userId), "2");
+                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
 
                             if (!CollectionUtils.isEmpty(beans)) {
                                 item.put("mainTitle", floor.getName());
@@ -131,8 +120,7 @@ public class IndexServiceImpl implements IndexServiceI {
                     } else {
 
                         // 消费卡券/充值缴费数据表
-                        AdConsumeRechargeServiceImpl adConsumeRechargeService = (AdConsumeRechargeServiceImpl) CacheBean.get("adConsumeRechargeServiceImpl");
-                        List<AdConsumeRecharge> beans = adConsumeRechargeService.getConsumeRecharges(floor.getTemplateId(),
+                        List<AdConsumeRecharge> beans = adConsumeRechargeDao.getConsumeRecharges(floor.getTemplateId(),
                                 floor.getFloorId());
 
                         if (!CollectionUtils.isEmpty(beans)) {

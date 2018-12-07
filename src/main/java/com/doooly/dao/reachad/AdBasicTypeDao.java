@@ -17,7 +17,6 @@ public interface AdBasicTypeDao extends BaseDaoI<AdBasicType> {
 
 	List<AdBasicType> getActivityCategoryList();
 
-//	@Cacheable(module = "TEMPLATE", event = "getFloors", key = "userId, type, templateType")
 	List<AdBasicType> getFloors(@Param("userId") String userId, @Param("type") Integer type, @Param("templateType")Integer templateType);
 
 }

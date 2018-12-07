@@ -56,5 +56,5 @@ public interface AdSelfProductDao{
 	AdGroupSelfProductPrice getSelfProductSkuListByName(@Param("activityName") String activityName, @Param("groupId")Integer groupId);
 
 	/**机场活动**/
-	List<AdGroupSelfProductPrice> getSelfProductAirport(@Param("activityName") String activityName);
+	List<AdGroupSelfProductPrice> getSelfProductAirport(@Param("activityName") String activityName,@Param("selfProductId") String selfProductId);
 }

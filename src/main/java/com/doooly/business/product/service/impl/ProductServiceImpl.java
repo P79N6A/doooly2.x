@@ -264,7 +264,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName) {
-		return adSelfProductDao.getSelfProductAirport(activityName);
+	public List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName,String selfProductId) {
+		return adSelfProductDao.getSelfProductAirport(activityName,selfProductId);
 	}
 }

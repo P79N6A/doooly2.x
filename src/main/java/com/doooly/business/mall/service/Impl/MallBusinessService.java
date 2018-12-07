@@ -496,6 +496,26 @@ public class MallBusinessService implements MallBusinessServiceI {
 	public AdAd findByTypeAndGroup(int groupId, String title) {
 		return adAdDao.findByTypeAndGroup(groupId, title);
 	}
-	
+
+	public String getActivityByTypeAndGroup(Integer type, Integer groupId) {
+		MessageDataBean messageDataBean = new MessageDataBean();
+
+		AdAd adAd = adAdDao.getActivityByTypeAndGroup(type, groupId);
+
+		if (adAd != null) {
+			messageDataBean.setCode(MessageDataBean.success_code);
+			messageDataBean.setMess(MessageDataBean.success_mess);
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("imgUrl", adAd.getImagePath());
+			map.put("linkUrl", adAd.getImageLinkUrl());
+			map.put("activityName", adAd.getTitle());
+			messageDataBean.setData(map);
+		} else {
+			log.info("暂无活动");
+			messageDataBean.setCode(MessageDataBean.null_code);
+		}
+
+		return messageDataBean.toJsonString();
+	}
 	
 }

@@ -15,7 +15,7 @@
 		  a.create_by as "createBy",
 		  a.update_by as "updateBy"
   </sql>
-  
+
   <select id="getDataByUserId" resultType="com.doooly.entity.reachad.AdBusinessServicePJ">
   	Select <include refid="adBusinessServicePJColumns"/>,b.deal_type as "dealType"
   	From ad_business_service a
@@ -23,12 +23,19 @@
 		LEFT JOIN ad_business_group bg on b.id = bg.business_id
 		LEFT JOIN ad_group g on bg.group_id = g.id
 		join ad_user u on u.group_num = g.id
+	  <if test="address != null and address != ''">
+		  join ad_business_area_conn abac on abac.business_id = a.business_id
+		  join ad_area aa on aa.id = abac.area_id
+	  </if>
 	where u.id = #{userId}
 	  <if test="serviceType != null and serviceType !=''">
 	  	and a.service_type = #{serviceType}
 	  </if>
+	  <if test="address != null and address != ''">
+		 AND (aa.name =#{address} or aa.name ="全国")
+	  </if>
 	  GROUP BY a.id order by a.sort desc
   </select>
-  
+
  
 </mapper>

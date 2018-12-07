@@ -89,8 +89,8 @@ public class IndexServiceImpl implements IndexServiceI {
                     Map<String, Object> item = new HashMap<String, Object>();
 
                     if (floor.getCode() == 25) {
-                        if (VersionConstants.INTERFACE_VERSION_V2.equalsIgnoreCase(version)) {
-                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2");
+                        if (VersionConstants.INTERFACE_VERSION_V2_2.equalsIgnoreCase(version)) {
+                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
 
                             if (!CollectionUtils.isEmpty(beans)) {
                                 item.put("mainTitle", floor.getName());

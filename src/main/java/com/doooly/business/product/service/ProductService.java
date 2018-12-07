@@ -1,10 +1,10 @@
 package com.doooly.business.product.service;
 
-import java.util.HashMap;
-
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdGroupSelfProductPrice;
 import com.doooly.business.product.entity.AdSelfProduct;
+
+import java.util.HashMap;
 
 public interface ProductService {
 	//活动库存
@@ -47,6 +47,6 @@ public interface ProductService {
 
 	public ActivityInfo getActivityInfo(String groupId, int skuId);
 	
-	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName);
+	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName, Integer groupId);
 
 }

@@ -16,6 +16,8 @@ import java.util.List;
 @Repository
 public interface AdBusinessServicePJDao extends BaseDaoI<AdBusinessServicePJ> {
 
-	List<AdBusinessServicePJ> getDataByUserId(@Param("userId") Long userId, @Param("serviceType") String serviceType);
+//	List<AdBusinessServicePJ> getDataByUserId(@Param("userId") Long userId, @Param("serviceType") String serviceType);
+
+	List<AdBusinessServicePJ> getDataByUserId(@Param("userId") Long userId, @Param("serviceType") String serviceType, @Param("address")String address);
 
 }

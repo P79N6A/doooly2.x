@@ -10,6 +10,8 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 		<property name="beanNames">
 			<list>
 				<value>indexServiceImpl</value><!-- 添加需要拦截的service bean-->
+				<value>adArticleService</value>
+				<value>hotBusinessService</value>
 			</list>
 		</property>
  		

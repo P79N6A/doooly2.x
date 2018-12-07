@@ -54,7 +54,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 
-	@Cacheable(module = "HotBusiness", event = "getIndexData", key = "userId, type, adType")
+	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "userId, type, adType")
 	@Override
 	public MessageDataBean getIndexData(Integer userId, Integer type, Integer adType) {
 		MessageDataBean messageDataBean = new MessageDataBean();

@@ -4,7 +4,7 @@ xmlns="http://www.springframework.org/schema/beans"
 xsi:schemaLocation="http://www.springframework.org/schema/beans 
 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"> 
 	<bean id="springInterceptor"
-		  class="com.doooly.aop.SpringInterceptor">
+		  class="com.reach.redis.interceptor.SpringInterceptor">
 	</bean>
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<property name="beanNames">

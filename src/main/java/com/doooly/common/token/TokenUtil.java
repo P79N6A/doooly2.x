@@ -1,20 +1,17 @@
 package com.doooly.common.token;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.doooly.common.context.SpringContextUtils;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.doooly.common.context.SpringContextUtils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 
@@ -29,7 +26,7 @@ import com.doooly.common.context.SpringContextUtils;
 public class TokenUtil {
 	private static Logger log = LoggerFactory.getLogger(TokenUtil.class);
 	private static StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-			.getBeanByClass(StringRedisTemplate.class);
+			.getBeanById("redisTemplate");
 	// 会员token，唯一标识，放入缓存
 	private static String TOKEN_KEY = "token:%s";
 	// token时效性暂定30天内有效

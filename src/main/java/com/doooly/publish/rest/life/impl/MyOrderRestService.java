@@ -102,6 +102,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess(MessageDataBean.success_mess);
 			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("showQr",1);
 			map.put("orderReportId", orderReportId);
 			messageDataBean.setData(map);
 		} catch (Exception e) {

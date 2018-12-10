@@ -74,7 +74,12 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 		try {
 			String productId = obj.getString("productId");
 			String userId = obj.getString("userId");
+			String activityName = obj.getString("activityName");
 			HashMap<String, Object> map = productService.getSelfProductDetail(productId, userId);
+			List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName,productId);
+			if (adGroupSelfProductPriceList != null && adGroupSelfProductPriceList.size() > 0) {
+				map.put("adGroupSelfProductPrice",adGroupSelfProductPriceList.get(0));
+			}
 			messageDataBean.setCode((String) map.get("code"));
 			messageDataBean.setData(map);
 		} catch (Exception e) {
@@ -168,7 +173,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
-	@POST
+    @POST
     @Path(value = "/getActivityByType")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -186,6 +191,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 
 
 
+
 	@POST
 	@Path(value = "/getSelfProductAirport")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -200,7 +206,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
             int pageNum = getPageNum(obj);
             int pageSize = getPageSize(obj);
 			PageHelper.startPage(pageNum,pageSize);
-            List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName);
+            List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName,null);
 			map.put("adGroupSelfProductPriceList", adGroupSelfProductPriceList);
 			messageDataBean.setData(map);
 		} catch (Exception e) {

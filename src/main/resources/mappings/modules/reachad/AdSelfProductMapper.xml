@@ -274,7 +274,7 @@
 			ON s.id = p.sku_id 
 		INNER JOIN ad_self_product p
         	ON s.self_product_id = p.id
-		WHERE ((s.state=4 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date) OR (s.state=6 AND NOW() &lt;= p.buy_end_date))
+		WHERE ((s.state=4 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date) OR (s.state=6 AND NOW() &lt;= p.buy_end_date) or  (s.state=1 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date))
 			AND s.self_product_id=#{productId} AND s.del_flag = 0
 			<if test="limitSkuIdList != null and limitSkuIdList.size()>0" >
        			AND s.id NOT IN 
@@ -364,6 +364,7 @@
 		a.tag AS "tag",
 		a.discount AS "discount",
 		c.inventory AS "inventory",
+		a.inventory_init as "inventoryInit",
 		a.number AS "number",
 		a.status AS "status",
 		a.type AS "type",
@@ -392,6 +393,9 @@
 		<where>
 			<if test="activityName != null and activityName != ''">
 				and a.activity_name = #{activityName} and b.state != 7 and a.status = 1
+			</if>
+			<if test="selfProductId != null and selfProductId !=''">
+				and e.id = #{selfProductId}
 			</if>
 		</where>
 	</select>

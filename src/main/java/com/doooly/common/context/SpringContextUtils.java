@@ -1,12 +1,13 @@
 package com.doooly.common.context;
 
-import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Map;
 
 /**
  * 获取ApplicationContext和Object的工具类
@@ -37,7 +38,8 @@ public class SpringContextUtils implements ApplicationContextAware {
 	 * @return
 	 */
 	public static Object getBeanById(String id) {
-		return applicationContext.getBean(id);
+		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+		return context.getBean(id);
 	}
 
 	/**

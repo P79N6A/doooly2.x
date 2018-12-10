@@ -14,7 +14,8 @@ import com.doooly.dao.reachad.AdBusinessServicePJDao;
 import com.doooly.dao.reachad.AdConsumeRechargeDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
-import com.doooly.publish.rest.life.impl.IndexRestService;
+import com.reach.redis.annotation.Cacheable;
+import com.reach.redis.annotation.EnableCaching;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,9 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
+@EnableCaching
 public class IndexServiceImpl implements IndexServiceI {
-	private static Logger logger = LoggerFactory.getLogger(IndexRestService.class);
+	private static Logger logger = LoggerFactory.getLogger(IndexServiceImpl.class);
 
 	private String BASE_URL = PropertiesHolder.getProperty("BASE_URL") + "/businessinfo/";
 	private static int DEAL_TYPE_ONLINE = 0;
@@ -40,7 +42,7 @@ public class IndexServiceImpl implements IndexServiceI {
 	@Autowired
 	private AdConsumeRechargeDao adConsumeRechargeDao;
 	@Autowired
-	private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate redisTemplate;
 	@Autowired
 	private AdBusinessDao adBusinessDao;
 	@Autowired
@@ -58,19 +60,11 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    public String listSpendIntegralFloors(JSONObject params, HttpServletRequest request, String version) {
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address")
+    public String listSpendIntegralFloors(String userId, String address) {
         long start = System.currentTimeMillis();
-        String userToken = request.getHeader(Constants.TOKEN_NAME);
-        logger.info("selectFloorsByVersion() userToken={}", userToken);
-        if (StringUtils.isEmpty(userToken)) {
-            return new MessageDataBean("1001", "userToken is null").toJsonString();
-        }
-        String userId = redisTemplate.opsForValue().get(userToken);
-        String address = params.getString("address");
-        // 取有返佣金额的商户
+
         try {
-            logger.info("selectFloorsByVersion() userToken={},userId={},params={},version={}", userToken, userId,
-                    params, version);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
@@ -85,33 +79,29 @@ public class IndexServiceImpl implements IndexServiceI {
                     Map<String, Object> item = new HashMap<String, Object>();
 
                     if (floor.getCode() == 25) {
-                        if (VersionConstants.INTERFACE_VERSION_V2_2.equalsIgnoreCase(version)) {
-                            List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
+                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
 
-                            if (!CollectionUtils.isEmpty(beans)) {
-                                item.put("mainTitle", floor.getName());
-                                item.put("isOnline", DEAL_TYPE_OFFLINE);
-                                item.put("type", "9");
+                        if (!CollectionUtils.isEmpty(beans)) {
+                            item.put("mainTitle", floor.getName());
+                            item.put("isOnline", DEAL_TYPE_OFFLINE);
+                            item.put("type", "9");
+                            List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
 
-                                List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
+                            for (AdBusinessServicePJ a : beans) {
+                                AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
+                                adConsumeRecharge.setMainTitle(a.getServiceName());
+                                adConsumeRecharge.setIconUrl(a.getLogo());
+                                adConsumeRecharge.setSubUrl(a.getServiceUrl());
 
-                                for (AdBusinessServicePJ a : beans) {
-                                    AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
-                                    adConsumeRecharge.setMainTitle(a.getServiceName());
-                                    adConsumeRecharge.setIconUrl(a.getLogo());
-                                    adConsumeRecharge.setSubUrl(a.getServiceUrl());
-
-                                    if (0 != a.getServiceUrl().indexOf("/")) {
-                                        adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
-                                    } else {
-                                        adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
-                                    }
-
-                                    list.add(adConsumeRecharge);
+                                if (0 != a.getServiceUrl().indexOf("/")) {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                } else {
+                                    adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
                                 }
 
-                                item.put("list", list);
+                                list.add(adConsumeRecharge);
                             }
+                            item.put("list", list);
                         }
                     } else {
 
@@ -135,11 +125,9 @@ public class IndexServiceImpl implements IndexServiceI {
                             } else {
                                 item.put("type", "2");
                             }
-                            
                             item.put("list", beans);
                         }
                     }
-
                     ls.add(item);
                 }
             }
@@ -148,7 +136,6 @@ public class IndexServiceImpl implements IndexServiceI {
             return new MessageDataBean("1000", "success", data).toJsonString();
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("selectFloorsByVersion() obj={} exception={}", params, e.getMessage());
             return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
         }
     }
@@ -170,7 +157,7 @@ public class IndexServiceImpl implements IndexServiceI {
         if (StringUtils.isEmpty(userToken)) {
             return new MessageDataBean("1001", "userToken is null").toJsonString();
         }
-        String userId = redisTemplate.opsForValue().get(userToken);
+        String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
         String address = params.getString("address");
         // 取有返佣金额的商户
         try {
@@ -255,45 +242,47 @@ public class IndexServiceImpl implements IndexServiceI {
         }
     }
 
+    /**
+     * 兜礼权益
+     * @param userId
+     * @param address
+     * @return
+     */
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "userId, address")
 	@Override
-	public String selectFloorsByV2_2(JSONObject params, HttpServletRequest request, String version) {
+	public String selectFloorsByV2_2(String userId, String address) {
 		long start = System.currentTimeMillis();
-		String userToken = request.getHeader(Constants.TOKEN_NAME);
-		logger.info("selectFloorsByV2_2() userToken={}", userToken);
-		if (StringUtils.isEmpty(userToken)) {
-			return new MessageDataBean("1001", "userToken is null").toJsonString();
-		}
-		String userId = redisTemplate.opsForValue().get(userToken);
-		String address = params.getString("address");
-		// 取有返佣金额的商户
 		try {
-			logger.info("selectFloorsByV2_2() userToken={},userId={},params={},version={}", userToken, userId, params,
-					version);
 			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
+
 			if (CollectionUtils.isEmpty(floors)) {
 				return new MessageDataBean("1000", "floors is null").toJsonString();
 			}
-
 			Map<String, Object> result = new HashMap<>();
 			JSONArray floorArrays = new JSONArray();
 			JSONObject itemJson = null;
 			Integer floorType = null;
+
 			for (AdBasicType floor : floors) {
 				floorType = floor.getFloorType();
 				JSONObject floorJson = new JSONObject();
 				floorJson.put("mainTitle", floor.getName());
 				floorJson.put("subTitle", floor.getSubTitle());
 				floorJson.put("type", floorType);
+
 				if (floorType == DooolyRightConstants.FLOOR_TYPE_GOUWUTEQUAN) {
 					// 兜礼权益商户（线上/线下）
-					floorJson.put("list",
-							getBussiness(userId, address, Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE), version));
+					floorJson.put("list", getBussiness(userId, address, Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE),
+                            VersionConstants.INTERFACE_VERSION_V2_2));
+
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
 					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
+
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();
+
 						for (AdProduct product : datas) {
 							itemJson = new JSONObject();
 							itemJson.put("iconUrl", product.getImageWechat());
@@ -314,6 +303,7 @@ public class IndexServiceImpl implements IndexServiceI {
 					List<AdConsumeRecharge> adConsumeRechargeList = adConsumeRechargeDao
 							.getConsumeRecharges(floor.getTemplateId(), floor.getFloorId());
 					JSONArray listJson = new JSONArray();
+
 					for (AdConsumeRecharge recharge : adConsumeRechargeList) {
 						itemJson = new JSONObject();
 						itemJson.put("iconUrl", recharge.getIconUrl());
@@ -321,13 +311,16 @@ public class IndexServiceImpl implements IndexServiceI {
 						itemJson.put("linkUrl", linkUrl);
 						itemJson.put("mainTitle", recharge.getMainTitle());
 						itemJson.put("subTitle", recharge.getSubTitle());
+
 						if (StringUtils.isNotBlank(recharge.getGuideIconUrl())) {
 							// 热销品牌导购图
 							itemJson.put("guideIconUrl", recharge.getGuideIconUrl());
 						}
+
 						if (StringUtils.isNotBlank(linkUrl) && linkUrl.indexOf("#") > -1) {
 							itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
 						}
+
 						if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
 							itemJson.put("cornerMark", recharge.getCornerMark());
 						}
@@ -343,7 +336,6 @@ public class IndexServiceImpl implements IndexServiceI {
 					.toJsonString();
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("selectFloorsByV2_2() obj={} exception={}", params, e.getMessage());
 			return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
 		}
 	}

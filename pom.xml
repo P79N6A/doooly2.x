@@ -616,7 +616,7 @@
 		<dependency>
 			<groupId>com.reach</groupId>
 			<artifactId>spring-redis-cache</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.9</version>
 		</dependency>
 	</dependencies>
 	<build>

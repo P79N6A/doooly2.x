@@ -50,7 +50,21 @@ public class MobikeProcessor implements ProductProcessor{
         if (order != null && order.getItems() != null) {
             //订单充值
             OrderItemVo oldItem = order.getItems().get(0);
-            if (!ExWingsService.MOBIKE_SUCCESS_CODE.equals(oldItem.getRetState())) {
+            //退款
+            PayMsg payMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber());
+            // 如果退款失败发送以下短信
+            //【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
+            if (!PayMsg.success_code.equals(payMsg.getCode())) {
+                AdUser user = adUserServiceI.getById(order.getUserId().intValue());
+                String mobiles = user.getTelephone();
+                String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
+                JSONObject paramSMSJSON = new JSONObject();
+                paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
+                paramSMSJSON.put("phone", "4001582212");
+                int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
+                logger.info("发送退款审批短信. i = {}", i);
+            }
+            /*if (!ExWingsService.MOBIKE_SUCCESS_CODE.equals(oldItem.getRetState())) {
                 JSONObject json = exWingsService.recharge(order);
                 //保存充值结果
                 updateOrderItemSuccesss(oldItem, json);
@@ -80,7 +94,7 @@ public class MobikeProcessor implements ProductProcessor{
                         logger.info("发送退款审批短信. i = {}", i);
                     }
                 }
-            }
+            }*/
         } else {
             logger.error("MobikeProcessor failed. order = {}", order);
         }

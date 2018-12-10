@@ -839,7 +839,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_APPLY_REFUND_URL);
         JSONObject jsonObject = JSONObject.parseObject(result);
-        return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"), jsonObject.getString("data"));
+        return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"), jsonObject.get("data"));
     }
 
     @Override

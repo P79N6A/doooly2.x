@@ -25,8 +25,8 @@ import java.util.Set;
  */
 public class TokenUtil {
 	private static Logger log = LoggerFactory.getLogger(TokenUtil.class);
-	private static StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-			.getBeanById("redisTemplate");
+//	private static StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
+//			.getBeanById("redisTemplate");
 	// 会员token，唯一标识，放入缓存
 	private static String TOKEN_KEY = "token:%s";
 	// token时效性暂定30天内有效
@@ -52,6 +52,8 @@ public class TokenUtil {
 		if (StringUtils.isBlank(userId) || StringUtils.isBlank(userToken) || StringUtils.isBlank(channel))
 			return false;
 		// 使用token:userId 标识用户token对应的key
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
+				.getBeanById("redisTemplate");
 		String tokenValue = redisService.opsForValue().get(String.format(channel + ":" + TOKEN_KEY, userId));
 		// 若Token为空，验证失败
 		if (StringUtils.isBlank(tokenValue) || !userToken.equals(tokenValue)) {
@@ -72,6 +74,8 @@ public class TokenUtil {
 	 * @version V1.0
 	 */
 	public static String getUserToken(String channel, String userId) {
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
+				.getBeanById("redisTemplate");
 		// 1.使用token:userId 标识用户token对应的key
 		String userToken = redisService.opsForValue().get(String.format(channel + ":" + TOKEN_KEY, userId));
 		if (StringUtils.isBlank(userToken)) {
@@ -99,6 +103,8 @@ public class TokenUtil {
 	 */
 	public static String refreshUserToken(String channel, String userId) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
+				.getBeanById("redisTemplate");
 		// 时间戳
 		String time_str = sdf.format(new Date());
 		TOKEN_SALT += time_str;
@@ -124,6 +130,8 @@ public class TokenUtil {
 	 */
 	public static void cancelUserToken(String userId) {
 		long start = System.currentTimeMillis();
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
+				.getBeanById("redisTemplate");
 		// 1.初始化需要删除的token key值
 		Set<String> tokenKeys = new HashSet<>();
 		tokenKeys.add(String.format("token:%s", userId));

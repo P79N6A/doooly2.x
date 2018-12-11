@@ -841,6 +841,23 @@
         FROM ad_order_report a
         WHERE a.order_number = #{orderNumber}
     </select>
+
+	<select id="getGroupNumByOrderNum" resultType="java.lang.String" parameterType="java.lang.String">
+		select u.group_num as groupNum from ad_order_report ar
+		LEFT JOIN ad_user u on ar.user_id = u.id
+		where ar.order_number = #{orderNumber}
+	</select>
+
+	<select id="orderBelongOneActivity" parameterType="java.util.Map" resultType="int">
+		select count(ar.id) from ad_order_report ar
+		LEFT JOIN ad_user u on ar.user_id = u.id
+		INNER JOIN ad_group_self_product_price  asp
+		 on asp.group_id = u.group_num and
+		asp.activity_name = #{activityName}
+		where ar.order_number = #{orderNum};
+	</select>
+
+
       <sql id="order_column_sql">
 	        a.id AS "id",
 	        b.logo AS "logo",

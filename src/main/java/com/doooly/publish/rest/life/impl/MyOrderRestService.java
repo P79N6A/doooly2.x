@@ -94,11 +94,13 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
 			String orderNum = obj.getString("orderNum");
+			String activityName = obj.getString("activityName");
 			long orderReportId = myOrderServiceI.getOrderReportIdByOrderNum(orderNum);
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess(MessageDataBean.success_mess);
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			map.put("showQr",1);
+			int showQr = myOrderServiceI.orderBelongOneActivity(activityName,orderNum);
+			map.put("showQr",showQr > 0 ? 1 : 0);
 			map.put("orderReportId", orderReportId);
 			messageDataBean.setData(map);
 		} catch (Exception e) {

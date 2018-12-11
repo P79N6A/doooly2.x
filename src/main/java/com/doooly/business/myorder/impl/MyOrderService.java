@@ -302,4 +302,12 @@ public class MyOrderService implements MyOrderServiceI {
 		adOrderReport = adOrderReportDao.getOrderReportIdByOrderNum(adOrderReport);
 		return adOrderReport.getId();
 	}
+
+    @Override
+    public int orderBelongOneActivity(String activityName, String orderNum) {
+        Map<String,Object> param = new HashMap<>();
+        param.put("activityName",activityName);
+        param.put("orderNum",orderNum);
+        return adOrderReportDao.orderBelongOneActivity(param);
+    }
 }

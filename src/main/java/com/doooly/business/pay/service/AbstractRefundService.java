@@ -140,7 +140,7 @@ public abstract class AbstractRefundService implements RefundService {
                             //查询待退款流水
                             List<AdReturnFlow> listByOrderId = adReturnFlowDao.getListByOrderId(order.getId(), null, null);
                             for (AdReturnFlow returnFlow : listByOrderId) {
-                                resultModel = dooolyPayRefund(order, merchantRefundNo, returnFlow.getType());
+                                resultModel = dooolyPayRefund(order, merchantRefundNo, String.valueOf(returnFlow.getPayType()));
                             }
                         } else {
                             return resultModel;

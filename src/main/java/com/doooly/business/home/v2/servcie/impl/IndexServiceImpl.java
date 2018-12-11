@@ -7,6 +7,7 @@ import com.doooly.business.home.v2.servcie.IndexServiceI;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.FloorTemplateConstants.DooolyRightConstants;
 import com.doooly.common.constants.PropertiesHolder;
+import com.doooly.common.constants.RedisConstants;
 import com.doooly.common.constants.VersionConstants;
 import com.doooly.dao.reachad.AdBasicTypeDao;
 import com.doooly.dao.reachad.AdBusinessDao;
@@ -60,7 +61,7 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address")
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
     public String listSpendIntegralFloors(String userId, String address) {
         long start = System.currentTimeMillis();
 
@@ -248,7 +249,7 @@ public class IndexServiceImpl implements IndexServiceI {
      * @param address
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "userId, address")
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
 	@Override
 	public String selectFloorsByV2_2(String userId, String address) {
 		long start = System.currentTimeMillis();

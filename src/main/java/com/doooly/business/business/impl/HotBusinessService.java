@@ -5,6 +5,7 @@ import com.doooly.business.business.HotBusinessServiceI;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2.SystemCode;
+import com.doooly.common.constants.RedisConstants;
 import com.doooly.dao.reachad.*;
 import com.doooly.dao.report.EnterpriseAccountResultDao;
 import com.doooly.dto.common.ConstantsLogin;
@@ -54,7 +55,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 
-	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "userId, type, adType")
+	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "userId, type, adType", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
 	@Override
 	public MessageDataBean getIndexData(Integer userId, Integer type, Integer adType) {
 		MessageDataBean messageDataBean = new MessageDataBean();

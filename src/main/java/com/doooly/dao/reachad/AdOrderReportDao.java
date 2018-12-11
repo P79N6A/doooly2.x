@@ -122,4 +122,8 @@ public interface AdOrderReportDao {
     Integer getNotRebateOrderTotal(OrderPoReq req);
     
     Integer deleteOrder(OrderDetailPoReq req);
+
+    String getGroupNumByOrderNum(@Param("orderNumber") String orderNumber);
+
+    int orderBelongOneActivity(Map<String,Object> param);
 }

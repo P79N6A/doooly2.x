@@ -241,6 +241,7 @@
 			p.id AS "id",
 			p.name AS "name",
 			p.detail AS "detail",
+			p.introduction as "introduction",
 			b.id AS "businessId",
 			b.company AS "company",  
 			r.description AS "brandDescription"

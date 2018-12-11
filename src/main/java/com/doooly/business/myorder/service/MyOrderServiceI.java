@@ -14,4 +14,6 @@ public interface MyOrderServiceI {
     OrderResult getOrderDetail(String paramBody);
     
     long getOrderReportIdByOrderNum(String orderNum);
+
+    int orderBelongOneActivity(String activityName,String orderNum);
 }

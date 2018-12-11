@@ -138,7 +138,7 @@ public abstract class AbstractRefundService implements RefundService {
                             Map<String, Object> map = (Map<String, Object>) resultModel.getData();
                             merchantRefundNo = (String) map.get("merchantRefundNo");
                             //查询待退款流水
-                            List<AdReturnFlow> listByOrderId = adReturnFlowDao.getListByOrderId(order.getId(), returnFlowNumber, null);
+                            List<AdReturnFlow> listByOrderId = adReturnFlowDao.getListByOrderId(order.getId(), null, null);
                             for (AdReturnFlow returnFlow : listByOrderId) {
                                 resultModel = dooolyPayRefund(order, merchantRefundNo, returnFlow.getType());
                             }

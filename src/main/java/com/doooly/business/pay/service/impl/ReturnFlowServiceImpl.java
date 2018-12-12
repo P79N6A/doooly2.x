@@ -52,4 +52,9 @@ public class ReturnFlowServiceImpl implements ReturnFlowService {
 		return adReturnFlowDao.updateByPrimaryKeySelective(adReturnFlow);
 	}
 
+    @Override
+    public int updateByOrderId(AdReturnFlow adReturnFlow) {
+        return adReturnFlowDao.updateByOrderId(adReturnFlow);
+    }
+
 }

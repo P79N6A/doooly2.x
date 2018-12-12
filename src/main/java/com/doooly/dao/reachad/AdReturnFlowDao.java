@@ -25,5 +25,6 @@ public interface AdReturnFlowDao  {
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 
 	List<AdReturnFlow> getOrderList(List<Long> list);
-	
+
+    int updateByOrderId(AdReturnFlow adReturnFlow);
 }

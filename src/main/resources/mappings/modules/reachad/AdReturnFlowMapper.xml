@@ -167,4 +167,18 @@
         </where>
         group by order_report_id
     </select>
+
+    <update id="updateByOrderId" parameterType="com.doooly.entity.reachad.AdReturnFlow">
+        update ad_return_flow
+        <set>
+            <if test="type != null">
+                type = #{type,jdbcType=CHAR},
+            </if>
+        </set>
+        <where>
+            <if test="orderReportId != null">
+                order_report_id = #{orderReportId,jdbcType=BIGINT},
+            </if>
+        </where>
+    </update>
 </mapper>

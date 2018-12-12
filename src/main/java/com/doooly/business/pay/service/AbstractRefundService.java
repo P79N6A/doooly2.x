@@ -97,7 +97,7 @@ public abstract class AbstractRefundService implements RefundService {
                     AdReturnFlow adReturnFlow = new AdReturnFlow();
                     adReturnFlow.setOrderReportId(order.getId());
                     adReturnFlow.setType("1");
-                    returnFlowService.updateByPrimaryKeySelective(adReturnFlow);
+                    returnFlowService.updateByOrderId(adReturnFlow);
                     return new PayMsg(PayMsg.success_code, PayMsg.success_mess);
                 }
             }

@@ -1,5 +1,8 @@
 package com.doooly.business.product.service;
 
+import java.util.HashMap;
+import java.util.List;
+
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdGroupSelfProductPrice;
 import com.doooly.business.product.entity.AdSelfProduct;
@@ -42,11 +45,13 @@ public interface ProductService {
 	 * @param userId
 	 *            用户id
 	 */
-	HashMap<String, Object> getSelfProductDetail(String productId,String userId);
+	HashMap<String, Object> getSelfProductDetail(String productId,String userId,String activityName);
 
 
 	public ActivityInfo getActivityInfo(String groupId, int skuId);
 	
 	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName, Integer groupId);
+
+	List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName,String selfProductId);
 
 }

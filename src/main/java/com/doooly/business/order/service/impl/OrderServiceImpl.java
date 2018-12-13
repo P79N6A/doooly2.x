@@ -343,10 +343,10 @@ public class OrderServiceImpl implements OrderService {
 			Integer inventory = actInfo.getInventory();
 			if (inventory != null) {
 				//校验库存
-				if (inventory <= 0) {
+				/*if (inventory <= 0) {
 					logger.error("activity.inventory = {}", inventory);
 					return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
-				}
+				}*/
 				//扣减库存
 				OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
 				if (msg != null) {

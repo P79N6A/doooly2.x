@@ -99,12 +99,13 @@ public class IndexServiceImpl implements IndexServiceI {
                                     AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
                                     adConsumeRecharge.setMainTitle(a.getServiceName());
                                     adConsumeRecharge.setIconUrl(a.getLogo());
-                                    adConsumeRecharge.setSubUrl(a.getServiceUrl());
 
                                     if (0 != a.getServiceUrl().indexOf("/")) {
                                         adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                        adConsumeRecharge.setSubUrl("/" + a.getServiceUrl());
                                     } else {
                                         adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
+                                        adConsumeRecharge.setSubUrl(a.getServiceUrl());
                                     }
 
                                     list.add(adConsumeRecharge);

@@ -271,7 +271,7 @@
         FROM ad_self_product_sku s
         LEFT JOIN (SELECT a.sku_id,e.inventory,a.buy_number_limit,a.special_price FROM ad_group_self_product_price a 
         		LEFT JOIN ad_group_self_product_price_expand e ON a.sku_id = e.sku_id AND a.number = e.number
-        		WHERE a.group_id = #{groupId} AND a.type = 0 AND a.status = 1 AND NOW() BETWEEN a.special_start_date AND a.special_end_date) p
+        		WHERE a.group_id = #{groupId} AND a.type = 0 AND a.status = 1 ) p
 			ON s.id = p.sku_id 
 		INNER JOIN ad_self_product p
         	ON s.self_product_id = p.id

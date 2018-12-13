@@ -11,5 +11,5 @@ public interface ReturnFlowService {
 	public int updateByPrimaryKeySelective(AdReturnFlow adReturnFlow);
 
 
-	
+    int updateByOrderId(AdReturnFlow adReturnFlow);
 }

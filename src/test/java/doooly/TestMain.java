@@ -1,0 +1,46 @@
+package doooly;
+
+import com.doooly.common.meituan.RsaUtil;
+import com.doooly.common.util.BeanMapUtil;
+import com.doooly.entity.meituan.EasyLogin;
+import com.google.gson.Gson;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.security.interfaces.RSAPrivateKey;
+import java.util.Map;
+
+/**
+ * Created by wanghai on 2018/12/13.
+ */
+public class TestMain {
+
+
+    private static String private_key = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAI7GfP9Zfqai1UFcEP/9t0CZj4wO47aU7kkkSE+uL69CDb83m+kX1/Nn0W3AFuaLrXx/Ny6ZbO1Gu9ziP+9IwMR/pPkwhh6FpFY2domp0h84Wpp7XZxB6xcYAUkiE2XygkEuuDqyqHBhxSUyfXPznmDDC3l+FvQgt5TxPTh7O3lnAgMBAAECgYA6NWQ6uuLuzw5Aomdv5qGynaivglaGVru7aCZvDeX0/uoZ3nMbGhR58QaqRxlPDv1A96Cox/Zn2mG3ESrdxHyKQL90g+r4gNWZONc/KPLsG14nvjAlxhQ558p5N9x5IRpmq8r2r9XJoGJDk5rqO3dSyEUGuCHP9Aqqu2TD9Za8SQJBAOznLQ7nmEKR6R5xqe9uuQR1KoI12gboU8K4X3j3S2WD2CBJPEf0luuRSsBPokdtZdKbEr7c6IZxlDSHvBhZVT0CQQCaSNs6S7XL0swAPlxx1D777hGpiV9P42J+7j7roo6Gj0oxiHJLMeyLu4hzjdCJ0+zeS0sh6HEC7ER+qnlE29tzAkB6SeNCfF5mjrdNldLo27j6ChlFWdMQGcGTFGWEJfNvlZ1tHSDW6/Uz6K4zk2frgxc6nf4RNCt7qwmcDC0WTJbpAkEAiwllJx/bcRdCaGXKgXo4WGiu2g3GKwRLWv/xDACuWG0A+6pu9XzEIxiZWylN6Sdmqt1HlAMY9P1erJeMOZW4KQJBAJsipPM/Y/YUhRTnl4sZazamtEriOtu1B6JzWKJ1frYU3ZSBkeYMekadalz/ANVz1FYHhfTcQ7Ti7gIGlcBr48w=";
+
+    @Test
+    public void test1() throws Exception{
+        EasyLogin easyLogin = new EasyLogin();
+        easyLogin.setEntToken("11");
+        easyLogin.setStaffNo("22");
+        easyLogin.setStaffPhoneNo("33");
+        Map<String,Object> paramMap = BeanMapUtil.transBean2Map(easyLogin);
+        paramMap =  BeanMapUtil.sortMapByKey(paramMap);
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String,Object> entry : paramMap.entrySet()) {
+            if (sb.length() == 0) {
+                sb.append(entry.getKey() + "=" + entry.getValue());
+            } else {
+                sb.append("&").append(entry.getKey() + "=" + entry.getValue());
+            }
+
+        }
+        System.out.println(new Gson().toJson(paramMap));
+        System.out.println(sb.toString());
+        RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(private_key);
+        String signature = RsaUtil.sign(sb.toString().getBytes(),rsaPrivateKey);
+        signature = URLEncoder.encode(signature,"utf-8");
+        System.out.println(signature);
+    }
+
+}

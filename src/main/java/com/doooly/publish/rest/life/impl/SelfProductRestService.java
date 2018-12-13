@@ -75,7 +75,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			String productId = obj.getString("productId");
 			String userId = obj.getString("userId");
 			String activityName = obj.getString("activityName");
-			HashMap<String, Object> map = productService.getSelfProductDetail(productId, userId);
+			HashMap<String, Object> map = productService.getSelfProductDetail(productId, userId,activityName);
 			List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName,productId);
 			if (adGroupSelfProductPriceList != null && adGroupSelfProductPriceList.size() > 0) {
 				map.put("adGroupSelfProductPrice",adGroupSelfProductPriceList.get(0));

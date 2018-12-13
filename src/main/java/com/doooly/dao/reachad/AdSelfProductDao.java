@@ -49,7 +49,7 @@ public interface AdSelfProductDao{
 	AdSelfProduct getSelfProductDetailById(String productId);
 
 	/** 根据商品id获取sku集合 */
-	List<AdSelfProductSku> getSelfProductSkuList(@Param("productId")String productId,@Param("limitSkuIdList")List<String> limitSkuIdList,@Param("groupId")Long groupId);
+	List<AdSelfProductSku> getSelfProductSkuList(@Param("productId")String productId,@Param("limitSkuIdList")List<String> limitSkuIdList,@Param("groupId")Long groupId,@Param("activityName") String activityName);
 
 	/** 根据商品id获取卡券类型集合 */
 	List<AdSelfProductType> getSelfProductTypeList(String productId);

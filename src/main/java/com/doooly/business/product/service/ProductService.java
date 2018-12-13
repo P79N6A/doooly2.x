@@ -43,7 +43,7 @@ public interface ProductService {
 	 * @param userId
 	 *            用户id
 	 */
-	HashMap<String, Object> getSelfProductDetail(String productId,String userId);
+	HashMap<String, Object> getSelfProductDetail(String productId,String userId,String activityName);
 
 
 	public ActivityInfo getActivityInfo(String groupId, int skuId);

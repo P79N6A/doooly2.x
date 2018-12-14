@@ -8,6 +8,8 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
 import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
+import com.doooly.common.meituan.MeituanConstants;
+import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
@@ -25,6 +27,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +72,7 @@ public class TestService {
 
     @Test
     public void test2() throws Exception{
-        Map<String,Object> map = new HashMap<>();
+        /*Map<String,Object> map = new HashMap<>();
         map.put("entId",15795);
         map.put("appKey","slt");
         map.put("entToken","ehvihi");
@@ -79,7 +83,12 @@ public class TestService {
         map.put("staffPhoneNo","18842612302");
         map =  BeanMapUtil.sortMapByKey(map);
         String sign = meituanService.getSiginature(map);
-        System.out.println("sign = " + sign);
+        System.out.println("sign = " + sign);*/
+
+        RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
+        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);
+        //signature = URLEncoder.encode(signature,"utf-8");
+        System.out.println(signature);
     }
 
     //https://m-sqt.meituan.com/open/commonaccess/access

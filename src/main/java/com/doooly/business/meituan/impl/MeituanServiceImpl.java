@@ -28,6 +28,7 @@ public class MeituanServiceImpl implements MeituanService{
         easyLogin.setStaffNo(staffNo);
         easyLogin.setStaffPhoneNo(staffPhoneNo);
         Map<String,Object> paramMap = BeanMapUtil.transBean2Map(easyLogin);
+        paramMap.remove("signature");
         paramMap =  BeanMapUtil.sortMapByKey(paramMap);
         String signature = getSiginature(paramMap);
         paramMap.put("signature",signature);

@@ -49,6 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.sun.tools.doclint.Entity.or;
+
 /**
  * 统一下单接口
  *
@@ -709,6 +711,7 @@ public class OrderServiceImpl implements OrderService {
 		int updateStatus = adOrderReportDao.cancleOrder(orderParam);
         //删除_order 删掉未null的
         Order order1 = new Order();
+        order1.setId(order.getOrderId());
         orderDao.delete(order1);
 		//恢复活动库存
 		OrderItemVo item = order.getItems().get(0);

@@ -31,6 +31,7 @@ public class MeituanServiceImpl implements MeituanService{
         paramMap =  BeanMapUtil.sortMapByKey(paramMap);
         String signature = getSiginature(paramMap);
         paramMap.put("signature",signature);
+        paramMap =  BeanMapUtil.sortMapByKey(paramMap);
         String ret = MeituanConstants.meituan_access_url + convertMapToUrl(paramMap);
         return ret;
     }

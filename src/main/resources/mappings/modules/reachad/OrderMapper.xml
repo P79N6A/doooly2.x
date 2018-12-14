@@ -309,5 +309,9 @@
         )
         }
     </select>
+    
+    <delete id="delete" parameterType="com.doooly.entity.reachad.Order">
+      DELETE FROM _order where id = #{id}
+    </delete>
 	
 </mapper>

@@ -707,6 +707,9 @@ public class OrderServiceImpl implements OrderService {
 		orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
 		orderParam.setState(PayState.CANCELLED.getCode());
 		int updateStatus = adOrderReportDao.cancleOrder(orderParam);
+        //删除_order 删掉未null的
+        Order order1 = new Order();
+        orderDao.delete(order1);
 		//恢复活动库存
 		OrderItemVo item = order.getItems().get(0);
 		String str[] = item.getProductSkuId().split("-");

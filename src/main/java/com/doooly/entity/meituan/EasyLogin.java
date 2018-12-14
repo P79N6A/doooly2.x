@@ -1,5 +1,6 @@
 package com.doooly.entity.meituan;
 
+import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.util.RandomUtil;
 
 import java.text.SimpleDateFormat;
@@ -14,14 +15,14 @@ public class EasyLogin {
 
     private String nounce;
 
-    private String appKey = "3Q2NCPEYQW";
+    private String appKey = MeituanConstants.appKey;
 
     private long requestTime;
 
     private String signature;
 
     //商企通id
-    private int entId = 27898;
+    private int entId = MeituanConstants.entId;
 
     //员工工号
     private String staffNo;

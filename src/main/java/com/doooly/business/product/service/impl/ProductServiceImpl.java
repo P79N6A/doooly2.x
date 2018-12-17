@@ -150,7 +150,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public HashMap<String, Object> getSelfProductDetail(String productId, String userId) {
+	public HashMap<String, Object> getSelfProductDetail(String productId, String userId,String activityName) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 0.查询某商品被屏蔽skuId
@@ -192,7 +192,7 @@ public class ProductServiceImpl implements ProductService {
 
 			// 4.获取商品规格|最低销售价|市场价(除去被屏蔽的sku)
 			List<AdSelfProductSku> skuList = adSelfProductDao.getSelfProductSkuList(productId, limitSkuIdList,
-					group.getId());
+					group.getId(),activityName);
 			if (CollectionUtils.isNotEmpty(skuList)) {
 				AdSelfProductSku lowestPriceSku = skuList.get(0);
 				// 比较商品特惠价跟销售价,哪个小显示哪个
@@ -263,4 +263,8 @@ public class ProductServiceImpl implements ProductService {
 		return adSelfProductDao.getSelfProductSkuListByName(activityName, groupId);
 	}
 
+	@Override
+	public List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName,String selfProductId) {
+		return adSelfProductDao.getSelfProductAirport(activityName,selfProductId);
+	}
 }

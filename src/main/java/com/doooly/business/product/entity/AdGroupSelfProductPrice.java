@@ -21,12 +21,15 @@ public class AdGroupSelfProductPrice {
 	private BigDecimal discount; // 折扣
 	private Integer inventory; // 活动配置库存
 	private Integer skuInventory; // 商品库存
+	private Integer inventoryInit;
 	private Integer number; // 标识编号，判断多条配置属于同一条记录
 	private Integer status; // 状态标记（0-草稿，1-完成,2-删除）
 	private String updateUser; // 修改人
 	private String specification; // SKU规格
 	private String productNumber; // SKU编号
 	private String title; // 标题
+	private String detail;//商品详情
+	private String introduction;//商品简述
 	private BigDecimal marketPrice; // 市场价
 	private BigDecimal supplyPrice; // 供货价
 	private BigDecimal sellPrice; // 销售价
@@ -37,11 +40,35 @@ public class AdGroupSelfProductPrice {
 	private String activityName;// 活动名称
 	private String isStart;
 	private String image; // 图片
-	private int produceId;
+	private int produceId;//商品id
 	private int businessId;
 	private String url;
 	private String weekList;
     private String activityOfTime;
+
+	public Integer getInventoryInit() {
+		return inventoryInit;
+	}
+
+	public void setInventoryInit(Integer inventoryInit) {
+		this.inventoryInit = inventoryInit;
+	}
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
 
 	public int getId() {
 		return id;

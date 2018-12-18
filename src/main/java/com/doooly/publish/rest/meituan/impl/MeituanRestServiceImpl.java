@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.PaymentService;
+import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
+import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.dao.reachad.AdConfigDictDao;
@@ -48,6 +51,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
 
     @Autowired
     private ConfigDictServiceI configDictServiceI;
+
+    @Autowired
+    private NewPaymentService newPaymentService;
+
+    @Autowired
+    private RefundService refundService;
 
     @GET
     @Path("/easyLogin")
@@ -118,11 +127,20 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         boolean signValid = validSign2(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
         if (signValid) {
-            retMap.put("status",0);
-            retMap.put("msg","success");
+            //商企通订单号
+            String serialNum = jsonObject.getString("serialNum");
+            OrderVo orderVo = orderService.getByOrderNum(serialNum);
+            ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
+            if (resultModel.getCode() == 1000) {
+                retMap.put("status",0);
+                retMap.put("msg","success");
+            } else {
+                retMap.put("status",500);
+                retMap.put("msg",resultModel.getInfo());
+            }
         } else {
             retMap.put("status",500);
-            retMap.put("msg","系统异常");
+            retMap.put("msg","签名校验失败");
         }
         return retMap;
     }

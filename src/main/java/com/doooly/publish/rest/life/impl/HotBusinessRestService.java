@@ -1,17 +1,5 @@
 package com.doooly.publish.rest.life.impl;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.HotBusinessServiceI;
@@ -22,6 +10,19 @@ import com.doooly.common.dto.BaseReq;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.HotBusinessRestServiceI;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Description: 商家
@@ -45,13 +46,20 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	@Path(value = "/index")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String index(JSONObject obj) {
+	public String index(JSONObject obj, @Context HttpServletRequest request) {
+		String groupId = request.getHeader("groupId");
 		// 获取用户id
 		Integer userId = obj.getInteger("userId");
 		// String address = obj.getString("address");
 		Integer type = obj.getInteger("type");
 		Integer adType = obj.getInteger("adType");
 		// logger.info("App首页的地域信息为============="+address);
+
+		Map<String, String> map = new HashMap<>();
+		map.put("groupId", request.getHeader("groupId"));
+		map.put("userId", obj.getInteger("userId").toString());
+		map.put("type", obj.getInteger("type").toString());
+		map.put("adType", obj.getInteger("adType").toString());
 		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(userId, type, adType);
 
 		logger.info(messageDataBean.toJsonString());

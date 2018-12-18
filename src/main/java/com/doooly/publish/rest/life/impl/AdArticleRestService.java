@@ -16,6 +16,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Description: 导购
@@ -66,12 +68,21 @@ public class AdArticleRestService implements AdArticleRestServiceI {
     public String getGuideProductListv2(JSONObject json, ContainerRequest request) {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
-            String userId = json.getString("userId");
-            String guideCategoryId = json.getString("guideCategoryId");//导购类目
-            String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
-            Integer currentPage = json.getInteger("currentPage");
-            Integer pageSize = json.getInteger("pageSize");
-            messageDataBean = adArticleServiceI.getGuideProductListv2(guideCategoryId, currentPage, pageSize,userId,recommendHomepage);
+//            String userId = json.getString("userId");
+//            String guideCategoryId = json.getString("guideCategoryId");//导购类目
+//            String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
+//            Integer currentPage = json.getInteger("currentPage");
+//            Integer pageSize = json.getInteger("pageSize");
+
+            Map<String, String> map = new HashMap<>();
+            map.put("usesrId", json.getString("userId"));
+            map.put("guideCategoryId", json.getString("guideCategoryId"));
+            map.put("recommendHomepage", json.getString("recommendHomepage"));
+            map.put("currentPage", json.getInteger("currentPage").toString());
+            map.put("pageSize", json.getInteger("pageSize").toString());
+            map.put("groupId", request.getHeaderValue("groupId"));
+
+            messageDataBean = adArticleServiceI.getGuideProductListv2(map);
         } catch (Exception e) {
             logger.error("获取导购信息出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);

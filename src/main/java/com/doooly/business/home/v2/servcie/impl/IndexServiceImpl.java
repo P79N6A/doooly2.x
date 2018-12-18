@@ -61,15 +61,15 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
-    public String listSpendIntegralFloors(String userId, String address) {
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "groupId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    public String listSpendIntegralFloors(Map<String, String> map) {
         long start = System.currentTimeMillis();
 
         try {
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(map.get("userId"), AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean("1000", "floors is null").toJsonString();
+                return new MessageDataBean("1005", "floors is null").toJsonString();
             }
 
             Map<String, Object> data = new HashMap<String, Object>();
@@ -80,7 +80,7 @@ public class IndexServiceImpl implements IndexServiceI {
                     Map<String, Object> item = new HashMap<String, Object>();
 
                     if (floor.getCode() == 25) {
-                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
+                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(map.get("userId")), "2", map.get("address"));
 
                         if (!CollectionUtils.isEmpty(beans)) {
                             item.put("mainTitle", floor.getName());
@@ -166,7 +166,7 @@ public class IndexServiceImpl implements IndexServiceI {
             logger.info("index() userToken={},userId={},params={},version={}", userToken, userId, params, version);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 2);
             if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean("1000", "floors is null").toJsonString();
+                return new MessageDataBean("1005", "floors is null").toJsonString();
             }
             Map<String, Object> data = new HashMap<String, Object>();
             List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
@@ -246,19 +246,21 @@ public class IndexServiceImpl implements IndexServiceI {
 
     /**
      * 兜礼权益
-     * @param userId
-     * @param address
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "groupId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
 	@Override
-	public String selectFloorsByV2_2(String userId, String address) {
+	public String selectFloorsByV2_2(Map<String, String> map) {
 		long start = System.currentTimeMillis();
+        String userId = map.get("userId");
+        String address = map.get("address");
+        String groupId = map.get("groupId");
+
 		try {
 			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
 
 			if (CollectionUtils.isEmpty(floors)) {
-				return new MessageDataBean("1000", "floors is null").toJsonString();
+				return new MessageDataBean("1005", "floors is null").toJsonString();
 			}
 			Map<String, Object> result = new HashMap<>();
 			JSONArray floorArrays = new JSONArray();
@@ -279,7 +281,13 @@ public class IndexServiceImpl implements IndexServiceI {
 
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
-					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
+                    Map<String, String> paramMap = new HashMap<>();
+                    paramMap.put("usesrId", userId);
+                    paramMap.put("recommendHomepage", "1");
+                    paramMap.put("currentPage", "1");
+                    paramMap.put("pageSize", "20");
+                    paramMap.put("groupId", groupId);
+					MessageDataBean guideData = guideService.getGuideProductListv2(map);
 
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");

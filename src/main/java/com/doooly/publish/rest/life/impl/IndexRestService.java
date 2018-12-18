@@ -19,6 +19,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 兜礼首页接口（微信端/app）
@@ -57,9 +59,16 @@ public class IndexRestService {
         }
         String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
         String address = params.getString("address");
+		String groupId = request.getHeader("groupId");
         try {
-            logger.info("selectFloorsByV2_2() userToken={},userId={},params={}", userToken, userId, params);
-            return indexService.selectFloorsByV2_2(userId, address);
+			logger.info("selectFloorsByV2_2() userToken={},userId={},groupId={} ,params={}", userToken, userId, groupId, params);
+
+			Map<String, String> map = new HashMap<>();
+			map.put("userId", userId);
+			map.put("groupId", groupId);
+			map.put("address", address);
+
+            return indexService.selectFloorsByV2_2(map);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("indexV2_2() obj={} exception={}", params, e.getMessage());
@@ -87,12 +96,18 @@ public class IndexRestService {
             return new MessageDataBean("1001", "userToken is null").toJsonString();
         }
         String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
+		String groupId = request.getHeader("groupId");
         String address = params.getString("address");
 
         try {
             logger.info("spendIntegral() userToken={},userId={},params={}", userToken, userId,
                     params);
-            return indexService.listSpendIntegralFloors(userId, address);
+			Map<String, String> map = new HashMap<>();
+			map.put("userId", userId);
+			map.put("groupId", groupId);
+			map.put("address", address);
+
+            return indexService.listSpendIntegralFloors(map);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("spendIntegral() obj={} exception={}", params, e.getMessage());

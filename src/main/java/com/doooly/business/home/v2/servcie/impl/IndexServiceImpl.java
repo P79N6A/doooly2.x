@@ -282,7 +282,7 @@ public class IndexServiceImpl implements IndexServiceI {
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
                     Map<String, String> paramMap = new HashMap<>();
-                    paramMap.put("usesrId", userId);
+                    paramMap.put("userId", userId);
                     paramMap.put("guideCategoryId", null);
                     paramMap.put("recommendHomepage", "1");
                     paramMap.put("currentPage", "1");

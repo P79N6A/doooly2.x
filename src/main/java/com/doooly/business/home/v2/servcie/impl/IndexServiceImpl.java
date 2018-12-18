@@ -283,11 +283,12 @@ public class IndexServiceImpl implements IndexServiceI {
 					// 员工内部专享价
                     Map<String, String> paramMap = new HashMap<>();
                     paramMap.put("usesrId", userId);
+                    paramMap.put("guideCategoryId", null);
                     paramMap.put("recommendHomepage", "1");
                     paramMap.put("currentPage", "1");
                     paramMap.put("pageSize", "20");
                     paramMap.put("groupId", groupId);
-					MessageDataBean guideData = guideService.getGuideProductListv2(map);
+					MessageDataBean guideData = guideService.getGuideProductListv2(paramMap);
 
 					if (MessageDataBean.success_code == guideData.getCode()) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");

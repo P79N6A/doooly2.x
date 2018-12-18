@@ -60,7 +60,7 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		map.put("userId", obj.getInteger("userId").toString());
 		map.put("type", obj.getInteger("type").toString());
 		map.put("adType", obj.getInteger("adType").toString());
-		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(userId, type, adType);
+		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(map);
 
 		logger.info(messageDataBean.toJsonString());
 		return messageDataBean.toJsonString();

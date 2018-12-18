@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 首页活动
@@ -55,9 +56,13 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 
-	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "userId, type, adType", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type, adType", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
 	@Override
-	public MessageDataBean getIndexData(Integer userId, Integer type, Integer adType) {
+	public MessageDataBean getIndexData(Map<String, String> paramMap) {
+		Integer userId = Integer.valueOf(paramMap.get("userId"));
+		Integer type = Integer.valueOf(paramMap.get("type"));
+		Integer adType = Integer.valueOf(paramMap.get("adType"));
+
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		// if (!StringUtils.isBlank(address)) {

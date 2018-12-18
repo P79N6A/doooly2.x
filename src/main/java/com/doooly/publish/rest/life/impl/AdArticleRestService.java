@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +67,7 @@ public class AdArticleRestService implements AdArticleRestServiceI {
     @Path(value = "/getGuideProductList/v2")
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public String getGuideProductListv2(JSONObject json, ContainerRequest request) {
+    public String getGuideProductListv2(JSONObject json, @Context HttpServletRequest request) {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
 //            String userId = json.getString("userId");
@@ -75,12 +77,11 @@ public class AdArticleRestService implements AdArticleRestServiceI {
 //            Integer pageSize = json.getInteger("pageSize");
 
             Map<String, String> map = new HashMap<>();
-            map.put("usesrId", json.getString("userId"));
+            map.put("userId", json.getString("userId"));
             map.put("guideCategoryId", json.getString("guideCategoryId"));
-            map.put("recommendHomepage", json.getString("recommendHomepage"));
             map.put("currentPage", json.getInteger("currentPage").toString());
             map.put("pageSize", json.getInteger("pageSize").toString());
-            map.put("groupId", request.getHeaderValue("groupId"));
+            map.put("groupId", request.getHeader("groupId"));
 
             messageDataBean = adArticleServiceI.getGuideProductListv2(map);
         } catch (Exception e) {

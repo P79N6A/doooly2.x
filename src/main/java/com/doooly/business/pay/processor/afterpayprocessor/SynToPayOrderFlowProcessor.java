@@ -3,6 +3,7 @@ package com.doooly.business.pay.processor.afterpayprocessor;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.AdOrderFlow;
+import com.doooly.business.pay.bean.PayTypeEnum;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.dao.reachad.AdOrderFlowDao;
@@ -43,7 +44,7 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
             }
 			logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> resultMap={}", order, resultMap);
             BigDecimal amount = new BigDecimal("0");
-            if(realPayType.equals("2")){
+            if(realPayType.equals(String.valueOf(PayTypeEnum.WEIXIN_DOOOLY.getCode())) || realPayType.equals(String.valueOf(PayTypeEnum.ALIPAY_DOOOLY.getCode()))){
                 //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
                 Order o = new Order();
                 o.setOrderNumber(order.getOrderNumber());
@@ -55,7 +56,7 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
             }
 			adOrderFlow.setOrderReportId(order.getId());
 			adOrderFlow.setSerialNumber(String.valueOf(resultMap.get("outTradeNo")));
-			short payType = getPayType(realPayType);
+			short payType = (short) PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType));
 			adOrderFlow.setPayType(payType);
 			adOrderFlow.setAmount(order.getTotalMount().subtract(amount));
 			adOrderFlow.setCreateBy(String.valueOf(order.getUserId()));

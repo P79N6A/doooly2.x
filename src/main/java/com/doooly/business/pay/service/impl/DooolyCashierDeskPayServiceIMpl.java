@@ -6,6 +6,7 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.AdOrderFlow;
 import com.doooly.business.pay.bean.PayFlow;
+import com.doooly.business.pay.bean.PayTypeEnum;
 import com.doooly.business.pay.service.AbstractPaymentService;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.utils.DateUtils;
@@ -87,7 +88,8 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
                     BigDecimal serviceCharge = order.getServiceCharge();
                     //包含积分支付才添加手续费
-                    if (OrderService.ProductType.MOBILE_RECHARGE.getCode() == order.getProductType() && serviceCharge != null && !realPayType.equals("1")) {
+                    if (OrderService.ProductType.MOBILE_RECHARGE.getCode() == order.getProductType() && serviceCharge != null
+                            && !realPayType.equals(String.valueOf(PayTypeEnum.WEIXIN.getCode())) && !realPayType.equals(String.valueOf(PayTypeEnum.ALIPAY.getCode()))) {
                         OrderVo o = new OrderVo();
                         o.setOrderNumber(order.getOrderNumber());
                         o.setTotalMount(order.getTotalMount().add(order.getServiceCharge()));
@@ -96,8 +98,8 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                         int i = orderService.updateByNum(o);
                         logger.info("updateByNum() i = {}", i);
                     }
-                    if (realPayType.equals("2")) {
-                        //表示是混合支付 在插入一条微信支付流水
+                    if (!realPayType.equals("0")) {
+                        //表示是混合支付 在插入一条现金支付流水
                         Order o = new Order();
                         o.setUserid(order.getUserId());
                         o.setOrderUserId(order.getUserId());
@@ -109,7 +111,8 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                         o.setTotalAmount(order.getTotalMount());
                         o.setPrice(new BigDecimal("0"));//混合支付第二笔流水设为0
                         o.setTotalPrice(order.getTotalPrice());
-                        o.setPayType(PayFlowService.PayType.getCodeByName("weixin"));
+                        int dooolyPaytype = PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType));
+                        o.setPayType(dooolyPaytype);
                         o.setOrderNumber(order.getOrderNumber());
                         o.setSerialNumber(order.getOrderNumber());
                         o.setOrderDate(order.getOrderDate());
@@ -133,7 +136,7 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                             //logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> payFlow={}", order, payFlow);
                             adOrderFlow.setOrderReportId(order.getId());
                             adOrderFlow.setSerialNumber(outTradeNo);
-                            adOrderFlow.setPayType((short) 3);
+                            adOrderFlow.setPayType((short) dooolyPaytype);
                             adOrderFlow.setAmount(new BigDecimal(payAmount));
                             adOrderFlow.setCreateBy(String.valueOf(order.getUserId()));
                             adOrderFlow.setType("1");

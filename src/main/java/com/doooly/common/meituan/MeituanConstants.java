@@ -18,8 +18,6 @@ public class MeituanConstants {
 
     public final static int entId = 27898;
 
-    public final static int entId_pay = 27899;
-
     public final static String appSecret = "IJwEr21n7T4PwTOISdhSL25D88f56cOW";
 
     public final static String exhaust_key = "3RO5KBIQ81";

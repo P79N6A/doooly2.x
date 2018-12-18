@@ -2,17 +2,11 @@ package com.doooly.business.guide.impl;
 
 import com.doooly.business.guide.service.AdArticleServiceI;
 import com.doooly.business.utils.Pagelab;
-import com.doooly.dao.reachad.AdArticleDao;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdGuideCategoryDao;
-import com.doooly.dao.reachad.AdPortRecordDao;
-import com.doooly.dao.reachad.AdProductDao;
+import com.doooly.common.constants.RedisConstants;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdArticle;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdGuideCategory;
-import com.doooly.entity.reachad.AdPortRecord;
-import com.doooly.entity.reachad.AdProduct;
+import com.doooly.entity.reachad.*;
+import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,7 +84,7 @@ public class AdArticleService implements AdArticleServiceI {
         return messageDataBean;
     }
 
-
+    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2", key = "guideCategoryId, userId, recommendHomepage", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
     @Override
     public MessageDataBean getGuideProductListv2(String guideCategoryId, Integer currentPage, Integer pageSize, String userId, String recommendHomepage) {
         MessageDataBean messageDataBean = new MessageDataBean();

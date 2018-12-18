@@ -1,18 +1,29 @@
 package com.doooly.business.meituan.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.meituan.MeituanService;
+import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.*;
+import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
-import com.doooly.common.util.HttpClientUtil;
+import com.doooly.dao.reachad.*;
+import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.meituan.EasyLogin;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.Order;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +31,25 @@ import java.util.Map;
  */
 @Service
 public class MeituanServiceImpl implements MeituanService{
+
+    @Autowired
+    private AdUserDao adUserDao;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderDao orderDao;
+
+    @Autowired
+    private AdOrderReportDao adOrderReportDao;
+
+    @Autowired
+    private AdOrderDetailDao adOrderDetailDao;
+
+    @Autowired
+    private AdOrderSourceDao adOrderSourceDao;
+
 
     @Override
     public String easyLogin(String entToken, String staffNo, String staffPhoneNo) throws Exception{
@@ -68,5 +98,118 @@ public class MeituanServiceImpl implements MeituanService{
             }
         }
         return sb.toString();
+    }
+
+
+    @Override
+    public OrderMsg createOrderMeituan(JSONObject json) {
+        String phone = json.getString("buyer_openid");
+        AdUser adUser = new AdUser();
+        adUser.setTelephone(phone);
+        adUser = adUserDao.get(adUser);
+        OrderVo orderVo = new OrderVo();
+        BigDecimal total = json.getBigDecimal("total");
+        String orderNum = json.getString("outer_trade_no");
+
+        //_order
+        Order o = new Order();
+        o.setIsRebate(0);
+        o.setOrderNumber(orderNum);
+        o.setBusinessRebate(new BigDecimal("0"));
+        o.setUserRebate(new BigDecimal("0"));
+        o.setCreateDateTime(new Date());
+        o.setState(0);
+        o.setSource(2);//合作商家
+        orderDao.insert(o);
+
+        //ad_order_report
+        OrderVo order = new OrderVo();
+        Date orderDate = new Date();
+        order.setBussinessId(1001);
+        order.setUserId(adUser.getId());
+        order.setOrderNumber(orderNum);
+        order.setStoresId(orderVo.getStoresId());
+        order.setTotalMount(total);
+        order.setTotalPrice(total);
+        order.setOrderDate(orderDate);
+        order.setState(OrderService.PayState.UNPAID.getCode());
+        order.setType(OrderService.OrderStatus.NEED_TO_PAY.getCode());
+        order.setIsUserRebate('0');
+        order.setUserRebate(orderVo.getUserRebate());
+        order.setUserReturnAmount(new BigDecimal("0"));
+        order.setIsBusinessRebate(orderVo.getIsBusinessRebate());
+        order.setBusinessRebateAmount(new BigDecimal("0"));
+        order.setBillingState('0');
+        order.setDelFlag('0');
+        order.setDelFlagUser('0');
+        order.setCreateBy(String.valueOf(adUser.getId()));
+        order.setIsFirst('0');
+        order.setIsSource(2);//合作商家
+        order.setFirstCount(0);
+        order.setAirSettleAccounts(null);
+        order.setRemarks(orderVo.getRemarks());
+        order.setUpdateDate(null);
+        order.setCreateDate(orderDate);
+        order.setConsigneeName(orderVo.getConsigneeName());
+        order.setConsigneeAddr(orderVo.getConsigneeAddr());
+        order.setConsigneeMobile(orderVo.getConsigneeMobile());
+        order.setProductType(orderVo.getProductType());
+        order.setActType(OrderService.ActivityType.COMMON_ORDER.getActType());
+        order.setVoucher(BigDecimal.ZERO);
+        order.setCouponId("");
+        //支持支付方式 ==> 1:积分,2:微信, 3.支付宝; 多个以逗号分割
+        if(order.getProductType() == OrderService.ProductType.NEXUS_RECHARGE.getCode()){
+            //全家集享卡只支持积分支付
+            order.setSupportPayType("1");
+        }else{
+            if (BigDecimal.ZERO.compareTo(total) == 0) {
+                //0元订单
+                order.setSupportPayType("0");
+                order.setServiceCharge(BigDecimal.ZERO);
+            } else {
+                //非0元订单
+                String supportPayType = orderVo.getSupportPayType();
+                if (StringUtils.isEmpty(orderVo.getSupportPayType())) {
+                    supportPayType = "all";
+                }
+                order.setSupportPayType(supportPayType);
+                order.setServiceCharge(orderVo.getServiceCharge());
+            }
+        }
+        adOrderReportDao.insert(order);
+
+
+        //ad_order_detail
+        OrderItemVo orderItem = new OrderItemVo();
+        orderItem.setOrderReportId(o.getId());
+        orderItem.setCategoryId("");
+        orderItem.setCode("");
+        orderItem.setGoods(json.getString("subject"));
+        orderItem.setAmount(total);
+        orderItem.setPrice(total);
+        orderItem.setNumber(new BigDecimal(1));
+        orderItem.setCreateBy(adUser.getId()+"");
+        orderItem.setDelFlag(0);
+        orderItem.setRemarks("");
+        orderItem.setTax(null);
+        orderItem.setUpdateDate(null);
+        orderItem.setUpdateBy(null);
+        orderItem.setCreateDate(new Date());
+        List<OrderItemVo> orderItemVoList = new ArrayList<>();
+        adOrderDetailDao.bantchInsert(o.getId(),orderItemVoList);
+
+
+        //ad_order_source
+        AdOrderSource adOrderSource = new AdOrderSource();
+        adOrderSource.setOrderNumber(order.getOrderNumber());
+        adOrderSource.setBusinessId(order.getBussinessId());
+        adOrderSource.setCashDeskSource("d");
+        adOrderSource.setTraceCodeSource("d");
+        adOrderSourceDao.insert(adOrderSource);
+
+        //下单成功返回信息
+        OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
+        msg.getData().put("orderNum", orderNum);
+        return msg;
     }
 }

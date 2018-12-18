@@ -16,7 +16,7 @@ public class IdGeneratorUtil {
 
 	private static Logger logger = LoggerFactory.getLogger(IdGeneratorUtil.class);
 
-	private static final String suffixOfOrderNo = "N";
+	private static String suffixOfOrderNo = "N";
 
 	private static final String REDIS_ID_KEY = "ID:ORDER_NUMBER";
 
@@ -65,7 +65,10 @@ public class IdGeneratorUtil {
 		}
 		// 订单来源(默认兜礼)
 		int s = source > 0 ? source : 3;
-		return sbf.append(l).append(r).append(s).append(suffixOfOrderNo).toString();
+		if (s == 4) {
+			suffixOfOrderNo = "MT";
+		}
+		return sbf.append(suffixOfOrderNo).append(l).append(r).append(s).toString();
 	}
 
 	public static String getUUID(){

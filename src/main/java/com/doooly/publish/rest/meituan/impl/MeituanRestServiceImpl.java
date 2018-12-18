@@ -129,6 +129,10 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         if (signValid) {
             //商企通订单号
             String serialNum = jsonObject.getString("serialNum");
+            if (StringUtils.isBlank(serialNum)) {
+                retMap.put("status",500);
+                retMap.put("msg","参数错误");
+            }
             OrderVo orderVo = orderService.getByOrderNum(serialNum);
             ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
             if (resultModel.getCode() == 1000) {

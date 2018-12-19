@@ -35,6 +35,13 @@ public interface DailyActivityServiceI {
 	 */
     String commonActivityQueryCopuon(JSONObject jsonReq);
 
+    /**
+     * 查看是否领取过
+     * @param jsonReq
+     * @return
+     */
+    String checkIfSendCode(JSONObject jsonReq);
+
 	/**
 	 * 交行活动（定制）发放礼品券
 	 * 

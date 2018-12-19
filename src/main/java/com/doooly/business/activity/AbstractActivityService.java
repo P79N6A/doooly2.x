@@ -286,4 +286,35 @@ public abstract class AbstractActivityService {
         return messageDataBean;
     }
 
+    /**
+     * 判断是否领取过
+     * @param jsonReq
+     * @return
+     */
+    public MessageDataBean checkIfSendCode(JSONObject jsonReq){
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            // 用户ID
+            Integer userId = jsonReq.getInteger("userId");
+            // 活动ID
+            Integer activityId = jsonReq.getInteger("activityId");
+            // 礼品券ID
+            Long couponId = jsonReq.getLong("couponId");
+            AdCouponCode coupon = new AdCouponCode();
+            coupon.setActivityId(activityId.longValue());
+            coupon.setUserId(userId.longValue());
+            coupon.setCoupon(couponId);
+            int couponCount = couponCodeDao.getUserCouponCountByIds(coupon);
+            if (couponCount > 0) {
+                return new MessageDataBean(ActivityEnum.ACTIVITY_RECEIVED);
+            }
+            messageDataBean.setCode(MessageDataBean.success_code);
+        } catch (Exception e) {
+            log.error("获取活动是否可领取优惠券数据异常！", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
+        }
+        log.info("获取活动是否可领取优惠券数据,{}",messageDataBean.toJsonString());
+        return messageDataBean;
+    }
 }

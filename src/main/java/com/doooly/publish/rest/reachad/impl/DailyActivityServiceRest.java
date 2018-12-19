@@ -44,6 +44,16 @@ public class DailyActivityServiceRest implements DailyActivityServiceI {
 	}
 
 	@POST
+	@Path(value = "/v1/checkIfSendCode")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String checkIfSendCode(JSONObject jsonReq) {
+		MessageDataBean result = dailyCommonService.checkIfSendCode(jsonReq);
+		return result.toJsonString();
+	}
+
+	@POST
 	@Path(value = "/v1/dailyQuery")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)

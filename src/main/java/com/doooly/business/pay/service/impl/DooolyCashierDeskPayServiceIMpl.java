@@ -98,7 +98,7 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                         int i = orderService.updateByNum(o);
                         logger.info("updateByNum() i = {}", i);
                     }
-                    if (!realPayType.equals("0")) {
+                    if (realPayType.equals(String.valueOf(PayTypeEnum.WEIXIN_DOOOLY.getCode())) || realPayType.equals(String.valueOf(PayTypeEnum.ALIPAY_DOOOLY.getCode()))) {
                         //表示是混合支付 在插入一条现金支付流水
                         Order o = new Order();
                         o.setUserid(order.getUserId());

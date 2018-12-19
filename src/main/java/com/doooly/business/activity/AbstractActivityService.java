@@ -298,8 +298,14 @@ public abstract class AbstractActivityService {
             Integer userId = jsonReq.getInteger("userId");
             // 活动ID
             Integer activityId = jsonReq.getInteger("activityId");
+            // 1.验证活动有效性
+            AdCouponActivityConn activityConn = couponActivityConnDao.getByActivityId(activityId, null);
+            // 1.1验证活动是否存在
+            if (activityConn == null) {
+                return new MessageDataBean("2010", "活动不存在");
+            }
             // 礼品券ID
-            Long couponId = jsonReq.getLong("couponId");
+            Long couponId = activityConn.getCoupon().getId();
             AdCouponCode coupon = new AdCouponCode();
             coupon.setActivityId(activityId.longValue());
             coupon.setUserId(userId.longValue());

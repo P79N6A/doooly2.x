@@ -61,7 +61,8 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "groupId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "groupId, address",
+            expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
     public String listSpendIntegralFloors(Map<String, String> map) {
         long start = System.currentTimeMillis();
 
@@ -248,7 +249,8 @@ public class IndexServiceImpl implements IndexServiceI {
      * 兜礼权益
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "groupId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "groupId, address",
+            expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
 	@Override
 	public String selectFloorsByV2_2(Map<String, String> map) {
 		long start = System.currentTimeMillis();

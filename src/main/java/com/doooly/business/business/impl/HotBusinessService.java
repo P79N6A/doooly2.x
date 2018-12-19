@@ -56,7 +56,8 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 
-	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type, adType", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type, adType",
+			expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
 	@Override
 	public MessageDataBean getIndexData(Map<String, String> paramMap) {
 		Integer userId = Integer.valueOf(paramMap.get("userId"));

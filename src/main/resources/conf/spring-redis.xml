@@ -19,7 +19,8 @@
 		<property name="maxWaitMillis" value="${redis.maxWait}"/>
 		<property name="testOnBorrow" value="${redis.testOnBorrow}"/>
 	</bean>
-	
+
+
 	<bean id="jedisPoolConfigWrapper" class="org.smallz.smallz_jedis.JPoolConfigWrapper">
 		<constructor-arg index="0" ref="jedisPoolConfig" />
 		<constructor-arg index="1" value="${redis.host}" />
@@ -36,4 +37,5 @@
 	<bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">  
         <property name="connectionFactory"   ref="connectionFactory" />
     </bean>
+
 </beans>

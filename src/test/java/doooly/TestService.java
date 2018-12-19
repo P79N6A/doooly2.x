@@ -4,35 +4,18 @@ package doooly;
 
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
-import com.doooly.common.meituan.MeituanConstants;
-import com.doooly.common.meituan.RsaUtil;
-import com.doooly.common.util.BeanMapUtil;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdReturnPointsLogDao;
 import com.doooly.dao.reachad.OrderDao;
-import com.doooly.entity.reachad.AdReturnPoints;
-import com.doooly.entity.reachad.AdReturnPointsLog;
-import com.doooly.entity.reachad.Order;
-import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.security.interfaces.RSAPrivateKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 //package com.redis;
 
@@ -85,10 +68,11 @@ public class TestService {
         String sign = meituanService.getSiginature(map);
         System.out.println("sign = " + sign);*/
 
-        RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
-        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);
+        /*RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
+        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);*/
         //signature = URLEncoder.encode(signature,"utf-8");
-        System.out.println(signature);
+       /* System.out.println(signature);*/
+
     }
 
     //https://m-sqt.meituan.com/open/commonaccess/access
@@ -99,6 +83,14 @@ public class TestService {
     // &staffNo=ljxtest1121&staffPhoneNo=18842612302
     // &signature=h0OitEyE97Puw02U3MT2NWNhEA7IS3%2FkoWq4IK2B%2BiDmLqZIIgl3jLvkydNS3%2B9TWP6j%2BEjljhoFfSbjOMnBTiLj6xMgjYqg2pP%2FUBERRm7VhNggR6Wt1Oxg2NyZf2V05ZH71J%2FhSJylJUO5w6aVSFNrRhk1DH5XLjSLDZ91paI%3D
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Test
+    public void test3() {
+        String s = stringRedisTemplate.opsForValue().get("");
+        System.out.println(s);
+    }
 
 
 

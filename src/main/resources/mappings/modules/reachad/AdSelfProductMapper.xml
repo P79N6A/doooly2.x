@@ -308,7 +308,7 @@
 			ON s.id = r.sku_id
 		INNER JOIN ad_self_product p
         	ON s.self_product_id = p.id
-		WHERE ((s.state=4 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date) OR (s.state=6 AND NOW() &lt;= p.buy_end_date))
+		WHERE ((s.state=4 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date) OR (s.state=6 AND NOW() &lt;= p.buy_end_date) or (s.state=1 AND NOW() BETWEEN p.buy_start_date AND p.buy_end_date))
 			AND s.self_product_id = #{productId} 
 			AND r.status = 1
 			AND r.group_id = #{groupId} 

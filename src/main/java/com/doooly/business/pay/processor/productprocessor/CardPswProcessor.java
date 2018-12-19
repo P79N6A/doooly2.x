@@ -1,9 +1,18 @@
 package com.doooly.business.pay.processor.productprocessor;
 
-import java.util.Map;
-
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.business.ofpay.service.OfPayService;
+import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.service.OrderService.ProductType;
+import com.doooly.business.order.vo.OrderItemVo;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.business.pay.service.RefundService;
+import com.doooly.business.pay.utils.AESTool;
+import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.ThirdPartySMSConstatns;
+import com.doooly.common.util.ThirdPartySMSUtil;
+import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,16 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.ofpay.service.OfPayService;
-import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.service.OrderService.ProductType;
-import com.doooly.business.order.vo.OrderItemVo;
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.utils.AESTool;
-import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.common.util.ThirdPartySMSUtil;
-import com.doooly.dto.common.PayMsg;
+import java.util.Map;
 
 /***
  * 卡密充值
@@ -42,6 +42,8 @@ public class CardPswProcessor implements ProductProcessor{
 	private StringRedisTemplate redisTemplate;
 	@Autowired
 	private AdUserServiceI adUserServiceI;
+    @Autowired
+    private RefundService refundService;
 
 	@Override
 	public int getProcessCode() {
@@ -103,14 +105,20 @@ public class CardPswProcessor implements ProductProcessor{
 				// 如果卡密获取失败发送以下短信
 				//【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
 				if(!bool){
-					AdUser user = adUserServiceI.getById(order.getUserId().intValue());
-					String mobiles = user.getTelephone();
-					String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
-					JSONObject paramSMSJSON = new JSONObject();
-					paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
-					paramSMSJSON.put("phone", "4001582212");
-					int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
-					logger.info("发送退款审批短信. i = {}", i);
+                    //退款
+                    PayMsg payMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber());
+                    // 如果退款失败发送以下短信
+                    //【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
+                    if(!PayMsg.success_code.equals(payMsg.getCode())){
+                        AdUser user = adUserServiceI.getById(order.getUserId().intValue());
+                        String mobiles = user.getTelephone();
+                        String alidayuSmsCode = ThirdPartySMSConstatns.SMSTemplateConfig.recharge_fail_template_code;
+                        JSONObject paramSMSJSON = new JSONObject();
+                        paramSMSJSON.put("productType", OrderService.ProductType.getProductTypeName(order.getProductType()));
+                        paramSMSJSON.put("phone", "4001582212");
+                        int i = ThirdPartySMSUtil.sendMsg(mobiles, paramSMSJSON, alidayuSmsCode, null, true);
+                        logger.info("发送退款审批短信. i = {}", i);
+                    }
 				}
 			}
 		}else{

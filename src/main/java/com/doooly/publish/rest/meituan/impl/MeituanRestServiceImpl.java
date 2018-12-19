@@ -71,6 +71,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         int status = 0;
         String message = "调用失败";
         if (StringUtils.isNotEmpty(entToken)) {
+
             status = 1;
             message = "调用成功";
             data.put("loginStatus",1);

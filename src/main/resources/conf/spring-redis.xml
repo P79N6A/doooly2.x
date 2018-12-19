@@ -36,4 +36,11 @@
 	<bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">  
         <property name="connectionFactory"   ref="connectionFactory" />
     </bean>
+
+	<bean class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory"   ref="connectionFactory" />
+	</bean>
+
+	<bean class="com.doooly.common.redis.Jiucache"/>
+
 </beans>

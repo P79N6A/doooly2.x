@@ -10,6 +10,7 @@ import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFac
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.RsaUtil;
+import com.doooly.common.redis.Jiucache;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
@@ -85,10 +86,11 @@ public class TestService {
         String sign = meituanService.getSiginature(map);
         System.out.println("sign = " + sign);*/
 
-        RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
-        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);
+        /*RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
+        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);*/
         //signature = URLEncoder.encode(signature,"utf-8");
-        System.out.println(signature);
+       /* System.out.println(signature);*/
+
     }
 
     //https://m-sqt.meituan.com/open/commonaccess/access
@@ -99,6 +101,14 @@ public class TestService {
     // &staffNo=ljxtest1121&staffPhoneNo=18842612302
     // &signature=h0OitEyE97Puw02U3MT2NWNhEA7IS3%2FkoWq4IK2B%2BiDmLqZIIgl3jLvkydNS3%2B9TWP6j%2BEjljhoFfSbjOMnBTiLj6xMgjYqg2pP%2FUBERRm7VhNggR6Wt1Oxg2NyZf2V05ZH71J%2FhSJylJUO5w6aVSFNrRhk1DH5XLjSLDZ91paI%3D
 
+    @Autowired
+    private Jiucache jiucache;
+
+    @Test
+    public void test3() {
+        jiucache.put("aa",11);
+        System.out.println(jiucache.get("aa"));
+    }
 
 
 

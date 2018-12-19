@@ -5,23 +5,21 @@ import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.service.PaymentService;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.impl.NewPaymentService;
-import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.common.meituan.MeituanConstants;
-import com.doooly.dao.reachad.AdConfigDictDao;
+import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
+import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
-import com.github.pagehelper.StringUtil;
-import com.google.gson.Gson;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +56,13 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Autowired
     private RefundService refundService;
 
+    @Autowired
+    private AdUserDao adUserDao;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+
     @GET
     @Path("/easyLogin")
     @Produces("application/json;charset=UTF-8")
@@ -71,10 +76,19 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         int status = 0;
         String message = "调用失败";
         if (StringUtils.isNotEmpty(entToken)) {
-            status = 1;
-            message = "调用成功";
-            data.put("loginStatus",1);
-            data.put("staffPhoneNo","15711667875");
+            String userId = String.valueOf(stringRedisTemplate.boundValueOps(entToken).get());
+            AdUser adUser = null;
+            try {
+                adUser = adUserDao.getById(Integer.parseInt(userId));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            if (adUser != null) {
+                status = 1;
+                message = "调用成功";
+                data.put("loginStatus",1);
+                data.put("staffPhoneNo",adUser.getTelephone());
+            }
         }
         retMap.put("status",status);
         retMap.put("message",message);

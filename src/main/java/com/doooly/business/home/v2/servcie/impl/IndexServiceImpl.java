@@ -281,7 +281,7 @@ public class IndexServiceImpl implements IndexServiceI {
 					// 员工内部专享价
 					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
 
-					if (MessageDataBean.success_code == guideData.getCode()) {
+					if (MessageDataBean.success_code.equals(guideData.getCode())) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();
 

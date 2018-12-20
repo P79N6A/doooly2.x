@@ -8,7 +8,6 @@ package com.doooly.business.utils;
 import com.doooly.common.context.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -17,7 +16,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 @Component
-@Scope(value = "prototype")
 public class RedisLock {
     private static Logger logger = LoggerFactory.getLogger(RedisLock.class);
 

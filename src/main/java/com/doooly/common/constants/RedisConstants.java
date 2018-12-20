@@ -27,6 +27,6 @@ public class RedisConstants {
 	/**
 	 * Redis 缓存过期时间 单位（秒）
 	 */
-	public static final int REDIS_CACHE_EXPIRATION_DATE = 600;
+	public static final int REDIS_CACHE_EXPIRATION_DATE = 86400;
 
 }

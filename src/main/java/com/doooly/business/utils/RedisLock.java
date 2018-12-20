@@ -1,13 +1,13 @@
-package com.doooly.common.util;
+package com.doooly.business.utils;
 
 //
 // Source code recreated from a .class file by IntelliJ IDEA
 // (powered by Fernflower decompiler)
 //
 
+import com.doooly.common.context.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -16,12 +16,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
-@Component("redisLockf")
+@Component
 @Scope(value = "prototype")
 public class RedisLock {
     private static Logger logger = LoggerFactory.getLogger(RedisLock.class);
-    @Autowired
-    private RedisTemplate redisTemplate;
+
     private static final int DEFAULT_ACQUIRY_RESOLUTION_MILLIS = 100;
     private int expireMsecs = '\uea60';
     private int timeoutMsecs = 10*1000;
@@ -31,9 +30,10 @@ public class RedisLock {
     }
 
     public String get(final String key) {
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
         Object obj = null;
         try {
-            obj = this.redisTemplate.execute(new RedisCallback<Object>() {
+            obj = redisTemplate.execute(new RedisCallback<Object>() {
                 public Object doInRedis(RedisConnection connection) throws DataAccessException {
                     StringRedisSerializer serializer = new StringRedisSerializer();
                     byte[] data = connection.get(serializer.serialize(key));
@@ -53,9 +53,10 @@ public class RedisLock {
     }
 
     public boolean setNX(final String key, final String value, final long timeout) {
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
         Object obj = null;
         try {
-            obj = this.redisTemplate.execute(new RedisCallback<Object>() {
+            obj = redisTemplate.execute(new RedisCallback<Object>() {
                 public Object doInRedis(RedisConnection connection) throws DataAccessException {
                     StringRedisSerializer serializer = new StringRedisSerializer();
                     Boolean success = connection.setNX(serializer.serialize(key), serializer.serialize(value));
@@ -72,9 +73,9 @@ public class RedisLock {
 
     private String getSet(final String key, final String value) {
         Object obj = null;
-
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
         try {
-            obj = this.redisTemplate.execute(new RedisCallback<Object>() {
+            obj = redisTemplate.execute(new RedisCallback<Object>() {
                 public Object doInRedis(RedisConnection connection) throws DataAccessException {
                     StringRedisSerializer serializer = new StringRedisSerializer();
                     byte[] ret = connection.getSet(serializer.serialize(key), serializer.serialize(value));
@@ -90,9 +91,10 @@ public class RedisLock {
     }
 
     public boolean lock(final String lockKey,final long timeOutMills) {
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
     	Object obj = null;
         try {
-            obj = this.redisTemplate.execute(new RedisCallback<Object>() {
+            obj = redisTemplate.execute(new RedisCallback<Object>() {
                 public Object doInRedis(RedisConnection connection) throws DataAccessException {
                     StringRedisSerializer serializer = new StringRedisSerializer();
                     Boolean success = connection.setNX(serializer.serialize(lockKey), serializer.serialize(""));
@@ -150,10 +152,11 @@ public class RedisLock {
             this.redisTemplate.delete(lockKey);
             this.locked = false;
         }*/
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
     	Object obj = null;
 
         try {
-            obj = this.redisTemplate.execute(new RedisCallback<Object>() {
+            obj = redisTemplate.execute(new RedisCallback<Object>() {
                 public Long doInRedis(RedisConnection connection) throws DataAccessException {
                     StringRedisSerializer serializer = new StringRedisSerializer();
                     Long data=connection.del(serializer.serialize(lockKey));
@@ -168,8 +171,9 @@ public class RedisLock {
 
 
     public synchronized void unlock_v2(String lockKey) {
+        RedisTemplate redisTemplate = (RedisTemplate) SpringContextUtils.getBeanByClass(RedisTemplate.class);
         if(this.locked) {
-            this.redisTemplate.delete(lockKey);
+            redisTemplate.delete(lockKey);
             this.locked = false;
         }
     }

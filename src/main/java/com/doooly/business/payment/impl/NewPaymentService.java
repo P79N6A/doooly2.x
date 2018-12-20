@@ -21,10 +21,10 @@ import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.payment.utils.SignUtil;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.utils.DateUtils;
+import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
-import com.doooly.common.util.RedisLock;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
@@ -568,11 +568,11 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject json = JSONObject.parseObject(retStr);
         String orderNum = json.getString("orderNum");
         String lockKey =String.format(SYNC_REFUND_CODE_KEY, orderNum + ":" + payType + ":" + payType);
+        boolean b = redisLock.lock(lockKey,15);
+        if (!b) {
+            return new PayMsg(PayMsg.success_code, "同步处理中");
+        }
         try {
-            boolean b = redisLock.lock(lockKey,15);
-            if (!b) {
-                return new PayMsg(PayMsg.success_code, "同步处理中");
-            }
             PaymentService paymentService = PaymentServiceFactory.getPayService(payType);
             logger.info("paymentService = {}", paymentService);
             if (paymentService != null) {

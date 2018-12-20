@@ -1,9 +1,11 @@
 package doooly;
 
+import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.entity.meituan.EasyLogin;
 import com.google.gson.Gson;
+import com.reach.redis.utils.GsonUtils;
 import org.junit.Test;
 
 import java.net.URLEncoder;
@@ -41,6 +43,15 @@ public class TestMain {
         String signature = RsaUtil.sign(sb.toString().getBytes(),rsaPrivateKey);
         signature = URLEncoder.encode(signature,"utf-8");
         System.out.println(signature);
+    }
+
+
+    @Test
+    public void test2() {
+        String orderNum = "3LNVWQWLTBwanghaicc";
+        String[] a = orderNum.split(MeituanConstants.app_id);
+        orderNum = a[1];
+        System.out.println(GsonUtils.toString(a) +"|"+ orderNum);
     }
 
 }

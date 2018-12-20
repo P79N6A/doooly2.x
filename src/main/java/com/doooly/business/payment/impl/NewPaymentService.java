@@ -465,7 +465,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             payMsg = ResultModel.ok();
         } else {
             payMsg = queryNewPayResult(param);
-            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            /*if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
@@ -478,7 +478,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
-            }
+            }*/
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {

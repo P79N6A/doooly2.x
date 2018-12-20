@@ -5,10 +5,9 @@ package doooly;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdReturnPointsDao;
-import com.doooly.dao.reachad.AdReturnPointsLogDao;
-import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.AdUser;
+import com.github.pagehelper.PageHelper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.List;
 
 //package com.redis;
 
@@ -86,11 +87,20 @@ public class TestService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    private AdUserDao adUserDao;
+
     @Test
     public void test3() {
-        String s = stringRedisTemplate.opsForValue().get("");
-        System.out.println(s);
+
+        PageHelper.startPage(2,6);
+        AdUser adUser = new AdUser();
+        long x = adUserDao.getIdByPhoneOrCard("");
+
     }
+
+
+
 
 
 

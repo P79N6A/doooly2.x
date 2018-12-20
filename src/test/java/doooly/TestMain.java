@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,10 +50,29 @@ public class TestMain {
 
     @Test
     public void test2() {
-        String orderNum = "3LNVWQWLTBwanghaicc";
+       /* String orderNum = "3LNVWQWLTBwanghaicc";
         String[] a = orderNum.split(MeituanConstants.app_id);
         orderNum = a[1];
-        System.out.println(GsonUtils.toString(a) +"|"+ orderNum);
+        System.out.println(GsonUtils.toString(a) +"|"+ orderNum);*/
+       int pageNum = 1;
+       int pageSize = 5;
+       //int offset = (pageNum - 1) * pageSize;  //0,5   6,11  12,17  2,2
+
+        int start = (pageNum - 1) * pageSize;
+        int end = pageNum * pageSize;
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            list.add(i);
+        }
+        if (start < list.size()) {
+          if (end < list.size()) {
+              System.out.println(new Gson().toJson(list.subList(start,end)));
+          } else {
+              System.out.println(new Gson().toJson(list.subList(start,list.size())));
+          }
+        }
+        System.out.println(new Gson().toJson(list.subList(list.size() - 1,list.size())));
+
     }
 
 }

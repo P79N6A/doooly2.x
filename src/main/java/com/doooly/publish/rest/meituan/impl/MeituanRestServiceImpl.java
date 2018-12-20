@@ -164,30 +164,51 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     }
 
 
+    /**
+     * orderNum
+     * amount
+     * @param jsonObject
+     * @return
+     */
     @POST
     @Path("/payNotify")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String payNotify(JSONObject jsonObject) {
+    public Map<String,Object> payNotify(JSONObject jsonObject) {
         logger.info("调用美团支付通知：{}",GsonUtils.toString(jsonObject));
         Map<String,Object> retMap = new HashMap<>();
-        try {
-            Map<String,Object> params = new HashMap<>();
-            params.put("token",MeituanConstants.token);
-            params.put("version",MeituanConstants.version);
-            Map<String,Object> contentParams = new HashMap<>();
-            contentParams.put("orderSN",jsonObject.getString("orderNum"));
-            contentParams.put("amount",jsonObject.getString("amount"));
-            contentParams.put("sign",MeituanConstants.sign);
-            contentParams.put("ts",new Date().getTime()/1000);
-            params.put("content",contentParams);
-            String ret = HttpClientUtil.doPost(MeituanConstants.url_meituan_pay_notify,GsonUtils.toString(params));
-            return ret;
-        } catch (Exception e) {
-            logger.error("美团payNotify异常：",e);
-        }
-        return null;
+        Map<String,Object> params = new HashMap<>();
+        params.put("token",MeituanConstants.token);
+        params.put("version",MeituanConstants.version);
+        Map<String,Object> contentParams = new HashMap<>();
+        contentParams.put("orderSN",jsonObject.getString("orderNum"));
+        contentParams.put("amount",jsonObject.getString("amount"));
+        contentParams.put("sign",MeituanConstants.sign);
+        contentParams.put("ts",new Date().getTime()/1000);
+        params.put("content",contentParams);
+        String ret = HttpClientUtil.doPost(MeituanConstants.url_meituan_pay_notify,GsonUtils.toString(params));
+        retMap = GsonUtils.son.fromJson(ret,Map.class);
+        return retMap;
     }
+
+
+    @POST
+    @Path("/queryOrderByOrderNum")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String,Object> queryOrderByOrderSN(JSONObject jsonObject) {
+        String orderNum = jsonObject.getString("orderNum");
+        Map<String,Object> retMap = new HashMap<>();
+        if (StringUtils.isNotEmpty(orderNum)) {
+            Map<String,Object> params = new HashMap<>();
+            params.put("orderSN",orderNum);
+            String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
+            String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/queryOrderByOrderSN",GsonUtils.toString(params));
+            retMap = GsonUtils.son.fromJson(ret,Map.class);
+        }
+        return retMap;
+    }
+
 
 
     public static Map<String,String> getParamMapFromRequest(HttpServletRequest request) {

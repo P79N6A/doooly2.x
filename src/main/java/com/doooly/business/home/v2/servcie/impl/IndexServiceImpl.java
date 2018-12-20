@@ -292,7 +292,7 @@ public class IndexServiceImpl implements IndexServiceI {
                     paramMap.put("groupId", groupId);
 					MessageDataBean guideData = guideService.getGuideProductListv2(paramMap);
 
-					if (MessageDataBean.success_code == guideData.getCode()) {
+					if (MessageDataBean.success_code.equals(guideData.getCode())) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();
 

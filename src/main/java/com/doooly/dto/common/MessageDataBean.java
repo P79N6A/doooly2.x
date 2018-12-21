@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 import com.doooly.common.util.BigDecimalValueFilter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MessageDataBean {
@@ -109,7 +108,7 @@ public class MessageDataBean {
 		return data;
 	}
 
-	public void setData(HashMap<String, Object> data) {
+	public void setData(Map<String, Object> data) {
 		this.data = data;
 	}
 

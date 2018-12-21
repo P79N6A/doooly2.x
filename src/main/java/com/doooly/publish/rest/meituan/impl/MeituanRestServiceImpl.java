@@ -14,6 +14,7 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
+import com.google.gson.Gson;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +62,30 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     private StringRedisTemplate stringRedisTemplate;
 
 
+    @POST
+    @Path("/getMeituanEasyLoginUrl")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Map<String,Object> getMeituanEasyLoginUrl(JSONObject jsonObject) {
+        String token = jsonObject.getString("token");
+        String userId = jsonObject.getString("userId");
+        String loginUrl = "";
+        if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
+            AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
+            if (adUser != null) {
+                try {
+                    loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        Map<String,Object> retMap = new HashMap<>();
+        retMap.put("loginUrl",loginUrl);
+        return retMap;
+    }
+
+
     @GET
     @Path("/easyLogin")
     @Produces("application/json;charset=UTF-8")
@@ -91,6 +116,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         retMap.put("status",status);
         retMap.put("message",message);
         retMap.put("data",data);
+        logger.info("美团调用easyLogin ret：{}",GsonUtils.toString(retMap));
         return retMap;
     }
 
@@ -107,6 +133,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     }
 
 
+    /**
+     * 从创建支付订单开始
+     * @param request
+     * @param response
+     * @return
+     */
     @GET
     @Path("/pay")
     @Produces("application/json;charset=utf-8")

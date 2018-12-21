@@ -1,4 +1,3 @@
-package com.doooly.business.home.v2.servcie.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -421,5 +420,5 @@ public class IndexServiceImpl implements IndexServiceI {
         }
         return beans;
     }
-
 }
+

@@ -1,6 +1,7 @@
 package com.doooly.publish.rest.meituan.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.business.common.util.HttpClientUtil;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
@@ -13,6 +14,7 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
+import com.google.gson.Gson;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,10 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by wanghai on 2018/12/14.
@@ -63,6 +62,30 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     private StringRedisTemplate stringRedisTemplate;
 
 
+    @POST
+    @Path("/getMeituanEasyLoginUrl")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Map<String,Object> getMeituanEasyLoginUrl(JSONObject jsonObject) {
+        String token = jsonObject.getString("token");
+        String userId = jsonObject.getString("userId");
+        String loginUrl = "";
+        if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
+            AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
+            if (adUser != null) {
+                try {
+                    loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        Map<String,Object> retMap = new HashMap<>();
+        retMap.put("loginUrl",loginUrl);
+        return retMap;
+    }
+
+
     @GET
     @Path("/easyLogin")
     @Produces("application/json;charset=UTF-8")
@@ -93,6 +116,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         retMap.put("status",status);
         retMap.put("message",message);
         retMap.put("data",data);
+        logger.info("美团调用easyLogin ret：{}",GsonUtils.toString(retMap));
         return retMap;
     }
 
@@ -109,6 +133,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     }
 
 
+    /**
+     * 从创建支付订单开始
+     * @param request
+     * @param response
+     * @return
+     */
     @GET
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
@@ -120,8 +150,10 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         OrderMsg orderMsg = null;
         try {
             if (signValid) {
-                //orderMsg = meituanService.createOrderMeituan(jsonObject);
-                response.sendRedirect(configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL"));
+                orderMsg = meituanService.createOrderMeituan(jsonObject);
+                jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
+                jsonObject.put("userId",orderMsg.getData().get("userId"));
+                response.sendRedirect(configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +  meituanService.convertMapToUrl(jsonObject));
             } else {
                 orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
             }
@@ -162,6 +194,53 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         }
         return retMap;
     }
+
+
+    /**
+     * orderNum
+     * amount
+     * @param jsonObject
+     * @return
+     */
+    @POST
+    @Path("/payNotify")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Map<String,Object> payNotify(JSONObject jsonObject) {
+        logger.info("调用美团支付通知：{}",GsonUtils.toString(jsonObject));
+        Map<String,Object> retMap = new HashMap<>();
+        Map<String,Object> params = new HashMap<>();
+        params.put("token",MeituanConstants.token);
+        params.put("version",MeituanConstants.version);
+        Map<String,Object> contentParams = new HashMap<>();
+        contentParams.put("orderSN",jsonObject.getString("orderNum"));
+        contentParams.put("amount",jsonObject.getString("amount"));
+        contentParams.put("sign",MeituanConstants.sign);
+        contentParams.put("ts",new Date().getTime()/1000);
+        params.put("content",contentParams);
+        String ret = HttpClientUtil.doPost(MeituanConstants.url_meituan_pay_notify,GsonUtils.toString(params));
+        retMap = GsonUtils.son.fromJson(ret,Map.class);
+        return retMap;
+    }
+
+
+    @POST
+    @Path("/queryOrderByOrderNum")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String,Object> queryOrderByOrderSN(JSONObject jsonObject) {
+        String orderNum = jsonObject.getString("orderNum");
+        Map<String,Object> retMap = new HashMap<>();
+        if (StringUtils.isNotEmpty(orderNum)) {
+            Map<String,Object> params = new HashMap<>();
+            params.put("orderSN",orderNum);
+            String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
+            String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/queryOrderByOrderSN",GsonUtils.toString(params));
+            retMap = GsonUtils.son.fromJson(ret,Map.class);
+        }
+        return retMap;
+    }
+
 
 
     public static Map<String,String> getParamMapFromRequest(HttpServletRequest request) {

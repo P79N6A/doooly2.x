@@ -30,4 +30,13 @@ public interface ConfigDictServiceI {
 	* @return
 	 */
 	List<String> getValueListByTypeAndKey(String dictType, String dictKey);
+
+
+	/**
+	 * 无缓存
+	 * @param dictType
+	 * @param dictKey
+	 * @return
+	 */
+	String getValueByTypeAndKeyNoCache(String dictType, String dictKey);
 }

@@ -104,12 +104,28 @@ public class MeituanServiceImpl implements MeituanService{
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
         String phone = json.getString("buyer_openid");
+        OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
+        if (StringUtils.isEmpty(phone)) {
+            msg.setCode(OrderMsg.failure_code);
+            msg.setMess("用户标示为空");
+            return msg;
+        }
         AdUser adUser = new AdUser();
         adUser.setTelephone(phone);
         adUser = adUserDao.get(adUser);
+        if (adUser == null) {
+            msg.setCode(OrderMsg.failure_code);
+            msg.setMess("用户查询失败");
+            return msg;
+        }
+
         OrderVo orderVo = new OrderVo();
         BigDecimal total = json.getBigDecimal("total");
         String orderNum = json.getString("outer_trade_no");
+        if (orderNum.contains(MeituanConstants.app_id)) {
+            String[] a = orderNum.split(MeituanConstants.app_id);
+            orderNum = a[1];
+        }
 
         //_order
         Order o = new Order();
@@ -208,8 +224,8 @@ public class MeituanServiceImpl implements MeituanService{
         adOrderSourceDao.insert(adOrderSource);
 
         //下单成功返回信息
-        OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
         msg.getData().put("orderNum", orderNum);
+        msg.getData().put("userId",adUser.getId());
         return msg;
     }
 }

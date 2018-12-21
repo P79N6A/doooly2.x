@@ -16,6 +16,8 @@ public class MeituanConstants {
 
     public final static String appKey = "3Q2NCPEYQW";
 
+    public final static String app_id = "3LNVWQWLTB";
+
     public final static int entId = 27898;
 
     public final static String appSecret = "IJwEr21n7T4PwTOISdhSL25D88f56cOW";
@@ -23,5 +25,13 @@ public class MeituanConstants {
     public final static String exhaust_key = "3RO5KBIQ81";
 
     public final static String meituan_access_url = "https://m-sqt.meituan.com/open/commonaccess/access";
+
+    public final static String token = "3QTJRJD37N-TK";
+
+    public final static String version = "1.0";
+
+    public final static String sign = "Sef0aEZcvqbJq0CQ/FABzQ==";
+
+    public final static String url_meituan_pay_notify = "https://api-sqt.meituan.com/openapi/payNotify/third";
 
 }

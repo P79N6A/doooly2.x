@@ -16,6 +16,9 @@ public interface ConfigDictServiceI {
 	* @return
 	 */
 	String getValueByTypeAndKey(String dictType, String dictKey);
+
+
+	String getValueByTypeAndKeyNoCache(String dictType, String dictKey);
 	
 	/**
 	 * 通过字典表查询对应配置value 列表

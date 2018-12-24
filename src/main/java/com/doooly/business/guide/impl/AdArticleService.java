@@ -85,7 +85,7 @@ public class AdArticleService implements AdArticleServiceI {
     }
 
     @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2",
-            key = "groupId, recommendHomepage，guideCategoryId, currentPage",
+            key = "groupId, userId, recommendHomepage，guideCategoryId, currentPage",
             expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
     @Override
     public MessageDataBean getGuideProductListv2(Map<String, String> paramMap) {

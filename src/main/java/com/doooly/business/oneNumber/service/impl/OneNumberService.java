@@ -2,13 +2,9 @@ package com.doooly.business.oneNumber.service.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.doooly.business.utils.RSAEncryptUtil;
-import com.doooly.common.constants.PropertiesHolder;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -35,6 +31,7 @@ import com.doooly.entity.reachad.AdUser;
 public class OneNumberService implements OneNumberServiceI {
 
     private static Logger logger = Logger.getLogger(OneNumberService.class);
+    private static ResourceBundle appBundle = ResourceBundle.getBundle("prop/sctcd");
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
@@ -177,8 +174,8 @@ public class OneNumberService implements OneNumberServiceI {
         Map<String, Object> res = new HashMap<>();
         String resultUrl;
         String mobile = null;
-        String dev_pub_key = PropertiesHolder.getProperty("ONE_NUM_DEV_PUB_KEY");
-        String prd_pub_key = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY");
+        String dev_pub_key = appBundle.getString("ONE_NUM_DEV_PUB_KEY");
+        String prd_pub_key = appBundle.getString("ONE_NUM_PRD_PUB_KEY");
         logger.info("------------ dev_pub_key :"  + dev_pub_key);
         logger.info("------------ prd_pub_key :"  + prd_pub_key);
         String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(dev_pub_key), adUser.getTelephone());
@@ -187,11 +184,11 @@ public class OneNumberService implements OneNumberServiceI {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        res.put("headerKey", PropertiesHolder.getProperty("ONE_NUM_HEADER_KEY"));
-        res.put("headerValue", PropertiesHolder.getProperty("ONE_NUM_HEADER_VALUE"));
+        res.put("headerKey", appBundle.getString("ONE_NUM_HEADER_KEY"));
+        res.put("headerValue", appBundle.getString("ONE_NUM_HEADER_VALUE"));
         res.put("telNo", mobile);
         res.put("channelCode", adBusinessExpandInfo.getShopId());
-        res.put("type", "2"); //前端需要字段，判断是否是新接口，酷邀贷专属
+        res.put("type", adBusinessExpandInfo.getType()); //前端需要字段，判断是否是新接口，酷邀贷专属
         res.put("resultUrl", adBusinessExpandInfo.getBusinessUrl());
         return res;
     }

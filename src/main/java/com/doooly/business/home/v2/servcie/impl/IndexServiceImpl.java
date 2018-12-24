@@ -279,7 +279,7 @@ public class IndexServiceImpl implements IndexServiceI {
 
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
-					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
+					MessageDataBean guideData = guideService.getGuideProductListv2(userId, null, 1, 20, "1");
 
 					if (MessageDataBean.success_code.equals(guideData.getCode())) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");

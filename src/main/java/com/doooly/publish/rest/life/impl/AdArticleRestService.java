@@ -71,7 +71,7 @@ public class AdArticleRestService implements AdArticleRestServiceI {
             String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
             Integer currentPage = json.getInteger("currentPage");
             Integer pageSize = json.getInteger("pageSize");
-            messageDataBean = adArticleServiceI.getGuideProductListv2(guideCategoryId, currentPage, pageSize,userId,recommendHomepage);
+            messageDataBean = adArticleServiceI.getGuideProductListv2(userId, guideCategoryId, currentPage, pageSize,recommendHomepage);
         } catch (Exception e) {
             logger.error("获取导购信息出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);

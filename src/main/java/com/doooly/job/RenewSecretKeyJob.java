@@ -24,8 +24,8 @@ import com.doooly.entity.doooly.SecretKey;
  * @date 2016-07-10
  * @version 1.0
  */
-@Component
-@Lazy(false)
+//@Component
+//@Lazy(false)
 public class RenewSecretKeyJob {
 
 	@Autowired
@@ -36,7 +36,7 @@ public class RenewSecretKeyJob {
 	/**
 	 * 定时任务:每天中午12点自动更新安全密钥
 	 */
-	@Scheduled(cron="")
+//	@Scheduled(cron="")
 	public void renewSecretKey(){
 		int counter = 0;
 		List<SecretKey> newKeys = null;

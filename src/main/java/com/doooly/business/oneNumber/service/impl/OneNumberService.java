@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.util.*;
 
 import com.doooly.business.utils.RSAEncryptUtil;
+import com.doooly.common.constants.PropertiesHolder;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -31,7 +32,7 @@ import com.doooly.entity.reachad.AdUser;
 public class OneNumberService implements OneNumberServiceI {
 
     private static Logger logger = Logger.getLogger(OneNumberService.class);
-    private static ResourceBundle appBundle = ResourceBundle.getBundle("prop/sctcd");
+    private static ResourceBundle appBundle = ResourceBundle.getBundle("prop/common");
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
@@ -172,12 +173,11 @@ public class OneNumberService implements OneNumberServiceI {
     private Map<String, Object> getKuYaoDaiUrl(String targetUrl, AdUser adUser,
                                                AdBusinessExpandInfo adBusinessExpandInfo) {
         Map<String, Object> res = new HashMap<>();
-        String resultUrl;
         String mobile = null;
         String dev_pub_key = appBundle.getString("ONE_NUM_DEV_PUB_KEY");
-        String prd_pub_key = appBundle.getString("ONE_NUM_PRD_PUB_KEY");
-        logger.info("------------ dev_pub_key :"  + dev_pub_key);
-        logger.info("------------ prd_pub_key :"  + prd_pub_key);
+        String prd_pub_key = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY");
+        logger.info("--------------- dev_pub_key :"  + dev_pub_key);
+        logger.info("################ prd_pub_key :"  + prd_pub_key);
         String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(dev_pub_key), adUser.getTelephone());
         try {
             mobile = URLEncoder.encode(str, "UTF-8");// 进行编码传输

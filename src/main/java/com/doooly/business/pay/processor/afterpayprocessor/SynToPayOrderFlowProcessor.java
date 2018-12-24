@@ -48,7 +48,7 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
                 //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
                 Order o = new Order();
                 o.setOrderNumber(order.getOrderNumber());
-                o.setPayType(PayFlowService.PayType.getCodeByName("weixin"));
+                o.setPayType(PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType)));
                 o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 Order order1 = orderDao.getSyncOrder(o);
@@ -56,7 +56,7 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
             }
 			adOrderFlow.setOrderReportId(order.getId());
 			adOrderFlow.setSerialNumber(String.valueOf(resultMap.get("outTradeNo")));
-			short payType = (short) PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType));
+			short payType = getPayType(realPayType);
 			adOrderFlow.setPayType(payType);
 			adOrderFlow.setAmount(order.getTotalMount().subtract(amount));
 			adOrderFlow.setCreateBy(String.valueOf(order.getUserId()));
@@ -81,6 +81,8 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
 		short payType;//其他
 		if(realPayType.equals("1")){
             payType = 3;//微信支付
+        }else if(realPayType.equals("6")){
+            payType = 6;//支付宝
         }else {
             payType = 0;//积分支付
         }

@@ -52,4 +52,11 @@ public class ConfigDictServiceImpl implements ConfigDictServiceI {
 		return values;
 	}
 
+
+	@Override
+	public String getValueByTypeAndKeyNoCache(String dictType, String dictKey) {
+		String	value = dictDao.getValueByTypeAndKey(dictType, dictKey);
+		return value;
+	}
+
 }

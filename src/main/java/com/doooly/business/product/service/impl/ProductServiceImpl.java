@@ -7,6 +7,14 @@ import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.AdUser;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import com.doooly.dao.reachad.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.business.product.entity.AdGroupSelfProductPrice;
+import com.doooly.business.product.entity.AdSelfProduct;
+import com.doooly.business.product.entity.AdSelfProductImage;
+import com.doooly.business.product.entity.AdSelfProductSku;
+import com.doooly.business.product.entity.AdSelfProductType;
+import com.doooly.business.product.service.ProductService;
+import com.doooly.business.utils.Pagelab;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdUser;
 
 @Service
 @Transactional
@@ -149,6 +168,9 @@ public class ProductServiceImpl implements ProductService {
 		return map;
 	}
 
+	@Autowired
+	private AdConfigDictDao adConfigDictDao;
+
 	@Override
 	public HashMap<String, Object> getSelfProductDetail(String productId, String userId,String activityName) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -190,6 +212,10 @@ public class ProductServiceImpl implements ProductService {
 			// 3.获取商品 id|商品名称|商品详情|商户名称|品牌介绍
 			AdSelfProduct adSelfProduct = adSelfProductDao.getSelfProductDetailById(productId);
 
+			String activityNameConfig = adConfigDictDao.getValueByTypeAndKey("AIRPORT_ACTIVITY_NAME","AIRPORT_ACTIVITY_NAME");
+			if (StringUtils.isNotEmpty(activityNameConfig) && activityNameConfig.contains(activityName)) {
+				activityName = "AirportActivity";
+			}
 			// 4.获取商品规格|最低销售价|市场价(除去被屏蔽的sku)
 			List<AdSelfProductSku> skuList = adSelfProductDao.getSelfProductSkuList(productId, limitSkuIdList,
 					group.getId(),activityName);

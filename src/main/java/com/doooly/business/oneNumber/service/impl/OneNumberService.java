@@ -177,10 +177,13 @@ public class OneNumberService implements OneNumberServiceI {
         Map<String, Object> res = new HashMap<>();
         String resultUrl;
         String mobile = null;
-        String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(PropertiesHolder.getProperty(
-                "ONE_NUM_DEV_PUB_KEY")), adUser.getTelephone());
+        String dev_pub_key = PropertiesHolder.getProperty("ONE_NUM_DEV_PUB_KEY");
+        String prd_pub_key = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY");
+        logger.info("------------ dev_pub_key :"  + dev_pub_key);
+        logger.info("------------ prd_pub_key :"  + prd_pub_key);
+        String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(dev_pub_key), adUser.getTelephone());
         try {
-            mobile = URLEncoder.encode(str, "utf-8");// 进行编码传输
+            mobile = URLEncoder.encode(str, "UTF-8");// 进行编码传输
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

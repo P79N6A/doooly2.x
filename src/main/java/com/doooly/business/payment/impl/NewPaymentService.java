@@ -21,6 +21,7 @@ import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.payment.utils.SignUtil;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.utils.DateUtils;
+import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
@@ -101,12 +102,15 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdReturnFlowDao adReturnFlowDao;
     @Autowired
     private AdReturnDetailDao adReturnDetailDao;
+    @Autowired
+    private RedisLock redisLock;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
     // 退款同步，唯一标识，缓存值4个0（0000）
     private static String SYNC_REFUND_CODE_VALUE = "0000";
-
+    // 支付同步，key；
+    private static String SYNC_PAY_CODE_KEY = "sync_pay_code:%s";
 
     @Override
     public ResultModel authorize(String businessId) {
@@ -461,7 +465,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             payMsg = ResultModel.ok();
         } else {
             payMsg = queryNewPayResult(param);
-            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            /*if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
@@ -474,7 +478,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
-            }
+            }*/
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
@@ -561,10 +565,21 @@ public class NewPaymentService implements NewPaymentServiceI {
      * @return
      */
     private PayMsg payCallback(String payType, String channel, String retStr) {
-        PaymentService paymentService = PaymentServiceFactory.getPayService(payType);
-        logger.info("paymentService = {}", paymentService);
-        if (paymentService != null) {
-            return paymentService.handlePayResult(retStr, channel);
+        JSONObject json = JSONObject.parseObject(retStr);
+        String orderNum = json.getString("orderNum");
+        String lockKey =String.format(SYNC_REFUND_CODE_KEY, orderNum + ":" + payType + ":" + payType);
+        boolean b = redisLock.lock(lockKey,15);
+        if (!b) {
+            return new PayMsg(PayMsg.success_code, "同步处理中");
+        }
+        try {
+            PaymentService paymentService = PaymentServiceFactory.getPayService(payType);
+            logger.info("paymentService = {}", paymentService);
+            if (paymentService != null) {
+                return paymentService.handlePayResult(retStr, channel);
+            }
+        } finally {
+            redisLock.unlock(lockKey);
         }
         return new PayMsg(PayMsg.failure_code, "invalied payType=" + payType);
     }

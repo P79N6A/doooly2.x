@@ -84,10 +84,18 @@ public class AdArticleService implements AdArticleServiceI {
         return messageDataBean;
     }
 
-    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2", key = "guideCategoryId, userId, recommendHomepage", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2",
+            key = "groupId, recommendHomepage，guideCategoryId, currentPage",
+            expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
     @Override
-    public MessageDataBean getGuideProductListv2(String guideCategoryId, Integer currentPage, Integer pageSize, String userId, String recommendHomepage) {
+    public MessageDataBean getGuideProductListv2(Map<String, String> paramMap) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        String userId = paramMap.get("userId");
+        String guideCategoryId = paramMap.get("guideCategoryId");
+        String recommendHomepage = paramMap.get("recommendHomepage");
+        Integer currentPage = Integer.valueOf(paramMap.get("currentPage"));
+        Integer pageSize = Integer.valueOf(paramMap.get("pageSize"));
+
         HashMap<String, Object> map = new HashMap<String, Object>();
         Pagelab pagelab = new Pagelab(currentPage, pageSize);
         // 查询总数

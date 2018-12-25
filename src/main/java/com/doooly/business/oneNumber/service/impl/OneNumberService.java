@@ -32,7 +32,6 @@ import com.doooly.entity.reachad.AdUser;
 public class OneNumberService implements OneNumberServiceI {
 
     private static Logger logger = Logger.getLogger(OneNumberService.class);
-    private static ResourceBundle appBundle = ResourceBundle.getBundle("prop/common");
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
@@ -174,18 +173,16 @@ public class OneNumberService implements OneNumberServiceI {
                                                AdBusinessExpandInfo adBusinessExpandInfo) {
         Map<String, Object> res = new HashMap<>();
         String mobile = null;
-        String dev_pub_key = appBundle.getString("ONE_NUM_DEV_PUB_KEY");
+        // String dev_pub_key = PropertiesHolder.getProperty("ONE_NUM_DEV_PUB_KEY"); // Dev env key
         String prd_pub_key = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY");
-        logger.info("--------------- dev_pub_key :"  + dev_pub_key);
-        logger.info("################ prd_pub_key :"  + prd_pub_key);
-        String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(dev_pub_key), adUser.getTelephone());
+        String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(prd_pub_key), adUser.getTelephone());
         try {
             mobile = URLEncoder.encode(str, "UTF-8");// 进行编码传输
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        res.put("headerKey", appBundle.getString("ONE_NUM_HEADER_KEY"));
-        res.put("headerValue", appBundle.getString("ONE_NUM_HEADER_VALUE"));
+        res.put("headerKey", PropertiesHolder.getProperty("ONE_NUM_HEADER_KEY"));
+        res.put("headerValue", PropertiesHolder.getProperty("ONE_NUM_HEADER_VALUE"));
         res.put("telNo", mobile);
         res.put("channelCode", adBusinessExpandInfo.getShopId());
         res.put("type", adBusinessExpandInfo.getType()); //前端需要字段，判断是否是新接口，酷邀贷专属

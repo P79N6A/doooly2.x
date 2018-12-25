@@ -88,8 +88,8 @@ public class TokenUtil {
 			redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken, TOKEN_EXPIRE,
 					TimeUnit.DAYS);
 			// 4.放入缓存token:userId
-			// redisService.opsForValue().set(userToken, userId, TOKEN_EXPIRE,
-			// TimeUnit.DAYS);
+			 redisService.opsForValue().set(userToken, userId, TOKEN_EXPIRE,
+			 TimeUnit.DAYS);
 		}
 
 		return userToken;
@@ -116,7 +116,8 @@ public class TokenUtil {
 		redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken, TOKEN_EXPIRE,
 				TimeUnit.DAYS);
 		// 3.放入缓存token:userId
-//		redisService.opsForValue().set(userToken, userId);
+		redisService.opsForValue().set(userToken, userId,TOKEN_EXPIRE,
+				TimeUnit.DAYS);
 
 		return userToken;
 	}

@@ -16,6 +16,8 @@ public interface MeituanService {
 
     String convertMapToUrl(Map<String,Object> map);
 
+    String convertMapToUrlEncode(Map<String, Object> paramMap);
+
     OrderMsg createOrderMeituan(JSONObject json);
 
 }

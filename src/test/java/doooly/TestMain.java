@@ -8,9 +8,12 @@ import com.google.gson.Gson;
 import com.reach.redis.utils.GsonUtils;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +76,33 @@ public class TestMain {
         }
         System.out.println(new Gson().toJson(list.subList(list.size() - 1,list.size())));
 
+    }
+
+    @Test
+    public void test3() {
+        System.out.println(getStrEncode("%E6%B5%8B%E8%AF%95%E4%BA%A7%E5%93%81"));
+        try {
+            String s = URLEncoder.encode("测试产品","UTF-8");
+            System.out.println(s);
+            System.out.println(URLDecoder.decode(s,"UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private String getStrEncode(String s) {
+        List<String> encodes = Arrays.asList("GB2312","ISO-8859-1","UTF-8","GBK");
+        for (int i = 0; i < encodes.size(); i++) {
+            try {
+                if (s.equals(new String(s.getBytes(encodes.get(i)),encodes.get(i)))) {
+                    return encodes.get(i);
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
     }
 
 }

@@ -29,6 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -67,6 +70,8 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Map<String,Object> getMeituanEasyLoginUrl(JSONObject jsonObject) {
+        String url = meituanService.convertMapToUrlEncode(jsonObject);
+        logger.info("url:{}", url);
         String token = jsonObject.getString("token");
         String userId = jsonObject.getString("userId");
         String loginUrl = "";
@@ -146,14 +151,16 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     public OrderMsg pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         JSONObject jsonObject = getJsonObjectFromRequest(request);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
-        boolean signValid = validSign(jsonObject);
+        boolean signValid = true;//validSign(jsonObject);
         OrderMsg orderMsg = null;
         try {
             if (signValid) {
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
                 jsonObject.put("userId",orderMsg.getData().get("userId"));
-                response.sendRedirect(configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +  meituanService.convertMapToUrl(jsonObject));
+                String redirectUrl = configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +  meituanService.convertMapToUrlEncode(jsonObject);
+                logger.info("美团pay跳转url：{}",redirectUrl);
+                response.sendRedirect(redirectUrl);
             } else {
                 orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
             }
@@ -257,10 +264,16 @@ public class MeituanRestServiceImpl implements MeituanRestService {
 
     public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
+        String charset = request.getParameter("encoding");
         Enumeration enu = request.getParameterNames();
         while (enu.hasMoreElements()) {
             String key = (String)enu.nextElement();
             String value = request.getParameter(key);
+            try {
+                value = new String(value.getBytes("iso-8859-1"),charset);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             jsonObject.put(key,value);
         }
         return jsonObject;

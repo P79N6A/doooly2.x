@@ -50,7 +50,6 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		String groupId = request.getHeader("groupId");
 		// 获取用户id
 		Integer userId = obj.getInteger("userId");
-		// String address = obj.getString("address");
 		Integer type = obj.getInteger("type");
 		Integer adType = obj.getInteger("adType");
 		// logger.info("App首页的地域信息为============="+address);
@@ -59,7 +58,7 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		map.put("groupId", request.getHeader("groupId"));
 		map.put("userId", obj.getInteger("userId").toString());
 		map.put("type", obj.getInteger("type").toString());
-		map.put("adType", obj.getInteger("adType").toString());
+		map.put("adType", obj.getInteger("adType") != null ? obj.getInteger("adType").toString() : null);
 		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(map);
 
 		logger.info(messageDataBean.toJsonString());

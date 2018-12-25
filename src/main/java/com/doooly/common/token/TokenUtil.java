@@ -1,20 +1,18 @@
 package com.doooly.common.token;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import com.doooly.common.context.SpringContextUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.doooly.common.async.AsyncDooolyService;
-import com.doooly.common.context.SpringContextUtils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -54,7 +52,7 @@ public class TokenUtil {
 			return false;
 		// 使用token:userId 标识用户token对应的key
 		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils.getBeanById("redisTemplate");
-		AsyncDooolyService asyncDooolyService = (AsyncDooolyService) SpringContextUtils.getBeanByClass(AsyncDooolyService.class);
+//		AsyncDooolyService asyncDooolyService = (AsyncDooolyService) SpringContextUtils.getBeanByClass(AsyncDooolyService.class);
 		String tokenKey = String.format(channel + ":" + TOKEN_KEY, userId);
 		String tokenValue = redisService.opsForValue().get(tokenKey);
 		// 若Token为空，验证失败
@@ -62,7 +60,7 @@ public class TokenUtil {
 			return false;
 		} else {
 			// 验证token成功
-			asyncDooolyService.setUserTokeExpire(channel, userId);
+//			asyncDooolyService.setUserTokeExpire(channel, userId);
 			log.info("验证token成功,userId={}",userId);
 			return true;
 		}

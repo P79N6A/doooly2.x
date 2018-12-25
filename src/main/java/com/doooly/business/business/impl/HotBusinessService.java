@@ -56,13 +56,13 @@ public class HotBusinessService implements HotBusinessServiceI {
 	// private int HOTMERCHATADS = 3;
 
 
-	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type, adType",
+	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type",
 			expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
 	@Override
 	public MessageDataBean getIndexData(Map<String, String> paramMap) {
 		Integer userId = Integer.valueOf(paramMap.get("userId"));
 		Integer type = Integer.valueOf(paramMap.get("type"));
-		Integer adType = Integer.valueOf(paramMap.get("adType"));
+//		Integer adType = Integer.valueOf(paramMap.get("adType"));
 
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -89,9 +89,9 @@ public class HotBusinessService implements HotBusinessServiceI {
 		// messageDataBean.setCode(MessageDataBean.success_code);
 		// }
 		int pageType = INDEXADS;
-		if (null != adType && adType == 1) {
-			pageType = 8;
-		}
+//		if (null != adType && adType == 1) {
+//			pageType = 8;
+//		}
 		List<AdAd> ads = adAdDao.findAllByType(pageType, type, userId);
 		if (!ads.isEmpty()) {
 			map.put("ads", ads);

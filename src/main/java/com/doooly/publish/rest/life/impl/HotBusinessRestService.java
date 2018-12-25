@@ -47,18 +47,12 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String index(JSONObject obj, @Context HttpServletRequest request) {
-		String groupId = request.getHeader("groupId");
-		// 获取用户id
-		Integer userId = obj.getInteger("userId");
-		Integer type = obj.getInteger("type");
-		Integer adType = obj.getInteger("adType");
-		// logger.info("App首页的地域信息为============="+address);
-
 		Map<String, String> map = new HashMap<>();
 		map.put("groupId", request.getHeader("groupId"));
 		map.put("userId", obj.getInteger("userId").toString());
 		map.put("type", obj.getInteger("type").toString());
-		map.put("adType", obj.getInteger("adType") != null ? obj.getInteger("adType").toString() : null);
+		// 没有传这个值得接口
+//		map.put("adType", obj.getInteger("adType") != null ? obj.getInteger("adType").toString() : null);
 		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(map);
 
 		logger.info(messageDataBean.toJsonString());

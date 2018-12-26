@@ -6,6 +6,7 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
 import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.common.meituan.MeituanConstants;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.dao.reachad.*;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
@@ -52,11 +54,12 @@ public class MeituanServiceImpl implements MeituanService{
 
 
     @Override
-    public String easyLogin(String entToken, String staffNo, String staffPhoneNo) throws Exception{
+    public String easyLogin(String entToken, String staffNo, String staffPhoneNo,MeituanProductTypeEnum productTypeEnum) throws Exception{
         EasyLogin easyLogin = new EasyLogin();
         easyLogin.setEntToken(entToken);
         easyLogin.setStaffNo(staffNo);
         easyLogin.setStaffPhoneNo(staffPhoneNo);
+        easyLogin.setProductType(productTypeEnum.getCode());
         Map<String,Object> paramMap = BeanMapUtil.transBean2Map(easyLogin);
         paramMap.remove("signature");
         paramMap =  BeanMapUtil.sortMapByKey(paramMap);
@@ -95,6 +98,27 @@ public class MeituanServiceImpl implements MeituanService{
                 sb.append(entry.getKey() + "=" + entry.getValue());
             } else {
                 sb.append("&").append(entry.getKey() + "=" + entry.getValue());
+            }
+        }
+        return sb.toString();
+    }
+
+
+    public String convertMapToUrlEncode(Map<String, Object> paramMap) {
+        StringBuilder sb = new StringBuilder("?");
+        for (Map.Entry<String,Object> entry : paramMap.entrySet()) {
+            if (sb.length() == 1) {
+                try {
+                    sb.append(entry.getKey() + "=" + URLEncoder.encode(String.valueOf(entry.getValue()),"UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    sb.append("&").append(entry.getKey() + "=" + URLEncoder.encode(String.valueOf(entry.getValue()),"utf-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return sb.toString();
@@ -142,6 +166,7 @@ public class MeituanServiceImpl implements MeituanService{
         OrderVo order = new OrderVo();
         Date orderDate = new Date();
         order.setBussinessId(1001);
+        order.setOrderId(o.getId());
         order.setUserId(adUser.getId());
         order.setOrderNumber(orderNum);
         order.setStoresId(orderVo.getStoresId());
@@ -212,6 +237,7 @@ public class MeituanServiceImpl implements MeituanService{
         orderItem.setUpdateBy(null);
         orderItem.setCreateDate(new Date());
         List<OrderItemVo> orderItemVoList = new ArrayList<>();
+        orderItemVoList.add(orderItem);
         adOrderDetailDao.bantchInsert(o.getId(),orderItemVoList);
 
 

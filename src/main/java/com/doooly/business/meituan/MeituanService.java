@@ -3,6 +3,7 @@ package com.doooly.business.meituan;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dto.common.OrderMsg;
+import com.doooly.entity.reachad.AdUser;
 
 import java.util.Map;
 

@@ -15,6 +15,8 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -66,16 +68,14 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     private StringRedisTemplate stringRedisTemplate;
 
 
-    @POST
+    @GET
     @Path("/getMeituanEasyLoginUrl")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Map<String,Object> getMeituanEasyLoginUrl(JSONObject jsonObject) {
-        String url = meituanService.convertMapToUrlEncode(jsonObject);
-        logger.info("url:{}", url);
-        String token = jsonObject.getString("token");
-        String userId = jsonObject.getString("userId");
-        String productType = jsonObject.getString("productType");
+    @Produces("application/json;charset=UTF-8")
+    @Consumes("application/json;charset=UTF-8")
+    public void getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
+        String token = request.getHeader("token");
+        String userId = request.getHeader("userId");
+        String productType = request.getParameter("productType");
         if (StringUtils.isBlank(productType)) {
             productType = MeituanProductTypeEnum.WAIMAI.getCode();
         }
@@ -85,14 +85,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             if (adUser != null) {
                 try {
                     loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                    response.sendRedirect(loginUrl);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("getMeituanEasyLoginUrl异常",e);
                 }
             }
         }
-        Map<String,Object> retMap = new HashMap<>();
-        retMap.put("loginUrl",loginUrl);
-        return retMap;
     }
 
 
@@ -156,10 +154,18 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     public OrderMsg pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         JSONObject jsonObject = getJsonObjectFromRequest(request);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
-        boolean signValid = true;//validSign(jsonObject);
+        boolean signValid = validSign(jsonObject);
         OrderMsg orderMsg = null;
         try {
             if (signValid) {
+                /**
+                 * 未支付订单同步：{"amount":"45.00","orderNumber":"11063373","serialNumber":"0","price":"45.00","storesId":"A001",
+                 * "businessId":"TEST_wf12e42a800b585piaoniu",
+                 * "orderDetail":[{"amount":"45.00","category":"5","code":"3883739","goods":"测试展览演出","number":1,"price":"45.00",
+                 * "tax":"0"},{"amount":"0.00","category":"0000","code":"0000","goods":"运费","number":1,"price":"0.00","tax":"0"}],
+                 * "type":1,"orderDate":"2018-12-26 14:40:54","cardNumber":"88588800005"}
+                 */
+                //商家未支付订单同步接口
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 logger.info("美团创建订单返回：{}",GsonUtils.son.toJson(orderMsg));
                 jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
@@ -212,6 +218,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
 
 
     /**
+     * 放到收银台
      * orderNum
      * amount
      * @param jsonObject

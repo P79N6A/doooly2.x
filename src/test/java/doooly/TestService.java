@@ -5,6 +5,7 @@ package doooly;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.reachad.AdUser;
 import com.github.pagehelper.PageHelper;
@@ -50,7 +51,7 @@ public class TestService {
 
     @Test
     public void test() throws Exception{
-        String ret = meituanService.easyLogin("8e348852107ccc2b299648cd832dafdc","29352788037","15711667875");
+        String ret = meituanService.easyLogin("8e348852107ccc2b299648cd832dafdc","29352788037","15711667875", MeituanProductTypeEnum.WAIMAI);
         System.out.println("ret1 = " + ret);
     }
 

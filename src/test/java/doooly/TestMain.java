@@ -1,6 +1,7 @@
 package doooly;
 
 import com.doooly.common.meituan.MeituanConstants;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.entity.meituan.EasyLogin;
@@ -88,6 +89,13 @@ public class TestMain {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @Test
+    public void test4() {
+        MeituanProductTypeEnum  meituanProductTypeEnum =  MeituanProductTypeEnum.getMeituanProductTypeByCode("sqt_home");
+        System.out.println(meituanProductTypeEnum.getCode() + "|" + meituanProductTypeEnum.getDesc());
     }
 
 

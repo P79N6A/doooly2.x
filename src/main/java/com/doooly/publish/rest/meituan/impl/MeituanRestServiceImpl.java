@@ -10,6 +10,7 @@ import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.common.meituan.MeituanConstants;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdUser;
@@ -74,12 +75,16 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         logger.info("url:{}", url);
         String token = jsonObject.getString("token");
         String userId = jsonObject.getString("userId");
+        String productType = jsonObject.getString("productType");
+        if (StringUtils.isBlank(productType)) {
+            productType = MeituanProductTypeEnum.WAIMAI.getCode();
+        }
         String loginUrl = "";
         if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
             if (adUser != null) {
                 try {
-                    loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone());
+                    loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -158,7 +163,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
                 jsonObject.put("userId",orderMsg.getData().get("userId"));
-                String redirectUrl = configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +  meituanService.convertMapToUrlEncode(jsonObject);
+                jsonObject.put("orderSource","meituan");
+                String redirectUrl = configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
+                        orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject);
                 logger.info("美团pay跳转url：{}",redirectUrl);
                 response.sendRedirect(redirectUrl);
             } else {

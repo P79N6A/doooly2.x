@@ -6,6 +6,7 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
 import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.common.meituan.MeituanConstants;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
 import com.doooly.dao.reachad.*;
@@ -53,11 +54,12 @@ public class MeituanServiceImpl implements MeituanService{
 
 
     @Override
-    public String easyLogin(String entToken, String staffNo, String staffPhoneNo) throws Exception{
+    public String easyLogin(String entToken, String staffNo, String staffPhoneNo,MeituanProductTypeEnum productTypeEnum) throws Exception{
         EasyLogin easyLogin = new EasyLogin();
         easyLogin.setEntToken(entToken);
         easyLogin.setStaffNo(staffNo);
         easyLogin.setStaffPhoneNo(staffPhoneNo);
+        easyLogin.setProductType(productTypeEnum.getCode());
         Map<String,Object> paramMap = BeanMapUtil.transBean2Map(easyLogin);
         paramMap.remove("signature");
         paramMap =  BeanMapUtil.sortMapByKey(paramMap);

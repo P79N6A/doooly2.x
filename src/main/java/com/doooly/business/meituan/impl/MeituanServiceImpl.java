@@ -164,11 +164,11 @@ public class MeituanServiceImpl implements MeituanService{
         //ad_order_report
         OrderVo order = new OrderVo();
         Date orderDate = new Date();
-        order.setBussinessId(1001);
+        order.setBussinessId(9413);
         order.setOrderId(o.getId());
         order.setUserId(adUser.getId());
         order.setOrderNumber(orderNum);
-        order.setStoresId("");
+        order.setStoresId("A001");
         order.setTotalMount(total);
         order.setTotalPrice(total);
         order.setOrderDate(orderDate);

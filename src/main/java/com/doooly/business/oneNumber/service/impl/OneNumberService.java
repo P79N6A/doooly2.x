@@ -58,7 +58,7 @@ public class OneNumberService implements OneNumberServiceI {
                 break;
             // 酷邀贷专属
             case 2:
-                map = getKuYaoDaiUrl(targetUrl, adUser, adBusinessExpandInfo);
+                resultUrl = getKuYaoDaiUrl(targetUrl, adUser, adBusinessExpandInfo);
                 break;
             // 酷屏专属
             case 3:
@@ -77,9 +77,7 @@ public class OneNumberService implements OneNumberServiceI {
                 break;
         }
         logger.info("1号通生成的结果链接:" + resultUrl);
-        if (map.isEmpty()) {
-            map.put("resultUrl", resultUrl);
-        }
+        map.put("resultUrl", resultUrl);
         messageDataBean.setCode(MessageDataBean.success_code);
         messageDataBean.setData(map);
         return messageDataBean;
@@ -169,26 +167,21 @@ public class OneNumberService implements OneNumberServiceI {
      * @param adBusinessExpandInfo 商户扩展信息
      * @return 跳转链接
      */
-    private Map<String, Object> getKuYaoDaiUrl(String targetUrl, AdUser adUser,
-                                               AdBusinessExpandInfo adBusinessExpandInfo) {
-        Map<String, Object> res = new HashMap<>();
+    private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
         String mobile = null;
-        // String dev_pub_key = PropertiesHolder.getProperty("ONE_NUM_DEV_PUB_KEY"); // Dev env key
-        String prd_pub_key = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY");
-        String str = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(prd_pub_key), adUser.getTelephone());
+        String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(
+                PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")), adUser.getTelephone());
         try {
-            mobile = URLEncoder.encode(str, "UTF-8");// 进行编码传输
+            mobile = URLEncoder.encode(rsaMobile, "UTF-8");// 进行编码传输
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        res.put("headerKey", PropertiesHolder.getProperty("ONE_NUM_HEADER_KEY"));
-        res.put("headerValue", PropertiesHolder.getProperty("ONE_NUM_HEADER_VALUE"));
-        res.put("telNo", mobile);
-        res.put("channelCode", adBusinessExpandInfo.getShopId());
-        res.put("type", adBusinessExpandInfo.getType()); //前端需要字段，判断是否是新接口，酷邀贷专属
-        res.put("resultUrl", adBusinessExpandInfo.getBusinessUrl());
-        return res;
+        String resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + "mobile=" + mobile + "&channelCode="
+                + adBusinessExpandInfo.getShopId();
+        return resultUrl;
     }
+
+
 
     /**
      * 内购网链接获取

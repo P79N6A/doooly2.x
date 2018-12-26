@@ -161,10 +161,11 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         try {
             if (signValid) {
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
+                logger.info("美团创建订单返回：{}",GsonUtils.son.toJson(orderMsg));
                 jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
                 jsonObject.put("userId",orderMsg.getData().get("userId"));
                 jsonObject.put("orderSource","meituan");
-                String redirectUrl = configDictServiceI.getValueByTypeAndKey("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
+                String redirectUrl = configDictServiceI.getValueByTypeAndKeyNoCache("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
                         orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject);
                 logger.info("美团pay跳转url：{}",redirectUrl);
                 response.sendRedirect(redirectUrl);

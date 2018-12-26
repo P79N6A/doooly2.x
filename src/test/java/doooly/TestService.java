@@ -51,7 +51,7 @@ public class TestService {
 
     @Test
     public void test() throws Exception{
-        String ret = meituanService.easyLogin("8e348852107ccc2b299648cd832dafdc","29352788037","15711667875", MeituanProductTypeEnum.WAIMAI);
+        String ret = meituanService.easyLogin("8e348852107ccc2b299648cd832dafdc","29352788035","15711667873", MeituanProductTypeEnum.WAIMAI);
         System.out.println("ret1 = " + ret);
     }
 

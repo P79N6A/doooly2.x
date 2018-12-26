@@ -143,7 +143,6 @@ public class MeituanServiceImpl implements MeituanService{
             return msg;
         }
 
-        OrderVo orderVo = new OrderVo();
         BigDecimal total = json.getBigDecimal("total");
         String orderNum = json.getString("outer_trade_no");
         if (orderNum.contains(MeituanConstants.app_id)) {
@@ -169,16 +168,16 @@ public class MeituanServiceImpl implements MeituanService{
         order.setOrderId(o.getId());
         order.setUserId(adUser.getId());
         order.setOrderNumber(orderNum);
-        order.setStoresId(orderVo.getStoresId());
+        order.setStoresId("");
         order.setTotalMount(total);
         order.setTotalPrice(total);
         order.setOrderDate(orderDate);
         order.setState(OrderService.PayState.UNPAID.getCode());
         order.setType(OrderService.OrderStatus.NEED_TO_PAY.getCode());
         order.setIsUserRebate('0');
-        order.setUserRebate(orderVo.getUserRebate());
+        order.setUserRebate(BigDecimal.ZERO);
         order.setUserReturnAmount(new BigDecimal("0"));
-        order.setIsBusinessRebate(orderVo.getIsBusinessRebate());
+        order.setIsBusinessRebate('0');
         order.setBusinessRebateAmount(new BigDecimal("0"));
         order.setBillingState('0');
         order.setDelFlag('0');
@@ -188,13 +187,13 @@ public class MeituanServiceImpl implements MeituanService{
         order.setIsSource(2);//合作商家
         order.setFirstCount(0);
         order.setAirSettleAccounts(null);
-        order.setRemarks(orderVo.getRemarks());
+        order.setRemarks("");
         order.setUpdateDate(null);
         order.setCreateDate(orderDate);
-        order.setConsigneeName(orderVo.getConsigneeName());
-        order.setConsigneeAddr(orderVo.getConsigneeAddr());
-        order.setConsigneeMobile(orderVo.getConsigneeMobile());
-        order.setProductType(orderVo.getProductType());
+        order.setConsigneeName("");
+        order.setConsigneeAddr("");
+        order.setConsigneeMobile("");
+        order.setProductType(0);
         order.setActType(OrderService.ActivityType.COMMON_ORDER.getActType());
         order.setVoucher(BigDecimal.ZERO);
         order.setCouponId("");
@@ -209,12 +208,8 @@ public class MeituanServiceImpl implements MeituanService{
                 order.setServiceCharge(BigDecimal.ZERO);
             } else {
                 //非0元订单
-                String supportPayType = orderVo.getSupportPayType();
-                if (StringUtils.isEmpty(orderVo.getSupportPayType())) {
-                    supportPayType = "all";
-                }
-                order.setSupportPayType(supportPayType);
-                order.setServiceCharge(orderVo.getServiceCharge());
+                order.setSupportPayType("all");
+                order.setServiceCharge(BigDecimal.ZERO);
             }
         }
         adOrderReportDao.insert(order);

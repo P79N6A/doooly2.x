@@ -57,41 +57,16 @@ public class HotBusinessService implements HotBusinessServiceI {
 
 
 	@Cacheable(module = "HOTBUSINESS", event = "getIndexData", key = "groupId, type",
-			expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
+			expiresKey = "expires", required = true)
 	@Override
 	public MessageDataBean getIndexData(Map<String, String> paramMap) {
 		Integer userId = Integer.valueOf(paramMap.get("userId"));
 		Integer type = Integer.valueOf(paramMap.get("type"));
-//		Integer adType = Integer.valueOf(paramMap.get("adType"));
+		paramMap.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
 
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		// if (!StringUtils.isBlank(address)) {
-		// Pagelab pagelab = new Pagelab(1, 10);
-		// // 查询总数
-		// int totalNum = adBusinessDao.getHotTotalNum(userId,address);
-		// pagelab.setTotalNum(totalNum);
-		// List<AdBusiness> merchants =
-		// adBusinessDao.findHotMerchantByPage(userId,address,"",pagelab.getStartIndex(),
-		// pagelab.getPageSize());
-		// if (!merchants.isEmpty()) {
-		// map.put("hotMerchantList", merchants);
-		// map.put("countPage", pagelab.getCountPage());
-		// messageDataBean.setCode(MessageDataBean.success_code);
-		// } else {
-		// map.put("hotMerchantList", null);
-		// map.put("countPage", 0);
-		// messageDataBean.setCode(MessageDataBean.no_data_code);
-		// }
-		// }else {
-		// map.put("countPage", 0);
-		// map.put("hotMerchantList", null);
-		// messageDataBean.setCode(MessageDataBean.success_code);
-		// }
 		int pageType = INDEXADS;
-//		if (null != adType && adType == 1) {
-//			pageType = 8;
-//		}
 		List<AdAd> ads = adAdDao.findAllByType(pageType, type, userId);
 		if (!ads.isEmpty()) {
 			map.put("ads", ads);
@@ -114,6 +89,20 @@ public class HotBusinessService implements HotBusinessServiceI {
 		} else {
 			map.put("type", null);
 		}
+
+		// 失效时间
+		Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
+		for (AdAd adAd : ads) {
+			// 如果失效时间大于商户服务结束时间，则修改失效时间为商户服务结束时间
+			if (date > (adAd.getEndDate().getTime()) / 1000) {
+				date = (adAd.getEndDate().getTime()) / 1000;
+			}
+		}
+
+		paramMap.put("expires", date - (System.currentTimeMillis() / 1000) + "");
+		logger.info("getIndexData>>失效时间=====" + (date - (System.currentTimeMillis() / 1000)));
+
 		messageDataBean.setData(map);
 		return messageDataBean;
 	}

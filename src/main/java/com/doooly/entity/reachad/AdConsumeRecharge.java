@@ -1,6 +1,6 @@
 package com.doooly.entity.reachad;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import java.util.Date;
 
 /**
  *
@@ -13,6 +13,7 @@ public class AdConsumeRecharge {
     private String iconUrl;  //图标地址
     private String linkUrl; //链接地址
     private String subUrl; //跳转链接后缀
+    private Date serverEndTime; // 服务结束时间
     /** 是否支持积分*/
     private String isSupportIntegral;
     //角标
@@ -21,7 +22,15 @@ public class AdConsumeRecharge {
     private Integer floorId;
     //
     private String guideIconUrl;
-    
+
+    public Date getServerEndTime() {
+        return serverEndTime;
+    }
+
+    public void setServerEndTime(Date serverEndTime) {
+        this.serverEndTime = serverEndTime;
+    }
+
     public String getGuideIconUrl() {
 		return guideIconUrl;
 	}

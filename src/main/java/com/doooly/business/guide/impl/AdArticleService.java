@@ -84,10 +84,20 @@ public class AdArticleService implements AdArticleServiceI {
         return messageDataBean;
     }
 
-    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2", key = "userId, guideCategoryId, recommendHomepage", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv2",
+            key = "groupId, recommendHomepage, guideCategoryId, currentPage",
+            expiresKey = "expires")
     @Override
-    public MessageDataBean getGuideProductListv2(String userId, String guideCategoryId, Integer currentPage, Integer pageSize, String recommendHomepage) {
+    public MessageDataBean getGuideProductListv2(Map<String, String> paramMap) {
         MessageDataBean messageDataBean = new MessageDataBean();
+        String userId = paramMap.get("userId");
+        String guideCategoryId = paramMap.get("guideCategoryId");
+        String recommendHomepage = paramMap.get("recommendHomepage");
+        Integer currentPage = Integer.valueOf(paramMap.get("currentPage"));
+        Integer pageSize = Integer.valueOf(paramMap.get("pageSize"));
+
+        paramMap.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+
         HashMap<String, Object> map = new HashMap<String, Object>();
         Pagelab pagelab = new Pagelab(currentPage, pageSize);
         // 查询总数
@@ -116,6 +126,23 @@ public class AdArticleService implements AdArticleServiceI {
             map.put("countPage", pagelab.getCountPage());// 总页码
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setData(map);
+
+            // 失效时间
+            Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
+            for (AdProduct adProduct : adProducts) {
+                // 如果失效时间大于商品结束时间，则修改失效时间为商品结束时间
+                if (date > (adProduct.getBuyEndTime().getTime()) / 1000) {
+                    date = (adProduct.getBuyEndTime().getTime()) / 1000;
+                }
+            }
+
+            date = date - (System.currentTimeMillis() / 1000);
+
+            logger.info("getGuideProductListv2>>失效时间(实际会减去1s)===" + date);
+            paramMap.put("expires", date + "");
+
+            map.put("expires", (date - 1) + "");
         } else {
             messageDataBean.setCode(MessageDataBean.no_data_code);
             messageDataBean.setMess("查询导购商品数据为空");

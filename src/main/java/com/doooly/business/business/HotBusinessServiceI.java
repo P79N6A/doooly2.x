@@ -1,9 +1,9 @@
 package com.doooly.business.business;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
+
+import java.util.Map;
 
 /**
  * @Description:
@@ -12,7 +12,7 @@ import com.doooly.dto.common.MessageDataBean;
  */
 public interface HotBusinessServiceI {
 
-	MessageDataBean getIndexData(Integer userId, Integer type, Integer adType);
+	MessageDataBean getIndexData(Map<String, String> map);
 
 	MessageDataBean getHotMerchatData(Integer userId, String address, Integer type, Integer shopType);
 

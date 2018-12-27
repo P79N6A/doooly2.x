@@ -14,6 +14,7 @@ import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
+import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
@@ -208,14 +209,16 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 retMap.put("status",500);
                 retMap.put("msg","参数错误");
             }
+            //退款
             OrderVo orderVo = orderService.getByOrderNum(serialNum);
-            ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
-            if (resultModel.getCode() == 1000) {
+            PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
+            //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
+            if ("1000".equals(payMsg.getCode())) {
                 retMap.put("status",0);
                 retMap.put("msg","success");
             } else {
                 retMap.put("status",500);
-                retMap.put("msg",resultModel.getInfo());
+                retMap.put("msg",payMsg.getMess());
             }
         } else {
             retMap.put("status",500);

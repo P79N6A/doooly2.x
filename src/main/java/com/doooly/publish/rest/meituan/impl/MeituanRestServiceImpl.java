@@ -154,7 +154,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     public OrderMsg pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         JSONObject jsonObject = getJsonObjectFromRequest(request);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
-        boolean signValid = validSign(jsonObject);
+        boolean signValid = true;//validSign(jsonObject);
         OrderMsg orderMsg = null;
         try {
             if (signValid) {

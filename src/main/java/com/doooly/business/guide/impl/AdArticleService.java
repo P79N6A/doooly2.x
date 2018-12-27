@@ -139,10 +139,10 @@ public class AdArticleService implements AdArticleServiceI {
 
             date = date - (System.currentTimeMillis() / 1000);
 
-            logger.info("getGuideProductListv2>>失效时间(实际会减去10s)===" + date);
+            logger.info("getGuideProductListv2>>失效时间(实际会减去1s)===" + date);
             paramMap.put("expires", date + "");
 
-            map.put("expires", (date - 10) + "");
+            map.put("expires", (date - 1) + "");
         } else {
             messageDataBean.setCode(MessageDataBean.no_data_code);
             messageDataBean.setMess("查询导购商品数据为空");

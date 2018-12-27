@@ -384,11 +384,11 @@ public class IndexServiceImpl implements IndexServiceI {
 			logger.info("selectFloorsByV2_2(), execution time = {}", System.currentTimeMillis() - start);
 
             if (guideExpores > RedisConstants.REDIS_CACHE_EXPIRATION_DATE) {
-                map.put("expores", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+                map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
             } else {
-                map.put("expores", guideExpores + "");
+                map.put("expires", guideExpores + "");
             }
-            logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expores"));
+            logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expires"));
 
 			return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess, result)
 					.toJsonString();

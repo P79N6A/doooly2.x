@@ -34,4 +34,10 @@ public class MeituanConstants {
 
     public final static String url_meituan_pay_notify = "https://api-sqt.meituan.com/openapi/payNotify/third";
 
+    public final static String url_meituan_pay_notify_doooly = "http://test2.doooly.com/Doooly/jersey/meituan/payNotify";
+
+    public final static String meituan_bussinesss_id = "9486";
+
+    public final static String meituan_bussinesss_serial = "TEST_bb841e7227asehtmeituan";
+
 }

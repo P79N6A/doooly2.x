@@ -1,32 +1,44 @@
 package com.doooly.business.meituan.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
 import com.doooly.business.pay.bean.AdOrderSource;
+import com.doooly.business.payment.bean.ResultModel;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
+import com.doooly.business.payment.service.NewPaymentServiceI;
+import com.doooly.business.payment.utils.SignUtil;
+import com.doooly.business.utils.DateUtils;
+import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.RsaUtil;
 import com.doooly.common.util.BeanMapUtil;
+import com.doooly.common.util.HTTPSClientUtils;
+import com.doooly.common.util.RandomUtil;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.meituan.EasyLogin;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.interfaces.RSAPrivateKey;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by wanghai on 2018/12/13.
@@ -34,11 +46,10 @@ import java.util.Map;
 @Service
 public class MeituanServiceImpl implements MeituanService{
 
-    @Autowired
-    private AdUserDao adUserDao;
+    private static Logger logger = LoggerFactory.getLogger(MeituanServiceImpl.class);
 
     @Autowired
-    private OrderService orderService;
+    private AdUserDao adUserDao;
 
     @Autowired
     private OrderDao orderDao;
@@ -51,6 +62,13 @@ public class MeituanServiceImpl implements MeituanService{
 
     @Autowired
     private AdOrderSourceDao adOrderSourceDao;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
+
 
 
     @Override
@@ -124,6 +142,8 @@ public class MeituanServiceImpl implements MeituanService{
         return sb.toString();
     }
 
+    @Autowired
+    private NewPaymentServiceI newPaymentServiceI;
 
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
@@ -149,104 +169,75 @@ public class MeituanServiceImpl implements MeituanService{
             String[] a = orderNum.split(MeituanConstants.app_id);
             orderNum = a[1];
         }
+        Map<String,Object> tradeInfoMap = GsonUtils.son.fromJson(json.getString("tradeInfoMap"),Map.class);
+        JSONObject param = new JSONObject();
+        param.put("businessId", MeituanConstants.meituan_bussinesss_serial);//商户编号
+        param.put("cardNumber", adUser.getTelephone());
+        param.put("merchantOrderNo", orderNum);
+        param.put("tradeType", "DOOOLY_JS");
+        param.put("notifyUrl", json.getString("notify_url"));
+        param.put("body", json.getString("subject"));
+        param.put("isSource", 2);
+        param.put("orderDate", DateUtils.formatDateTime(new Date()));
+        param.put("storesId", "A001");
+        param.put("price", total);
+        param.put("amount", total);
+        param.put("clientIp", json.get("clientIp"));
+        param.put("nonceStr", RandomUtil.getRandomStr(16));
+        param.put("isPayPassword", adUser.getIsPayPassword());
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonDetail = new JSONObject();
+        jsonDetail.put("code", tradeInfoMap == null ? "" : tradeInfoMap.get("biz_code"));
+        jsonDetail.put("goods", json.getString("subject"));
+        jsonDetail.put("number", 1);
+        jsonDetail.put("price", total);
+        jsonDetail.put("category", "0000");
+        jsonDetail.put("tax", 0);
+        jsonDetail.put("amount", total);
+        jsonArray.add(jsonDetail);
+        param.put("orderDetail", jsonArray.toJSONString());
+        logger.info("美团下单参数param=========" + param);
 
-        //_order
-        Order o = new Order();
-        o.setIsRebate(0);
-        o.setOrderNumber(orderNum);
-        o.setBusinessRebate(new BigDecimal("0"));
-        o.setUserRebate(new BigDecimal("0"));
-        o.setCreateDateTime(new Date());
-        o.setState(0);
-        o.setSource(2);//合作商家
-        orderDao.insert(o);
-
-        //ad_order_report
-        OrderVo order = new OrderVo();
-        Date orderDate = new Date();
-        order.setBussinessId(9413);
-        order.setOrderId(o.getId());
-        order.setUserId(adUser.getId());
-        order.setOrderNumber(orderNum);
-        order.setStoresId("A001");
-        order.setTotalMount(total);
-        order.setTotalPrice(total);
-        order.setOrderDate(orderDate);
-        order.setState(OrderService.PayState.UNPAID.getCode());
-        order.setType(OrderService.OrderStatus.NEED_TO_PAY.getCode());
-        order.setIsUserRebate('0');
-        order.setUserRebate(BigDecimal.ZERO);
-        order.setUserReturnAmount(new BigDecimal("0"));
-        order.setIsBusinessRebate('0');
-        order.setBusinessRebateAmount(new BigDecimal("0"));
-        order.setBillingState('0');
-        order.setDelFlag('0');
-        order.setDelFlagUser('0');
-        order.setCreateBy(String.valueOf(adUser.getId()));
-        order.setIsFirst('0');
-        order.setIsSource(2);//合作商家
-        order.setFirstCount(0);
-        order.setAirSettleAccounts(null);
-        order.setRemarks("");
-        order.setUpdateDate(null);
-        order.setCreateDate(orderDate);
-        order.setConsigneeName("");
-        order.setConsigneeAddr("");
-        order.setConsigneeMobile("");
-        order.setProductType(0);
-        order.setActType(OrderService.ActivityType.COMMON_ORDER.getActType());
-        order.setVoucher(BigDecimal.ZERO);
-        order.setCouponId("");
-        //支持支付方式 ==> 1:积分,2:微信, 3.支付宝; 多个以逗号分割
-        if(order.getProductType() == OrderService.ProductType.NEXUS_RECHARGE.getCode()){
-            //全家集享卡只支持积分支付
-            order.setSupportPayType("1");
-        }else{
-            if (BigDecimal.ZERO.compareTo(total) == 0) {
-                //0元订单
-                order.setSupportPayType("0");
-                order.setServiceCharge(BigDecimal.ZERO);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(MeituanConstants.meituan_bussinesss_id);
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, adBusinessExpandInfo.getClientId()));
+        logger.info("美团下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = newPaymentServiceI.authorize(MeituanConstants.meituan_bussinesss_id);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
             } else {
-                //非0元订单
-                order.setSupportPayType("all");
-                order.setServiceCharge(BigDecimal.ZERO);
+                msg.setCode(GlobalResultStatusEnum.FAIL.getCode() + "");
+                msg.setMess("接口授权认证失败");
+                return msg;
             }
         }
-        adOrderReportDao.insert(order);
 
+        long timestamp = System.currentTimeMillis() / 1000;
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        parameters.put("client_id", adBusinessExpandInfo.getClientId());
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
 
-        //ad_order_detail
-        OrderItemVo orderItem = new OrderItemVo();
-        orderItem.setOrderReportId(o.getId());
-        orderItem.setCategoryId("");
-        orderItem.setCode("");
-        orderItem.setGoods(json.getString("subject"));
-        orderItem.setAmount(total);
-        orderItem.setPrice(total);
-        orderItem.setNumber(new BigDecimal(1));
-        orderItem.setCreateBy(adUser.getId()+"");
-        orderItem.setDelFlag(0);
-        orderItem.setRemarks("");
-        orderItem.setTax(null);
-        orderItem.setUpdateDate(null);
-        orderItem.setUpdateBy(null);
-        orderItem.setCreateDate(new Date());
-        List<OrderItemVo> orderItemVoList = new ArrayList<>();
-        orderItemVoList.add(orderItem);
-        adOrderDetailDao.bantchInsert(o.getId(),orderItemVoList);
-
-
-        //ad_order_source
-        AdOrderSource adOrderSource = new AdOrderSource();
-        adOrderSource.setOrderNumber(order.getOrderNumber());
-        adOrderSource.setBusinessId(order.getBussinessId());
-        adOrderSource.setCashDeskSource("d");
-        adOrderSource.setTraceCodeSource("d");
-        adOrderSourceDao.insert(adOrderSource);
-
-        //下单成功返回信息
-        msg.getData().put("orderNum", orderNum);
-        msg.getData().put("userId",adUser.getId());
+        JSONObject object = new JSONObject();
+        object.put("client_id", adBusinessExpandInfo.getClientId());
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
+        object.put("param", param.toJSONString());
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        logger.info("美团下单返回：{}",result);
+        if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //下单成功返回信息
+            msg.getData().put("orderNum", orderNum);
+            msg.getData().put("userId",adUser.getId());
+        } else {
+            msg.setCode("1001");
+            msg.setMess("下单失败");
+        }
         return msg;
     }
 }

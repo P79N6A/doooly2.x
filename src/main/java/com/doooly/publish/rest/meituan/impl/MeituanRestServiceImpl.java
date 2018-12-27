@@ -9,6 +9,7 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.impl.NewPaymentService;
+import com.doooly.common.IPUtils;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
@@ -72,7 +73,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/getMeituanEasyLoginUrl")
     @Produces("application/json;charset=UTF-8")
     @Consumes("application/json;charset=UTF-8")
-    public void getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
+    public String getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         String token = request.getHeader("token");
         String userId = request.getHeader("userId");
         String productType = request.getParameter("productType");
@@ -91,6 +92,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 }
             }
         }
+        return loginUrl;
     }
 
 
@@ -132,12 +134,13 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/payTest")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/json;charset=utf-8")
-    public void payTest(@Context HttpServletRequest request,@Context HttpServletResponse response) {
+    public String payTest(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         try {
             response.sendRedirect("https://admin.doooly.com/reachtest/activity_v1.0.0/#/airport?a=11");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return "";
     }
 
 
@@ -155,7 +158,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         JSONObject jsonObject = getJsonObjectFromRequest(request);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
-        OrderMsg orderMsg = null;
+        OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);
         try {
             if (signValid) {
                 /**
@@ -166,15 +169,20 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                  * "type":1,"orderDate":"2018-12-26 14:40:54","cardNumber":"88588800005"}
                  */
                 //商家未支付订单同步接口
+                //下单接口
+                jsonObject.put("clientIp", IPUtils.getIpAddr(request));
+                jsonObject.put("notifyUrl",MeituanConstants.url_meituan_pay_notify_doooly);
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 logger.info("美团创建订单返回：{}",GsonUtils.son.toJson(orderMsg));
-                jsonObject.put("orderNum",orderMsg.getData().get("orderNum"));
-                jsonObject.put("userId",orderMsg.getData().get("userId"));
-                jsonObject.put("orderSource","meituan");
+                JSONObject jsonObject1 = new JSONObject();
+                jsonObject1.put("userId",orderMsg.getData().get("userId"));
+                jsonObject1.put("orderSource","meituan");
+                jsonObject1.put("return_url","https://app.jia-fu.cn/app-takeaway/h5/rec/sqt/checkstand");
                 String redirectUrl = configDictServiceI.getValueByTypeAndKeyNoCache("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
-                        orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject);
+                        orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject1);
                 logger.info("美团pay跳转url：{}",redirectUrl);
-                response.sendRedirect(redirectUrl);
+                orderMsg.getData().put("redirectUrl",redirectUrl);
+                //response.sendRedirect(redirectUrl);
             } else {
                 orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
             }
@@ -234,14 +242,36 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         Map<String,Object> params = new HashMap<>();
         params.put("token",MeituanConstants.token);
         params.put("version",MeituanConstants.version);
-        Map<String,Object> contentParams = new HashMap<>();
-        contentParams.put("orderSN",jsonObject.getString("orderNum"));
-        contentParams.put("amount",jsonObject.getString("amount"));
-        contentParams.put("sign",MeituanConstants.sign);
-        contentParams.put("ts",new Date().getTime()/1000);
-        params.put("content",contentParams);
-        String ret = HttpClientUtil.doPost(MeituanConstants.url_meituan_pay_notify,GsonUtils.toString(params));
-        retMap = GsonUtils.son.fromJson(ret,Map.class);
+
+        String paramStr = jsonObject.getString("param");
+        Map<String,Object> paramMap= GsonUtils.son.fromJson(paramStr,Map.class);
+        String payStatus = String.valueOf(paramMap.get("payStatus"));
+        String outTradeNo = String.valueOf(paramMap.get("outTradeNo"));
+        String orderPrice = String.valueOf(paramMap.get("orderPrice"));
+        String ret = "";
+        if ("1".equals(payStatus)) {
+            Map<String,Object> contentParams = new HashMap<>();
+            contentParams.put("orderSN",jsonObject.getString("orderNum"));
+            contentParams.put("amount",jsonObject.getString("amount"));
+            contentParams.put("sign",MeituanConstants.sign);
+            contentParams.put("ts",new Date().getTime()/1000);
+            params.put("content",contentParams);
+            ret = HttpClientUtil.doPost(MeituanConstants.url_meituan_pay_notify,GsonUtils.toString(params));
+            retMap = GsonUtils.son.fromJson(ret,Map.class);
+            Map<String,Object> dataMap = GsonUtils.son.fromJson(String.valueOf(retMap.get("data")),Map.class);
+            logger.info("支付通知美团返回：{}",ret);
+            if ("0".equals(String.valueOf(dataMap.get("status")))) {
+                retMap.put("code",OrderMsg.success_code);
+                retMap.put("info",OrderMsg.success_mess);
+            } else {
+                return null;
+            }
+        } else {
+            retMap.put("payStatus",payStatus);
+            retMap.put("outTradeNo",outTradeNo);
+            retMap.put("orderPrice",orderPrice);
+            logger.info("美团订单支付失败：{}",GsonUtils.son.toJson(retMap));
+        }
         return retMap;
     }
 

@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.doooly.business.utils.RSAEncryptUtil;
+import com.doooly.common.constants.PropertiesHolder;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,16 +175,16 @@ public class OneNumberService implements OneNumberServiceI {
 	 * @return 跳转链接
 	 */
 	private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
-		String resultUrl;
-		String str = "telNo=" + adUser.getTelephone() + "&source=" + adBusinessExpandInfo.getShopId();
-		if (StringUtils.isNotBlank(targetUrl) && !"null".equals(targetUrl)) {
-			str += "&surl=" + targetUrl;
+		String mobile = null;
+		String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(
+				PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")), adUser.getTelephone());
+		try {
+			mobile = URLEncoder.encode(rsaMobile, "UTF-8");// 进行编码传输
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
-		if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
-			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str;
-		} else {
-			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str;
-		}
+		String resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + "mobile=" + mobile + "&channelCode="
+				+ adBusinessExpandInfo.getShopId();
 		return resultUrl;
 	}
 

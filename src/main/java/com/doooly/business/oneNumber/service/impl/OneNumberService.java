@@ -176,10 +176,12 @@ public class OneNumberService implements OneNumberServiceI {
 	 */
 	private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
 		String mobile = null;
-		String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(
-				PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")), adUser.getTelephone());
+		// String pubKey = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")
+		String pubKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCh+8ubaJTICB+I0lvQjKkw+fAebI2rPL9SuJAzoy24a8qOQaj4bDsxCw1y6xLgeBpZ1i31FnDAJvqmZJ3QQh+DSib6182u6sd6fByaTxbLqyetE4t90oUncuwnWX0R8HVREgOV718VKQIIcj+sULJIZ0LMpYLU37XVYfTDlrz0iwIDAQAB";
+		String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64
+						.decodeBase64(pubKey), adUser.getTelephone());
 		try {
-			mobile = URLEncoder.encode(rsaMobile, "UTF-8");// 进行编码传输
+			mobile = URLEncoder.encode(rsaMobile, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

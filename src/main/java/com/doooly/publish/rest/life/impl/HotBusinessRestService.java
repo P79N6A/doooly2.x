@@ -51,6 +51,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		map.put("groupId", request.getHeader("groupId"));
 		map.put("userId", obj.getInteger("userId").toString());
 		map.put("type", obj.getInteger("type").toString());
+
+		logger.info("index === groupId:" + request.getHeader("groupId"));
+
 		// 没有传这个值得接口
 //		map.put("adType", obj.getInteger("adType") != null ? obj.getInteger("adType").toString() : null);
 		MessageDataBean messageDataBean = hotBusinessServiceI.getIndexData(map);

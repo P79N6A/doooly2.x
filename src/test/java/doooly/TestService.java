@@ -7,8 +7,10 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
 import com.github.pagehelper.PageHelper;
+import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +100,15 @@ public class TestService {
         AdUser adUser = new AdUser();
         long x = adUserDao.getIdByPhoneOrCard("");
 
+    }
+
+    @Autowired
+    private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
+
+    @Test
+    public void test4() {
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId("9486");
+        System.out.println(new Gson().toJson(adBusinessExpandInfo));
     }
 
 

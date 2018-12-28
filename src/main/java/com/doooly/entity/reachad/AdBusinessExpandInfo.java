@@ -18,6 +18,16 @@ public class AdBusinessExpandInfo {
     /**兜礼访问商家密钥32位*/
     private String clientSecret;
 
+    private String payMethod;
+
+    public String getPayMethod() {
+        return payMethod;
+    }
+
+    public void setPayMethod(String payMethod) {
+        this.payMethod = payMethod;
+    }
+
     public Long getId() {
         return id;
     }

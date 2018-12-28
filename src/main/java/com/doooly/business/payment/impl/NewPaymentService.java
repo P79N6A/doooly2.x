@@ -3,7 +3,10 @@ package com.doooly.business.payment.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.business.AdBusinessServiceI;
+import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
+import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
@@ -20,6 +23,7 @@ import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.payment.utils.SignUtil;
 import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
@@ -63,6 +67,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
+import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
 
 /**
  * @Description:
@@ -104,6 +109,14 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdReturnDetailDao adReturnDetailDao;
     @Autowired
     private RedisLock redisLock;
+    @Autowired
+    private AdOrderReportServiceI adOrderReportServiceI;
+    @Autowired
+    private AdUserServiceI adUserServiceI;
+    @Autowired
+    private AdRechargeConfServiceI adRechargeConfServiceI;
+    @Autowired
+    private AdBusinessServiceI adBusinessServiceI;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -146,7 +159,11 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject param = orderSummary.getJSONObject("param");
         JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
         String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        //改造缓存 === zhangqing 20181227
+        //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
@@ -166,7 +183,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         parameters.put("access_token", accessToken);
         parameters.put("param", param.toJSONString());
         String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
-        logger.info(sign);
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
@@ -205,11 +221,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
-        List<OrderVo> orderVoList = orderService.getOrder(order);
-        if (CollectionUtils.isEmpty(orderVoList)) {
-            return null;
-        }
-        OrderVo o = orderVoList.get(0);
+        //20181227 优化改造只查询一个
+        //List<OrderVo> orderVoList = orderService.getOrder(order);
+        //if (CollectionUtils.isEmpty(orderVoList)) {
+        //    return null;
+        //}
+        //OrderVo o = orderVoList.get(0);
+        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
@@ -228,19 +246,34 @@ public class NewPaymentService implements NewPaymentServiceI {
         ) && o.getServiceCharge() != null) {
             retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
         }
+        //用户缓存改造
+        //AdUser user = adUserDao.getById(order.getUserId().intValue());
+        AdUser paramUser = new AdUser();
+        paramUser.setId(order.getUserId());
+        AdUser user = adUserServiceI.getUser(paramUser);
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
-            //用户消费金额
-            BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
+            //用户消费金额 优化改造20181227
+            //BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
+            //每月积分购买话费的金额
+            Map<String, Object> paramOrderMap = new HashMap<>();
+            paramOrderMap.put("userId", userId);
+            BigDecimal consumptionAmount = adOrderReportServiceI.getConsumptionAmountByMap(paramOrderMap);
             retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
-            AdUser user = adUserDao.getById(order.getUserId().intValue());
-            AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
+            //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
+            //20181227改造缓存---zhangqing
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("groupId", user.getGroupNum());
+            AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit());
         }
         //组建预支付订单参数
-        AdUser user = adUserDao.getById(order.getUserId().intValue());
-        AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
+        //20181227 缓存改造 ---zhangqing
+        //AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
+        AdBusiness paramBusiness = new AdBusiness();
+        paramBusiness.setId(o.getBussinessId());
+        AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
@@ -273,6 +306,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         result.put("param", param);
         retJson.put("company", business.getCompany());
         retJson.put("userIntegral", user.getIntegral());
+        retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id
@@ -282,8 +316,6 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel getPayForm(JSONObject params) {
-        String orderNum = params.getString("orderNum");
-        OrderVo order = orderService.getByOrderNum(orderNum);
         //自营商品全是兜礼支付
         PayMsg payMsg = prePayNew(params);
         //为空或者校验失败直接返回错误信息
@@ -294,7 +326,10 @@ public class NewPaymentService implements NewPaymentServiceI {
         String businessId = jsonData.getString("businessId");
         String isPayPassword = jsonData.getString("isPayPassword");
         params.put("isPayPassword", isPayPassword);
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
@@ -447,11 +482,20 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel getPayResult(JSONObject json) {
         String orderNum = json.getString("orderNum");
-        OrderVo order = orderService.getByOrderNum(orderNum);
+        //20181227--改造收银台
+        //OrderVo order = orderService.getByOrderNum(orderNum);
+        OrderVo paramOrder = new OrderVo();
+        paramOrder.setOrderNumber(orderNum);
+        OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
         //自营商品全是兜礼支付
         ResultModel payMsg = null;
         //调用支付平台查询API,查询结果并处理支付记录
-        AdBusiness business = adBusinessDao.getById(String.valueOf(order.getBussinessId()));
+        //AdBusiness business = adBusinessDao.getById(String.valueOf(order.getBussinessId()));
+        //20181227 缓存改造 ---zhangqing
+        //AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
+        AdBusiness paramBusiness = new AdBusiness();
+        paramBusiness.setId(order.getBussinessId());
+        AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
         // 积分支付查询新接口
         JSONObject param = new JSONObject();
         param.put("merchantOrderNo", orderNum);
@@ -512,7 +556,11 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel queryNewPayResult(JSONObject param) {
         String id = param.getString("id");//商户表主键
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(id);
+        //20181227 --收银台缓存改造
+        //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(id);
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(id));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
@@ -567,8 +615,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private PayMsg payCallback(String payType, String channel, String retStr) {
         JSONObject json = JSONObject.parseObject(retStr);
         String orderNum = json.getString("orderNum");
-        String lockKey =String.format(SYNC_REFUND_CODE_KEY, orderNum + ":" + payType + ":" + payType);
-        boolean b = redisLock.lock(lockKey,15);
+        String lockKey = String.format(SYNC_REFUND_CODE_KEY, orderNum + ":" + payType + ":" + payType);
+        boolean b = redisLock.lock(lockKey, 15);
         if (!b) {
             return new PayMsg(PayMsg.success_code, "同步处理中");
         }
@@ -593,12 +641,19 @@ public class NewPaymentService implements NewPaymentServiceI {
     private PayMsg prePayNew(JSONObject param) {
         // 校验订单
         String orderNum = param.getString("orderNum");
-        List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
+        //20181227===收银台改造优化
+      /*  List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
         if (CollectionUtils.isEmpty(orders)) {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
+        OrderVo order = orders.get(0);*/
+        OrderVo paramOrder = new OrderVo();
+        paramOrder.setOrderNumber(orderNum);
+        OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
+        if (order == null) {
+            return new PayMsg(PayMsg.failure_code, "没有找到订单");
+        }
         // 订单状态
-        OrderVo order = orders.get(0);
         Long oid = checkOrderStatus(order);
         if (oid != null) {
             return new PayMsg(PayMsg.failure_code, "无效的订单状态");
@@ -609,7 +664,11 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     private PayMsg canPay(OrderVo order, JSONObject json) {
         logger.info("productType={}", order.getProductType());
-        AdUser user = adUserDao.getById(order.getUserId().intValue());
+        //用户缓存改造
+        //AdUser user = adUserDao.getById(order.getUserId().intValue());
+        AdUser paramUser = new AdUser();
+        paramUser.setId(order.getUserId());
+        AdUser user = adUserServiceI.getUser(paramUser);
         if (!StringUtils.isEmpty(order.getActType())) {
             //是否普通订单
             if (!OrderService.ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
@@ -626,7 +685,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                         String activityName = actInfo.getActivityName();
                         Integer actLimitNum = actInfo.getBuyNumberLimit();
                         int buyQuantity = item.getNumber().intValue();
-                        int byNum = orderService.getBuyNum(userId, skuId, activityName);
+                        //int byNum = orderService.getBuyNum(userId, skuId, activityName);
+                        //20181226 优化-==zhangqing
+                        Map<String,Object> paramOrderMap = new HashMap<>();
+                        paramOrderMap.put("userId",userId);
+                        paramOrderMap.put("productSkuId",item.getProductSkuId());
+                        paramOrderMap.put("actType",activityName);
+                        int byNum = adOrderReportServiceI.getBuyNum(paramOrderMap);
                         logger.info("canPay() actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, byNum + buyQuantity);
                         if (actLimitNum != null && actLimitNum < byNum + buyQuantity) {
                             return new PayMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
@@ -646,7 +711,11 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (order.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 && (payType == 0 || payType == 2)) {
             //获取已使用额度
-            AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
+            //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
+            //20181227改造缓存---zhangqing
+            Map<String,Object> paramMap = new HashMap<>();
+            paramMap.put("groupId",user.getGroupNum());
+            AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             logger.info("conf = {}", conf);
             if (conf == null) {
                 return new PayMsg(OrderMsg.failure_code, "没有找到话费充值配置");
@@ -659,7 +728,11 @@ public class NewPaymentService implements NewPaymentServiceI {
                 discountsMonthLimit = new BigDecimal("0");
             }
             //每月积分购买话费的金额
-            BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(order.getUserId());
+            //BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(order.getUserId());
+            //每月积分购买话费的金额 == 收银台改造20181227--zhangqing
+            Map<String,Object> paramOrderMap = new HashMap<>();
+            paramOrderMap.put("userId",order.getUserId());
+            BigDecimal consumptionAmount = adOrderReportServiceI.getConsumptionAmountByMap(paramOrderMap);
             if (consumptionAmount == null) {
                 consumptionAmount = new BigDecimal("0");
             }
@@ -738,9 +811,16 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel integralPay(JSONObject param) {
         String orderNum = param.getString("orderNum");
-        OrderVo orderVo = adOrderReportDao.getByOrderNum(orderNum).get(0);
+        //20181227 改造优化
+        //OrderVo orderVo = adOrderReportDao.getByOrderNum(orderNum).get(0);
+        OrderVo paramOrder = new OrderVo();
+        paramOrder.setOrderNumber(orderNum);
+        OrderVo orderVo= adOrderReportServiceI.getOrderLimt(paramOrder);
         String businessId = String.valueOf(orderVo.getBussinessId());
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
@@ -770,6 +850,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
+            data.put("orderId",orderVo.getId());
             return ResultModel.ok(data);
         } else {
             return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"));
@@ -885,7 +966,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 orderService.updateOrderRefund(order, String.valueOf(order.getUserId()));
                 //退款成功
                 int payType1 = Integer.parseInt(payType);
-                if (payType1 != 0 && refundFee != null && refundFee != null && (new BigDecimal(refundFee).compareTo(new BigDecimal("0"))>0)) {
+                if (payType1 != 0 && refundFee != null && refundFee != null && (new BigDecimal(refundFee).compareTo(new BigDecimal("0")) > 0)) {
                     //非积分需要插入流水
                     payType1 = 3;//微信
                     saveOneOrder(order, payType1, refundFee, refundFee, merchantRefundNo);
@@ -1003,7 +1084,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
         String totalAmount = json.getString("totalAmount");
-        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum,totalAmount);
+        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum, totalAmount);
         return resultModel;
     }
 

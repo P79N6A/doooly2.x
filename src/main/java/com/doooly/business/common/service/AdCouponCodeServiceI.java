@@ -1,12 +1,11 @@
 package com.doooly.business.common.service;
 
-import java.util.HashMap;
-
-import com.doooly.common.service.impl.BaseServiceI;
-import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeProduct;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lxl
@@ -24,4 +23,6 @@ public interface AdCouponCodeServiceI {
 	 * @return couponCode-优惠码
 	 */
 	public HashMap<String, Object> giveCouponCode(LifeProduct lifeProduct, LifeMember lifeMember) throws Exception;
+
+    AdCouponCode getSelfCouponByMap(Map<String, Object> paramMap);
 }

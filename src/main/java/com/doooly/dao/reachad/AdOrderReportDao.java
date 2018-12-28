@@ -3,19 +3,18 @@
  */
 package com.doooly.dao.reachad;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
 import com.doooly.business.myorder.po.OrderDetailPoReq;
-import org.apache.ibatis.annotations.Param;
-
 import com.doooly.business.myorder.po.OrderDetailReport;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 public interface AdOrderReportDao {
 	/**
@@ -126,4 +125,12 @@ public interface AdOrderReportDao {
     String getGroupNumByOrderNum(@Param("orderNumber") String orderNumber);
 
     int orderBelongOneActivity(Map<String,Object> param);
+
+    BigDecimal getConsumptionAmountByMap(@Param("paramMap") Map<String, Object> paramMap);
+    /**
+     * 购买活动商品数量
+     */
+    public int getBuyNum(@Param("paramMap") Map<String, Object> paramMap);
+
+    OrderVo getOrderLimt(OrderVo order);
 }

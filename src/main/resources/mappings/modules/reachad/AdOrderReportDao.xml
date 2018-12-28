@@ -122,6 +122,73 @@
 
 	</resultMap>
 
+
+    <sql id="getAdOrderReportColumns">
+        a.id AS "id",
+        a.order_id AS "orderId",
+        a.bussiness_id AS "bussinessId",
+        a.user_id AS "userId",
+        a.order_number AS "orderNumber",
+        a.stores_id AS "storesId",
+        a.total_mount AS "totalMount",
+        a.total_price AS "totalPrice",
+        a.order_date AS "orderDate",
+        a.state AS "state",
+        a.type AS "type",
+        a.is_user_rebate AS "isUserRebate",
+        IFNULL(a.user_rebate,0.00) AS "userRebate",
+        IFNULL(a.user_return_amount,0.00) AS "userReturnAmount",
+        a.is_business_rebate AS "isBusinessRebate",
+        IFNULL(a.business_rebate_amount,0.00) AS "businessRebateAmount",
+        a.billing_state AS "billingState",
+        a.create_by AS "createBy",
+        a.del_flag AS "delFlag",
+        a.is_first AS "isFirst",
+        a.is_source AS "isSource",
+        a.first_count AS "firstCount",
+        a.air_settle_accounts AS "airSettleAccounts",
+        a.remarks AS "remarks",
+        a.update_date AS "updateDate",
+        a.update_by AS "updateBy",
+        a.create_date AS "createDate",
+        a.consignee_name AS "consigneeName",
+        a.consignee_mobile AS "consigneeMobile",
+        a.consignee_addr AS "consigneeAddr",
+        a.product_type AS "productType",
+        a.act_type AS "actType",
+        a.service_charge AS "serviceCharge",
+        a.coupon_id AS "couponId",
+        a.support_pay_type AS "supportPayType",
+        a.voucher AS "voucher"
+    </sql>
+
+    <sql id="adOrderDetailColumns">
+        d.id AS "did",
+        d.order_report_id AS "orderReportId",
+        d.category_id AS "categoryId",
+        d.code AS "code",
+        d.goods AS "goods",
+        d.amount AS "amount",
+        d.price AS "price",
+        d.number AS "number",
+        d.sku AS "sku",
+        d.product_sku_id AS "productSkuId",
+        d.card_oid AS "cardOid",
+        d.product_img AS "productImg",
+        d.external_number AS "externalNumber",
+        d.tax AS "tax",
+        d.ret_msg AS "retMsg",
+        d.ret_code AS "retCode",
+        d.ret_state AS "retState",
+        d.create_by AS "createBy",
+        d.del_flag AS "delFlag",
+        d.remarks AS "remarks",
+        d.update_date AS "updateDate",
+        d.update_by AS "updateBy",
+        d.create_date AS "createDate"
+    </sql>
+
+
 	<!-- 注意:以下最好不要使用星号,暂时没有时间调整 -->
 
 	<!--获得用户每天话费和流量充值的消费金额-->
@@ -141,6 +208,28 @@
         AND DATE_FORMAT(r.order_date, '%Y-%m') = DATE_FORMAT(now(), '%Y-%m')
 	</select>
 
+	<!--获得用户每天话费和流量充值的消费金额-->
+	<select id="getConsumptionAmountByMap" resultType="java.math.BigDecimal" parameterType="java.util.Map">
+		SELECT
+            SUM(IF(r.type=1,o.amount,0)-IF(r.type=5,o.amount,0)) totalAmount
+        FROM
+            ad_order_report r,
+            ad_order_flow o
+        WHERE
+            r.id = o.order_report_id
+        AND r.state = 1
+        AND r.type in (1,5)
+        AND o.pay_type = 0
+        AND r.user_id = #{userId}
+        AND r.product_type = 3
+        <if test="paramMap.firstDayOfMonth != null and paramMap.firstDayOfMonth != ''">
+            AND a.order_date &gt;= #{paramMap.firstDayOfMonth}
+        </if>
+        <if test="paramMap.lastDayOfMonth != null and paramMap.lastDayOfMonth != ''">
+            AND a.order_date &lt;= #{paramMap.lastDayOfMonth}
+        </if>
+	</select>
+
 	<!-- 获得用户未完成订单和完成订单的购买数量-->
 	<select id="getByNum" resultType="java.lang.Integer" >
 		select
@@ -153,6 +242,21 @@
 		and d.product_sku_id like concat('%',#{skuId})
 		and	r.user_id = #{userId}
 		and r.act_type= #{actType}
+		and r.type = '1'
+	</select>
+
+	<!-- 获得用户未完成订单和完成订单的购买数量-->
+	<select id="getBuyNum" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(1)
+		from
+		ad_order_report r,
+		ad_order_detail d
+		where
+		r.id = d.order_report_id
+		and d.product_sku_id = #{paramMap.productSkuId}
+		and	r.user_id = #{paramMap.userId}
+		and r.act_type= #{paramMap.actType}
 		and r.type = '1'
 	</select>
 
@@ -235,6 +339,61 @@
 			</if>
 		</where>
 
+	</select>
+
+
+	<select id="getOrderLimt" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">
+		select
+        <include refid="getAdOrderReportColumns" />,
+        <include refid="adOrderDetailColumns" />
+		from
+		ad_order_report o,ad_order_detail d
+		<where>
+			and o.id = d.order_report_id
+			<if test="orderId != null and orderId != ''" >
+				and o.order_id = #{orderId,jdbcType=BIGINT}
+			</if>
+			<if test="bussinessId != null and bussinessId != ''" >
+				and o.bussiness_id = #{bussinessId,jdbcType=BIGINT}
+			</if>
+			<if test="userId != null and userId != ''" >
+				and o.user_id = #{userId,jdbcType=BIGINT}
+			</if>
+			<if test="orderNumber != null and orderNumber != ''" >
+				and o.order_number = #{orderNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="storesId != null and storesId != ''" >
+				and o.stores_id = #{storesId,jdbcType=VARCHAR}
+			</if>
+			<if test="state != null and state != ''" >
+				and o.state = #{state,jdbcType=CHAR}
+			</if>
+			<if test="type != null and type != ''" >
+				and o.type = #{type,jdbcType=SMALLINT}
+			</if>
+			<if test="productType != null and productType != ''" >
+				and o.product_type = #{productType,jdbcType=SMALLINT}
+			</if>
+			<if test="createBy != null and createBy != ''" >
+				and o.create_by = #{createBy,jdbcType=VARCHAR}
+			</if>
+			<if test="isSource != null and isSource != ''" >
+				and o.is_source = #{isSource,jdbcType=INTEGER}
+			</if>
+			<if test="updateBy != null and updateBy != ''" >
+				and o.update_by = #{updateBy,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeName != null and consigneeName != ''" >
+				and o.consignee_name = #{consigneeName,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeMobile != null and consigneeMobile != ''" >
+				and o.consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR}
+			</if>
+			<if test="consigneeAddr != null and consigneeAddr != ''" >
+				and o.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
+			</if>
+		</where>
+        limit 1
 	</select>
 
 	<insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="com.doooly.business.order.vo.OrderVo">

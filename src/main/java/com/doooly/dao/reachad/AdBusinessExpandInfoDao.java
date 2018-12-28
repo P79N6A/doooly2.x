@@ -11,4 +11,5 @@ public interface AdBusinessExpandInfoDao {
 
     AdBusinessExpandInfo getByBusinessId(String businessId);
 
+    AdBusinessExpandInfo getBusinessExpandInfo(AdBusinessExpandInfo adBusinessExpandInfo);
 }

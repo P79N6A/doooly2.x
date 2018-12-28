@@ -1,5 +1,6 @@
 package com.doooly.publish.rest.meituan.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.HttpClientUtil;
 import com.doooly.business.dict.ConfigDictServiceI;
@@ -12,6 +13,7 @@ import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.common.IPUtils;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
+import com.doooly.common.meituan.StaffTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
@@ -20,6 +22,7 @@ import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +80,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     public String getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         String token = request.getHeader("token");
         String userId = request.getHeader("userId");
+        if (StringUtils.isBlank(token)) {
+            token = request.getParameter("token");
+        }
+        if (StringUtils.isBlank(userId)) {
+            userId = request.getParameter("userId");
+        }
         String productType = request.getParameter("productType");
         if (StringUtils.isBlank(productType)) {
             productType = MeituanProductTypeEnum.WAIMAI.getCode();
@@ -86,7 +95,35 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
             if (adUser != null) {
                 try {
-                    loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                    //判断是否已经同步
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("staffs",Arrays.asList(adUser.getTelephone()));
+                    jsonObject.put("staffType", StaffTypeEnum.StaffTypeEnum50.getCode());
+                    String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
+                    String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/getStaffs",jsonObject.toJSONString());
+                    List<Map<String,Object>> listMap = GsonUtils.son.fromJson(ret,new TypeToken<List<Map<String,Object>>>(){}.getType());
+                    logger.info("美团免登录查询员工结果：{}",ret);
+                    if (listMap != null && listMap.size() > 0) {
+                        loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                    } else {
+                        //先同步用户
+                        JSONObject jsonObjectUser = new JSONObject();
+                        jsonObjectUser.put("name",adUser.getName());
+                        jsonObjectUser.put("phone",adUser.getTelephone());
+                        jsonObjectUser.put("entStaffNum",adUser.getCardNumber());
+                        JSONArray jsonArray = new JSONArray();
+                        jsonArray.add(jsonObjectUser);
+                        JSONObject jsonObjectParam = new JSONObject();
+                        jsonObjectParam.put("staffInfoVOList",jsonArray);
+                        jsonObjectParam.put("staffType",StaffTypeEnum.StaffTypeEnum30.getCode());
+                        String retStaff = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/batchSynStaffs",jsonObjectParam.toJSONString());
+                        List<Map<String,Object>> listStaffMap = GsonUtils.son.fromJson(retStaff,new TypeToken<List<Map<String,Object>>>(){}.getType());
+                        logger.info("美团免登录同步员工结果：{}",retStaff);
+                        if (listStaffMap != null && listStaffMap.size() > 0) {
+                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        }
+                    }
+                    logger.info("用户:{}免登录url:{}",adUser.getTelephone(),loginUrl);
                     response.sendRedirect(loginUrl);
                 } catch (Exception e) {
                     logger.error("getMeituanEasyLoginUrl异常",e);

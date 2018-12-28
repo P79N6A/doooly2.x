@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.annotation.UserToken;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.exception.GlobalException;

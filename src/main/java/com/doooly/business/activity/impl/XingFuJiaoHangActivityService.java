@@ -1,5 +1,6 @@
 package com.doooly.business.activity.impl;
 
+import com.doooly.business.common.service.AdUserServiceI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ import com.doooly.entity.reachad.AdUserEnterpriseChange;
 public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired
-	private AdUserService userService;
+	private AdUserServiceI userService;
 	@Autowired
 	private ConfigDictServiceI configService;
 	@Autowired

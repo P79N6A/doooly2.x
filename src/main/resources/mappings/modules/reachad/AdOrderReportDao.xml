@@ -222,11 +222,11 @@
         AND o.pay_type = 0
         AND r.user_id = #{userId}
         AND r.product_type = 3
-        <if test="paramMap.firstDayOfMonth != null and paramMap.firstDayOfMonth != ''">
-            AND a.order_date &gt;= #{paramMap.firstDayOfMonth}
+        <if test="firstDayOfMonth != null and firstDayOfMonth != ''">
+            AND a.order_date &gt;= #{firstDayOfMonth}
         </if>
-        <if test="paramMap.lastDayOfMonth != null and paramMap.lastDayOfMonth != ''">
-            AND a.order_date &lt;= #{paramMap.lastDayOfMonth}
+        <if test="lastDayOfMonth != null and lastDayOfMonth != ''">
+            AND a.order_date &lt;= #{lastDayOfMonth}
         </if>
 	</select>
 

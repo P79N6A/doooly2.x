@@ -3,15 +3,16 @@
  */
 package com.doooly.business.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * 日期工具类, 继承org.apache.commons.lang.time.DateUtils类
@@ -37,6 +38,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 		"yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM", 
 		"yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
 		"yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
+
+    private static Calendar gregorianCalendar = null;
+    static {
+        gregorianCalendar = new GregorianCalendar();
+    }
 
 	/**
 	 * 得到当前日期字符串 格式（yyyy-MM-dd）
@@ -268,6 +274,29 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
    		cad.add(field, amount);
    		return cad.getTime();
    	}
+
+
+    /**
+     * 获取当前月的第一天
+     * @return date
+     */
+    public static Date getFirstDayOfMonth() {
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        return gregorianCalendar.getTime();
+    }
+
+    /**
+     * 获取当前月的最后一天
+     * @return
+     */
+    public static Date getLastDayOfMonth() {
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.set(Calendar.DAY_OF_MONTH, 1);
+        gregorianCalendar.add(Calendar.MONTH, 1);
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -1);
+        return gregorianCalendar.getTime();
+    }
 
 
     /**

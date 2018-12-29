@@ -96,8 +96,8 @@ public class RSAEncryptUtil {
 			byte[] enBytes = null;
 			for (int i = 0; i < data.length; i += 64) {  
 			// 注意要使用2的倍数，否则会出现加密后的内容再解密时为乱码
-			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i,i + 64));  
-			    enBytes = ArrayUtils.addAll(enBytes, doFinal);  
+			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i,i + 64));
+			    enBytes = ArrayUtils.addAll(enBytes, doFinal);
 			}
 			return enBytes;
 		} catch (NoSuchAlgorithmException e) {
@@ -162,8 +162,8 @@ public class RSAEncryptUtil {
 			byte[] enBytes = null;
 			for (int i = 0; i < data.length; i += 64) {  
 			// 注意要使用2的倍数，否则会出现加密后的内容再解密时为乱码
-			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i,i + 64));  
-			    enBytes = ArrayUtils.addAll(enBytes, doFinal);  
+			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i,i + 64));
+			    enBytes = ArrayUtils.addAll(enBytes, doFinal);
 			}
 			return enBytes;
 		} catch (NoSuchAlgorithmException e) {
@@ -227,7 +227,7 @@ public class RSAEncryptUtil {
 			byte[] retByte = null;
 			for (int i = 0; i < data.length; i += 128) {
 			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i, i + 128));
-			    retByte = ArrayUtils.addAll(retByte, doFinal);  
+			    retByte = ArrayUtils.addAll(retByte, doFinal);
 			}
 			return retByte;
 		} catch (NoSuchAlgorithmException e) {
@@ -286,7 +286,7 @@ public class RSAEncryptUtil {
 			byte[] retByte = null;
 			for (int i = 0; i < data.length; i += 128) {
 			    byte[] doFinal = cipher.doFinal(ArrayUtils.subarray(data, i, i + 128));
-			    retByte = ArrayUtils.addAll(retByte, doFinal);  
+			    retByte = ArrayUtils.addAll(retByte, doFinal);
 			}
 			return retByte;
 		} catch (NoSuchAlgorithmException e) {

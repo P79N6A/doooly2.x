@@ -1,23 +1,19 @@
 package com.doooly.publish.rest.life.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.business.familyInviteApp.AdInvitationService;
+import com.doooly.publish.rest.life.FamilyInviteAppRestServiceI;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.common.service.impl.AdUserService;
-import com.doooly.business.familyInviteApp.AdInvitationService;
-import com.doooly.publish.rest.life.FamilyInviteAppRestServiceI;
 
 @Component
 @Path("/familyInviteApp")
@@ -27,7 +23,7 @@ public class FamilyInviteAppRestService implements FamilyInviteAppRestServiceI {
 	@Autowired
 	private AdInvitationService adInvitationService;
 	@Autowired
-	private AdUserService adUserService;
+	private AdUserServiceI adUserService;
 	
 	private static Logger logger = Logger.getLogger(FamilyInviteAppRestService.class);
 	

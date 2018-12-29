@@ -3,9 +3,11 @@ package com.doooly.business.product.service;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdGroupSelfProductPrice;
 import com.doooly.business.product.entity.AdSelfProduct;
+import com.doooly.business.product.entity.AdSelfProductSku;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
 	//活动库存
@@ -52,4 +54,11 @@ public interface ProductService {
 
 	List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName,String selfProductId);
 
+    AdSelfProduct getCacheProductSku(Map<String, Object> paramMap);
+
+    int decStockNumber(int number, int skuId, int buyNum);
+
+    int decInventoryByNum(int skuId, int buyNum);
+
+    AdSelfProductSku getSelfProductSku(AdSelfProductSku sku);
 }

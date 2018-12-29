@@ -1,7 +1,11 @@
 package com.doooly.business.order.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.common.service.AdCouponCodeServiceI;
 import com.doooly.business.exwings.ExWingsUtils;
+import com.doooly.business.freeCoupon.service.task.SaveOrderExtTask;
+import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
+import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.MerchantProdcutVo;
 import com.doooly.business.order.vo.OrderExtVo;
@@ -14,7 +18,9 @@ import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductImage;
 import com.doooly.business.product.entity.AdSelfProductSku;
+import com.doooly.business.product.service.AdSelfProductImageServiceI;
 import com.doooly.business.product.service.ProductService;
+import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.common.util.IdGeneratorUtil;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
@@ -49,8 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.tools.doclint.Entity.or;
-
 /**
  * 统一下单接口
  *
@@ -71,6 +75,8 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private AdSelfProductImageDao adSelfProductImageDao;
 	@Autowired
+	private AdSelfProductImageServiceI adSelfProductImageServiceI;
+	@Autowired
 	private OrderDao orderDao;
 	@Autowired
 	protected AdUserDao adUserDao;
@@ -84,6 +90,14 @@ public class OrderServiceImpl implements OrderService {
     private RefundService refundService;
     @Autowired
     private AdOrderSourceDao adOrderSourceDao;
+    @Autowired
+    private AdRechargeConfServiceI adRechargeConfServiceI;
+    @Autowired
+    private AdOrderReportServiceI adOrderReportServiceI;
+    @Autowired
+    private AdCouponCodeServiceI adCouponCodeServiceI;
+    @Autowired
+    private MyThreadPoolServiceImpl myThreadPoolService;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -114,7 +128,13 @@ public class OrderServiceImpl implements OrderService {
 				int skuId = productSkuVo.getSkuId();
 				int buyQuantity = productSkuVo.getBuyNum();
 
-				AdSelfProduct product = productService.getProductSku(merchantId, productId, skuId);
+				//AdSelfProduct product = productService.getProductSku(merchantId, productId, skuId);
+                //20181226改成缓存获取
+                Map<String,Object> paramMap = new HashMap<>();
+                paramMap.put("merchantId",merchantId);
+                paramMap.put("productId",productId);
+                paramMap.put("skuId",skuId);
+				AdSelfProduct product = productService.getCacheProductSku(paramMap);
 				if (product == null) {
 					return new OrderMsg(OrderMsg.failure_code, "未找到商品信息.");
 				}
@@ -164,14 +184,18 @@ public class OrderServiceImpl implements OrderService {
 					}
 				}
 				//校验库存并扣除库存
-				Integer inventory = sku.getInventory();
+				//Integer inventory = sku.getInventory();
+                //商品从缓存取这里库存单独查询
+                Integer inventory = productService.getSelfProductSku(sku).getInventory();
 				if (inventory != null) {
 					if (inventory <= 0) {
 						logger.error("product.inventory = {}", inventory);
 						return new OrderMsg(OrderMsg.out_of_stock_code1, OrderMsg.out_of_stock_mess1);
 					}
-					int rows = productService.decInventory(skuId);
-					logger.info("decInventory() skuId={},inventor={},rows={}", skuId, inventory, rows);
+					//int rows = productService.decInventory(skuId);
+                    //库存优化根据数量扣减 ===20181226 zhangqing
+					int rows = productService.decInventoryByNum(skuId,buyQuantity);
+					logger.info("decInventory() skuId={},inventor={},buyQuantity={},rows={}", skuId, inventory,buyQuantity, rows);
 					if (rows == 0) {
 						if (orderVo.getProductType() == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
 							return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
@@ -225,14 +249,20 @@ public class OrderServiceImpl implements OrderService {
 	 * @return
 	 */
 	public OrderMsg getServiceChargeAndCheckLimit(OrderVo orderVo,AdSelfProductSku sku) {
-		AdRechargeConf conf = adRechargeConfDao.getRechargeConf(orderVo.getGroupId());
+		//AdRechargeConf conf = adRechargeConfDao.getRechargeConf(orderVo.getGroupId());
+        //20181226改造缓存---zhangqing
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("groupId",orderVo.getGroupId());
+		AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
 		logger.info("conf = {}", conf);
 		if (conf == null) {
 			return new OrderMsg(OrderMsg.failure_code, "没有找到话费充值配置");
 		}
 		BigDecimal sellPrice = new BigDecimal(sku.getSellPrice());
 		//每月积分购买话费的金额
-		BigDecimal consumptionAmount = this.getConsumptionAmount(orderVo.getUserId());
+        Map<String,Object> paramOrderMap = new HashMap<>();
+        paramOrderMap.put("userId",orderVo.getUserId());
+        BigDecimal consumptionAmount = adOrderReportServiceI.getConsumptionAmountByMap(paramOrderMap);
 		if (consumptionAmount == null) {
 			consumptionAmount = new BigDecimal("0");
 		}
@@ -276,7 +306,12 @@ public class OrderServiceImpl implements OrderService {
 		String couponId = orderVo.getCouponId();
 		long userId = orderVo.getUserId();
 		if(StringUtils.isNotEmpty(couponId)){
-			AdCouponCode couponCode = adCouponCodeDao.getSelfCoupon(userId,couponId);
+            //20181226优化改造
+            //AdCouponCode couponCode = adCouponCodeDao.getSelfCoupon(userId,couponId);
+            Map<String,Object> paramMap = new HashMap<>();
+            paramMap.put("userId",userId);
+            paramMap.put("couponId",couponId);
+			AdCouponCode couponCode = adCouponCodeServiceI.getSelfCouponByMap(paramMap);
 			if(couponCode != null){
 				if(!AdCouponCode.LOCKED.equals(couponCode.getIsLocked())){
 					AdCoupon coupon = couponCode.getAdCoupon();
@@ -334,9 +369,15 @@ public class OrderServiceImpl implements OrderService {
 			if (actInfo.getSpecialPrice() != null && actInfo.getSpecialPrice().compareTo(BigDecimal.ZERO) == 1) {
 				actPrice = actInfo.getSpecialPrice();
 			}
-			//用户限购数量
-			Integer actLimitNum = actInfo.getBuyNumberLimit();
-			int buyNum = getBuyNum(orderVo.getUserId(), skuId, activityName);
+            Integer actLimitNum = actInfo.getBuyNumberLimit();
+            //用户限购数量
+            //int buyNum = getBuyNum(orderVo.getUserId(), skuId, activityName);
+            //20181226 优化-==zhangqing
+            Map<String,Object> paramOrderMap = new HashMap<>();
+            paramOrderMap.put("userId",orderVo.getUserId());
+            paramOrderMap.put("productSkuId",product.getProductId()+"-"+skuId);
+            paramOrderMap.put("actType",activityName);
+			int buyNum = adOrderReportServiceI.getBuyNum(paramOrderMap);
 			logger.info("actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, buyNum + buyQuantity);
 			if (actLimitNum != null && actLimitNum < buyNum + buyQuantity) {
 				return new OrderMsg(OrderMsg.purchase_limit_code, String.format("此商品每个账号仅限购买%s次", actLimitNum));
@@ -350,7 +391,9 @@ public class OrderServiceImpl implements OrderService {
 					return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
 				}*/
 				//扣减库存
-				OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
+				//OrderMsg msg = decStock(actInfo.getNumber(), skuId, inventory);
+                //优化扣减购买的数量，之前写死只扣减1
+				OrderMsg msg = decStockNumber(actInfo.getNumber(), skuId, inventory,buyQuantity);
 				if (msg != null) {
 					return msg;
 				}
@@ -369,6 +412,17 @@ public class OrderServiceImpl implements OrderService {
 		//扣减活动库存
 		int rows = productService.decStock(number, skuId);
 		logger.info("decStock() skuId={},inventor={},rows = {}", skuId,oldNum, rows);
+		if (rows == 0) {
+			return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
+		}
+		return null;
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public OrderMsg decStockNumber(int number,int skuId,int oldNum,int buyNum){
+		//扣减活动库存
+		int rows = productService.decStockNumber(number, skuId,buyNum);
+		logger.info("decStock() skuId={},inventor={},buyNum={},rows = {}", skuId,oldNum,buyNum, rows);
 		if (rows == 0) {
 			return new OrderMsg(OrderMsg.out_of_stock_code2, OrderMsg.out_of_stock_mess2);
 		}
@@ -442,7 +496,9 @@ public class OrderServiceImpl implements OrderService {
 		if(order.getProductType() == ProductType.NEXUS_RECHARGE.getCode()){
 			orderItem.setCardOid(ExWingsUtils.getOrderId());
 		}
-		AdSelfProductImage image = adSelfProductImageDao.getImageByProductId(product.getId());
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("productId",product.getId());
+		AdSelfProductImage image = adSelfProductImageServiceI.getImageByProductId(paramMap);
 		if (image != null) {
 			orderItem.setProductImg(image.getImage());
 		}
@@ -537,10 +593,15 @@ public class OrderServiceImpl implements OrderService {
 		order.setOrderId(oneOrderId);
 		rows += saveOrder(order);
 		logger.info("order.id = {}", order.getId());
-		if (orderExt != null) {
-			rows += saveOrderExt(order.getId(),orderExt);
-		}
-		rows += saveOrderItem(order.getId(), orderItem);
+		//if (orderExt != null) {
+		//	rows += saveOrderExt(order.getId(),orderExt);
+		//}
+		//rows += saveOrderItem(order.getId(), orderItem);
+        //20181226改成异步处理
+        JSONObject req = new JSONObject();
+        req.put("orderId",order.getId());
+        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
+        myThreadPoolService.submitTask(saveOrderExtTask);
         AdOrderSource adOrderSource = new AdOrderSource();
         adOrderSource.setOrderNumber(order.getOrderNumber());
         adOrderSource.setBusinessId(order.getBussinessId());

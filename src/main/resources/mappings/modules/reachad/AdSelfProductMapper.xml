@@ -135,6 +135,20 @@
         		</if>
     </select>
 
+	<!-- 下单查询商品sku信息 -->
+    <select id="getSelfProductSku" resultType="com.doooly.business.product.entity.AdSelfProductSku" parameterType="com.doooly.business.product.entity.AdSelfProductSku">
+        SELECT
+        		s.id AS sid, s.specification, s.number,s.title, s.state, s.market_price,s.supply_price, s.sell_price,
+        		s.freight,s.delivery_type, s.audit_description, s.self_product_id,s.update_date, s.update_user,s.external_number,s.del_flag,s.inventory
+        	FROM
+        		ad_self_product_sku s
+        WHERE
+				and s.del_flag = '0'
+        		<if test="id != null and id != ''" >
+        			and s.id = #{id}
+        		</if>
+    </select>
+
 	<select id="getSelfProductTotalNum" resultType="java.lang.Integer">
 		SELECT COUNT(b.id) FROM(
 			SELECT 

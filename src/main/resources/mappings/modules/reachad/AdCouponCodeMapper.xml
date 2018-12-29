@@ -102,6 +102,17 @@
 		and now() BETWEEN begin_date and end_date
 	</select>
 
+	<!-- 查询自营抵扣券 -->
+	<select id="getSelfCouponByMap" resultMap="couponMap" parameterType="java.util.Map">
+		SELECT
+		c.coupon_value,cou.id coupon_id,cou.is_locked
+		FROM
+		ad_coupon cou,ad_coupon_code c
+		WHERE
+		cou.id = c.coupon and c.id = #{paramMap.couponId} and c.is_used != '1' and c.user_id = #{paramMap.userId}
+		and now() BETWEEN begin_date and end_date
+	</select>
+
 	<!-- UNLOCK  -->
 	<update id="unlockCoupon" >
 		update ad_coupon_code set is_locked = '0',update_date=now() where id = #{couponId} and user_id = #{userId}

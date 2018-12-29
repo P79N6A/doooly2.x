@@ -593,14 +593,14 @@ public class OrderServiceImpl implements OrderService {
 		order.setOrderId(oneOrderId);
 		rows += saveOrder(order);
 		logger.info("order.id = {}", order.getId());
-		//if (orderExt != null) {
-		//	rows += saveOrderExt(order.getId(),orderExt);
-		//}
-		//rows += saveOrderItem(order.getId(), orderItem);
+		if (orderExt != null) {
+			rows += saveOrderExt(order.getId(),orderExt);
+		}
+		rows += saveOrderItem(order.getId(), orderItem);
         //20181226改成异步处理
-        JSONObject req = new JSONObject();
-        req.put("orderId",order.getId());
-        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
+//        JSONObject req = new JSONObject();
+//        req.put("orderId",order.getId());
+//        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
         myThreadPoolService.submitTask(saveOrderExtTask);
         AdOrderSource adOrderSource = new AdOrderSource();
         adOrderSource.setOrderNumber(order.getOrderNumber());

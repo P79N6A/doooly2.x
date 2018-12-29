@@ -223,10 +223,10 @@
         AND r.user_id = #{userId}
         AND r.product_type = 3
         <if test="firstDayOfMonth != null and firstDayOfMonth != ''">
-            AND a.order_date &gt;= #{firstDayOfMonth}
+            AND r.order_date &gt;= #{firstDayOfMonth}
         </if>
         <if test="lastDayOfMonth != null and lastDayOfMonth != ''">
-            AND a.order_date &lt;= #{lastDayOfMonth}
+            AND r.order_date &lt;= #{lastDayOfMonth}
         </if>
 	</select>
 

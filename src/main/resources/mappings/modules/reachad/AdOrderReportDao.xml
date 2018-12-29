@@ -344,53 +344,54 @@
 
 	<select id="getOrderLimt" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">
 		select
-        <include refid="getAdOrderReportColumns" />,
-        <include refid="adOrderDetailColumns" />
+			o.*,
+			d.*,
+			d.id did
 		from
-		ad_order_report a,ad_order_detail d
+		ad_order_report o,ad_order_detail d
 		<where>
-			and a.id = d.order_report_id
+			and o.id = d.order_report_id
 			<if test="orderId != null and orderId != ''" >
-				and a.order_id = #{orderId,jdbcType=BIGINT}
+				and o.order_id = #{orderId,jdbcType=BIGINT}
 			</if>
 			<if test="bussinessId != null and bussinessId != ''" >
-				and a.bussiness_id = #{bussinessId,jdbcType=BIGINT}
+				and o.bussiness_id = #{bussinessId,jdbcType=BIGINT}
 			</if>
 			<if test="userId != null and userId != ''" >
-				and a.user_id = #{userId,jdbcType=BIGINT}
+				and o.user_id = #{userId,jdbcType=BIGINT}
 			</if>
 			<if test="orderNumber != null and orderNumber != ''" >
-				and a.order_number = #{orderNumber,jdbcType=VARCHAR}
+				and o.order_number = #{orderNumber,jdbcType=VARCHAR}
 			</if>
 			<if test="storesId != null and storesId != ''" >
-				and a.stores_id = #{storesId,jdbcType=VARCHAR}
+				and o.stores_id = #{storesId,jdbcType=VARCHAR}
 			</if>
 			<if test="state != null and state != ''" >
-				and a.state = #{state,jdbcType=CHAR}
+				and o.state = #{state,jdbcType=CHAR}
 			</if>
 			<if test="type != null and type != ''" >
-				and a.type = #{type,jdbcType=SMALLINT}
+				and o.type = #{type,jdbcType=SMALLINT}
 			</if>
 			<if test="productType != null and productType != ''" >
-				and a.product_type = #{productType,jdbcType=SMALLINT}
+				and o.product_type = #{productType,jdbcType=SMALLINT}
 			</if>
 			<if test="createBy != null and createBy != ''" >
-				and a.create_by = #{createBy,jdbcType=VARCHAR}
+				and o.create_by = #{createBy,jdbcType=VARCHAR}
 			</if>
 			<if test="isSource != null and isSource != ''" >
-				and a.is_source = #{isSource,jdbcType=INTEGER}
+				and o.is_source = #{isSource,jdbcType=INTEGER}
 			</if>
 			<if test="updateBy != null and updateBy != ''" >
-				and a.update_by = #{updateBy,jdbcType=VARCHAR}
+				and o.update_by = #{updateBy,jdbcType=VARCHAR}
 			</if>
 			<if test="consigneeName != null and consigneeName != ''" >
-				and a.consignee_name = #{consigneeName,jdbcType=VARCHAR}
+				and o.consignee_name = #{consigneeName,jdbcType=VARCHAR}
 			</if>
 			<if test="consigneeMobile != null and consigneeMobile != ''" >
-				and a.consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR}
+				and o.consignee_mobile = #{consigneeMobile,jdbcType=VARCHAR}
 			</if>
 			<if test="consigneeAddr != null and consigneeAddr != ''" >
-				and a.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
+				and o.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
 			</if>
 		</where>
         limit 1

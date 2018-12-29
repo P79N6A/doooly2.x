@@ -29,26 +29,11 @@ import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdRechargeConfDao;
-import com.doooly.dao.reachad.AdRechargeRecordDao;
-import com.doooly.dao.reachad.AdReturnDetailDao;
-import com.doooly.dao.reachad.AdReturnFlowDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdBusinessExpandInfo;
-import com.doooly.entity.reachad.AdRechargeConf;
-import com.doooly.entity.reachad.AdRechargeRecord;
-import com.doooly.entity.reachad.AdReturnFlow;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.Order;
-import com.doooly.entity.reachad.OrderDetail;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,15 +44,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
-import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
 
 /**
  * @Description:
@@ -222,7 +201,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
         //20181227 优化改造只查询一个
-        //List<OrderVo> orderVoList = orderService.getOrder(order);
+        List<OrderVo> orderVoList = orderService.getOrder(order);
         //if (CollectionUtils.isEmpty(orderVoList)) {
         //    return null;
         //}

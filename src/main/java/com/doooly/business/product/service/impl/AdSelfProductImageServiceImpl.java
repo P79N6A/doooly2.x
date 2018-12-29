@@ -21,7 +21,7 @@ public class AdSelfProductImageServiceImpl implements AdSelfProductImageServiceI
     @Autowired
     private AdSelfProductImageDao adSelfProductImageDao;
 
-    @Cacheable(module = "ADSELFPRODUCTIMAGESERVICEIMPL", event = "getImageByProductId", key = "productId",
+    @Cacheable(module = "PRODUCTSERVICEIMPL", event = "getImageByProductId", key = "productId",
             expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
     @Override
     public AdSelfProductImage getImageByProductId(Map<String, Object> paramMap) {

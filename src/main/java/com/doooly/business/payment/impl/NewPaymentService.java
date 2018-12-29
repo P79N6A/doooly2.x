@@ -208,6 +208,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         //}
         //OrderVo o = orderVoList.get(0);
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+        if (o == null) {
+            return null;
+        }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;

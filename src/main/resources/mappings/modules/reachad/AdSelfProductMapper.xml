@@ -143,7 +143,7 @@
         	FROM
         		ad_self_product_sku s
         WHERE
-				and s.del_flag = '0'
+				s.del_flag = '0'
         		<if test="id != null and id != ''" >
         			and s.id = #{id}
         		</if>

@@ -245,8 +245,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
             //20181227改造缓存---zhangqing
-            Map<String, String> paramMap = new HashMap<>();
-            paramMap.put("groupId", user.getGroupNum().toString());
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("groupId", user.getGroupNum());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
         }
@@ -695,7 +695,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             //获取已使用额度
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
             //20181227改造缓存---zhangqing
-            Map<String,String> paramMap = new HashMap<>();
+            Map<String,Object> paramMap = new HashMap<>();
             paramMap.put("groupId",user.getGroupNum().toString());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             logger.info("conf = {}", conf);

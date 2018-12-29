@@ -229,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
 	public OrderMsg getServiceChargeAndCheckLimit(OrderVo orderVo,AdSelfProductSku sku) {
 		//AdRechargeConf conf = adRechargeConfDao.getRechargeConf(orderVo.getGroupId());
         //20181226改造缓存---zhangqing
-        Map<String,String> paramMap = new HashMap<>();
+        Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("groupId",orderVo.getGroupId());
 		AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
 		logger.info("conf = {}", conf);

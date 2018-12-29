@@ -11,5 +11,5 @@ import java.util.Map;
  */
 public interface AdRechargeConfServiceI {
 
-    AdRechargeConf getRechargeConf(Map<String, Object> paramMap);//配置数据
+    AdRechargeConf getRechargeConf(Map<String, String> paramMap);//配置数据
 }

@@ -601,7 +601,7 @@ public class OrderServiceImpl implements OrderService {
 //        JSONObject req = new JSONObject();
 //        req.put("orderId",order.getId());
 //        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
-        myThreadPoolService.submitTask(saveOrderExtTask);
+//        myThreadPoolService.submitTask(saveOrderExtTask);
         AdOrderSource adOrderSource = new AdOrderSource();
         adOrderSource.setOrderNumber(order.getOrderNumber());
         adOrderSource.setBusinessId(order.getBussinessId());

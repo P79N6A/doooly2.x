@@ -201,7 +201,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
         //20181227 优化改造只查询一个
-        List<OrderVo> orderVoList = orderService.getOrder(order);
+        //List<OrderVo> orderVoList = orderService.getOrder(order);
         //if (CollectionUtils.isEmpty(orderVoList)) {
         //    return null;
         //}

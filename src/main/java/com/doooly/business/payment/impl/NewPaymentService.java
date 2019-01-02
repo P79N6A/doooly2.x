@@ -202,15 +202,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
 //        20181227 优化改造只查询一个
-        List<OrderVo> orderVoList = orderService.getOrder(order);
+       /* List<OrderVo> orderVoList = orderService.getOrder(order);
         if (CollectionUtils.isEmpty(orderVoList)) {
             return null;
         }
-        OrderVo o = orderVoList.get(0);
-//        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
-//        if (o == null) {
-//            return null;
-//        }
+        OrderVo o = orderVoList.get(0);*/
+        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+        if (o == null) {
+            return null;
+        }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
@@ -246,8 +246,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
             //20181227改造缓存---zhangqing
-            Map<String, String> paramMap = new HashMap<>();
-            paramMap.put("groupId", user.getGroupNum().toString());
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("groupId", user.getGroupNum());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
         }
@@ -492,7 +492,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             payMsg = ResultModel.ok();
         } else {
             payMsg = queryNewPayResult(param);
-            /*if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            if (payMsg.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
@@ -505,7 +505,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
                 payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
-            }*/
+            }
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
@@ -696,7 +696,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             //获取已使用额度
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
             //20181227改造缓存---zhangqing
-            Map<String,String> paramMap = new HashMap<>();
+            Map<String,Object> paramMap = new HashMap<>();
             paramMap.put("groupId",user.getGroupNum().toString());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             logger.info("conf = {}", conf);

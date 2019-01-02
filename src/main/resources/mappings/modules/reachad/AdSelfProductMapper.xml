@@ -66,6 +66,10 @@
 	<update id="decStock">
 		update ad_group_self_product_price_expand set inventory = inventory - 1 where sku_id =  #{skuId} and number = #{number} and inventory > 0
 	</update>
+	<!-- 根据购买数量扣减活动库存 -->
+	<update id="decStockNumber">
+		update ad_group_self_product_price_expand set inventory = inventory - #{buyNum} where sku_id =  #{skuId} and number = #{number} and inventory > 0
+	</update>
 	<update id="incStock">
 		update ad_group_self_product_price_expand set inventory = inventory + 1 where sku_id =  #{skuId} and number = #{number}
 	</update>
@@ -73,6 +77,9 @@
 	<!-- 商品库存 -->
 	<update id="decInventory">
 		update ad_self_product_sku set inventory = inventory - 1 where id =  #{skuId} and inventory > 0
+	</update>
+	<update id="decInventoryByNum">
+		update ad_self_product_sku set inventory = inventory - #{buyNum} where id =  #{skuId} and inventory > 0
 	</update>
 	<update id="incInventory">
 		update ad_self_product_sku set inventory = inventory + 1 where id =  #{skuId}

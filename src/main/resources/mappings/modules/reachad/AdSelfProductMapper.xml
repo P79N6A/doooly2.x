@@ -121,9 +121,9 @@
         	FROM 
         		ad_self_product p,
         		ad_self_product_sku s 
-        WHERE 
-        		p.id = s.self_product_id
-				and s.del_flag = '0'
+        WHERE
+				s.del_flag = '0'
+				and p.id = s.self_product_id
         		<if test="merchantId != null and merchantId != ''" >
         			and p.business_id = #{merchantId}
         		</if>
@@ -143,7 +143,7 @@
         	FROM
         		ad_self_product_sku s
         WHERE
-				and s.del_flag = '0'
+				s.del_flag = '0'
         		<if test="id != null and id != ''" >
         			and s.id = #{id}
         		</if>

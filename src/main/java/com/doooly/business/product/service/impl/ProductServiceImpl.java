@@ -113,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-    @Cacheable(module = "PRODUCTSERVICEIMPL", event = "getProductSku", key = "merchantId, productId, skuId",
+    @Cacheable(module = "PRODUCTSERVICEIMPL", event = "getProductSku", key = "productId, merchantId, skuId",
             expires = RedisConstants.REDIS_SELFPRODUCT_CACHE_EXPIRATION_DATE, required = true)
 	public AdSelfProduct getCacheProductSku(Map<String, Object> paramMap) {
         Integer merchantId = (Integer) paramMap.get("merchantId");

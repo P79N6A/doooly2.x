@@ -25,7 +25,7 @@ public class AdRechargeConfServiceImpl implements AdRechargeConfServiceI{
     @Cacheable(module = "ADRECHARGECONFSERVICEIMPL", event = "getRechargeConf", key = "groupId",
             expires = RedisConstants.REDIS_RECHARGE_CACHE_EXPIRATION_DATE, required = true)
     public AdRechargeConf getRechargeConf(Map<String, Object> paramMap) {
-        String groupId = (String) paramMap.get("groupId");
+        String groupId = paramMap.get("groupId").toString();
         return adRechargeConfDao.getRechargeConf(groupId);
     }
 }

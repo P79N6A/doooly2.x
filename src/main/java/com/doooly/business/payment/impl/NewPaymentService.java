@@ -29,26 +29,11 @@ import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdRechargeConfDao;
-import com.doooly.dao.reachad.AdRechargeRecordDao;
-import com.doooly.dao.reachad.AdReturnDetailDao;
-import com.doooly.dao.reachad.AdReturnFlowDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdBusinessExpandInfo;
-import com.doooly.entity.reachad.AdRechargeConf;
-import com.doooly.entity.reachad.AdRechargeRecord;
-import com.doooly.entity.reachad.AdReturnFlow;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.Order;
-import com.doooly.entity.reachad.OrderDetail;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,12 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 
@@ -220,13 +200,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
-        //20181227 优化改造只查询一个
-        //List<OrderVo> orderVoList = orderService.getOrder(order);
-        //if (CollectionUtils.isEmpty(orderVoList)) {
-        //    return null;
-        //}
-        //OrderVo o = orderVoList.get(0);
-        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+//        20181227 优化改造只查询一个
+        List<OrderVo> orderVoList = orderService.getOrder(order);
+        if (CollectionUtils.isEmpty(orderVoList)) {
+            return null;
+        }
+        OrderVo o = orderVoList.get(0);
+//        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+//        if (o == null) {
+//            return null;
+//        }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
@@ -265,7 +248,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("groupId", user.getGroupNum());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
-            retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit());
+            retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
         }
         //组建预支付订单参数
         //20181227 缓存改造 ---zhangqing
@@ -713,7 +696,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
             //20181227改造缓存---zhangqing
             Map<String,Object> paramMap = new HashMap<>();
-            paramMap.put("groupId",user.getGroupNum());
+            paramMap.put("groupId",user.getGroupNum().toString());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             logger.info("conf = {}", conf);
             if (conf == null) {

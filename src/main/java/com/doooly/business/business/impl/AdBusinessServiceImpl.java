@@ -24,8 +24,8 @@ public class AdBusinessServiceImpl implements AdBusinessServiceI {
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
 
     @Override
-    @Cacheable(module = "ADBUSINESSSERVICEIMPL", event = "getBusiness", key = "id,businessId",
-            expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE, required = true)
+    @Cacheable(module = "ADBUSINESSSERVICEIMPL", event = "getBusiness", key = "id",
+            expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
     public AdBusiness getBusiness(AdBusiness adBusiness) {
         return adBusinessDao.getBusiness(adBusiness);
     }

@@ -3,15 +3,10 @@ package com.doooly.business.order.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdCouponCodeServiceI;
 import com.doooly.business.exwings.ExWingsUtils;
-import com.doooly.business.freeCoupon.service.task.SaveOrderExtTask;
 import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
 import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.MerchantProdcutVo;
-import com.doooly.business.order.vo.OrderExtVo;
-import com.doooly.business.order.vo.OrderItemVo;
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.order.vo.ProductSkuVo;
+import com.doooly.business.order.vo.*;
 import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.product.entity.ActivityInfo;
@@ -22,24 +17,11 @@ import com.doooly.business.product.service.AdSelfProductImageServiceI;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.common.util.IdGeneratorUtil;
-import com.doooly.dao.reachad.AdCouponCodeDao;
-import com.doooly.dao.reachad.AdOrderDeliveryDao;
-import com.doooly.dao.reachad.AdOrderDetailDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdOrderSourceDao;
-import com.doooly.dao.reachad.AdRechargeConfDao;
-import com.doooly.dao.reachad.AdRechargeRecordDao;
-import com.doooly.dao.reachad.AdSelfProductImageDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.AdCoupon;
-import com.doooly.entity.reachad.AdCouponCode;
-import com.doooly.entity.reachad.AdRechargeConf;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.Order;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 统一下单接口
@@ -593,15 +571,15 @@ public class OrderServiceImpl implements OrderService {
 		order.setOrderId(oneOrderId);
 		rows += saveOrder(order);
 		logger.info("order.id = {}", order.getId());
-		//if (orderExt != null) {
-		//	rows += saveOrderExt(order.getId(),orderExt);
-		//}
-		//rows += saveOrderItem(order.getId(), orderItem);
+		if (orderExt != null) {
+			rows += saveOrderExt(order.getId(),orderExt);
+		}
+		rows += saveOrderItem(order.getId(), orderItem);
         //20181226改成异步处理
-        JSONObject req = new JSONObject();
-        req.put("orderId",order.getId());
-        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
-        myThreadPoolService.submitTask(saveOrderExtTask);
+//        JSONObject req = new JSONObject();
+//        req.put("orderId",order.getId());
+//        SaveOrderExtTask saveOrderExtTask = new SaveOrderExtTask(req,orderExt,orderItem);
+//        myThreadPoolService.submitTask(saveOrderExtTask);
         AdOrderSource adOrderSource = new AdOrderSource();
         adOrderSource.setOrderNumber(order.getOrderNumber());
         adOrderSource.setBusinessId(order.getBussinessId());

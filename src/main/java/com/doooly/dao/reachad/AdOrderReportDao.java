@@ -126,11 +126,11 @@ public interface AdOrderReportDao {
 
     int orderBelongOneActivity(Map<String,Object> param);
 
-    BigDecimal getConsumptionAmountByMap(@Param("paramMap") Map<String, Object> paramMap);
+    BigDecimal getConsumptionAmountByMap(Map<String, Object> paramMap);
     /**
      * 购买活动商品数量
      */
-    public int getBuyNum(@Param("paramMap") Map<String, Object> paramMap);
+    int getBuyNum(Map<String, Object> paramMap);
 
     OrderVo getOrderLimt(OrderVo order);
 }

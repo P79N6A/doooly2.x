@@ -201,15 +201,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
 //        20181227 优化改造只查询一个
-        List<OrderVo> orderVoList = orderService.getOrder(order);
+       /* List<OrderVo> orderVoList = orderService.getOrder(order);
         if (CollectionUtils.isEmpty(orderVoList)) {
             return null;
         }
-        OrderVo o = orderVoList.get(0);
-//        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
-//        if (o == null) {
-//            return null;
-//        }
+        OrderVo o = orderVoList.get(0);*/
+        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+        if (o == null) {
+            return null;
+        }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;

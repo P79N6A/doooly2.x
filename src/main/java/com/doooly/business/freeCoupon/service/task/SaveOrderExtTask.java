@@ -7,40 +7,41 @@ import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @Description: 保存用户扩展信息
  * @author: qing.zhang
  * @date: 2018-12-26
  */
-public class SaveOrderExtTask implements Callable<SaveOrderExtTask>{
+public class SaveOrderExtTask implements Runnable{
 
     private static Logger logger = LoggerFactory.getLogger(SaveOrderExtTask.class);
 
     private JSONObject req;
     private OrderExtVo orderExt;
     private List<OrderItemVo> orderItem;
-    @Autowired
     private AdOrderDeliveryDao adOrderDeliveryDao;
-    @Autowired
     private AdOrderDetailDao adOrderDetailDao;
 
     public SaveOrderExtTask() {
     }
 
-    public SaveOrderExtTask(JSONObject req, OrderExtVo orderExt, List<OrderItemVo> orderItem) {
+    public SaveOrderExtTask(JSONObject req, OrderExtVo orderExt, List<OrderItemVo> orderItem,
+                            AdOrderDeliveryDao adOrderDeliveryDao,AdOrderDetailDao adOrderDetailDao) {
         this.req = req;
         this.orderExt = orderExt;
         this.orderItem = orderItem;
+        this.adOrderDeliveryDao = adOrderDeliveryDao;
+        this.adOrderDetailDao = adOrderDetailDao;
     }
 
+
     @Override
-    public SaveOrderExtTask call() throws Exception {
+    public void run() {
         // 方法进入时间
+        logger.info("保存订单商品信息====orderId:{},开始");
         Long startTime = System.currentTimeMillis();
         int rows = 0;
         Long orderId = req.getLong("orderId");
@@ -48,7 +49,6 @@ public class SaveOrderExtTask implements Callable<SaveOrderExtTask>{
             rows += adOrderDeliveryDao.insert(orderId,orderExt);
         }
         rows += adOrderDetailDao.bantchInsert(orderId,orderItem);
-        logger.info("保存订单商品信息====orderId:{},rows:{},成功发券执行耗时：{}" , orderId,rows,(System.currentTimeMillis() - startTime));
-        return null;
+        logger.info("保存订单商品信息====orderId:{},rows:{},成功保存订单执行耗时：{}" , orderId,rows,(System.currentTimeMillis() - startTime));
     }
 }

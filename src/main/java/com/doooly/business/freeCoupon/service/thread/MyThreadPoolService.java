@@ -11,4 +11,6 @@ import java.util.concurrent.Future;
 public interface MyThreadPoolService {
 
     Future submitTask(Callable callable);
+
+    void submitRunalbeTask(Runnable callable);
 }

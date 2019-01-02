@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.activity.ActActivityRecordDao">
+
+    <sql id="columnAll">
+        a.id AS "id",
+        a.act_key AS "actKey",
+        a.act_name AS "actName",
+        a.act_type AS "actType",
+        a.begin_date AS "beginDate",
+        a.end_date AS "endDate",
+        a.state AS "state",
+        a.stock_total AS "stockTotal",
+        a.stock_avail AS "stockAvail",
+        a.update_date AS "updateDate",
+        a.create_date AS "createDate",
+        a.create_by AS "createBy",
+        a.update_by AS "updateBy"
+    </sql>
+
+    <!--查询单个-->
+    <select id="queryById" resultType="com.doooly.entity.activity.ActActivityRecord" parameterType="java.lang.String">
+        select
+            <include refid="columnAll"/>
+        from act_activity_record a
+        where
+           a.id=#{id}
+           and a.state = 2
+    </select>
+
+    <select id="queryByActKeyAndGroup" resultType="com.doooly.entity.activity.ActActivityRecord">
+        select
+            <include refid="columnAll"/>,
+            g.group_id AS "groupId"
+        from act_activity_record a
+        INNER JOIN act_activity_group_record g ON a.id = g.activity_id
+        where
+            a.id= #{id}
+          and g.group_id = #{groupId}
+          and a.state = 2
+    </select>
+</mapper>

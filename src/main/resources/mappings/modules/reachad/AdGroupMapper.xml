@@ -38,7 +38,7 @@
 		parameterType="java.lang.String">
 		Select *
 		From ad_group
-		Where ud_id = #{0}
+			Where ud_id = #{0}
 	</select>
 
 

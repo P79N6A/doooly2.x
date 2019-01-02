@@ -1,17 +1,16 @@
 package com.doooly.dao.reachad;
 
+import com.doooly.common.dao.BaseDaoI;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserConn;
+import com.doooly.entity.reachad.AdUserPersonalInfo;
+import org.apache.ibatis.annotations.Param;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.ibatis.annotations.Param;
-
-import com.doooly.business.myorder.po.OrderPoReq;
-import com.doooly.common.dao.BaseDaoI;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserConn;
-import com.doooly.entity.reachad.AdUserPersonalInfo;
 
 public interface AdUserDao extends BaseDaoI<AdUser> {
 
@@ -345,8 +344,7 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 查询用户激活时间
 	 */
 	AdUser getUserActiveInfo(AdUser adUser);
-	
-	
-	
-	
+
+	AdUser getUserByPhoneAndGroup(AdUser adUser);
+
 }

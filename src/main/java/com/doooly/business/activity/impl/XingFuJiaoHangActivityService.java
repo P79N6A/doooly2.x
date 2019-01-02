@@ -45,7 +45,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	 * 预导入用户到ad_user表
 	 */
 	@Override
-	protected MessageDataBean doBefore(JSONObject beforeJson) {
+	public MessageDataBean doBefore(JSONObject beforeJson) {
 		long start = System.currentTimeMillis();
 		// 1.验证短信验证码是否有效
 		JSONObject verificationReq = new JSONObject();

@@ -2,6 +2,7 @@ package com.doooly.business.common.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdGroup;
 
 /**
  * 企业信息表服务接口
@@ -46,4 +47,11 @@ public interface AdGroupServiceI {
 	 * @return groupList-企业集合
 	 */
 	public MessageDataBean getGroupByCommand(JSONObject param) throws Exception;
+
+	/**
+	 * 通过企业id获得企业信息
+	 * @param groupId
+	 * @return
+	 */
+	public AdGroup getGroupById(String groupId);
 }

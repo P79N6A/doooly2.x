@@ -1,30 +1,5 @@
 package com.doooly.business.common.service.impl;
 
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
@@ -35,25 +10,35 @@ import com.doooly.common.util.MD5Utils;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.common.util.WechatUtil;
 import com.doooly.dao.payment.VoucherCardRecordDao;
-import com.doooly.dao.reachad.AdActiveCodeDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdInvitationRecordDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdUserPersonalInfoDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dao.reachlife.LifeGroupDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.payment.VoucherCardRecord;
-import com.doooly.entity.reachad.AdActiveCode;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdInvitationRecord;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserPersonalInfo;
+import com.doooly.entity.reachad.*;
 import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeWechatBinding;
 import com.doooly.publish.rest.life.impl.FamilyInviteService;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 
@@ -118,6 +103,19 @@ public class AdUserService implements AdUserServiceI {
 
 	public AdUser getById(Integer id) {
 		return adUserDao.getById(id);
+	}
+
+	@Override
+	public AdUser getUserByPhone(String phone) {
+		return adUserDao.findByMobile(phone);
+	}
+
+	@Override
+	public AdUser getUserByPhoneAndGroup(String phone, String groupId) {
+		AdUser adUser = new AdUser();
+		adUser.setTelephone(phone);
+		adUser.setGroupNum(Long.valueOf(groupId));
+		return adUserDao.getUserByPhoneAndGroup(adUser);
 	}
 
 	@Override

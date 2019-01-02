@@ -1,11 +1,12 @@
 package com.doooly.business.common.service;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.HashMap;
 
 /**
  * 
@@ -27,6 +28,21 @@ public interface AdUserServiceI {
 	public long getID(AdUser user);
 
 	public AdUser getById(Integer id);
+
+	/**
+	 * 根据手机号码获得用户
+	 * @param phone
+	 * @return
+	 */
+	public AdUser getUserByPhone(String phone);
+
+	/**
+	 * 根据手机号码和企业id获得用户
+	 * @param phone
+	 * @param groupId
+	 * @return
+	 */
+	public AdUser getUserByPhoneAndGroup(String phone, String groupId);
 
 	/**
 	 * 根据会员卡号或会员手机号查找 若只有手机号则会员卡号为NULL 若只有会员卡号手机号则为NULL

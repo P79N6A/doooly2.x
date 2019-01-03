@@ -80,6 +80,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 			if (adGroupSelfProductPriceList != null && adGroupSelfProductPriceList.size() > 0) {
 				map.put("adGroupSelfProductPrice",adGroupSelfProductPriceList.get(0));
 			}
+			map.put("currentTime",new Date().getTime()/1000);
 			messageDataBean.setCode((String) map.get("code"));
 			messageDataBean.setData(map);
 		} catch (Exception e) {

@@ -870,7 +870,9 @@
 	</update>
 	
 	<select id="findByMobile" resultType="AdUser">
-		select * from ad_user
+		select
+		  <include refid="Base_Column_List" />
+		from ad_user
 		Where telephone = #{mobile} limit 1
 	</select>
 	<select id="findByMobileBySelfApplication" resultType="AdUser">

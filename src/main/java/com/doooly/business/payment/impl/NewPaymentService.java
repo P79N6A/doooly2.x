@@ -189,6 +189,155 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     /**
+     * 饿了么下单
+     * @param jsonObject
+     * @return
+     */
+    @Override
+    public ResultModel unifiedElmorder(JSONObject jsonObject) {
+        JSONObject orderSummary = getElmOrderSummary(jsonObject);
+        if (orderSummary == null) {
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
+        }
+        logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
+        JSONObject param = orderSummary.getJSONObject("param");
+        JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
+        String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        logger.info(sign);
+        JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
+        object.put("param", param.toJSONString());
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //说明获取成功
+            Map<Object, Object> data = (Map<Object, Object>) jsonResult.get("data");
+            String payId = (String) data.get("payId");
+            String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
+            retJson.put("payId", payId);
+            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
+            if (StringUtils.isNotBlank(integralRebatePayAmount)) {
+                retJson.put("integralRebatePayAmount", integralRebatePayAmount);
+            }
+            logger.info("payment unifiedorder result data={}", data);
+            return ResultModel.ok(retJson);
+        } else {
+            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
+        }
+    }
+
+    /**
+     * 获取商品信息
+     *
+     * @param json
+     * @return
+     */
+    private JSONObject getElmOrderSummary(JSONObject json) {
+        logger.info("getOrderSummary() json = {}", json);
+        JSONObject result = new JSONObject();
+        String orderNum = json.getString("orderNum");
+        long userId = json.getLong("userId");
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVoList = orderService.getOrder(order);
+        if (CollectionUtils.isEmpty(orderVoList)) {
+            return null;
+        }
+        OrderVo o = orderVoList.get(0);
+        OrderItemVo item = o.getItems().get(0);
+        String sku = item.getSku() != null ? item.getSku() : "";
+        String orderDesc = item.getGoods() + sku;
+        //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
+        JSONObject retJson = new JSONObject();
+        retJson.put("productType", o.getProductType());
+        retJson.put("totalFree", o.getTotalMount().toString());
+        retJson.put("orderDesc", orderDesc);
+        retJson.put("orderId", o.getOrderId());
+        retJson.put("isSource", o.getIsSource());
+        retJson.put("productImg", item.getProductImg());
+        retJson.put("supportPayType", o.getSupportPayType());
+        retJson.put("orderNum", orderNum);
+        if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
+                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
+        ) && o.getServiceCharge() != null) {
+            retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
+        }
+        //话费充值需要校验积分消费金额,用到此参数
+        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
+                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+            //用户消费金额
+            BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
+            retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
+            AdUser user = adUserDao.getById(order.getUserId().intValue());
+            AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
+            retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit());
+        }
+        //组建预支付订单参数
+        AdUser user = adUserDao.getById(order.getUserId().intValue());
+        AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
+        String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
+        String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
+        JSONObject param = new JSONObject();
+        param.put("businessId", business.getBusinessId());//商户编号
+        param.put("cardNumber", user.getTelephone());
+        param.put("merchantOrderNo", o.getOrderNumber());
+        param.put("tradeType", "DOOOLY_JS");
+        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("body", orderDesc);
+        param.put("isSource", o.getIsSource());
+        param.put("orderDate", DateUtils.formatDateTime(o.getOrderDate()));
+        param.put("storesId", "A001");
+        param.put("price", price);
+        param.put("amount", amount);
+        param.put("clientIp", json.get("clientIp"));
+        param.put("nonceStr", RandomUtil.getRandomStr(16));
+        param.put("isPayPassword", user.getIsPayPassword());
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonDetail = new JSONObject();
+        jsonDetail.put("code", item.getCode());
+        jsonDetail.put("goods", item.getGoods());
+        jsonDetail.put("number", item.getNumber());
+        jsonDetail.put("price", item.getPrice());
+        jsonDetail.put("category", item.getCategoryId());
+        jsonDetail.put("tax", item.getTax());
+        jsonDetail.put("amount", item.getAmount());
+        jsonArray.add(jsonDetail);
+        param.put("orderDetail", jsonArray.toJSONString());
+        logger.info("下单参数param=========" + param);
+        result.put("param", param);
+        retJson.put("company", business.getCompany());
+        retJson.put("userIntegral", user.getIntegral());
+        logger.info("retJson = {}", retJson);
+        result.put("retJson", retJson);
+        result.put("businessId", o.getBussinessId());//商户id
+        return result;
+    }
+
+    /**
      * 获取商品信息
      *
      * @param json

@@ -3,9 +3,13 @@ package com.doooly.service.activity.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.activity.impl.XingFuJiaoHangActivityService;
 import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.common.constants.ActivityConstants;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.GenerateKeyUtil;
+import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.HttpClientUtil;
+import com.doooly.common.webservice.WebService;
 import com.doooly.dao.activity.ActActivityCodeRecordDao;
 import com.doooly.dao.activity.ActActivityRecordDao;
 import com.doooly.dao.activity.ActLotteryResultDao;
@@ -125,15 +129,28 @@ public class ActivityServiceImpl implements ActivityServiceI {
 
             adUser = adUserService.getUserByPhone(phone);
         } else {
+            JSONObject verificationReq = new JSONObject();
+            verificationReq.put("businessId", WebService.BUSINESSID);
+            verificationReq.put("storesId", WebService.STOREID);
+            verificationReq.put("verificationCode", obj.getString("verificationCode"));
+            verificationReq.put("cardNumber", obj.getString("phone"));
+            String result = HTTPSClientUtils.sendPost(verificationReq, Constants.MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
+
+            // 验证码验证失败
+            if (JSONObject.parseObject(result).getInteger("code") != 0) {
+                logger.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", obj.toJSONString(), result);
+                return new MessageDataBean(ActivityConstants.ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR).toJsonString();
+            }
+
             ActActivityCodeRecord actCodeRecord = activityCodeRecordDao.findByActivityIdAndUserId(actActivityRecord.getId(), adUser.getId());
 
             if (actCodeRecord != null) {
-                return new MessageDataBean(MessageDataBean.failure_code, "您已经领取过了").toJSONString();
+                return new MessageDataBean(MessageDataBean.failure_code, "您已经领取过了").toJsonString();
             }
         }
 
         if (!groupId.equals(adUser.getGroupNum().toString())) {
-            return new MessageDataBean(MessageDataBean.failure_code, "用户与当前企业不对应").toJSONString();
+            return new MessageDataBean(MessageDataBean.failure_code, "用户与当前企业不对应").toJsonString();
         }
         return getCode(actActivityRecord.getId().toString(), adUser);
     }

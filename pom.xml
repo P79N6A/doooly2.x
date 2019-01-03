@@ -607,24 +607,18 @@
 			<version>0.0.1</version>
 		</dependency>
 
+		<!-- redis 缓存 -->
+		<dependency>
+			<groupId>com.reach</groupId>
+			<artifactId>spring-redis-cache</artifactId>
+			<version>1.0.23</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.github.pagehelper</groupId>
 			<artifactId>pagehelper</artifactId>
 			<version>4.1.6</version>
 		</dependency>
-		<!-- redis 缓存 -->
-		<dependency>
-			<groupId>com.reach</groupId>
-			<artifactId>spring-redis-cache</artifactId>
-			<version>1.0.12</version>
-		</dependency>
-
-		<!--<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.2</version>
-			<scope>provided</scope>
-		</dependency>-->
 	</dependencies>
 	<build>
 		<finalName>Doooly</finalName>
@@ -770,10 +764,10 @@
 			</plugin>
 		</plugins>
 	</build>
-	 <repositories>
+	<!-- <repositories>
 		<repository>
 			<id>nexus-central</id>
 			<url>http://test1.doooly.com:7777/nexus/content/groups/public/</url>
 		</repository>
-	</repositories>
+	</repositories> -->
 </project>

@@ -11,11 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Description: 导购
@@ -63,15 +67,23 @@ public class AdArticleRestService implements AdArticleRestServiceI {
     @Path(value = "/getGuideProductList/v2")
     @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public String getGuideProductListv2(JSONObject json, ContainerRequest request) {
+    public String getGuideProductListv2(JSONObject json, @Context HttpServletRequest request) {
         MessageDataBean messageDataBean = new MessageDataBean();
         try {
-            String userId = json.getString("userId");
-            String guideCategoryId = json.getString("guideCategoryId");//导购类目
-            String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
-            Integer currentPage = json.getInteger("currentPage");
-            Integer pageSize = json.getInteger("pageSize");
-            messageDataBean = adArticleServiceI.getGuideProductListv2(guideCategoryId, currentPage, pageSize,userId,recommendHomepage);
+//            String userId = json.getString("userId");
+//            String guideCategoryId = json.getString("guideCategoryId");//导购类目
+//            String recommendHomepage = json.getString("recommendHomepage");//是否推荐到首页 0 不推荐，1 推荐
+//            Integer currentPage = json.getInteger("currentPage");
+//            Integer pageSize = json.getInteger("pageSize");
+
+            Map<String, String> map = new HashMap<>();
+            map.put("userId", json.getString("userId"));
+            map.put("guideCategoryId", json.getString("guideCategoryId"));
+            map.put("currentPage", json.getInteger("currentPage").toString());
+            map.put("pageSize", json.getInteger("pageSize").toString());
+            map.put("groupId", request.getHeader("groupId"));
+
+            messageDataBean = adArticleServiceI.getGuideProductListv2(map);
         } catch (Exception e) {
             logger.error("获取导购信息出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);

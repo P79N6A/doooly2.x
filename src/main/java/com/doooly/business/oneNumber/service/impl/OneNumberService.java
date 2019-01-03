@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.EncryptDecryptUtil;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
 import com.doooly.business.utils.MD5Util;
+import com.doooly.business.utils.RSAEncryptUtil;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdUserDao;
@@ -11,6 +12,7 @@ import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
 import com.koalii.bc.util.encoders.Hex;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,16 +203,18 @@ public class OneNumberService implements OneNumberServiceI {
 	 * @return 跳转链接
 	 */
 	private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
-		String resultUrl;
-		String str = "telNo=" + adUser.getTelephone() + "&source=" + adBusinessExpandInfo.getShopId();
-		if (StringUtils.isNotBlank(targetUrl) && !"null".equals(targetUrl)) {
-			str += "&surl=" + targetUrl;
+		String mobile = null;
+		// String pubKey = PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")
+		String pubKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCh+8ubaJTICB+I0lvQjKkw+fAebI2rPL9SuJAzoy24a8qOQaj4bDsxCw1y6xLgeBpZ1i31FnDAJvqmZJ3QQh+DSib6182u6sd6fByaTxbLqyetE4t90oUncuwnWX0R8HVREgOV718VKQIIcj+sULJIZ0LMpYLU37XVYfTDlrz0iwIDAQAB";
+		String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64
+						.decodeBase64(pubKey), adUser.getTelephone());
+		try {
+			mobile = URLEncoder.encode(rsaMobile, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
-		if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
-			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str;
-		} else {
-			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str;
-		}
+		String resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + "mobile=" + mobile + "&channelCode="
+				+ adBusinessExpandInfo.getShopId();
 		return resultUrl;
 	}
 

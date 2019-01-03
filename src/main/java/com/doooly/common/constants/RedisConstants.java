@@ -27,6 +27,18 @@ public class RedisConstants {
 	/**
 	 * Redis 缓存过期时间 单位（秒）
 	 */
-	public static final int REDIS_CACHE_EXPIRATION_DATE = 600;
+	public static final int REDIS_CACHE_EXPIRATION_DATE = 86400;
+	/**
+	 * Redis 商品缓存过期时间 单位（秒）
+	 */
+	public static final int REDIS_SELFPRODUCT_CACHE_EXPIRATION_DATE = 3600;
+	/**
+	 * Redis 充值话费配置缓存过期时间 单位（秒）
+	 */
+	public static final int REDIS_RECHARGE_CACHE_EXPIRATION_DATE = 86400;
+	/**
+	 * Redis 用户缓存过期时间 单位（秒）
+	 */
+	public static final int REDIS_USER_CACHE_EXPIRATION_DATE = 600;
 
 }

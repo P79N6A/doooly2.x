@@ -12,7 +12,7 @@ import com.doooly.business.utils.MD5Util;
 public class SignUtils {
 
 
-    public static Boolean validParam(String consumerNo, String timeStamp, String sign, JSONObject eleConfig) {
+    public static Boolean validParam(String consumerNo, String timeStamp, String sign, JSONObject obj, JSONObject eleConfig) {
         String elmConsumerNO = eleConfig.getString("consumerNo");
         String elmConsumerSecret = eleConfig.getString("consumerSecret");
         //1,客户编码校验
@@ -26,7 +26,7 @@ public class SignUtils {
             return false;
         }
         //3,加密sign
-        String sign1 = MD5Util.MD5Encode(sign + elmConsumerSecret + timeStamp, ELMConstants.CHARSET);
+        String sign1 = MD5Util.MD5Encode(obj + elmConsumerSecret + timeStamp, ELMConstants.CHARSET);
         if(!sign.equals(sign1)){
             return false;
         }

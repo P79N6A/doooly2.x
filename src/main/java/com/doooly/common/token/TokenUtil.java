@@ -1,17 +1,20 @@
 package com.doooly.common.token;
 
-import com.doooly.common.context.SpringContextUtils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.doooly.common.async.AsyncDooolyService;
+import com.doooly.common.context.SpringContextUtils;
 
 /**
  * 
@@ -25,12 +28,10 @@ import java.util.Set;
  */
 public class TokenUtil {
 	private static Logger log = LoggerFactory.getLogger(TokenUtil.class);
-//	private static StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-//			.getBeanById("redisTemplate");
 	// 会员token，唯一标识，放入缓存
-	private static String TOKEN_KEY = "token:%s";
-	// token时效性暂定30天内有效
-	// private static Long TOKEN_EXPIRE = 30L;
+	public static String TOKEN_KEY = "token:%s";
+	// token时效性暂定120天内有效
+	public static Long TOKEN_EXPIRE = 120L;
 	// 加盐
 	private static String TOKEN_SALT = "279125393@qq.com";
 	// private static Logger log = Logger.getLogger(TokenUtil.class);
@@ -52,14 +53,17 @@ public class TokenUtil {
 		if (StringUtils.isBlank(userId) || StringUtils.isBlank(userToken) || StringUtils.isBlank(channel))
 			return false;
 		// 使用token:userId 标识用户token对应的key
-		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-				.getBeanById("redisTemplate");
-		String tokenValue = redisService.opsForValue().get(String.format(channel + ":" + TOKEN_KEY, userId));
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils.getBeanById("redisTemplate");
+		AsyncDooolyService asyncDooolyService = (AsyncDooolyService) SpringContextUtils.getBeanByClass(AsyncDooolyService.class);
+		String tokenKey = String.format(channel + ":" + TOKEN_KEY, userId);
+		String tokenValue = redisService.opsForValue().get(tokenKey);
 		// 若Token为空，验证失败
 		if (StringUtils.isBlank(tokenValue) || !userToken.equals(tokenValue)) {
 			return false;
 		} else {
-			// todo 验证Token的有效性
+			// 验证token成功
+			asyncDooolyService.setUserTokeExpire(channel, userId);
+			log.info("验证token成功,userId={}",userId);
 			return true;
 		}
 	}
@@ -74,19 +78,18 @@ public class TokenUtil {
 	 * @version V1.0
 	 */
 	public static String getUserToken(String channel, String userId) {
-		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-				.getBeanById("redisTemplate");
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils.getBeanById("redisTemplate");
 		// 1.使用token:userId 标识用户token对应的key
 		String userToken = redisService.opsForValue().get(String.format(channel + ":" + TOKEN_KEY, userId));
 		if (StringUtils.isBlank(userToken)) {
 			// 2.生成token,userId:salt=会员Id+盐
 			userToken = DigestUtils.md5Hex(String.format("%s %s", userId, TOKEN_SALT));
-			// 3.放入缓存userId:token
-			redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken);
+			// 3.放入缓存channel:userId:token
+			redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken, TOKEN_EXPIRE,
+					TimeUnit.DAYS);
 			// 4.放入缓存token:userId
-			redisService.opsForValue().set(userToken, userId);
-			// redisService.opsForValue().set(userToken, userId, TOKEN_EXPIRE,
-			// TimeUnit.DAYS);
+			 redisService.opsForValue().set(userToken, userId, TOKEN_EXPIRE,
+			 TimeUnit.DAYS);
 		}
 
 		return userToken;
@@ -103,17 +106,18 @@ public class TokenUtil {
 	 */
 	public static String refreshUserToken(String channel, String userId) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-				.getBeanById("redisTemplate");
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils.getBeanById("redisTemplate");
 		// 时间戳
 		String time_str = sdf.format(new Date());
 		TOKEN_SALT += time_str;
 		// 1.生成token,userId:salt=会员Id+盐
 		String userToken = DigestUtils.md5Hex(String.format("%s %s", userId, TOKEN_SALT));
-		// 2.放入redis缓存,并设置有效期
-		redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken);
+		// 2.放入redis缓存,并设置有效期,key=channel:token:userId
+		redisService.opsForValue().set(String.format(channel + ":" + TOKEN_KEY, userId), userToken, TOKEN_EXPIRE,
+				TimeUnit.DAYS);
 		// 3.放入缓存token:userId
-		redisService.opsForValue().set(userToken, userId);
+		redisService.opsForValue().set(userToken, userId,TOKEN_EXPIRE,
+				TimeUnit.DAYS);
 
 		return userToken;
 	}
@@ -130,8 +134,7 @@ public class TokenUtil {
 	 */
 	public static void cancelUserToken(String userId) {
 		long start = System.currentTimeMillis();
-		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils
-				.getBeanById("redisTemplate");
+		StringRedisTemplate redisService = (StringRedisTemplate) SpringContextUtils.getBeanById("redisTemplate");
 		// 1.初始化需要删除的token key值
 		Set<String> tokenKeys = new HashSet<>();
 		tokenKeys.add(String.format("token:%s", userId));

@@ -61,15 +61,20 @@ public class IndexServiceImpl implements IndexServiceI {
      * @since
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
-    public String listSpendIntegralFloors(String userId, String address) {
+    @Cacheable(module = "TEMPLATE", event = "listSpendIntegralFloors", key = "groupId, address",
+            expiresKey = "expires", required = true)
+    public String listSpendIntegralFloors(Map<String, String> map) {
         long start = System.currentTimeMillis();
 
+        map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+
+        long bussinessExpores = RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
         try {
-            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 0);
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(map.get("userId"), AdBasicType.INDEX_TYPE, 0);
 
             if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean("1000", "floors is null").toJsonString();
+                return new MessageDataBean("1005", "floors is null").toJsonString();
             }
 
             Map<String, Object> data = new HashMap<String, Object>();
@@ -80,7 +85,7 @@ public class IndexServiceImpl implements IndexServiceI {
                     Map<String, Object> item = new HashMap<String, Object>();
 
                     if (floor.getCode() == 25) {
-                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(userId), "2", address);
+                        List<AdBusinessServicePJ> beans = adBusinessServicePJDao.getDataByUserId(Long.valueOf(map.get("userId")), "2", map.get("address"));
 
                         if (!CollectionUtils.isEmpty(beans)) {
                             item.put("mainTitle", floor.getName());
@@ -88,21 +93,32 @@ public class IndexServiceImpl implements IndexServiceI {
                             item.put("type", "9");
                             List<AdConsumeRecharge> list = new ArrayList<>(beans.size());
 
+                            // 失效时间
+//                            Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
                             for (AdBusinessServicePJ a : beans) {
                                 AdConsumeRecharge adConsumeRecharge = new AdConsumeRecharge();
                                 adConsumeRecharge.setMainTitle(a.getServiceName());
                                 adConsumeRecharge.setIconUrl(a.getLogo());
-                                adConsumeRecharge.setSubUrl(a.getServiceUrl());
+                                adConsumeRecharge.setServerEndTime(a.getServerEndTime());
 
                                 if (0 != a.getServiceUrl().indexOf("/")) {
                                     adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + "/" + a.getServiceUrl());
+                                    adConsumeRecharge.setSubUrl("/" + a.getServiceUrl());
                                 } else {
                                     adConsumeRecharge.setLinkUrl(PropertiesHolder.getProperty("BASE_URL") + a.getServiceUrl());
+                                    adConsumeRecharge.setSubUrl(a.getServiceUrl());
                                 }
+
+                                // 如果失效时间大于商户服务结束时间，则修改失效时间为商户服务结束时间
+//                                if (date > (adConsumeRecharge.getServerEndTime().getTime()) / 1000) {
+//                                    date = (adConsumeRecharge.getServerEndTime().getTime()) / 1000;
+//                                }
 
                                 list.add(adConsumeRecharge);
                             }
                             item.put("list", list);
+//                            bussinessExpores = date - (System.currentTimeMillis() / 1000);
                         }
                     } else {
 
@@ -134,6 +150,9 @@ public class IndexServiceImpl implements IndexServiceI {
             }
             data.put("floors", ls);
             logger.info("selectFloorsByVersion(), execution time = {}", System.currentTimeMillis() - start);
+
+//            map.put("expires", bussinessExpores + "");
+//            logger.info("listSpendIntegralFloors>>失效时间====" + bussinessExpores);
             return new MessageDataBean("1000", "success", data).toJsonString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,7 +184,7 @@ public class IndexServiceImpl implements IndexServiceI {
             logger.info("index() userToken={},userId={},params={},version={}", userToken, userId, params, version);
             List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.INDEX_TYPE, 2);
             if (CollectionUtils.isEmpty(floors)) {
-                return new MessageDataBean("1000", "floors is null").toJsonString();
+                return new MessageDataBean("1005", "floors is null").toJsonString();
             }
             Map<String, Object> data = new HashMap<String, Object>();
             List<Map<String, Object>> ls = new ArrayList<Map<String, Object>>();
@@ -245,19 +264,27 @@ public class IndexServiceImpl implements IndexServiceI {
 
     /**
      * 兜礼权益
-     * @param userId
-     * @param address
      * @return
      */
-    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "userId, address", expires = RedisConstants.REDIS_CACHE_EXPIRATION_DATE)
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV2_2", key = "groupId, address",
+            expiresKey = "expires", required = true)
 	@Override
-	public String selectFloorsByV2_2(String userId, String address) {
+	public String selectFloorsByV2_2(Map<String, String> map) {
 		long start = System.currentTimeMillis();
+        String userId = map.get("userId");
+        String address = map.get("address");
+        String groupId = map.get("groupId");
+
+        map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+
+        long guideExpores = RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+//        long bussinessExpores = RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
 		try {
 			List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
 
 			if (CollectionUtils.isEmpty(floors)) {
-				return new MessageDataBean("1000", "floors is null").toJsonString();
+				return new MessageDataBean("1005", "floors is null").toJsonString();
 			}
 			Map<String, Object> result = new HashMap<>();
 			JSONArray floorArrays = new JSONArray();
@@ -273,16 +300,38 @@ public class IndexServiceImpl implements IndexServiceI {
 
 				if (floorType == DooolyRightConstants.FLOOR_TYPE_GOUWUTEQUAN) {
 					// 兜礼权益商户（线上/线下）
-					floorJson.put("list", getBussiness(userId, address, Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE),
-                            VersionConstants.INTERFACE_VERSION_V2_2));
+                    List<AdConsumeRecharge> bussinessList = getBussiness(userId, address,
+                            Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE), VersionConstants.INTERFACE_VERSION_V2_2);
+
+
+                    floorJson.put("list", bussinessList);
+
+//                    // 失效时间
+//                    Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+//
+//                    for (AdConsumeRecharge adConsumeRecharge : bussinessList) {
+//                        // 如果失效时间大于商户服务结束时间，则修改失效时间为商户服务结束时间
+//                        if (date > (adConsumeRecharge.getServerEndTime().getTime()) / 1000) {
+//                            date = (adConsumeRecharge.getServerEndTime().getTime()) / 1000;
+//                        }
+//                    }
+//                    bussinessExpores = date - (System.currentTimeMillis() / 1000);
 
 				} else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
 					// 员工内部专享价
-					MessageDataBean guideData = guideService.getGuideProductListv2(null, 1, 20, userId, "1");
+                    Map<String, String> paramMap = new HashMap<>();
+                    paramMap.put("userId", userId);
+                    paramMap.put("guideCategoryId", null);
+                    paramMap.put("recommendHomepage", "1");
+                    paramMap.put("currentPage", "1");
+                    paramMap.put("pageSize", "20");
+                    paramMap.put("groupId", groupId);
+					MessageDataBean guideData = guideService.getGuideProductListv2(paramMap);
 
-					if (MessageDataBean.success_code == guideData.getCode()) {
+					if (MessageDataBean.success_code.equals(guideData.getCode())) {
 						List<AdProduct> datas = (List<AdProduct>) guideData.getData().get("adProducts");
 						JSONArray listJson = new JSONArray();
+                        guideExpores = Long.valueOf(guideData.getData().get("expires").toString());
 
 						for (AdProduct product : datas) {
 							itemJson = new JSONObject();
@@ -333,6 +382,14 @@ public class IndexServiceImpl implements IndexServiceI {
 			}
 			result.put("floors", floorArrays);
 			logger.info("selectFloorsByV2_2(), execution time = {}", System.currentTimeMillis() - start);
+
+            if (guideExpores > RedisConstants.REDIS_CACHE_EXPIRATION_DATE) {
+                map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+            } else {
+                map.put("expires", guideExpores + "");
+            }
+            logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expires"));
+
 			return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess, result)
 					.toJsonString();
 		} catch (Exception e) {
@@ -361,6 +418,7 @@ public class IndexServiceImpl implements IndexServiceI {
 			for (AdBusiness merchant : merchants) {
 				AdConsumeRecharge bean = new AdConsumeRecharge();
 				bean.setMainTitle(merchant.getCompany());
+				bean.setServerEndTime(merchant.getServerEndTime());
 				// 前折信息
 				String promotionInfo = "";
 				// 返利信息

@@ -6,6 +6,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,15 +33,15 @@ import com.doooly.publish.rest.life.TokenRestServiceI;
 @Component
 @Path("/token")
 public class TokenRestService implements TokenRestServiceI {
-
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private UserServiceI userService;
-
 	@POST
 	@Path(value = "/validateUserToken")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONObject validUserToken(JSONObject json) {
+		Long start = System.currentTimeMillis();
 		JSONObject dataJson = new JSONObject();
 		try {
 			// todo 验证渠道/密码 String channel, String pwd, String userId
@@ -61,6 +63,7 @@ public class TokenRestService implements TokenRestServiceI {
 			dataJson.put(ConstantsLogin.CODE, GlobalException.TOKEN_CODE);
 			dataJson.put(ConstantsLogin.MESS, "token验证失败,系统错误");
 		}
+		log.info("validUserToken cost={}", System.currentTimeMillis() - start);
 		return dataJson;
 	}
 
@@ -91,12 +94,12 @@ public class TokenRestService implements TokenRestServiceI {
 	@Override
 	public MessageDataBean cancelToken(JSONObject json) {
 		JSONArray phones = json.getJSONArray("phones");
-		if(phones!=null){
-			for(int index=0;index<phones.size();index++){
+		if (phones != null) {
+			for (int index = 0; index < phones.size(); index++) {
 				String phoneNo = phones.getString(index);
 				userService.cancelUserByphoneNo(phoneNo);
 			}
 		}
-		return new MessageDataBean(Login.SUCCESS.getCode(),Login.SUCCESS.getMsg());
+		return new MessageDataBean(Login.SUCCESS.getCode(), Login.SUCCESS.getMsg());
 	}
 }

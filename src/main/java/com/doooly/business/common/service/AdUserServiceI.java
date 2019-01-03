@@ -1,11 +1,14 @@
 package com.doooly.business.common.service;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -99,4 +102,12 @@ public interface AdUserServiceI {
 	public void addIntegral(Long userId, BigDecimal integralForEach);
 
 	public JSONObject verifyCodeAndActivation(JSONObject param) throws Exception;
+
+    AdUser getUser(AdUser adUser);
+
+    List<String> getIds(List<String> returnUserList);
+
+    AdUser saveUserAndPersonal(JSONObject userJson) throws Exception;
+
+    JSONObject checkTelephone(JSONObject data);
 }

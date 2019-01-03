@@ -10,6 +10,7 @@ import com.doooly.business.utils.MD5Util;
 import com.doooly.common.elm.ELMConstants;
 import com.doooly.common.elm.SignUtils;
 import com.doooly.common.util.HttpClientUtil;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class ELMServiceImpl implements ELMServiceI{
 
     @Autowired
     private ConfigDictServiceI configDictServiceI;
+
 
     /** 推送信息
      * {
@@ -46,25 +48,31 @@ public class ELMServiceImpl implements ELMServiceI{
         String valueByTypeAndKey = configDictServiceI.getValueByTypeAndKey(ELMConstants.ELM_DICT_TYPE, ELMConstants.ELM_DICT_KEY);
         JSONObject eleConfig = JSONObject.parseObject(valueByTypeAndKey);
         String elmConsumerSecret = eleConfig.getString("consumerSecret");
-        Boolean flag = SignUtils.validParam(consumerNo,timeStamp,sign,eleConfig);
+        Boolean flag = SignUtils.validParam(consumerNo,timeStamp,sign,obj,eleConfig);
         if(!flag){
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
         //创建doooly订单
-        String uNo = obj.getString("uNo");
         String orderNo = obj.getString("orderNo");
-        String orderNo98 = obj.getString("orderNo98");
-        String totalFee = obj.getString("totalFee");
-        String status = obj.getString("status");
+        JSONObject orderGetParam = new JSONObject();
+        orderGetParam.put("orderNo",orderNo);
+        String orderParam = Hex.encodeHexString(orderGetParam.toJSONString().getBytes());
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(HttpClientUtil.HEADER_CONTENT_TYPE, HttpClientUtil.HEADER_CONTENT_TYPE_JSON);
         headerMap.put("consumerNo",consumerNo);
-        headerMap.put("timeStamp", String.valueOf(DateUtils.getNowTime()));
-        headerMap.put("sign", MD5Util.MD5Encode(sign + elmConsumerSecret + String.valueOf(DateUtils.getNowTime()), ELMConstants.CHARSET));
-
+        String timeNow = String.valueOf(DateUtils.getNowTime());
+        headerMap.put("timeStamp", timeNow);
+        headerMap.put("sign", MD5Util.MD5Encode(orderParam + elmConsumerSecret + timeNow, ELMConstants.CHARSET));
         Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("org",orderParam);
+        String result = HttpClientUtil.doPost(ELMConstants.ELM_URL + ELMConstants.QUERY_ORDER, headerMap, paramMap);
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        Integer code = jsonResult.getInteger("code");
+        if(code == GlobalResultStatusEnum.SUCCESS_ok.getCode()){
+            //查询订单成功下支付单
 
 
+        }
         return null;
     }
 }

@@ -2,6 +2,8 @@ package com.doooly.business.guide.service;
 
 import com.doooly.dto.common.MessageDataBean;
 
+import java.util.Map;
+
 /**
  * @Description: 导购
  * @author: qing.zhang
@@ -11,7 +13,7 @@ public interface AdArticleServiceI {
 
     MessageDataBean getGuideProductList(String orderType, Integer currentPage, Integer pageSize, String userId);
 
-    MessageDataBean getGuideProductListv2(String guideCategoryId, Integer currentPage, Integer pageSize, String userId, String recommendHomepage);
+    MessageDataBean getGuideProductListv2(Map<String, String> paramMap);
 
     MessageDataBean getArticleProductList(String articleId);
 

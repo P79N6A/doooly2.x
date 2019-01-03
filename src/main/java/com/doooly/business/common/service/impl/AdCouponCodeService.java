@@ -1,12 +1,7 @@
 package com.doooly.business.common.service.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.doooly.business.common.service.AdCouponCodeServiceI;
+import com.doooly.common.constants.RedisConstants;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachlife.LifeGiftOrderDao;
 import com.doooly.dao.reachlife.LifeProductDao;
@@ -14,6 +9,15 @@ import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachlife.LifeGiftOrder;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeProduct;
+import com.reach.redis.annotation.Cacheable;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -91,4 +95,9 @@ public class AdCouponCodeService implements AdCouponCodeServiceI {
 		}
 		return infoMap;
 	}
+
+    @Override
+    public AdCouponCode getSelfCouponByMap(Map<String, Object> paramMap) {
+        return adCouponCodeDao.getSelfCouponByMap(paramMap);
+    }
 }

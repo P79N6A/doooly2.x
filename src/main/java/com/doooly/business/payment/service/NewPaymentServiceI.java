@@ -14,6 +14,8 @@ public interface NewPaymentServiceI {
 
     ResultModel unifiedorder(JSONObject param);//下单
 
+    ResultModel unifiedElmorder(JSONObject param);//饿了么下单
+
     ResultModel getTradeInfo(JSONObject param);//获取订单交易信息
 
     ResultModel integralPay(JSONObject param);//积分混合支付

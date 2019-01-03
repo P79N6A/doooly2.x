@@ -212,6 +212,7 @@
             a.link_url_wechat AS "linkUrlWechat",
             a.layered_rebate AS "layeredRebate",
 			a.shipping_method AS "shippingMethod",
+			a.buy_end_time AS "buyEndTime",
             ab.id AS "businessId",
             IFNULL(ab.discount,0) AS "discount",
             ab.logo AS "businessLogo",

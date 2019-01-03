@@ -12,11 +12,13 @@ import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdUser;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -52,7 +54,26 @@ public class OrderServicePublish {
 	@Path(value = "/createOrder")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String createOrder(JSONObject json){
+	public String createOrder(JSONObject json, HttpServletRequest request){
+		OrderMsg orderMsg = new OrderMsg();
+		String groupId = json.getString("groupId");
+		if (StringUtils.isBlank(groupId)) {
+			String userId = json.getString("userId");
+			if (StringUtils.isNotBlank(userId)) {
+				AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
+				if (adUser != null) {
+					json.put("groupId",adUser.getGroupNum());
+				} else {
+					orderMsg.setCode("1001");
+					orderMsg.setMess("用户不存在");
+					return orderMsg.toJsonString();
+				}
+			} else {
+				orderMsg.setCode("1001");
+				orderMsg.setMess("用户不存在");
+				return orderMsg.toJsonString();
+			}
+		}
 		return orderService.createOrder(json).toJsonString();
 	}
 

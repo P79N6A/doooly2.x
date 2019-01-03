@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.common.service.AdUserServiceI;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class ShareRecordService implements ShareRecordServiceI {
 	@Autowired
 	private AdVoteRecordDao adVoteRecordDao;
 	@Autowired
-	private AdUserService adUserService;
+	private AdUserServiceI adUserService;
 	@Autowired
 	private AdOrderReportDao adOrderReportDao;
 	@Autowired

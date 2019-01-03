@@ -256,48 +256,13 @@ public class NewPaymentService implements NewPaymentServiceI {
      * @return
      */
     private JSONObject getElmOrderSummary(JSONObject json) {
-        logger.info("getOrderSummary() json = {}", json);
+       /* logger.info("getElmOrderSummary() json = {}", json);
         JSONObject result = new JSONObject();
-        String orderNum = json.getString("orderNum");
+        String orderNo = json.getString("orderNo");
+
+
         long userId = json.getLong("userId");
-        OrderVo order = new OrderVo();
-        order.setOrderNumber(orderNum);
-        order.setUserId(userId);
-        List<OrderVo> orderVoList = orderService.getOrder(order);
-        if (CollectionUtils.isEmpty(orderVoList)) {
-            return null;
-        }
-        OrderVo o = orderVoList.get(0);
-        OrderItemVo item = o.getItems().get(0);
-        String sku = item.getSku() != null ? item.getSku() : "";
-        String orderDesc = item.getGoods() + sku;
-        //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
-        JSONObject retJson = new JSONObject();
-        retJson.put("productType", o.getProductType());
-        retJson.put("totalFree", o.getTotalMount().toString());
-        retJson.put("orderDesc", orderDesc);
-        retJson.put("orderId", o.getOrderId());
-        retJson.put("isSource", o.getIsSource());
-        retJson.put("productImg", item.getProductImg());
-        retJson.put("supportPayType", o.getSupportPayType());
-        retJson.put("orderNum", orderNum);
-        if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
-                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
-        ) && o.getServiceCharge() != null) {
-            retJson.put("serviceCharge", o.getServiceCharge().compareTo(BigDecimal.ZERO) == 0 ? null : o.getServiceCharge());
-        }
-        //话费充值需要校验积分消费金额,用到此参数
-        if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
-                || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
-            //用户消费金额
-            BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(userId);
-            retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
-            AdUser user = adUserDao.getById(order.getUserId().intValue());
-            AdRechargeConf conf = adRechargeConfDao.getRechargeConf(user.getGroupNum() + "");
-            retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit());
-        }
         //组建预支付订单参数
-        AdUser user = adUserDao.getById(order.getUserId().intValue());
         AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
@@ -334,7 +299,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id
-        return result;
+        return result;*/
+       return null;
     }
 
     /**

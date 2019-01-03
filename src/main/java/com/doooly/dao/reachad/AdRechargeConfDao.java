@@ -7,5 +7,5 @@ import com.doooly.entity.reachad.AdRechargeConf;
 
 public interface AdRechargeConfDao {
 
-    AdRechargeConf getRechargeConf(String groupId);//首页数据
+    AdRechargeConf getRechargeConf(String groupId);//配置数据
 }

@@ -69,7 +69,7 @@ public class FamilyInviteService {
     @Autowired
     protected LifeWechatBindingDao lifeWechatBindingDao;
     @Autowired
-    private AdUserService adUserService;
+    private AdUserServiceI adUserService;
     @Autowired
     private AdLightenBusinessServiceI adLightenBusinessService;
     @Autowired

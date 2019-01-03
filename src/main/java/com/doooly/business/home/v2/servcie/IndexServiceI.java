@@ -3,6 +3,7 @@ package com.doooly.business.home.v2.servcie;
 import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 public interface IndexServiceI {
 
@@ -16,7 +17,7 @@ public interface IndexServiceI {
 	* @since  
 	* @return
 	 */
-	String selectFloorsByV2_2(String userId, String address);
+	String selectFloorsByV2_2(Map<String, String> map);
 
 	/**
 	 * 根据接口版本查询首页楼层信息
@@ -40,7 +41,7 @@ public interface IndexServiceI {
 	 * @since
 	 * @return
 	 */
-	String listSpendIntegralFloors(String userId, String address);
+	String listSpendIntegralFloors(Map<String, String> map);
 	
 
 }

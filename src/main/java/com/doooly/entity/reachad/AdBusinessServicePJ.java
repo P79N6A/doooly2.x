@@ -3,6 +3,8 @@
  */
 package com.doooly.entity.reachad;
 
+import java.util.Date;
+
 /**
  * 商户信息Entity
  * 
@@ -19,6 +21,16 @@ public class AdBusinessServicePJ  {
 	private String logo;
 	private String dealType;
 	private String serviceType;
+	private Date serverEndTime; 	// 商户服务结束时间
+
+	public Date getServerEndTime() {
+		return serverEndTime;
+	}
+
+	public void setServerEndTime(Date serverEndTime) {
+		this.serverEndTime = serverEndTime;
+	}
+
 	public String getId() {
 		return id;
 	}

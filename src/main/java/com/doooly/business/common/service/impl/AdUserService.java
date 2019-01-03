@@ -1,36 +1,12 @@
 package com.doooly.business.common.service.impl;
 
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.ConstantsV2;
+import com.doooly.common.constants.RedisConstants;
 import com.doooly.common.util.MD5Utils;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.common.util.WechatUtil;
@@ -54,6 +30,30 @@ import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeWechatBinding;
 import com.doooly.publish.rest.life.impl.FamilyInviteService;
+import com.reach.redis.annotation.Cacheable;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 
@@ -1277,7 +1277,14 @@ public class AdUserService implements AdUserServiceI {
 		return resultData;
 	}
 
-	private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
+  /*  @Override
+    @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
+            expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
+    public AdUser getUser(AdUser adUser) {
+        return adUserDao.getUser(adUser);
+    }
+
+    private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
 		AdUser u = new AdUser();
 		u.setTelephone(telephone);
 		u.setGroupNum(Long.valueOf(group.getId()));

@@ -390,6 +390,7 @@
 		a.is_support_integral as 'isSupportIntegral',
 		a.is_new_end_date AS "isNewEndTime",
 		a.is_new_begin_date AS "isNewBeginTime",
+		a.server_end_time AS "serverEndTime",
 		CASE WHEN a.max_user_rebate is NULL then 0 ELSE a.max_user_rebate END AS "maxUserRebate"
 		FROM
 		ad_business a
@@ -506,5 +507,20 @@
 			ad_business a
 		WHERE
 		a.id = #{id}
+	</select>
+
+	<select id="getBusiness" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			<include refid="adBusinessRebateColumns" />,a.bussiness_rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		<where>
+            <if test="id != null and id != ''">
+                AND a.id = #{id}
+            </if>
+            <if test="businessId != null and businessId != ''">
+                AND a.business_id = #{businessId}
+            </if>
+        </where>
 	</select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.doooly.business.freeCoupon.service.Impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.common.service.impl.AdUserService;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
 import com.doooly.business.freeCoupon.service.task.GetCouponTask;
@@ -58,7 +59,7 @@ public class FreeCouponBusinessService implements FreeCouponBusinessServiceI {
     @Autowired
     private AdRegisterRecordDao adRegisterRecordDao;
     @Autowired
-    private AdUserService adUserService;
+    private AdUserServiceI adUserService;
     /**
      * redis工具类
      */

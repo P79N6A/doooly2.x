@@ -102,4 +102,6 @@ public interface AdCouponCodeDao extends BaseDaoI<AdCouponCode> {
 	int unlockCoupon(@Param("userId")long userId, @Param("couponId")String couponCodeId);
 
 	int lockCoupon(@Param("userId")long userId, @Param("couponId")String couponCodeId);
+
+    AdCouponCode getSelfCouponByMap(@Param("paramMap")Map<String, Object> paramMap);
 }

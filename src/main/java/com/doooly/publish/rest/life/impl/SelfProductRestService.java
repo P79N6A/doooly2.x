@@ -72,9 +72,9 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 	public String getSelfProductDetail(JSONObject obj) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
-			String productId = obj.getString("productId");
-			String userId = obj.getString("userId");
-			String activityName = obj.getString("activityName");
+			String productId = String.valueOf(obj.get("productId"));
+			String userId = String.valueOf(obj.get("userId"));
+			String activityName = String.valueOf(obj.get("activityName"));
 			HashMap<String, Object> map = productService.getSelfProductDetail(productId, userId,activityName);
 			List<AdGroupSelfProductPrice> adGroupSelfProductPriceList = productService.getSelfProductAirport(activityName,productId);
 			if (adGroupSelfProductPriceList != null && adGroupSelfProductPriceList.size() > 0) {
@@ -173,7 +173,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
-    @POST
+	@POST
     @Path(value = "/getActivityByType")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -188,7 +188,6 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 
         return result;
     }
-
 
 
 

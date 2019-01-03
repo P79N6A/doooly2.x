@@ -1,8 +1,10 @@
 package com.doooly.publish.rest.life;
 
-import javax.servlet.http.HttpServletRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.dto.BaseReq;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 
 /**
  * 
@@ -12,7 +14,7 @@ public interface HotBusinessRestServiceI {
 	 * app首页页面
 	 * 
 	 */
-	String index(JSONObject obj);
+	String index(JSONObject obj, @Context HttpServletRequest request);
 
 	/**
 	 * 热门商户页面

@@ -43,4 +43,10 @@ public class MyThreadPoolServiceImpl implements MyThreadPoolService {
         init();
         return executors.submit(task);
     }
+
+    @Override
+    public void submitRunalbeTask(Runnable task) {
+        init();
+        executors.submit(task);
+    }
 }

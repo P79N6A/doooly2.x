@@ -269,6 +269,16 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
    		return cad.getTime();
    	}
 
+    /**
+     * 获取当前时间戳
+     * @return
+     */
+    public static int getNowTime(){
+        Date now = Calendar.getInstance().getTime();
+        int nowTime = (int) (now.getTime()/1000);
+        return nowTime;
+    }
+
 
     /**
 	 * @param args

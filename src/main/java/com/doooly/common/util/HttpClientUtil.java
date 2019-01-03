@@ -20,6 +20,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,17 +30,26 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -47,6 +58,14 @@ import java.util.List;
 public class HttpClientUtil {
 
     private static Logger log = LoggerFactory.getLogger(HttpClientUtil.class);
+    /**编码*/
+    public static String CHARACTER_ENCODING = "UTF-8";
+    private static PoolingHttpClientConnectionManager connMgr;
+    private static RequestConfig requestConfig;
+    private static final int MAX_TIMEOUT = 10000;
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_TYPE_JSON = "application/json";
+
     
     static HostnameVerifier hv = new HostnameVerifier() {
         public boolean verify(String urlHostName, SSLSession session) {
@@ -358,6 +377,69 @@ public class HttpClientUtil {
             e.printStackTrace();
         }
         return HttpClients.createDefault();
+    }
+
+    /**
+     * 发送 POST 请求（HTTP），K-V形式
+     * @param url  请求地址
+     * @param headerMap 头信息
+     * @param paramMap 参数
+     * @return
+     */
+    public static String doPost(String url, Map<String, String> headerMap, Map<String, String> paramMap) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        String httpStr = null;
+        HttpPost httpPost = new HttpPost(url);
+        CloseableHttpResponse response = null;
+        try {
+            httpPost.setConfig(requestConfig);
+            // 头部请求信息
+            if(null != headerMap) {
+                Iterator iterator = headerMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iterator.next();
+                    httpPost.addHeader(entry.getKey().toString(), entry.getValue().toString());
+                }
+            }
+            // 请求参数信息
+            if(null != paramMap){
+                String contentType = "";
+                if(null != headerMap && headerMap.containsKey(HEADER_CONTENT_TYPE)){
+                    contentType = headerMap.get(HEADER_CONTENT_TYPE).toLowerCase();
+                }
+                switch (contentType) {
+                    case HEADER_CONTENT_TYPE_JSON:
+                        String paramStr = JSON.toJSON(paramMap).toString();
+                        StringEntity stringEntity = new StringEntity(paramStr, CHARACTER_ENCODING);//解决中文乱码问题
+                        httpPost.setEntity(stringEntity);
+                        break;
+                    default:
+                        List<NameValuePair> pairList = new ArrayList<NameValuePair>(paramMap.size());
+                        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+                            NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry.getValue());
+                            pairList.add(pair);
+                        }
+                        httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName(CHARACTER_ENCODING)));
+                        break;
+                }
+            }
+            response = httpClient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+            int statusCode = response.getStatusLine().getStatusCode();
+            httpStr = EntityUtils.toString(entity, CHARACTER_ENCODING);
+            log.info("doPost响应状态码："+statusCode+"，结果："+httpStr+"");
+        } catch (IOException e) {
+            log.error("doPost执行异常："+e.getMessage()+"",e);
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                } catch (IOException e) {
+                    log.error("doPost执行异常："+e.getMessage()+"",e);
+                }
+            }
+        }
+        return httpStr;
     }
 
 }

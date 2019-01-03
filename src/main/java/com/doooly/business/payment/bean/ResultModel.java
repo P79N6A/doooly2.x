@@ -92,4 +92,16 @@ public class ResultModel {
     public void setData(Object data) {
         this.data = data;
     }
+
+    /**
+     * 饿了么对接返回结果
+     * @return
+     */
+    public String toELMString() {
+        JSONObject json = new JSONObject();
+        json.put("code", this.getCode());
+        json.put("message", this.getInfo());
+        json.put("data", data);
+        return json.toJSONString();
+    }
 }

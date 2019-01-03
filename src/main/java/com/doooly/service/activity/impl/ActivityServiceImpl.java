@@ -129,11 +129,12 @@ public class ActivityServiceImpl implements ActivityServiceI {
 
             adUser = adUserService.getUserByPhone(phone);
         } else {
+            // 存在时验证手机验证码
             JSONObject verificationReq = new JSONObject();
             verificationReq.put("businessId", WebService.BUSINESSID);
             verificationReq.put("storesId", WebService.STOREID);
             verificationReq.put("verificationCode", obj.getString("verificationCode"));
-            verificationReq.put("cardNumber", obj.getString("phone"));
+            verificationReq.put("cardNumber", phone);
             String result = HTTPSClientUtils.sendPost(verificationReq, Constants.MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
 
             // 验证码验证失败
@@ -142,11 +143,18 @@ public class ActivityServiceImpl implements ActivityServiceI {
                 return new MessageDataBean(ActivityConstants.ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR).toJsonString();
             }
 
-            ActActivityCodeRecord actCodeRecord = activityCodeRecordDao.findByActivityIdAndUserId(actActivityRecord.getId(), adUser.getId());
+        }
 
-            if (actCodeRecord != null) {
-                return new MessageDataBean(MessageDataBean.failure_code, "您已经领取过了").toJsonString();
-            }
+        ActActivityCodeRecord actCodeRecord = activityCodeRecordDao.findByActivityIdAndUserId(actActivityRecord.getId(), adUser.getId());
+
+        if (actCodeRecord != null) {
+            MessageDataBean messageDataBean = new MessageDataBean();
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("您已经领取过了");
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put("code", actCodeRecord.getActCode());
+            messageDataBean.setData(map);
+            return messageDataBean.toJsonString();
         }
 
         if (!groupId.equals(adUser.getGroupNum().toString())) {

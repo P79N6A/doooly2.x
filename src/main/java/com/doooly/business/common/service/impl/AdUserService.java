@@ -1277,9 +1277,9 @@ public class AdUserService implements AdUserServiceI {
 		return resultData;
 	}
 
-    @Override
+  /*  @Override
     @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
-            expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)
+            expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
     public AdUser getUser(AdUser adUser) {
         return adUserDao.getUser(adUser);
     }

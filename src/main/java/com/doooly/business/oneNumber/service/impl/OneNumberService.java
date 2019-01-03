@@ -1,17 +1,5 @@
 package com.doooly.business.oneNumber.service.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.EncryptDecryptUtil;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
@@ -22,6 +10,18 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
+import com.koalii.bc.util.encoders.Hex;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Description: 1号通接口
@@ -72,6 +72,9 @@ public class OneNumberService implements OneNumberServiceI {
 		case 5:
 			resultUrl = getYiHaiUrl(targetUrl, adUser, adBusinessExpandInfo);
 			break;
+		case 6:
+			resultUrl = getElmUrl(adUser, adBusinessExpandInfo);
+			break;
 		default:
 			resultUrl = "";
 			break;
@@ -82,6 +85,32 @@ public class OneNumberService implements OneNumberServiceI {
 		messageDataBean.setCode(MessageDataBean.success_code);
 		messageDataBean.setData(map);
 		return messageDataBean;
+	}
+
+	/**
+	 * 饿了么专属连接
+	 * @param adUser
+	 * @param adBusinessExpandInfo
+	 * @return
+	 */
+	private String getElmUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+		long timeStamp = new Date().getTime();
+		String consumerNo = adBusinessExpandInfo.getShopId();
+		String consumerSecret = adBusinessExpandInfo.getShopKey();
+		JSONObject json = new JSONObject();
+		json.put("uNo", adUser.getTelephone());
+		json.put("bNo", adUser.getCardNumber());
+		String org = Hex.encode(json.toJSONString().getBytes()).toString();
+		int type = 3;
+		String sign = MD5Util.MD5Psw(org + consumerSecret + timeStamp);
+		StringBuilder url = new StringBuilder();
+		url.append("https://entu.ele.me?");
+		url.append("consumerNo=" + consumerNo);
+		url.append("&type=" + type);
+		url.append("&timeStamp=" + timeStamp);
+		url.append("&sign=" + sign);
+		url.append("&type=" + type);
+		return url.toString();
 	}
 
 	/**

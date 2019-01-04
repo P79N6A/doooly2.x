@@ -79,6 +79,7 @@ public class DailyActivityServiceRest implements DailyActivityServiceI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Override
 	public String jiaoHanLotteryActivitySendCopuon(JSONObject jsonReq) {
+        jsonReq.put("remarks", "交行亲友" + jsonReq.getString("remarks"));
 		MessageDataBean result = jiaohangService.sendLotteryCode(jsonReq);
 		return result.toJsonString();
 	}

@@ -529,6 +529,51 @@ public class AdUserService implements AdUserServiceI {
 	}
 
 	/**
+	 * 用户自动激活
+	 * @param adUser
+	 * @return Is
+	 */
+	public JSONObject userAutoActive(AdUser adUser) {
+		JSONObject jsonResult = new JSONObject();
+		try {
+			// 激活,生成随机明文密码,start
+			String randomPassword = "";
+			Random random = new Random();
+			for (int i = 0; i < 6; i++) {
+				randomPassword += String.valueOf(random.nextInt(9) + 1);
+			}
+			// 激活操作,保存加密密码
+			String activeMd5Pwd = MD5Utils.encode(randomPassword);
+			// 激活,生成随机明文密码end
+			HashMap<String, Object> activeParam = new HashMap<String, Object>();
+			activeParam.put("mobile", adUser.getTelephone());
+			activeParam.put("cardNumber", adUser.getCardNumber());
+			activeParam.put("password", activeMd5Pwd);
+			// 激活B系统数据
+			int updateCount = this.userActivationLogin(activeParam);
+			// 激活A系统数据
+			boolean updateStatus = lifeMemberService.memberActivationLogin(activeParam);
+			logger.info("====【validateUserInfo】B系统更新updateCount：" + updateCount + ",A系统更新updateStatus："
+					+ updateStatus);
+			if (!updateStatus || updateCount == 0) {
+				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.FAIL.getCode());
+				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.FAIL.getMsg());
+				return jsonResult;
+			} else {
+				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
+				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
+				return jsonResult;
+			}
+		} catch (Exception e) {
+			logger.info("=== e = {}", e);
+			e.printStackTrace();
+			jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
+			jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
+			return jsonResult;
+		}
+	}
+
+	/**
 	 * 企业口令激活-执行激活
 	 */
 	public MessageDataBean execCommandActive(JSONObject paramJson) throws Exception {

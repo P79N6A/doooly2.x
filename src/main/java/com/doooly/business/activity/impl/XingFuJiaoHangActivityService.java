@@ -86,6 +86,10 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		userJson.put("isActive", AdUser.USER_ACTIVATION_OFF);// 未激活
 		userJson.put("dataSource", 0);// 平台导入
 
+		if (beforeJson.getString("remarks") != null && !"".equals(beforeJson.getString("remarks"))) {
+			userJson.put("remarks", beforeJson.getString("remarks"));
+		}
+
 		try {
 			AdUser user = userService.saveUserAndPersonal(userJson);
 			log.info("交行活动-保存用户耗时cost={}", System.currentTimeMillis() - saveStart);
@@ -149,7 +153,14 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));
 			return result;
 		}
+		AdUser adUser = userService.getById(Integer.valueOf(userId));
 
+		if (!"2".equals(adUser.getIsActive())) {
+			JSONObject jsonActive = userService.userAutoActive(adUser);
+			if ("1000".equals(jsonActive.getString("code"))) {
+				log.info("用户激活成功");
+			}
+		}
 		// 3.发放抽奖码
 		result = getCode(activityId, userId, groupId);
 

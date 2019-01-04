@@ -43,6 +43,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI{
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
-        return null;
+        ResultModel resultModel = elmServiceI.orderStatusPush(obj,httpServletRequest);
+        return resultModel.toELMString();
     }
 }

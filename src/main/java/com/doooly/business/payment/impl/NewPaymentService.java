@@ -1,6 +1,7 @@
 package com.doooly.business.payment.impl;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.AdBusinessServiceI;
@@ -196,13 +197,16 @@ public class NewPaymentService implements NewPaymentServiceI {
     public ResultModel unifiedElmorder(JSONObject jsonObject) {
         JSONObject orderSummary = getElmOrderSummary(jsonObject);
         if (orderSummary == null) {
-            return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "系统异常");
         }
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
         JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
         String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+        //改造缓存 === zhangqing 20181227
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
@@ -232,17 +236,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
         if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
-            //说明获取成功
-            Map<Object, Object> data = (Map<Object, Object>) jsonResult.get("data");
-            String payId = (String) data.get("payId");
-            String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
-            retJson.put("payId", payId);
-            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
-            if (StringUtils.isNotBlank(integralRebatePayAmount)) {
-                retJson.put("integralRebatePayAmount", integralRebatePayAmount);
-            }
-            logger.info("payment unifiedorder result data={}", data);
-            return ResultModel.ok(retJson);
+            return ResultModel.success_ok(retJson);
         } else {
             return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
         }
@@ -255,25 +249,32 @@ public class NewPaymentService implements NewPaymentServiceI {
      * @return
      */
     private JSONObject getElmOrderSummary(JSONObject json) {
-       /* logger.info("getElmOrderSummary() json = {}", json);
+        logger.info("getElmOrderSummary() json = {}", json);
         JSONObject result = new JSONObject();
         String orderNo = json.getString("orderNo");
-
-
-        long userId = json.getLong("userId");
+        long businessId = json.getLong("businessId");
+        String bNo = json.getString("bNo");
+        JSONArray foodsInfo = json.getJSONArray("foodsInfo");
+        JSONArray orderExtras = json.getJSONArray("orderExtras");
+        JSONObject foodsInfo1 = foodsInfo.getJSONObject(0);
+        AdUser paramUser = new AdUser();
+        paramUser.setCardNumber(bNo);
+        AdUser user = adUserServiceI.getUser(paramUser);
         //组建预支付订单参数
-        AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
-        String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
-        String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
+        AdBusiness paramBusiness = new AdBusiness();
+        paramBusiness.setId(businessId);
+        AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
+        String price = json.getString("totalFee");
+        String amount = json.getString("totalFee");
         JSONObject param = new JSONObject();
         param.put("businessId", business.getBusinessId());//商户编号
         param.put("cardNumber", user.getTelephone());
-        param.put("merchantOrderNo", o.getOrderNumber());
+        param.put("merchantOrderNo", orderNo);
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
-        param.put("body", orderDesc);
-        param.put("isSource", o.getIsSource());
-        param.put("orderDate", DateUtils.formatDateTime(o.getOrderDate()));
+        param.put("body", foodsInfo1.getString("foodName"));
+        param.put("isSource", "0");
+        param.put("orderDate", DateUtils.formatDateTime(new Date()));
         param.put("storesId", "A001");
         param.put("price", price);
         param.put("amount", amount);
@@ -281,25 +282,37 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("nonceStr", RandomUtil.getRandomStr(16));
         param.put("isPayPassword", user.getIsPayPassword());
         JSONArray jsonArray = new JSONArray();
-        JSONObject jsonDetail = new JSONObject();
-        jsonDetail.put("code", item.getCode());
-        jsonDetail.put("goods", item.getGoods());
-        jsonDetail.put("number", item.getNumber());
-        jsonDetail.put("price", item.getPrice());
-        jsonDetail.put("category", item.getCategoryId());
-        jsonDetail.put("tax", item.getTax());
-        jsonDetail.put("amount", item.getAmount());
-        jsonArray.add(jsonDetail);
+        //商品信息
+        for (Object jsonObject : foodsInfo) {
+            JSONObject params = (JSONObject) jsonObject;
+            JSONObject jsonDetail = new JSONObject();
+            jsonDetail.put("code",params.getString("foodId"));
+            jsonDetail.put("goods", params.getString("foodName"));
+            jsonDetail.put("number", params.getString("count"));
+            jsonDetail.put("price", params.getString("price"));
+            jsonDetail.put("category", "0000");
+            jsonDetail.put("tax", "0");
+            jsonDetail.put("amount", params.getString("price"));
+            jsonArray.add(jsonDetail);
+        }
+        //拓展信息
+        for (Object orderExtra : orderExtras) {
+            JSONObject params = (JSONObject) orderExtra;
+            JSONObject jsonDetail = new JSONObject();
+            jsonDetail.put("code",params.getString("categoryId"));
+            jsonDetail.put("goods", params.getString("name"));
+            jsonDetail.put("number", params.getString("quantity"));
+            jsonDetail.put("price", params.getString("price"));
+            jsonDetail.put("category", "0000");
+            jsonDetail.put("tax", "0");
+            jsonDetail.put("amount", params.getString("price"));
+            jsonArray.add(jsonDetail);
+        }
         param.put("orderDetail", jsonArray.toJSONString());
         logger.info("下单参数param=========" + param);
         result.put("param", param);
-        retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral());
-        logger.info("retJson = {}", retJson);
-        result.put("retJson", retJson);
-        result.put("businessId", o.getBussinessId());//商户id
-        return result;*/
-       return null;
+        result.put("businessId",business.getId());//商户id
+        return result;
     }
 
     /**

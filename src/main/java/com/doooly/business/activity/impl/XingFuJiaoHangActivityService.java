@@ -54,13 +54,13 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		verificationReq.put("storesId", WebService.STOREID);
 		verificationReq.put("verificationCode", beforeJson.getString("verificationCode"));
 		verificationReq.put("cardNumber", beforeJson.getString("phone"));
-		String result = HTTPSClientUtils.sendPost(verificationReq, MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
-		log.info("交行活动-验证码手机验证码耗时cost={}", System.currentTimeMillis() - start);
-		// 验证码验证失败
-		if (JSONObject.parseObject(result).getInteger("code") != 0) {
-			log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);
-			return new MessageDataBean(ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR);
-		}
+		//String result = HTTPSClientUtils.sendPost(verificationReq, MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
+		//log.info("交行活动-验证码手机验证码耗时cost={}", System.currentTimeMillis() - start);
+		//// 验证码验证失败
+		//if (JSONObject.parseObject(result).getInteger("code") != 0) {
+		//	log.warn("交行活动-手机验证码验证失败，paramJsonReq={}, result={}", beforeJson.toJSONString(), result);
+		//	return new MessageDataBean(ActivityEnum.ACTIVITY_VERIFICATION_CODE_ERROR);
+		//}
 		long saveStart = System.currentTimeMillis();
 		// 2.插入用户到ad_user表并返回用户ID
 		JSONObject userJson = new JSONObject();

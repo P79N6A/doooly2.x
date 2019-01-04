@@ -1,16 +1,29 @@
 package com.doooly.business.ele.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.business.AdBusinessServiceI;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.ele.ELMServiceI;
+import com.doooly.business.order.service.AdOrderReportServiceI;
+import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.OrderItemVo;
+import com.doooly.business.order.vo.OrderVo;
+import com.doooly.business.pay.utils.AESTool;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
+import com.doooly.business.payment.impl.NewPaymentService;
+import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.MD5Util;
 import com.doooly.common.elm.ELMConstants;
+import com.doooly.common.elm.OrderTypeEnum;
 import com.doooly.common.elm.SignUtils;
 import com.doooly.common.util.HttpClientUtil;
+import com.doooly.dao.reachad.AdOrderDetailDao;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +39,20 @@ import java.util.Map;
 @Service
 public class ELMServiceImpl implements ELMServiceI{
 
+    private Logger logger = LoggerFactory.getLogger(ELMServiceImpl.class);
+
     @Autowired
     private ConfigDictServiceI configDictServiceI;
+    @Autowired
+    private AdBusinessServiceI adBusinessServiceI;
+    @Autowired
+    private NewPaymentServiceI paymentService;
+    @Autowired
+    private OrderService orderService;
+    @Autowired
+    private AdOrderReportServiceI adOrderReportServiceI;
+    @Autowired
+    private AdOrderDetailDao detailDao;
 
 
     /** 推送信息
@@ -68,11 +93,61 @@ public class ELMServiceImpl implements ELMServiceI{
         String result = HttpClientUtil.doPost(ELMConstants.ELM_URL + ELMConstants.QUERY_ORDER, headerMap, paramMap);
         JSONObject jsonResult = JSONObject.parseObject(result);
         Integer code = jsonResult.getInteger("code");
-        if(code == GlobalResultStatusEnum.SUCCESS_ok.getCode()){
+        if(code == GlobalResultStatusEnum.SUCCESS_OK.getCode()){
+            JSONObject data = jsonResult.getJSONObject("data");
             //查询订单成功下支付单
-
-
+            AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+            paramAdBusinessExpandInfo.setShopId(consumerNo);
+            AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+            data.put("businessId",adBusinessExpandInfo.getId());
+            return paymentService.unifiedElmorder(data);
+        }else {
+            return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
-        return null;
+    }
+
+    /**
+     * 饿了么 状态推送
+     * @param obj
+     * @param httpServletRequest
+     * @return
+     */
+    @Override
+    public ResultModel orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        String consumerNo = httpServletRequest.getHeader("consumerNo");
+        String timeStamp = httpServletRequest.getHeader("timeStamp");
+        String sign = httpServletRequest.getHeader("sign");
+        String valueByTypeAndKey = configDictServiceI.getValueByTypeAndKey(ELMConstants.ELM_DICT_TYPE, ELMConstants.ELM_DICT_KEY);
+        JSONObject eleConfig = JSONObject.parseObject(valueByTypeAndKey);
+        String elmConsumerSecret = eleConfig.getString("consumerSecret");
+        Boolean flag = SignUtils.validParam(consumerNo,timeStamp,sign,obj,eleConfig);
+        if(!flag){
+            return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
+        }
+        String orderNo = obj.getString("orderNo");
+        Integer status = obj.getInteger("status");
+        String remark = obj.getString("remark");
+        //查询doooly订单
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNo);
+        OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+        if(o==null){
+            return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
+        }
+        //修改doooly订单状态
+        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
+            //订单取消
+            orderService.cancleOrder(o.getUserId(), orderNo);
+        }else {
+            //更新
+            OrderItemVo newItem = new OrderItemVo();
+            newItem.setOrderReportId(order.getId());
+            newItem.setRetCode(String.valueOf(status));
+            newItem.setRetMsg(remark);
+            newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
+            logger.info("update elm order status, item = {}",newItem);
+            orderService.updateOrderItem(newItem);
+        }
+        return ResultModel.success_ok("收到状态");
     }
 }

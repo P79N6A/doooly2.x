@@ -73,6 +73,10 @@ public class ResultModel {
         return new ResultModel(GlobalResultStatusEnum.SUCCESS, result);
     }
 
+    public static ResultModel success_ok(Object result) {
+        return new ResultModel(GlobalResultStatusEnum.SUCCESS_OK, result);
+    }
+
     public static ResultModel ok() {
         return new ResultModel(GlobalResultStatusEnum.SUCCESS);
     }

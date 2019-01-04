@@ -624,6 +624,7 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setPassword(md5Pwd);
 //			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
+			adUserParam.setRemarks(jsonParam.get("remarks").toString());
 			String isActive = jsonParam.getString("isActive");
 			if (StringUtils.isEmpty(isActive)) {
 				adUserParam.setIsActive(AdUser.USER_ACTIVATION_ON);

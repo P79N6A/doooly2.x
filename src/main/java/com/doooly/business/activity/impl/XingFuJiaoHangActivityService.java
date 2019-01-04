@@ -1,14 +1,8 @@
 package com.doooly.business.activity.impl;
 
-import com.doooly.business.common.service.AdUserServiceI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.activity.AbstractActivityService;
-import com.doooly.business.common.service.impl.AdUserService;
+import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 import com.doooly.common.constants.Constants.MerchantApiConstants;
@@ -157,7 +151,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		}
 
 		// 3.发放抽奖码
-		result = getCode(activityId, userId);
+		result = getCode(activityId, userId, groupId);
 
 		// 4.发放券后业务处理（扩展）可选
 		if (isDoAfter()) {
@@ -192,6 +186,9 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			MessageDataBean messageDataBean = new MessageDataBean(ActivityEnum.ACTIVITY_RECEIVED);
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			map.put("code", actCodeRecord.getActCode());
+			map.put("endTime", actActivityRecord.getEndDate().getTime());
+			map.put("startTime", actActivityRecord.getBeginDate().getTime());
+			map.put("now", new Date().getTime());
 			messageDataBean.setData(map);
 			return messageDataBean;
 		}
@@ -205,7 +202,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	 * @param userId
 	 * @return
 	 */
-	public MessageDataBean getCode(String activityId, String userId) {
+	public MessageDataBean getCode(String activityId, String userId, String groupId) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 
 		JSONObject json = new JSONObject();
@@ -217,8 +214,14 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess("获取抽奖码成功");
+
+			ActActivityRecord actActivityRecord = activityRecordDao.queryByActKeyAndGroup(activityId, groupId);
+
 			HashMap<String, Object> map = new HashMap<>();
 			map.put("code", resultJson.getString("data"));
+			map.put("endTime", actActivityRecord.getEndDate().getTime());
+			map.put("startTime", actActivityRecord.getBeginDate().getTime());
+			map.put("now", new Date().getTime());
 			messageDataBean.setData(map);
 		} else {
 			messageDataBean.setCode(MessageDataBean.failure_code);

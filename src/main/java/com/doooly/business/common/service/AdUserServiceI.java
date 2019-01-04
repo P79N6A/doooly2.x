@@ -82,6 +82,7 @@ public interface AdUserServiceI {
 	public JSONObject batchSendSms(AdUser user, JSONObject paramJson, String mobiles, String alidayuSmsCode,
 			String smsContent, Boolean alidayuFlag);
 
+	public JSONObject userAutoActive(AdUser adUser);
 	/**
 	 * 会员登录验证,无卡激活 （新兜礼）
 	 * 

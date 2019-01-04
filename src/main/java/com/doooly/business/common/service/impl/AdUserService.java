@@ -560,8 +560,8 @@ public class AdUserService implements AdUserServiceI {
 				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.FAIL.getMsg());
 				return jsonResult;
 			} else {
-				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.USER_NOT_ACTIVED.getCode());
-				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.USER_NOT_ACTIVED.getMsg());
+				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.SUCCESS.getCode());
+				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.SUCCESS.getMsg());
 				return jsonResult;
 			}
 		} catch (Exception e) {

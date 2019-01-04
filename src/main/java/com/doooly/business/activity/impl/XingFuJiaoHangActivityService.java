@@ -139,37 +139,45 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 				return result;
 			}
 		}
-		// 用户ID
-		String userId = sendJsonReq.getString("userId");
-		// 活动ID
-		String activityId = sendJsonReq.getString("activityId");
-		// 活动企业id
-		String groupId = configService.getValueByTypeAndKey("ENTERPRISE", "JIAOHANG_GROUP_ID");
-		// 2.验证活动有效性
-		result = validParamsLottery(userId, activityId, groupId);
 
-		// 2.1若result不为空，则有效性验证失败
-		if (result != null) {
-			log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));
-			return result;
-		}
-		AdUser adUser = userService.getById(Integer.valueOf(userId));
+		try {
+			// 用户ID
+			String userId = sendJsonReq.getString("userId");
+			// 活动ID
+			String activityId = sendJsonReq.getString("activityId");
+			// 活动企业id
+			String groupId = configService.getValueByTypeAndKey("ENTERPRISE", "JIAOHANG_GROUP_ID");
+			// 2.验证活动有效性
+			result = validParamsLottery(userId, activityId, groupId);
 
-		if (!"2".equals(adUser.getIsActive())) {
-			JSONObject jsonActive = userService.userAutoActive(adUser);
-			if ("1000".equals(jsonActive.getString("code"))) {
-				log.info("用户激活成功");
+			// 2.1若result不为空，则有效性验证失败
+			if (result != null) {
+				log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));
+				return result;
 			}
-		}
-		// 3.发放抽奖码
-		result = getCode(activityId, userId, groupId);
+			AdUser adUser = userService.getById(Integer.valueOf(userId));
 
-		// 4.发放券后业务处理（扩展）可选
-		if (isDoAfter()) {
-			doAfter(sendJsonReq);
+			if (!"2".equals(adUser.getIsActive())) {
+				JSONObject jsonActive = userService.userAutoActive(adUser);
+				if ("1000".equals(jsonActive.getString("code"))) {
+					log.info("用户激活成功");
+				}
+			}
+			// 3.发放抽奖码
+			result = getCode(activityId, userId, groupId);
+
+			// 4.发放券后业务处理（扩展）可选
+			if (isDoAfter()) {
+				doAfter(sendJsonReq);
+			}
+			log.info("活动发放礼品券流程结束，activityId={}, userId={}, result={}, cost(ms)={}", activityId, userId,
+					JSONObject.toJSONString(result), System.currentTimeMillis() - start);
+		} catch (NumberFormatException e) {
+			result.setCode(MessageDataBean.failure_code);
+			result.setMess(MessageDataBean.failure_mess);
+			e.printStackTrace();
 		}
-		log.info("活动发放礼品券流程结束，activityId={}, userId={}, result={}, cost(ms)={}", activityId, userId,
-				JSONObject.toJSONString(result), System.currentTimeMillis() - start);
+
 		return result;
 	}
 

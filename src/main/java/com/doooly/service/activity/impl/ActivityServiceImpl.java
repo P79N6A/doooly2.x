@@ -107,7 +107,7 @@ public class ActivityServiceImpl implements ActivityServiceI {
         String groupId = obj.getString("groupId");
         String phone = obj.getString("phone");
         String activityId = obj.getString("activityId");
-        ActActivityRecord actActivityRecord = activityRecordDao.queryByActKeyAndGroup(activityId, groupId);
+        ActActivityRecord actActivityRecord = activityRecordDao.queryById(activityId);
 
         if (actActivityRecord == null) {
             return new MessageDataBean(MessageDataBean.failure_code, "活动未找到").toJSONString();

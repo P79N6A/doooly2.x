@@ -20,7 +20,6 @@ public class AdBusinessExpandInfo {
     //支付方式
     private String payMethod;
 
-    private String payMethod;
 
     public String getPayMethod() {
         return payMethod;
@@ -95,11 +94,4 @@ public class AdBusinessExpandInfo {
         this.clientSecret = clientSecret;
     }
 
-    public String getPayMethod() {
-        return payMethod;
-    }
-
-    public void setPayMethod(String payMethod) {
-        this.payMethod = payMethod;
-    }
 }

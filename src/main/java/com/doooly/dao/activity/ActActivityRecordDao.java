@@ -26,4 +26,12 @@ public interface ActActivityRecordDao {
      * @return
      */
     ActActivityRecord queryByActKeyAndGroup(@Param("id")String id, @Param("groupId") String groupId);
+
+
+    /**
+     * 查询企业活动
+     * @param id
+     * @return
+     */
+    ActActivityRecord queryByActKeyAndGroup(@Param("id")String id);
 }

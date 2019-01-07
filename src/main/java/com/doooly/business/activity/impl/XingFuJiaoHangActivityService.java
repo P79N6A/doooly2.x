@@ -148,7 +148,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			// 活动企业id
 			String groupId = configService.getValueByTypeAndKey("ENTERPRISE", "JIAOHANG_GROUP_ID");
 			// 2.验证活动有效性
-			result = validParamsLottery(userId, activityId, groupId);
+			result = validParamsLottery(userId, activityId);
 
 			// 2.1若result不为空，则有效性验证失败
 			if (result != null) {
@@ -181,11 +181,11 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		return result;
 	}
 
-	public MessageDataBean validParamsLottery(String userId, String activityId, String groupId) {
+	public MessageDataBean validParamsLottery(String userId, String activityId) {
 		Date nowDate = new Date();
 
 		// 验证活动
-		ActActivityRecord actActivityRecord = activityRecordDao.queryByActKeyAndGroup(activityId, groupId);
+		ActActivityRecord actActivityRecord = activityRecordDao.queryById(activityId);
 
 		if (actActivityRecord == null) {
 			return new MessageDataBean(ActivityEnum.ACTIVITY_NOT_EXIST);
@@ -234,7 +234,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess("获取抽奖码成功");
 
-			ActActivityRecord actActivityRecord = activityRecordDao.queryByActKeyAndGroup(activityId, groupId);
+			ActActivityRecord actActivityRecord = activityRecordDao.queryById(activityId);
 
 			HashMap<String, Object> map = new HashMap<>();
 			map.put("code", resultJson.getString("data"));

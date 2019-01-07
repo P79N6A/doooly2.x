@@ -244,7 +244,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			messageDataBean.setData(map);
 		} else {
 			messageDataBean.setCode(MessageDataBean.failure_code);
-			messageDataBean.setMess("获取抽奖码失败");
+			messageDataBean.setMess(resultJson.getString("message"));
 		}
 		return messageDataBean;
 	}

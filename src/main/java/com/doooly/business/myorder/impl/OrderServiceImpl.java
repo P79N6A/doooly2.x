@@ -231,7 +231,7 @@ public class OrderServiceImpl implements OrderService{
 	                }else if(adOrderFlow.getPayType() == AdOrderFlow.PAY_TYPE_WECHAT){
 	                    payTypeMap.put("3","微信支付");
 	                }else {
-	                    payTypeMap.put("1","现金支付");
+	                    payTypeMap.put("1","支付宝支付");
 	                }
 	            }
 	            StringBuilder stringBuilder = new StringBuilder();

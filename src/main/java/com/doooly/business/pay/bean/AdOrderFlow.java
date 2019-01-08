@@ -10,6 +10,8 @@ public class AdOrderFlow {
     public static final int PAY_TYPE_PLATFORM_POINT = 0;
     /** 支付类型：微信支付 */
     public static final int PAY_TYPE_WECHAT = 3;
+	/** 支付类型：支付宝支付 */
+	public static final int PAY_TYPE_ALIPAY = 6;
 
 	private Long id;
 

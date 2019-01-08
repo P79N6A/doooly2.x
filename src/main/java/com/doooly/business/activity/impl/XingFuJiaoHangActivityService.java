@@ -10,12 +10,8 @@ import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.webservice.WebService;
-import com.doooly.dao.activity.ActActivityCodeRecordDao;
-import com.doooly.dao.activity.ActActivityRecordDao;
 import com.doooly.dao.reachad.AdUserEnterpriseChangeDao;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.activity.ActActivityCodeRecord;
-import com.doooly.entity.activity.ActActivityRecord;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserEnterpriseChange;
 import org.slf4j.Logger;
@@ -23,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -44,13 +39,6 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	private ConfigDictServiceI configService;
 	@Autowired
 	private AdUserEnterpriseChangeDao enterpriseChangeDao;
-
-	@Autowired
-	private ActActivityRecordDao activityRecordDao;
-
-	@Autowired
-	private ActActivityCodeRecordDao activityCodeRecordDao;
-
 	@Override
 	protected Boolean isDoBefore() {
 		return true;
@@ -147,14 +135,13 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 			String activityId = sendJsonReq.getString("activityId");
 			// 活动企业id
 			String groupId = configService.getValueByTypeAndKey("ENTERPRISE", "JIAOHANG_GROUP_ID");
-			// 2.验证活动有效性
-			result = validParamsLottery(userId, activityId);
+			result = getCode(activityId, userId, groupId);
 
-			// 2.1若result不为空，则有效性验证失败
-			if (result != null) {
+			if (!MessageDataBean.success_code.equals(result.getCode()) || ActivityEnum.ACTIVITY_RECEIVED.getCode().equals(result.getCode())) {
 				log.warn("验证活动有效性失败，paramReqJson={}, error={}", sendJsonReq.toString(), JSONObject.toJSONString(result));
 				return result;
 			}
+
 			AdUser adUser = userService.getById(Integer.valueOf(userId));
 
 			if (!"2".equals(adUser.getIsActive())) {
@@ -163,13 +150,12 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 					log.info("用户激活成功");
 				}
 			}
-			// 3.发放抽奖码
-			result = getCode(activityId, userId, groupId);
 
 			// 4.发放券后业务处理（扩展）可选
 			if (isDoAfter()) {
 				doAfter(sendJsonReq);
 			}
+
 			log.info("活动发放礼品券流程结束，activityId={}, userId={}, result={}, cost(ms)={}", activityId, userId,
 					JSONObject.toJSONString(result), System.currentTimeMillis() - start);
 		} catch (NumberFormatException e) {
@@ -179,40 +165,6 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		}
 
 		return result;
-	}
-
-	public MessageDataBean validParamsLottery(String userId, String activityId) {
-		Date nowDate = new Date();
-
-		// 验证活动
-		ActActivityRecord actActivityRecord = activityRecordDao.queryById(activityId);
-
-		if (actActivityRecord == null) {
-			return new MessageDataBean(ActivityEnum.ACTIVITY_NOT_EXIST);
-		}
-
-		if (actActivityRecord.getBeginDate().compareTo(nowDate) > 0) {
-			return new MessageDataBean(ActivityEnum.ACTIVITY_NOT_STARTED);
-		}
-
-		if (actActivityRecord.getEndDate().compareTo(nowDate) < 0) {
-			return new MessageDataBean(ActivityEnum.ACTIVITY_ENDED);
-		}
-
-		ActActivityCodeRecord actCodeRecord = activityCodeRecordDao.findByActivityIdAndUserId(actActivityRecord.getId(), Long.valueOf(userId));
-
-		if (actCodeRecord != null) {
-			MessageDataBean messageDataBean = new MessageDataBean(ActivityEnum.ACTIVITY_RECEIVED);
-			HashMap<String, Object> map = new HashMap<String, Object>();
-			map.put("code", actCodeRecord.getActCode());
-			map.put("endTime", actActivityRecord.getEndDate().getTime());
-			map.put("startTime", actActivityRecord.getBeginDate().getTime());
-			map.put("now", new Date().getTime());
-			messageDataBean.setData(map);
-			return messageDataBean;
-		}
-
-		return null;
 	}
 
 	/**
@@ -227,24 +179,28 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		JSONObject json = new JSONObject();
 		json.put("activityId", activityId);
 		json.put("userId", userId);
-		JSONObject resultJson = HttpClientUtil.httpPost(PRJECT_ACTIVITY_URL + "lottery/getLotteryCodeByUserId", json);
-
+		JSONObject resultJson = HttpClientUtil.httpPost(PRJECT_ACTIVITY_URL + "lottery/getCode", json);
 		log.info("根据活动获得券码：" + resultJson.toJSONString());
+
 		if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess("获取抽奖码成功");
 
-			ActActivityRecord actActivityRecord = activityRecordDao.queryById(activityId);
+			if (ActivityEnum.ACTIVITY_RECEIVED.getCode().equals(resultJson.getString("code"))) {
+				messageDataBean = new MessageDataBean(ActivityEnum.ACTIVITY_RECEIVED);
+			}
 
+			JSONObject jsonObject = (JSONObject) JSONObject.parse(resultJson.getString("data"));
 			HashMap<String, Object> map = new HashMap<>();
-			map.put("code", resultJson.getString("data"));
-			map.put("endTime", actActivityRecord.getEndDate().getTime());
-			map.put("startTime", actActivityRecord.getBeginDate().getTime());
-			map.put("now", new Date().getTime());
+			map.put("code", jsonObject.getString("code"));
+			map.put("endTime", jsonObject.getString("endTime"));
+			map.put("startTime", jsonObject.getString("startTime"));
+			map.put("now", System.currentTimeMillis() + "");
 			messageDataBean.setData(map);
+
 		} else {
 			messageDataBean.setCode(MessageDataBean.failure_code);
-			messageDataBean.setMess(resultJson.getString("info"));
+			messageDataBean.setMess(resultJson.getString("msg"));
 		}
 		return messageDataBean;
 	}

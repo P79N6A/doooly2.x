@@ -182,7 +182,8 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		JSONObject resultJson = HttpClientUtil.httpPost(PRJECT_ACTIVITY_URL + "lottery/getCode", json);
 		log.info("根据活动获得券码：" + resultJson.toJSONString());
 
-		if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
+		if (MessageDataBean.success_code.equals(resultJson.getString("code")) ||
+				ActivityEnum.ACTIVITY_RECEIVED.getCode().equals(resultJson.getString("code"))) {
 			messageDataBean.setCode(MessageDataBean.success_code);
 			messageDataBean.setMess("获取抽奖码成功");
 

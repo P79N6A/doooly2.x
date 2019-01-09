@@ -105,7 +105,7 @@
 	<!-- 查询自营抵扣券 -->
 	<select id="getSelfCouponByMap" resultMap="couponMap" parameterType="java.util.Map">
 		SELECT
-		c.coupon_value,cou.id coupon_id,cou.is_locked
+		cou.coupon_value,cou.id coupon_id,c.is_locked
 		FROM
 		ad_coupon cou,ad_coupon_code c
 		WHERE

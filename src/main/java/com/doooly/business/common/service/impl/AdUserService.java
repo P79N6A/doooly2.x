@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
@@ -1110,14 +1111,6 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 同步添加，修改账户信息
-	 * 
-	 * @param adGroup
-	 * @param adUser
-	 * @param flag
-	 * @param name
-	 * @param sex
-	 * @param telephone
-	 * @param identityCard
 	 * @return
 	 * @throws Exception
 	 */
@@ -1316,6 +1309,20 @@ public class AdUserService implements AdUserServiceI {
 				resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());
 				logger.info("====【verifyCodeAndActivation】-参数位数不合理,参数为：" + code);
 			}
+
+			//福特处理
+			String staffNum = paramData.getString("staffNum");
+			String email = paramData.getString("email");
+			if (StringUtils.isBlank(staffNum)) {
+				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+				resultData.put(ConstantsLogin.MSG, "工号为空");
+			}
+
+			if (StringUtils.isBlank(email)) {
+				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+				resultData.put(ConstantsLogin.MSG, "邮箱为空");
+			}
+			resultData = validateFordUser(code,telephone,staffNum,email);
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1348,6 +1355,69 @@ public class AdUserService implements AdUserServiceI {
 			}
 		}
 		logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+		return resultData;
+	}
+
+
+	JSONObject validateFordUser(String code,String mobile,String staffNum,String email) {
+		JSONObject resultData = new JSONObject();
+		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+		//手机号是否被绑定
+		AdUser adUser = new AdUser();
+		adUser.setTelephone(mobile);
+		adUser = adUserDao.get(adUser);
+		if (adUser != null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "该手机号已经被绑定");
+		}
+		//员工号与邮箱是否匹配
+		//通过员工号查询用户id
+		AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+		adUserPersonalInfo.setWorkNumber(staffNum);
+		adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+		if (adUserPersonalInfo == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工号不存在");
+		}
+
+		adUser = new AdUser();
+		adUser.setId(adUserPersonalInfo.getId());
+		adUser = adUserDao.get(adUser);
+		if (adUser == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工用户不存在");
+		}
+		if (!email.equals(adUser.getMailbox())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工号和邮箱不匹配");
+		}
+		//员工工号是否已经绑定手机号
+		if (StringUtils.isNotBlank(adUser.getTelephone())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "该工号已激活，请输入正确的员工工号");
+		}
+		//员工工号与激活码是否匹配
+		//查询激活码
+		AdActiveCode adActiveCode = new AdActiveCode();
+		adActiveCode.setAdUserId(adUser.getId());
+		adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+		if (adActiveCode == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "用户激活码不存在");
+		}
+		if (!code.equals(adActiveCode.getCode())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "请输入正确的激活码");
+		}
+		//绑定手机号
+		adUser.setTelephone(mobile);
+		adUser.setUpdateDate(new Date());
+		int i = adUserDao.updateByPrimaryKeySelective(adUser);
+		if (i == 0) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
+		}
 		return resultData;
 	}
 

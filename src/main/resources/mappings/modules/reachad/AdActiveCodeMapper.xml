@@ -57,21 +57,22 @@
   	Set is_used = #{isUsed}, used_date = #{usedDate}
   	Where card_number = #{cardNumber}
   </update>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+    <select id="getByCondition" parameterType="com.doooly.entity.reachad.AdActiveCode" resultMap="BaseResultMap">
+        Select
+        <include refid="Base_Column_List"/>
+        From ad_active_code
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="adUserId != null">
+                and ad_user_id = #{adUserId}
+            </if>
+            and del_flag = 0
+        </where>
+    </select>
   
   <!-- 自动生成 -->
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >

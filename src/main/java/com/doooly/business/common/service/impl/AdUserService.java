@@ -638,6 +638,7 @@ public class AdUserService implements AdUserServiceI {
 	 * 存储B库ad_user表,ad_user_personal_info数据
 	 */
 	public AdUser saveUserAndPersonal(JSONObject jsonParam) throws Exception {
+        logger.info("保存用户开始，参数：{}", jsonParam);
 		// 用户信息
 		AdUser adUserParam = new AdUser();
 		String telephone = jsonParam.get("mobile").toString();
@@ -690,6 +691,7 @@ public class AdUserService implements AdUserServiceI {
 			}
 			// 执行插入
 			adUserDao.saveUser(adUserParam);
+            logger.info("保存用户完成，生成用户id:{}", adUserParam.getId());
 			// 回传明文密码,发短信
 			adUserParam.setPassword(password);
 			

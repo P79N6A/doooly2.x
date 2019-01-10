@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.doooly.business.common.service.AdUserServiceI;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,8 @@ public class UserRestService implements UserRestServiceI {
 
 	@Autowired
 	private UserServiceI userService;
+    @Autowired
+    private AdUserServiceI adUserServiceI;
 
 	@POST
 	@Path(value = "/login")
@@ -235,4 +238,20 @@ public class UserRestService implements UserRestServiceI {
 		}
 		return baseRes.toJsonString();
 	}
+
+    @POST
+    @Path(value = "/userBind")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String userBind(JSONObject paramJson, @Context HttpServletRequest request) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            messageDataBean = adUserServiceI.userBind(paramJson);
+        } catch (Exception e) {
+            messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
+            messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
+            logger.info("========rest系统异常=====",e);
+        }
+        return messageDataBean.toJsonString();
+    }
 }

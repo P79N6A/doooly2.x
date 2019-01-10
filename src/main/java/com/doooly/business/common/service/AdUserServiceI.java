@@ -116,4 +116,6 @@ public interface AdUserServiceI {
 	public void addIntegral(Long userId, BigDecimal integralForEach);
 
 	public JSONObject verifyCodeAndActivation(JSONObject param) throws Exception;
+
+    MessageDataBean userBind(JSONObject paramJson);
 }

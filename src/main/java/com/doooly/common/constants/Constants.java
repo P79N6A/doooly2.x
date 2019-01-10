@@ -1,8 +1,8 @@
 package com.doooly.common.constants;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.util.List;
 
 public class Constants {
 
@@ -11,6 +11,7 @@ public class Constants {
 	 */
 	public final static String WECHAT = "wechat";
 	public final static String DOOOLY = "doooly";
+	public final static String THIRDPARTYCHANNEL = "thirdPartyChannel";//第三方渠道来源
 
 	/** 会员token，唯一标识，放入缓存 */
 	public static String TOKEN_KEY = "token:%s";

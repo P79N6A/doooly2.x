@@ -1602,6 +1602,9 @@ public class AdUserService implements AdUserServiceI {
                         logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
                     }
                 }
+            }else {
+                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
             }
         } catch (Exception e) {
             messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());

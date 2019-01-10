@@ -1561,7 +1561,7 @@ public class AdUserService implements AdUserServiceI {
                     String FVersionUsed = result.getString("FVersionUsed");
                     String FEmail = result.getString("FEmail");
                     String FBirthDay = result.getString("FBirthDay");
-                    String mobile = paramJson.getString("mobile");
+                    String mobile = paramJson.getString("loginName");
                     Map<String,Object> params = new HashMap<>();
                     params.put("workNumber",FItemNumber);
                     params.put("adGroupId",groupId);
@@ -1594,6 +1594,9 @@ public class AdUserService implements AdUserServiceI {
                         messageDataBean = this.execCommandActive(paramData);
                         logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
                     }
+                }else {
+                    messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
+                    messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
                 }
             }else {
                 messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());

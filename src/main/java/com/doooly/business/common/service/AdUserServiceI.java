@@ -125,4 +125,6 @@ public interface AdUserServiceI {
     AdUser saveUserAndPersonal(JSONObject userJson) throws Exception;
 
     JSONObject checkTelephone(JSONObject data);
+
+    MessageDataBean userBind(JSONObject paramJson);
 }

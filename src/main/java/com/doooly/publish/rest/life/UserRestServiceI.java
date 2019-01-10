@@ -1,7 +1,5 @@
 package com.doooly.publish.rest.life;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.user.CheckActiveCodeReq;
 import com.doooly.dto.user.LoginReq;
@@ -9,6 +7,8 @@ import com.doooly.dto.user.LogoutReq;
 import com.doooly.dto.user.ModifyMobileReq;
 import com.doooly.dto.user.ModifyPwdReq;
 import com.doooly.dto.user.UserActiveReq;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -98,4 +98,11 @@ public interface UserRestServiceI {
 	 * @return
 	 */
 	public String getWechatUserInitInfo(JSONObject paramJson);
+	/**
+	 * 用户登录绑定
+	 *
+	 * @param paramJson
+	 * @return
+	 */
+	public String userBind(JSONObject paramJson, HttpServletRequest request);
 }

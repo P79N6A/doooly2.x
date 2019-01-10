@@ -230,7 +230,9 @@ public class OrderServiceImpl implements OrderService{
 	                    payTypeMap.put("0","兜礼积分");
 	                }else if(adOrderFlow.getPayType() == AdOrderFlow.PAY_TYPE_WECHAT){
 	                    payTypeMap.put("3","微信支付");
-	                }else {
+	                }else if(adOrderFlow.getPayType() == AdOrderFlow.PAY_TYPE_ALIPAY) {
+						payTypeMap.put("6", "支付宝支付");
+					}else {
 	                    payTypeMap.put("1","现金支付");
 	                }
 	            }

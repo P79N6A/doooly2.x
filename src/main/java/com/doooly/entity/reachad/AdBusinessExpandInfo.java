@@ -17,6 +17,8 @@ public class AdBusinessExpandInfo {
     private String clientId;
     /**兜礼访问商家密钥32位*/
     private String clientSecret;
+    //支付方式
+    private String payMethod;
 
     public Long getId() {
         return id;
@@ -81,5 +83,13 @@ public class AdBusinessExpandInfo {
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
+    }
+
+    public String getPayMethod() {
+        return payMethod;
+    }
+
+    public void setPayMethod(String payMethod) {
+        this.payMethod = payMethod;
     }
 }

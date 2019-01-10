@@ -1593,15 +1593,32 @@ public class AdUserService implements AdUserServiceI {
                         }
                     }else {
                         //说明没有绑定过工号，直接走激活流程
-                        // 激活用户
-                        JSONObject paramData = new JSONObject();
-                        paramData.put("mobile",mobile);
-                        paramData.put("groupId",groupId);
-                        paramData.put("name",fItemName);
-                        paramData.put("workerNumber",FItemNumber);
-                        paramData.put("remarks","大华企业登录激活");
-                        messageDataBean = this.execCommandActive(paramData);
-                        logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+                        //查看手机号是否存在
+                        Map<String,Object> params1 = new HashMap<>();
+                        params.put("telephone",mobile);
+                        //根据手机号
+                        AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
+                        if(isUser1 != null){
+                            //说明手机号已存在
+                            AdUser user = new AdUser();
+                            user.setId(isUser1.getId());
+                            user.setGroupNum(Long.valueOf(groupId));
+                            user.setName(fItemName);
+                            user.setTelephone(mobile);
+                            adUserDao.updateByPrimaryKeySelective(user);
+                            isUser1.setWorkNumber(FItemNumber);
+                            adUserDao.updatePersonalData(isUser1);
+                        }else {
+                            // 激活用户
+                            JSONObject paramData = new JSONObject();
+                            paramData.put("mobile",mobile);
+                            paramData.put("groupId",groupId);
+                            paramData.put("name",fItemName);
+                            paramData.put("workerNumber",FItemNumber);
+                            paramData.put("remarks","大华企业登录激活");
+                            messageDataBean = this.execCommandActive(paramData);
+                            logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+                        }
                     }
                 }else {
                     messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());

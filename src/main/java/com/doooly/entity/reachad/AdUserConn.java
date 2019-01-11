@@ -1,5 +1,7 @@
 package com.doooly.entity.reachad;
 
+import java.math.BigDecimal;
+
 /**
  * 个人资料
  * 
@@ -54,6 +56,10 @@ public class AdUserConn {
 	private String returnIntegral;
 	/** 累计积分 */
 	private String totalIntegral;
+
+	/** 定向积分*/
+	private BigDecimal dirIntegal;
+
 	/** 我的福利是否有可用的新券(false:无 true:有) */
 	private boolean hasNewCoupon;
 	/** 是否激活 */
@@ -84,6 +90,14 @@ public class AdUserConn {
 	private String blocId;
 	/** 集团名称 */
 	private String blocName;
+
+	public BigDecimal getDirIntegal() {
+		return dirIntegal;
+	}
+
+	public void setDirIntegal(BigDecimal dirIntegal) {
+		this.dirIntegal = dirIntegal;
+	}
 
 	public String getBlocId() {
 		return blocId;

@@ -53,6 +53,13 @@ public interface AdActiveCodeDao {
 	 * 更新激活码信息
 	 * */
 	void updateCodeIsUsed(String adActiveCodeId);
+
+	/**
+	 * 查询单个
+	 * @param adActiveCode
+	 * @return
+	 */
+	AdActiveCode getByCondition(AdActiveCode adActiveCode);
 	
 	/**
 	 * 更新用户ID

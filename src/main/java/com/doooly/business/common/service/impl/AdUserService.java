@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
@@ -1112,14 +1113,6 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 同步添加，修改账户信息
-	 * 
-	 * @param adGroup
-	 * @param adUser
-	 * @param flag
-	 * @param name
-	 * @param sex
-	 * @param telephone
-	 * @param identityCard
 	 * @return
 	 * @throws Exception
 	 */
@@ -1194,24 +1187,45 @@ public class AdUserService implements AdUserServiceI {
 		boolean isFailed = true;
 		String code = paramData.getString("code");
 		String telephone = paramData.getString("mobile");
+        String staffNum = paramData.getString("staffNum");
+        String email = paramData.getString("email");
 		try {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
-				// 个人专属码
-				JSONObject validateResult = this.validateCode(code);
-				if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
-					// resultData = this.doActive(validateResult);
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
-					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-					isFailed = false;
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时："
-							+ (System.currentTimeMillis() - startTime));
-				} else {
-					resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
-					resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时："
-							+ (System.currentTimeMillis() - startTime));
-				}
+                if (StringUtils.isNotBlank(staffNum)) {
+                    //福特处理
+                    if (StringUtils.isBlank(telephone)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "手机号为空");
+                    } else if (StringUtils.isBlank(staffNum)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "工号为空");
+                    } else if (StringUtils.isBlank(email)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "邮箱为空");
+                    } else {
+                        resultData = validateFordUser(code,telephone,staffNum,email);
+                        if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
+                            isFailed = false;
+                        }
+                    }
+                } else {
+                    // 个人专属码
+                    JSONObject validateResult = this.validateCode(code);
+                    if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
+                        // resultData = this.doActive(validateResult);
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+                        resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+                        isFailed = false;
+                        logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时："
+                                + (System.currentTimeMillis() - startTime));
+                    } else {
+                        resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
+                        resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
+                        logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时："
+                                + (System.currentTimeMillis() - startTime));
+                    }
+                }
 			} else if (code.length() == 8) {
 				// 企业口令
 				HashMap<String, Object> paramMap = new HashMap<String, Object>();
@@ -1318,6 +1332,7 @@ public class AdUserService implements AdUserServiceI {
 				resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());
 				logger.info("====【verifyCodeAndActivation】-参数位数不合理,参数为：" + code);
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1350,6 +1365,82 @@ public class AdUserService implements AdUserServiceI {
 			}
 		}
 		logger.info("====【verifyCodeAndActivation】返回数据-resultData：" + resultData.toJSONString());
+		return resultData;
+	}
+
+
+	JSONObject validateFordUser(String code,String mobile,String staffNum,String email) {
+		JSONObject resultData = new JSONObject();
+		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+		//手机号是否被绑定
+		AdUser adUser = new AdUser();
+		adUser.setTelephone(mobile);
+		adUser = adUserDao.get(adUser);
+		if (adUser != null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "该手机号已经被绑定");
+			return resultData;
+		}
+		//员工号与邮箱是否匹配
+		//通过员工号查询用户id
+		AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+		adUserPersonalInfo.setWorkNumber(staffNum);
+		adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+		if (adUserPersonalInfo == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工号不存在");
+			return resultData;
+		}
+
+		adUser = adUserDao.getById(Integer.parseInt(adUserPersonalInfo.getId()+""));
+		if (adUser == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工用户不存在");
+			return resultData;
+		}
+		if (!email.equals(adUser.getMailbox())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "员工号和邮箱不匹配");
+			return resultData;
+		}
+		//员工工号是否已经绑定手机号
+		if (StringUtils.isNotBlank(adUser.getTelephone())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "该工号已激活，请输入正确的员工工号");
+			return resultData;
+		}
+		//员工工号与激活码是否匹配
+		//查询激活码
+		AdActiveCode adActiveCode = new AdActiveCode();
+		adActiveCode.setAdUserId(adUser.getId());
+		adActiveCode.setIsUsed("0");//未使用
+		adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+		if (adActiveCode == null) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "用户激活码不存在");
+			return resultData;
+		}
+		if (!code.equals(adActiveCode.getCode())) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "请输入正确的激活码");
+			return resultData;
+		}
+		//绑定手机号
+		adUser.setTelephone(mobile);
+		adUser.setUpdateDate(new Date());
+		int i = adUserDao.updateByPrimaryKeySelective(adUser);
+		if (i == 0) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
+			return resultData;
+		} else {
+            adActiveCode.setIsUsed("1");
+            adActiveCode.setUsedDate(new Date());
+            adActiveCodeDao.updateByPrimaryKey(adActiveCode);
+        }
+		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
 		return resultData;
 	}
 

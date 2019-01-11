@@ -19,5 +19,7 @@ public interface AdUserPersonalInfoDao extends BaseDaoI<AdUserPersonalInfo> {
 
     AdUserConn getIsUser(Map<String,Object> param);
 
+    AdUserPersonalInfo select(AdUserPersonalInfo adUserPersonalInfo);
+
     Integer updatePayPassword(@Param("userId") String userId, @Param("payPassword") String payPassword,@Param("isPayPassword") String isPayPassword);
 }

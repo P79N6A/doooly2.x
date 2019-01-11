@@ -1600,6 +1600,8 @@ public class AdUserService implements AdUserServiceI {
                             isUser1.setWorkNumber(FItemNumber);
                             isUser1.setUserId(String.valueOf(isUser1.getId()));
                             adUserDao.updatePersonalData(isUser1);
+                            messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+                            messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
                         }else {
                             // 激活用户
                             JSONObject paramData = new JSONObject();

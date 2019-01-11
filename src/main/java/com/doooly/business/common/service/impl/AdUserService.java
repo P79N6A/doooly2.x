@@ -1598,6 +1598,7 @@ public class AdUserService implements AdUserServiceI {
                             user.setTelephone(mobile);
                             adUserDao.updateByPrimaryKeySelective(user);
                             isUser1.setWorkNumber(FItemNumber);
+                            isUser1.setUserId(String.valueOf(isUser1.getId()));
                             adUserDao.updatePersonalData(isUser1);
                         }else {
                             // 激活用户

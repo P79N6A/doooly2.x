@@ -666,6 +666,9 @@
 	      <if test="appHeadImageUrl != null and appHeadImageUrl != ''" >
 	        b.app_head_image_url = #{appHeadImageUrl},
 	      </if>
+	      <if test="workNumber != null and workNumber != ''" >
+	        b.work_number = #{workNumber},
+	      </if>
 	    </set>
 		WHERE b.id = #{userId}
   	</update>

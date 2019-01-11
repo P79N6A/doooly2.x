@@ -6,7 +6,7 @@
 		<result column="is_regular_employee" jdbcType="CHAR" property="isRegularEmployee" />
 		<result column="has_child" jdbcType="CHAR" property="hasChild" />
 	</resultMap>
-z
+
 	<sql id="TableColumn">
 		id,
 		ad_group_department_id as "adGroupDepartment.id",

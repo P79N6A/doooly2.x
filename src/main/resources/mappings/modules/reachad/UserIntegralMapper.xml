@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.UserIntegralMapper" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.reachad.UserIntegral" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="ad_user_id" property="adUserId" jdbcType="BIGINT" />
+    <result column="batch_no" property="batchNo" jdbcType="BIGINT" />
+    <result column="total_integral" property="totalIntegral" jdbcType="DECIMAL" />
+    <result column="avail_integral" property="availIntegral" jdbcType="DECIMAL" />
+    <result column="type" property="type" jdbcType="TINYINT" />
+    <result column="source_id" property="sourceId" jdbcType="TINYINT" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="del_flag" property="delFlag" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, ad_user_id, batch_no, total_integral, avail_integral, type, source_id, create_date, 
+    update_date, del_flag
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ad_user_integral
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ad_user_integral
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.doooly.entity.reachad.UserIntegral" >
+    insert into ad_user_integral (id, ad_user_id, batch_no, 
+      total_integral, avail_integral, type, 
+      source_id, create_date, update_date, 
+      del_flag)
+    values (#{id,jdbcType=BIGINT}, #{adUserId,jdbcType=BIGINT}, #{batchNo,jdbcType=BIGINT}, 
+      #{totalIntegral,jdbcType=DECIMAL}, #{availIntegral,jdbcType=DECIMAL}, #{type,jdbcType=TINYINT}, 
+      #{sourceId,jdbcType=TINYINT}, #{createDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{delFlag,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.reachad.UserIntegral" >
+    insert into ad_user_integral
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="adUserId != null" >
+        ad_user_id,
+      </if>
+      <if test="batchNo != null" >
+        batch_no,
+      </if>
+      <if test="totalIntegral != null" >
+        total_integral,
+      </if>
+      <if test="availIntegral != null" >
+        avail_integral,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="sourceId != null" >
+        source_id,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="delFlag != null" >
+        del_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="adUserId != null" >
+        #{adUserId,jdbcType=BIGINT},
+      </if>
+      <if test="batchNo != null" >
+        #{batchNo,jdbcType=BIGINT},
+      </if>
+      <if test="totalIntegral != null" >
+        #{totalIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="availIntegral != null" >
+        #{availIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="sourceId != null" >
+        #{sourceId,jdbcType=TINYINT},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        #{delFlag,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.reachad.UserIntegral" >
+    update ad_user_integral
+    <set >
+      <if test="adUserId != null" >
+        ad_user_id = #{adUserId,jdbcType=BIGINT},
+      </if>
+      <if test="batchNo != null" >
+        batch_no = #{batchNo,jdbcType=BIGINT},
+      </if>
+      <if test="totalIntegral != null" >
+        total_integral = #{totalIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="availIntegral != null" >
+        avail_integral = #{availIntegral,jdbcType=DECIMAL},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="sourceId != null" >
+        source_id = #{sourceId,jdbcType=TINYINT},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="delFlag != null" >
+        del_flag = #{delFlag,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.reachad.UserIntegral" >
+    update ad_user_integral
+    set ad_user_id = #{adUserId,jdbcType=BIGINT},
+      batch_no = #{batchNo,jdbcType=BIGINT},
+      total_integral = #{totalIntegral,jdbcType=DECIMAL},
+      avail_integral = #{availIntegral,jdbcType=DECIMAL},
+      type = #{type,jdbcType=TINYINT},
+      source_id = #{sourceId,jdbcType=TINYINT},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      del_flag = #{delFlag,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="getAvailIntegal" parameterType="com.doooly.entity.reachad.UserIntegral" resultType="java.math.BigDecimal">
+    select IFNULL(sum(avail_integral),0) from ad_user_integral
+     where ad_user_id = #{adUserId}
+     and type = 1
+  </select>
+
+</mapper>

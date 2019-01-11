@@ -9,16 +9,9 @@ import com.doooly.common.constants.KeyConstants;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.FileUtils;
 import com.doooly.common.util.MD5Util;
-import com.doooly.dao.reachad.AdAvailablePointsDao;
-import com.doooly.dao.reachad.AdFamilyDao;
-import com.doooly.dao.reachad.AdFamilyUserDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdUserPersonalInfoDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdFamily;
-import com.doooly.entity.reachad.AdFamilyUser;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserConn;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -85,6 +78,9 @@ public class MyAccountService implements MyAccountServiceI {
 	
 	@Autowired
 	private StringRedisTemplate redisTemplate;
+
+	@Autowired
+	private UserIntegralMapper userIntegralMapper;
 
 	@Override
 	public HashMap<String, Object> getAccountListById(String userId) {
@@ -227,6 +223,10 @@ public class MyAccountService implements MyAccountServiceI {
 			BigDecimal returnPoint = (BigDecimal) pointMap.get("returnPoint");
 			adUserConn.setAvailableIntegral(availablePoint.toString());
 			adUserConn.setReturnIntegral(returnPoint.toString());
+			UserIntegral userIntegral = new UserIntegral();
+			userIntegral.setAdUserId(Long.parseLong(userId));
+			BigDecimal dirIntegal = userIntegralMapper.getAvailIntegal(userIntegral);
+			adUserConn.setDirIntegal(dirIntegal);
 			logger.info(String.format("个人中心 获取用户积分信息===> SQL耗时：%s", System.currentTimeMillis()-start));
 			// 3.判断用户是否有不同状态下的新订单
 			this.setNewOrdersFlag(adUserConn, userId);

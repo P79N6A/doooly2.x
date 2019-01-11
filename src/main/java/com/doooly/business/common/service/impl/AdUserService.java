@@ -1595,7 +1595,7 @@ public class AdUserService implements AdUserServiceI {
                         //说明没有绑定过工号，直接走激活流程
                         //查看手机号是否存在
                         Map<String,Object> params1 = new HashMap<>();
-                        params.put("telephone",mobile);
+                        params1.put("telephone",mobile);
                         //根据手机号
                         AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
                         if(isUser1 != null){
@@ -1607,7 +1607,10 @@ public class AdUserService implements AdUserServiceI {
                             user.setTelephone(mobile);
                             adUserDao.updateByPrimaryKeySelective(user);
                             isUser1.setWorkNumber(FItemNumber);
+                            isUser1.setUserId(String.valueOf(isUser1.getId()));
                             adUserDao.updatePersonalData(isUser1);
+                            messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+                            messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
                         }else {
                             // 激活用户
                             JSONObject paramData = new JSONObject();

@@ -6,6 +6,7 @@ import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
+import com.doooly.business.user.service.UserService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2;
@@ -1175,6 +1176,9 @@ public class AdUserService implements AdUserServiceI {
 		adUserDao.addIntegral(userId, integralForEach);
 	}
 
+	@Autowired
+	private UserService userService;
+
 	/**
 	 * 验证企业口令是否存在,专属码是否可用,激活码是否可用并激活
 	 * 
@@ -1207,6 +1211,11 @@ public class AdUserService implements AdUserServiceI {
                         resultData = validateFordUser(code,telephone,staffNum,email);
                         if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
                             isFailed = false;
+                            try {
+                                resultData = userService.userLogin(resultData);
+                            } catch (Exception e) {
+                                logger.info("verifyCodeAndActivation登录异常：",e);
+                            }
                         }
                     }
                 } else {
@@ -1428,6 +1437,7 @@ public class AdUserService implements AdUserServiceI {
 		}
 		//绑定手机号
 		adUser.setTelephone(mobile);
+		adUser.setIsActive("2");
 		adUser.setUpdateDate(new Date());
 		int i = adUserDao.updateByPrimaryKeySelective(adUser);
 		if (i == 0) {
@@ -1441,6 +1451,7 @@ public class AdUserService implements AdUserServiceI {
         }
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+		resultData.put("userId",adUser.getId());
 		return resultData;
 	}
 

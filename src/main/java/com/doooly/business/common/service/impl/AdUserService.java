@@ -1586,7 +1586,7 @@ public class AdUserService implements AdUserServiceI {
                         //说明没有绑定过工号，直接走激活流程
                         //查看手机号是否存在
                         Map<String,Object> params1 = new HashMap<>();
-                        params.put("telephone",mobile);
+                        params1.put("telephone",mobile);
                         //根据手机号
                         AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
                         if(isUser1 != null){

@@ -1185,24 +1185,45 @@ public class AdUserService implements AdUserServiceI {
 		boolean isFailed = true;
 		String code = paramData.getString("code");
 		String telephone = paramData.getString("mobile");
+        String staffNum = paramData.getString("staffNum");
+        String email = paramData.getString("email");
 		try {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
-				// 个人专属码
-				JSONObject validateResult = this.validateCode(code);
-				if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
-					// resultData = this.doActive(validateResult);
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
-					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-					isFailed = false;
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时："
-							+ (System.currentTimeMillis() - startTime));
-				} else {
-					resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
-					resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
-					logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时："
-							+ (System.currentTimeMillis() - startTime));
-				}
+                if (StringUtils.isNotBlank(staffNum)) {
+                    //福特处理
+                    if (StringUtils.isBlank(telephone)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "手机号为空");
+                    } else if (StringUtils.isBlank(staffNum)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "工号为空");
+                    } else if (StringUtils.isBlank(email)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "邮箱为空");
+                    } else {
+                        resultData = validateFordUser(code,telephone,staffNum,email);
+                        if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
+                            isFailed = false;
+                        }
+                    }
+                } else {
+                    // 个人专属码
+                    JSONObject validateResult = this.validateCode(code);
+                    if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
+                        // resultData = this.doActive(validateResult);
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+                        resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+                        isFailed = false;
+                        logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,激活总耗时："
+                                + (System.currentTimeMillis() - startTime));
+                    } else {
+                        resultData.put(ConstantsLogin.CODE, validateResult.getString(ConstantsLogin.CODE));
+                        resultData.put(ConstantsLogin.MESS, validateResult.getString(ConstantsLogin.MESS));
+                        logger.info("====【verifyCodeAndActivation】-【個人专属码】验证,券码不存在,激活总耗时："
+                                + (System.currentTimeMillis() - startTime));
+                    }
+                }
 			} else if (code.length() == 8) {
 				// 企业口令
 				HashMap<String, Object> paramMap = new HashMap<String, Object>();
@@ -1304,25 +1325,6 @@ public class AdUserService implements AdUserServiceI {
 					resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_NOT_EXIST.getMsg());
 				}
 				logger.info("====【verifyCodeAndActivation】-【激活码】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
-			} else if (code.length() == 14)  {
-				//福特处理
-				String staffNum = paramData.getString("staffNum");
-				String email = paramData.getString("email");
-				if (StringUtils.isBlank(telephone)) {
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
-					resultData.put(ConstantsLogin.MSG, "手机号为空");
-				} else if (StringUtils.isBlank(staffNum)) {
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
-					resultData.put(ConstantsLogin.MSG, "工号为空");
-				} else if (StringUtils.isBlank(email)) {
-					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
-					resultData.put(ConstantsLogin.MSG, "邮箱为空");
-				} else {
-					resultData = validateFordUser(code,telephone,staffNum,email);
-					if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
-						isFailed = false;
-					}
-				}
 			} else {
 				resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 				resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getMsg());

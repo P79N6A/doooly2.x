@@ -23,8 +23,13 @@ public class HomePageDataV2 {
 	private Integer couponNum;
 	/** 抵扣券，即将过期张数 **/
 	private Integer couponExpireNum;
-	/** 会员可用积分 **/
+	/** 会员可用积分 (通用积分+定向积分)**/
 	private BigDecimal availablePoints;
+	//会员定向积分
+	private BigDecimal dirIntegralPoints;
+	//会员通用积分
+	private BigDecimal generalIntegral;
+	
 	/** 会员认证标识，(0-非认证会员,1-认证会员) **/
 	private Integer authFlag;
 
@@ -47,6 +52,22 @@ public class HomePageDataV2 {
 
 	public String getMemberName() {
 		return memberName;
+	}
+
+	public BigDecimal getDirIntegralPoints() {
+		return dirIntegralPoints;
+	}
+
+	public void setDirIntegralPoints(BigDecimal dirIntegralPoints) {
+		this.dirIntegralPoints = dirIntegralPoints;
+	}
+
+	public BigDecimal getGeneralIntegral() {
+		return generalIntegral;
+	}
+
+	public void setGeneralIntegral(BigDecimal generalIntegral) {
+		this.generalIntegral = generalIntegral;
 	}
 
 	public String getReturnPoints() {

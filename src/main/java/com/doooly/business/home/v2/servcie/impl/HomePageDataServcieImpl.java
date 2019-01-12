@@ -81,9 +81,9 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		//查詢定向積分
 		AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(request.getUserId()));
 		homePageData.setGeneralIntegral(generalIntegral);
-		homePageData.setDirIntegralPoints(userIntegral.getAvailIntegra());
+		homePageData.setDirIntegralPoints(userIntegral.getAvailIntegral());
 		//會員總積分（通用積分+定向積分）
-		homePageData.setAvailablePoints(generalIntegral.add(userIntegral.getAvailIntegra()));
+		homePageData.setAvailablePoints(generalIntegral.add(userIntegral.getAvailIntegral()));
 		homePageData.setAuthFlag(adUserInfos.getAuthFlag() == null ? 0 : adUserInfos.getAuthFlag());
 		// 查询会员的福利券
 		int expiredNum = 0;

@@ -8,7 +8,7 @@ public class AdUserIntegral {
 	//该批次号总定向积分
 	private BigDecimal totalIntegral;
 	//该批次号可用定向积分
-	private BigDecimal availIntegra;
+	private BigDecimal availIntegral;
 	//企业充值定向积分批次号
 	private String batchNo;
 	//0:通用积分 1：定向积分
@@ -33,11 +33,12 @@ public class AdUserIntegral {
 	public void setTotalIntegral(BigDecimal totalIntegral) {
 		this.totalIntegral = totalIntegral;
 	}
-	public BigDecimal getAvailIntegra() {
-		return availIntegra;
+	
+	public BigDecimal getAvailIntegral() {
+		return availIntegral;
 	}
-	public void setAvailIntegra(BigDecimal availIntegra) {
-		this.availIntegra = availIntegra;
+	public void setAvailIntegral(BigDecimal availIntegral) {
+		this.availIntegral = availIntegral;
 	}
 	public String getBatchNo() {
 		return batchNo;

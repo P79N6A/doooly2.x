@@ -227,6 +227,7 @@ public class MyAccountService implements MyAccountServiceI {
 			userIntegral.setAdUserId(Long.parseLong(userId));
 			BigDecimal dirIntegal = userIntegralMapper.getAvailIntegal(userIntegral);
 			adUserConn.setDirIntegal(dirIntegal);
+			adUserConn.setAvailableIntegral(availablePoint.add(dirIntegal).toString());
 			logger.info(String.format("个人中心 获取用户积分信息===> SQL耗时：%s", System.currentTimeMillis()-start));
 			// 3.判断用户是否有不同状态下的新订单
 			this.setNewOrdersFlag(adUserConn, userId);

@@ -33,6 +33,7 @@ import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdReturnDetailDao;
 import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
@@ -43,6 +44,7 @@ import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -104,6 +106,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdReturnDetailDao adReturnDetailDao;
     @Autowired
     private RedisLock redisLock;
+    @Autowired
+    private AdUserIntegralDao userIntegralDao;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -241,6 +245,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         //组建预支付订单参数
         AdUser user = adUserDao.getById(order.getUserId().intValue());
+        AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
         AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
@@ -273,7 +278,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral());
+        retJson.put("userIntegral", user.getIntegral().add(userIntegral.getAvailIntegral()));
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id

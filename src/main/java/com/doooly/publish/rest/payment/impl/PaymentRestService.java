@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.common.IPUtils;
+import com.doooly.common.constants.VersionConstants;
 import com.doooly.publish.rest.payment.PaymentRestServiceI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,16 @@ public class PaymentRestService implements PaymentRestServiceI{
     public String unifiedorder(JSONObject json,@Context HttpServletRequest request) {
         json.put("clientIp", IPUtils.getIpAddr(request));
         ResultModel unifiedorder = paymentService.unifiedorder(json);
+        return unifiedorder.toJsonString();
+    }
+    @Override
+    @POST
+    @Path(value = "/unifiedorder/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String unifiedorderV2(JSONObject json,@Context HttpServletRequest request) {
+        json.put("clientIp", IPUtils.getIpAddr(request));
+        ResultModel unifiedorder = paymentService.unifiedorderV2(json);
         return unifiedorder.toJsonString();
     }
 

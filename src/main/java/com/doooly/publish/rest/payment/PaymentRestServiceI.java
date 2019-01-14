@@ -16,6 +16,8 @@ public interface PaymentRestServiceI {
 
     // 下单
     String unifiedorder(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 下单 v2
+    String unifiedorderV2(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 获取支付参数
     String getPayForm(JSONObject obj);

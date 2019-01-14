@@ -6,6 +6,7 @@ import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 
 import java.math.BigDecimal;
@@ -14,7 +15,9 @@ import java.util.Map;
 
 public interface OrderService {
 
-	// 活动类型
+    MessageDataBean cancleOrderV2(long userId, String bigOrderNumber);
+
+    // 活动类型
 	public static enum ActivityType {
 
 		COMMON_ORDER("COMMON", "普通订单"),
@@ -161,6 +164,10 @@ public interface OrderService {
 	 * 创建订单
 	 */
 	public OrderMsg createOrder(JSONObject json);
+	/**
+	 * 创建订单createOrderv2
+	 */
+	public OrderMsg createOrderv2(JSONObject json);
 
 	/**
 	 * 保存订单

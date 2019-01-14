@@ -8,6 +8,7 @@ import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.AdOrderBig;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
@@ -186,6 +187,100 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
     }
 
+    @Override
+    public ResultModel unifiedorderV2(JSONObject jsonObject) {
+        JSONObject orderSummary = getOrderSummaryV2(jsonObject);
+        if (orderSummary == null) {
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
+        }
+        logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
+        JSONObject param = orderSummary.getJSONObject("param");
+        JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
+        JSONObject object = new JSONObject();
+        object.put("param", param.toJSONString());
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL_V2);
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //说明获取成功
+            Map<Object, Object> data = (Map<Object, Object>) jsonResult.get("data");
+            String payId = (String) data.get("payId");
+            String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
+            retJson.put("payId", payId);
+            if (StringUtils.isNotBlank(integralRebatePayAmount)) {
+                retJson.put("integralRebatePayAmount", integralRebatePayAmount);
+            }
+            logger.info("payment unifiedorder v2 result data={}", data);
+            return ResultModel.ok(retJson);
+        } else {
+            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
+        }
+    }
+
+    private JSONObject getOrderSummaryV2(JSONObject json) {
+        logger.info("getOrderSummaryV2() json = {}", json);
+        JSONObject result = new JSONObject();
+        String bigOrderNumber = json.getString("bigOrderNumber");
+        long userId = json.getLong("userId");
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
+        //查询子订单
+        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
+        JSONObject retJson = new JSONObject();
+        retJson.put("totalFree",adOrderBig.getTotalAmount().toString());
+        retJson.put("dirIntegral","0.00");//定向积分
+        AdUser paramUser = new AdUser();
+        paramUser.setId(userId);
+        AdUser user = adUserServiceI.getUser(paramUser);
+        getServiceCharge(orderVos,retJson,user);
+        //组建预支付订单参数
+        String price = String.valueOf(adOrderBig.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
+        String amount = String.valueOf(adOrderBig.getTotalAmount().setScale(2, BigDecimal.ROUND_DOWN));
+        JSONObject param = new JSONObject();
+        param.put("cardNumber", user.getTelephone());
+        param.put("bigOrderNumber", adOrderBig.getId());
+        param.put("tradeType", "DOOOLY_JS");
+        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("body", "兜礼订单-"+adOrderBig.getId());
+        param.put("isSource", adOrderBig.getIsSource());
+        param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));
+        param.put("storesId", "A001");
+        param.put("price", price);
+        param.put("amount", amount);
+        param.put("clientIp", json.get("clientIp"));
+        param.put("nonceStr", RandomUtil.getRandomStr(16));
+        param.put("isPayPassword", user.getIsPayPassword());
+        logger.info("下单参数param=========" + param);
+        result.put("param", param);
+        retJson.put("userIntegral", user.getIntegral());
+        retJson.put("isPayPassword", user.getIsPayPassword());
+        logger.info("retJson = {}", retJson);
+        result.put("retJson", retJson);
+        return result;
+    }
+
+    //计算手续费和已用额度
+    private void getServiceCharge(List<OrderVo> orderVos, JSONObject retJson, AdUser user) {
+        BigDecimal serviceCharge = new BigDecimal("0");
+        for (OrderVo orderVo : orderVos) {
+            if(orderVo.getProductType()==OrderService.ProductType.MOBILE_RECHARGE.getCode() && orderVo.getServiceCharge() != null){
+                serviceCharge = serviceCharge.add(orderVo.getServiceCharge());
+            }
+        }
+        retJson.put("serviceCharge",serviceCharge);
+        //每月积分购买话费的金额
+        Map<String, Object> paramOrderMap = new HashMap<>();
+        paramOrderMap.put("userId", user.getId());
+        BigDecimal consumptionAmount = adOrderReportServiceI.getConsumptionAmountByMap(paramOrderMap);
+        retJson.put("consumptionAmount", consumptionAmount == null ? "0" : consumptionAmount);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("groupId", user.getGroupNum());
+        AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
+        retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
+        retJson.put("consumptionAmount",consumptionAmount);
+    }
+
     /**
      * 获取商品信息
      *
@@ -200,12 +295,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
-//        20181227 优化改造只查询一个
-       /* List<OrderVo> orderVoList = orderService.getOrder(order);
-        if (CollectionUtils.isEmpty(orderVoList)) {
-            return null;
-        }
-        OrderVo o = orderVoList.get(0);*/
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         if (o == null) {
             return null;

@@ -1353,4 +1353,56 @@
 		update ad_order_report set	del_flag =  1,update_date = now()
 		where id = #{orderId} and user_id=#{userId}
 	</update>
+
+    <insert id="insertAdBigOrder" parameterType="com.doooly.business.order.vo.AdOrderBig">
+        INSERT INTO ad_order_big (
+          id,
+          user_id,
+          total_amount,
+          total_price,
+          order_date,
+          is_source,
+          remarks,
+          update_date,
+          create_date
+        )
+        VALUES
+          (
+            #{id},
+            #{userId},
+            #{totalAmount},
+            #{totalPrice},
+            now(),
+            #{isSource},
+            #{remarks}
+            now(),
+            now()
+          )
+    </insert>
+
+    <select id="getOrders" resultMap="orderMap" parameterType="java.lang.String">
+        SELECT
+            <include refid="getAdOrderReportColumns" />
+        FROM ad_order_report o
+        WHERE o.order_number = #{bigOrderNumber}
+    </select>
+
+    <select id="getAdOrderBig" resultType="com.doooly.business.order.vo.AdOrderBig" parameterType="com.doooly.business.order.vo.AdOrderBig">
+        SELECT
+          id,
+          user_id,
+          total_amount,
+          total_price,
+          order_date,
+          is_source,
+          remarks,
+          update_date,
+          create_date
+        FROM ad_order_big
+        <where>
+            <if test="id != null and id != ''">
+               AND id = #{id}
+            </if>
+        </where>
+    </select>
 </mapper>

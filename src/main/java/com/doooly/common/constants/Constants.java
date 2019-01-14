@@ -1,8 +1,10 @@
 package com.doooly.common.constants;
 
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import static com.doooly.common.constants.Constants.MerchantApiConstants.MERCHANT_BASE_URL;
 
 public class Constants {
 
@@ -47,6 +49,12 @@ public class Constants {
 		//商家接口base url
 		public final static String MERCHANT_BASE_URL=PropertiesConstants.dooolyBundle.getString("ws.url");
 		public final static String CHECK_VERIFICATION_CODE_URL = MERCHANT_BASE_URL+"services/rest/checkVerificationCode";
+	}
+
+	public static class OrderApiConstants{
+		//订单接口base url
+		public final static String ORDER_BASE_URL="http://47.92.199.89:1080/";
+		public final static String SHOP_CART_URL = MERCHANT_BASE_URL+"order/shopCart/handle/v1/";
 	}
 
 	/**

@@ -7,6 +7,7 @@ import com.doooly.business.myorder.po.OrderDetailPoReq;
 import com.doooly.business.myorder.po.OrderDetailReport;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
+import com.doooly.business.order.vo.AdOrderBig;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUserBusinessExpansion;
@@ -133,4 +134,11 @@ public interface AdOrderReportDao {
     int getBuyNum(Map<String, Object> paramMap);
 
     OrderVo getOrderLimt(OrderVo order);
+
+    void insertAdBigOrder(AdOrderBig adOrderBig);
+
+    List<OrderVo> getOrders(@Param("bigOrderNumber")String bigOrderNumber);
+
+    AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
+
 }

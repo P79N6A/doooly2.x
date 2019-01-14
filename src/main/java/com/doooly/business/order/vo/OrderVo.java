@@ -95,6 +95,8 @@ public class OrderVo {
 
 	//话费充值运营商 cmcc cucc ctc
 	private String operator;
+	//大订单编号
+	private Long bigOrderNumber;
 
 
 	public OrderVo() {
@@ -451,7 +453,15 @@ public class OrderVo {
 		this.operator = operator;
 	}
 
-	@Override
+    public Long getBigOrderNumber() {
+        return bigOrderNumber;
+    }
+
+    public void setBigOrderNumber(Long bigOrderNumber) {
+        this.bigOrderNumber = bigOrderNumber;
+    }
+
+    @Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}

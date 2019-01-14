@@ -22,6 +22,9 @@ public interface PaymentRestServiceI {
     // 获取支付参数
     String getPayForm(JSONObject obj);
 
+    // 获取支付参数
+    String getPayFormV2(JSONObject obj);
+
     // 获取支付信息
     String getTradeInfo(JSONObject obj, HttpServletRequest httpServletRequest);
 

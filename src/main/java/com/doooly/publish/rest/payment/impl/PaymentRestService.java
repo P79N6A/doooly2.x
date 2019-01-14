@@ -57,6 +57,17 @@ public class PaymentRestService implements PaymentRestServiceI{
 
     @Override
     @POST
+    @Path(value = "/getPayForm/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getPayFormV2(JSONObject json) {
+        logger.info("payment getPayFormV2() json = {}", json);
+        ResultModel payForm = paymentService.getPayFormV2(json);
+        return payForm.toJsonString();
+    }
+
+    @Override
+    @POST
     @Path(value = "/unifiedorder")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

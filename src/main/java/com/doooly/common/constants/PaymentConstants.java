@@ -27,6 +27,8 @@ public class PaymentConstants {
 
 	public static final String GET_PAYFROM_URL = PAYMENT_HTTPS+"/pay/getPayForm";// 确认支付接口
 
+	public static final String GET_PAYFROM_URL_V2 = PAYMENT_HTTPS+"/pay/getPayForm"+VersionConstants.INTERFACE_VERSION_V2;// 确认支付接口v2
+
 	public static final String INTEGRAL_PAY_URL = PAYMENT_HTTPS+"/pay/integralPay";// 积分现金支付
 
 	public static final String ORDER_QUERY_URL = PAYMENT_HTTPS+"/mchpay/orderquery";// 支付查询接口

@@ -1361,6 +1361,7 @@
           total_amount,
           total_price,
           order_date,
+          state,
           is_source,
           remarks,
           update_date,
@@ -1373,6 +1374,7 @@
             #{totalAmount},
             #{totalPrice},
             now(),
+            #{state},
             #{isSource},
             #{remarks}
             now(),
@@ -1394,6 +1396,7 @@
           total_amount,
           total_price,
           order_date,
+          state,
           is_source,
           remarks,
           update_date,

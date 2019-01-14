@@ -37,4 +37,6 @@ public interface NewPaymentServiceI {
     ResultModel applyRefund(JSONObject json);
 
     ResultModel unifiedorderV2(JSONObject json);
+
+    ResultModel getPayFormV2(JSONObject json);
 }

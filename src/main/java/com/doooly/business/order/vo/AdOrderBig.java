@@ -19,6 +19,8 @@ public class AdOrderBig
     private BigDecimal totalPrice;
     // 订单时间
     private Date orderDate;
+    // 支付状态：0 未支付(进行中)   1已支付 2取消
+    private int state;
     // 订单来源   0:机票个人      1：机票分销商       2：合作商家     3：睿渠平台
     private String isSource;
     // 备注信息
@@ -66,6 +68,14 @@ public class AdOrderBig
 
     public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 
     public String getIsSource() {

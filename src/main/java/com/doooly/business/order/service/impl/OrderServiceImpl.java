@@ -393,6 +393,7 @@ public class OrderServiceImpl implements OrderService {
         adOrderBig.setId(bigOrderNumber);
         adOrderBig.setTotalPrice(totalAllPrice);
         adOrderBig.setTotalAmount(totalAllMount);
+        adOrderBig.setState(0);
         adOrderBig.setUserId(userId);
         adOrderBig.setIsSource("3");
         adOrderReportServiceI.insertAdBigOrder(adOrderBig);

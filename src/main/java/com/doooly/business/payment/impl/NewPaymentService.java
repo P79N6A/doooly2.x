@@ -437,41 +437,49 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
     }
 
-    //自营都作为兜礼支付
-    private PayMsg prePay(JSONObject json) {
-        String payType = PayFlowService.PAYTYPE_CASHIER_DESK;
-        logger.info("prePay()  payType={},json = {}", payType, json);
-        String orderNum = json.getString("orderNum");
-        String userId = json.getString("userId");
-        String channel = json.getString("channel");
+    @Override
+    public ResultModel getPayFormV2(JSONObject params) {
+        //自营商品全是兜礼支付
+        PayMsg payMsg = prePayNewV2(params);
+        //为空或者校验失败直接返回错误信息
+        if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
+            return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
+        }
+        JSONObject object = new JSONObject();
+        object.put("param", params.toJSONString());
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.GET_PAYFROM_URL_V2);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //说明获取成功
+            Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
+            return ResultModel.ok(data);
+        } else {
+            return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"));
+        }
+    }
+
+    private PayMsg prePayNewV2(JSONObject params) {
         // 校验订单
-        List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
-        if (CollectionUtils.isEmpty(orders)) {
+        String bigOrderNumber = params.getString("bigOrderNumber");
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
+        if (adOrderBig == null) {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
-        // 订单状态
-        OrderVo order = orders.get(0);
-        Long oid = checkOrderStatus(order);
-        if (oid != null) {
+        if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
             return new PayMsg(PayMsg.failure_code, "无效的订单状态");
         }
-        // 是否重复支付
-        PayFlow paidRecord = payFlowService.getByOrderNum(orderNum, payType, null);
-        if (paidRecord != null && PayFlowService.PAYMENT_SUCCESS.equals(paidRecord.getPayStatus())) {
-            return new PayMsg(PayMsg.failure_code, "请勿重复支付");
-        }
-        //校验是否可以支付
-        PayMsg msg = canPay(order, json);
-        if (!OrderMsg.valid_pass_code.equals(msg.getCode())) {
-            return msg;
-        }
-        // 保存支付记录
-        PayFlow flow = savePayFlow(orderNum, userId, payType, paidRecord, order, channel);
-        if (flow == null) {
-            return new PayMsg(PayMsg.failure_code, "保存支付记录失败.");
-        }
-        return msg;
+        //构建收银台接口需要参数
+        AdUser paramUser = new AdUser();
+        paramUser.setId(adOrderBig.getUserId());
+        AdUser user = adUserServiceI.getUser(paramUser);
+        params.put("isPayPassword", "2".equals(user.getIsPayPassword()) ? "2" : 1);//除了密码模式都是验证码模式
+        PayMsg payMsg = new PayMsg(OrderMsg.valid_pass_code, OrderMsg.valid_pass__mess);
+        return payMsg;
     }
+
 
     /**
      * 保存支付记录, 如果支付记录存在,支付次数+1

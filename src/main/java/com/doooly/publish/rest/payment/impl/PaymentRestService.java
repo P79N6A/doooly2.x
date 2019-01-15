@@ -110,6 +110,16 @@ public class PaymentRestService implements PaymentRestServiceI{
 
     @Override
     @POST
+    @Path(value = "/integralPay/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String integralPayV2(JSONObject json, HttpServletRequest httpServletRequest) {
+        ResultModel resultModel = paymentService.integralPayV2(json);
+        return resultModel.toJsonString();
+    }
+
+    @Override
+    @POST
     @Path(value = "/dooolyPayCallback")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

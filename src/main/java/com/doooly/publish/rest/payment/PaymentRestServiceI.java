@@ -30,6 +30,8 @@ public interface PaymentRestServiceI {
 
     // 获取支付信息
     String integralPay(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 获取支付信息
+    String integralPayV2(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 积分支付回调url
     String dooolyPayCallback(JSONObject obj, HttpServletRequest httpServletRequest);

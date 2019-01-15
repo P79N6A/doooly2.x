@@ -306,7 +306,10 @@
 		a.logo,
 		a.logo_url as 'logoUrl',
 		a.mini_logo_url as 'miniLogoUrl',
-		a.display_url as 'displayUrl'
+		a.display_url as 'displayUrl',
+		a.group_short_name as 'groupShortName',
+		a.bloc_id as 'blocId',
+		a.group_num as 'groupNum'
 		FROM ad_group a 
 		LEFT JOIN 
 			ad_user b ON b.group_num = a.id

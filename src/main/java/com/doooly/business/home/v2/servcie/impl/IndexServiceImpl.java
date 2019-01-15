@@ -9,10 +9,7 @@ import com.doooly.common.constants.FloorTemplateConstants.DooolyRightConstants;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.common.constants.RedisConstants;
 import com.doooly.common.constants.VersionConstants;
-import com.doooly.dao.reachad.AdBasicTypeDao;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdBusinessServicePJDao;
-import com.doooly.dao.reachad.AdConsumeRechargeDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
 import com.reach.redis.annotation.Cacheable;
@@ -50,6 +47,8 @@ public class IndexServiceImpl implements IndexServiceI {
 	private AdArticleServiceI guideService;
 	@Autowired
 	private AdBusinessServicePJDao adBusinessServicePJDao;
+	@Autowired
+	private AdGroupDao adGroupDao;
 
 
     /**
@@ -389,6 +388,10 @@ public class IndexServiceImpl implements IndexServiceI {
                 map.put("expires", guideExpores + "");
             }
             logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expires"));
+
+            //查询企业信息
+            AdGroup adGroup = adGroupDao.findGroupByUserId(userId);
+            result.put("adGroup",adGroup);
 
 			return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess, result)
 					.toJsonString();

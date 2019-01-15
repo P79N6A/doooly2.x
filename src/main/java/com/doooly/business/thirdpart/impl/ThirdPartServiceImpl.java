@@ -122,7 +122,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                     map.put("adGroup",adGroup.getMiniLogoUrl());
                     messageDataBean.setData(map);
                     logger.error("用户信息不存在,返回前端跳登录页面");
-                    messageDataBean.setCode(ConstantsLogin.Login.USER_NOT_EXIST.getCode());
+                    messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
                     messageDataBean.setMess(ConstantsLogin.Login.USER_NOT_EXIST.getMsg());
                 }
             }else {
@@ -130,7 +130,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                 map.put("adGroup",adGroup.getMiniLogoUrl());
                 messageDataBean.setData(map);
                 logger.error("调用大华接口校验token异常，返回结果{}",jsonObject);
-                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
                 messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
             }
         }else {

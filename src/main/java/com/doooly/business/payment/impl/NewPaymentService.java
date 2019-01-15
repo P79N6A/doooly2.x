@@ -29,11 +29,28 @@ import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
-import com.doooly.dao.reachad.*;
+import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdRechargeRecordDao;
+import com.doooly.dao.reachad.AdReturnDetailDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserIntegralDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.*;
+import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdRechargeRecord;
+import com.doooly.entity.reachad.AdReturnFlow;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserIntegral;
+import com.doooly.entity.reachad.Order;
+import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -88,6 +105,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdReturnDetailDao adReturnDetailDao;
     @Autowired
     private RedisLock redisLock;
+    @Autowired
+    private AdUserIntegralDao userIntegralDao;
     @Autowired
     private AdOrderReportServiceI adOrderReportServiceI;
     @Autowired
@@ -252,8 +271,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
         }
         //组建预支付订单参数
+        AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
         //20181227 缓存改造 ---zhangqing
-        //AdBusiness business = adBusinessDao.getById(String.valueOf(o.getBussinessId()));
         AdBusiness paramBusiness = new AdBusiness();
         paramBusiness.setId(o.getBussinessId());
         AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
@@ -288,7 +307,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral());
+        retJson.put("userIntegral", user.getIntegral().add(userIntegral.getAvailIntegral()));
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);

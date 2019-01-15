@@ -19,6 +19,7 @@ import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdRechargeDao;
 import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.payment.VoucherCardFailRecord;
@@ -29,6 +30,7 @@ import com.doooly.entity.reachad.AdIntegralAcquireRecord;
 import com.doooly.entity.reachad.AdRecharge;
 import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +71,9 @@ public class MyPoinitService implements MyPointServiceI {
 	private AdBusinessDao adBusinessDao;
 	@Autowired
 	private AdUserDao adUserDao;
+	@Autowired
+	private AdUserIntegralDao userIntegralDao;
+	
 	@Autowired
 	private AdAvailablePointsDao adAvailablePointsDao;
 	@Autowired
@@ -153,9 +158,12 @@ public class MyPoinitService implements MyPointServiceI {
 		}
 		// 查询可用积分
 		BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
+		availablePoint = availablePoint != null ? availablePoint : new BigDecimal("0");
+		//
+		AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
 		// 查询待返积分
 		BigDecimal returnPoint = adUserDao.getReturnPoint(userId);
-		map.put("availablePoint", availablePoint != null ? availablePoint : new BigDecimal("0"));
+		map.put("availablePoint", availablePoint.add(userIntegral.getAvailIntegral()));
 		map.put("returnPoint", returnPoint != null ? returnPoint : new BigDecimal("0"));
 		messageDataBean.setCode(MessageDataBean.success_code);
 		messageDataBean.setData(map);

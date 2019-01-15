@@ -3,6 +3,7 @@ package com.doooly.business.pay.processor.afterpayprocessor;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.AdOrderFlow;
+import com.doooly.business.pay.bean.PayTypeEnum;
 import com.doooly.business.pay.service.PayFlowService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.dao.reachad.AdOrderFlowDao;
@@ -43,11 +44,11 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
             }
 			logger.info("同步ad_pay_fow到ad_order_flow开始. ==> order={}, ==> resultMap={}", order, resultMap);
             BigDecimal amount = new BigDecimal("0");
-            if(realPayType.equals("2")){
+            if(realPayType.equals(String.valueOf(PayTypeEnum.WEIXIN_DOOOLY.getCode())) || realPayType.equals(String.valueOf(PayTypeEnum.ALIPAY_DOOOLY.getCode()))){
                 //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
                 Order o = new Order();
                 o.setOrderNumber(order.getOrderNumber());
-                o.setPayType(PayFlowService.PayType.getCodeByName("weixin"));
+                o.setPayType(PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType)));
                 o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 Order order1 = orderDao.getSyncOrder(o);
@@ -80,6 +81,8 @@ public class SynToPayOrderFlowProcessor implements AfterPayProcessor{
 		short payType;//其他
 		if(realPayType.equals("1")){
             payType = 3;//微信支付
+        }else if(realPayType.equals("6")){
+            payType = 6;//支付宝
         }else {
             payType = 0;//积分支付
         }

@@ -508,4 +508,19 @@
 		WHERE
 		a.id = #{id}
 	</select>
+
+	<select id="getBusiness" resultType="com.doooly.entity.reachad.AdBusiness">
+		SELECT
+			<include refid="adBusinessRebateColumns" />,a.bussiness_rebate AS "bussinessRebate"
+		FROM
+			ad_business a
+		<where>
+            <if test="id != null and id != ''">
+                AND a.id = #{id}
+            </if>
+            <if test="businessId != null and businessId != ''">
+                AND a.business_id = #{businessId}
+            </if>
+        </where>
+	</select>
 </mapper>

@@ -7,6 +7,8 @@ import com.doooly.entity.reachad.AdUser;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -118,4 +120,12 @@ public interface AdUserServiceI {
 	public JSONObject verifyCodeAndActivation(JSONObject param) throws Exception;
 
     MessageDataBean userBind(JSONObject paramJson);
+
+    AdUser getUser(AdUser adUser);
+
+    List<String> getIds(List<String> returnUserList);
+
+    AdUser saveUserAndPersonal(JSONObject userJson) throws Exception;
+
+    JSONObject checkTelephone(JSONObject data);
 }

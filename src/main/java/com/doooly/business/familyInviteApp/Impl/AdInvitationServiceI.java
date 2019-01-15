@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.doooly.business.common.service.AdUserServiceI;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class AdInvitationServiceI implements AdInvitationService {
 	private AdGroupDao adGroupDao;
 
 	@Autowired
-	private AdUserService adUserService;
+	private AdUserServiceI adUserService;
 	@Autowired
 	private AdInvitationRecordDao adInvitationRecordDao;
 	@Autowired

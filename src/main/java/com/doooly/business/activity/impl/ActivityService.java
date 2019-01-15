@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.doooly.business.common.service.AdUserServiceI;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class ActivityService implements ActivityServiceI {
 	@Autowired
 	private AdCouponActivityDao adCouponActivityDao;
 	@Autowired
-	private AdUserService adUserService;
+	private AdUserServiceI adUserService;
 	@Autowired
 	private AdBusinessActivityRuleDao activityRuleDao;
 	@Autowired

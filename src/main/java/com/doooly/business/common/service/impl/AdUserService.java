@@ -1351,7 +1351,14 @@ public class AdUserService implements AdUserServiceI {
 		return resultData;
 	}
 
-	private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
+  /*  @Override
+    @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
+            expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
+    public AdUser getUser(AdUser adUser) {
+        return adUserDao.getUser(adUser);
+    }
+
+    private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
 		AdUser u = new AdUser();
 		u.setTelephone(telephone);
 		u.setGroupNum(Long.valueOf(group.getId()));

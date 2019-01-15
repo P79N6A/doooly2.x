@@ -18,4 +18,15 @@
 	<select id="getByBusinessId" resultType="AdBusinessExpandInfo">
 		select <include refid="adBusinessExpandInfoColumns"/> from ad_business_expand_info a where a.business_id=#{businessId}
 	</select>
+
+	<select id="getBusinessExpandInfo" resultType="AdBusinessExpandInfo">
+		select
+          <include refid="adBusinessExpandInfoColumns"/>
+        from ad_business_expand_info a
+        <where>
+            <if test="businessId != null and businessId != ''">
+                AND a.business_id=#{businessId}
+            </if>
+        </where>
+	</select>
 </mapper>

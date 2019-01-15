@@ -959,6 +959,9 @@
 		<if test="cardNumber!=null and cardNumber!=''">
 			and a.card_number=#{cardNumber}
 		</if>
+		<if test="id!=null and id!=''">
+			and a.id=#{id}
+		</if>
 		<if test="telephone!=null and telephone!=''">
 			and a.telephone=#{telephone}
 		</if>

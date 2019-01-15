@@ -68,17 +68,19 @@
 			ad_group_department_id = #{departmentId}
 	</select>
 	
-	<select id="getIsUser" resultMap="AdUserPersonalInfoMap">
+	<select id="getIsUser" resultType="com.doooly.entity.reachad.AdUserConn">
 		select 
-		aupi.id,
-		aupi.work_number
+		aupi.id id,
+		aupi.work_number workNumber,
+        au.telephone telephone
 		from ad_user_personal_info aupi
 						left join ad_user au on au.id=aupi.id
-						where aupi.work_number = #{workNumber} 
-				<if test="idCard != null and idCard!=''">and au.identity_card = #{idCard}</if>	
-				<if test="telephone != null and telephone !=''">and au.telephone = #{telephone}</if>		
-						and au.name = #{name}
-						and au.group_num =  #{adGroupId}
+						where 1=1
+				<if test="workNumber != null and workNumber!=''">and aupi.work_number = #{workNumber}</if>
+				<if test="idCard != null and idCard!=''">and au.identity_card = #{idCard}</if>
+				<if test="telephone != null and telephone !=''">and au.telephone = #{telephone}</if>
+				<if test="name != null and name!=''">and au.name = #{name}</if>
+				<if test="adGroupId != null and adGroupId !=''">and au.group_num =  #{adGroupId}</if>
 	</select>
 
 

@@ -1383,10 +1383,16 @@
     </insert>
 
     <select id="getOrders" resultMap="orderMap" parameterType="java.lang.String">
-        SELECT
-            <include refid="getAdOrderReportColumns" />
-        FROM ad_order_report o
-        WHERE o.order_number = #{bigOrderNumber}
+        select
+            <include refid="getAdOrderReportColumns" />,
+            <include refid="adOrderDetailColumns" />
+        from
+            ad_order_report o,ad_order_detail d
+        <where>
+            <if test="bigOrderNumber != null and bigOrderNumber != ''">
+                and o.order_number = #{bigOrderNumber}
+            </if>
+        </where>
     </select>
 
     <select id="getAdOrderBig" resultType="com.doooly.business.order.vo.AdOrderBig" parameterType="com.doooly.business.order.vo.AdOrderBig">

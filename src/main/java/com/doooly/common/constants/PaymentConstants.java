@@ -31,6 +31,8 @@ public class PaymentConstants {
 
 	public static final String INTEGRAL_PAY_URL = PAYMENT_HTTPS+"/pay/integralPay";// 积分现金支付
 
+	public static final String INTEGRAL_PAY_URL_V2 = PAYMENT_HTTPS+"/pay/integralPay"+VersionConstants.INTERFACE_VERSION_V2;// 积分现金支付
+
 	public static final String ORDER_QUERY_URL = PAYMENT_HTTPS+"/mchpay/orderquery";// 支付查询接口
 
 	public static final String ORDER_REFUND_URL = PAYMENT_HTTPS+"/mchpay/applyRefund";// 兜礼支付退款接口

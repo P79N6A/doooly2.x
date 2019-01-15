@@ -32,6 +32,21 @@ public interface AdUserServiceI {
 	public AdUser getById(Integer id);
 
 	/**
+	 * 根据手机号码获得用户
+	 * @param phone
+	 * @return
+	 */
+	public AdUser getUserByPhone(String phone);
+
+	/**
+	 * 根据手机号码和企业id获得用户
+	 * @param phone
+	 * @param groupId
+	 * @return
+	 */
+	public AdUser getUserByPhoneAndGroup(String phone, String groupId);
+
+	/**
 	 * 根据会员卡号或会员手机号查找 若只有手机号则会员卡号为NULL 若只有会员卡号手机号则为NULL
 	 * 
 	 * @param user
@@ -69,6 +84,7 @@ public interface AdUserServiceI {
 	public JSONObject batchSendSms(AdUser user, JSONObject paramJson, String mobiles, String alidayuSmsCode,
 			String smsContent, Boolean alidayuFlag);
 
+	public JSONObject userAutoActive(AdUser adUser);
 	/**
 	 * 会员登录验证,无卡激活 （新兜礼）
 	 * 
@@ -110,4 +126,6 @@ public interface AdUserServiceI {
     AdUser saveUserAndPersonal(JSONObject userJson) throws Exception;
 
     JSONObject checkTelephone(JSONObject data);
+
+    MessageDataBean userBind(JSONObject paramJson);
 }

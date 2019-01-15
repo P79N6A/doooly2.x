@@ -1,11 +1,5 @@
 package com.doooly.business.common.service.impl;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdGroupServiceI;
 import com.doooly.dao.reachad.AdGroupDao;
@@ -14,6 +8,12 @@ import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.SysDict;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 企业信息表服务类
@@ -115,4 +115,11 @@ public class AdGroupService implements AdGroupServiceI {
 		logger.info("====【getGroupByCommand】返回数据-dataBean：" + dataBean.toJsonString());
 		return dataBean;
 	}
+
+	@Override
+	public AdGroup getGroupById(String groupId) {
+		return adGroupDao.findGroupByID(groupId);
+	}
+
+
 }

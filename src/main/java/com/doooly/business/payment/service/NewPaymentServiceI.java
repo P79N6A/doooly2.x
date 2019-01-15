@@ -39,4 +39,6 @@ public interface NewPaymentServiceI {
     ResultModel unifiedorderV2(JSONObject json);
 
     ResultModel getPayFormV2(JSONObject json);
+
+    ResultModel integralPayV2(JSONObject param);//积分混合支付
 }

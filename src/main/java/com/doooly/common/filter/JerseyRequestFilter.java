@@ -42,6 +42,7 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 				|| reqUrl.contains("/token/validateUserToken")
 				|| reqUrl.contains("/share/getFamilyInviteInfoRestFul")
 				|| reqUrl.contains("/forumInvitation/registerForum")
+				|| reqUrl.contains("/daily-activity/v1/jiaohang/lottery")
 		) {
 			return request;
 		}

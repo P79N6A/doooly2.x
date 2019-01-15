@@ -53,4 +53,11 @@ public interface DailyActivityServiceI {
 	 * @return
 	 */
     String jiaoHangActivitySendCopuon(JSONObject jsonReq);
+
+	/**
+	 * 交行活动（定制）抽奖活动
+	 * @param jsonReq
+	 * @return
+	 */
+	String jiaoHanLotteryActivitySendCopuon(JSONObject jsonReq);
 }

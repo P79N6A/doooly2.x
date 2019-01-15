@@ -30,13 +30,31 @@ import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
-import com.doooly.dao.reachad.*;
+import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdRechargeConfDao;
+import com.doooly.dao.reachad.AdRechargeRecordDao;
+import com.doooly.dao.reachad.AdReturnDetailDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserIntegralDao;
+import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.reachad.*;
+import com.doooly.entity.reachad.AdBusiness;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import com.doooly.entity.reachad.AdRechargeConf;
+import com.doooly.entity.reachad.AdRechargeRecord;
+import com.doooly.entity.reachad.AdReturnFlow;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserIntegral;
+import com.doooly.entity.reachad.Order;
+import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.ognl.Ognl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +107,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdReturnDetailDao adReturnDetailDao;
     @Autowired
     private RedisLock redisLock;
+    @Autowired
+    private AdUserIntegralDao userIntegralDao;
     @Autowired
     private AdOrderReportServiceI adOrderReportServiceI;
     @Autowired
@@ -177,6 +197,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
+            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
@@ -227,9 +248,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
         List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("userId",adOrderBig.getUserId());
+        List<String> skus = getSkus(orderVos);
+        paramMap.put("skus",skus);
+        AdUserIntegral adUserIntegral = userIntegralDao.getDirIntegral(paramMap);
         JSONObject retJson = new JSONObject();
         retJson.put("totalFree",adOrderBig.getTotalAmount().toString());
-        retJson.put("dirIntegral","0.00");//定向积分
+        retJson.put("dirIntegral",String.valueOf(adUserIntegral.getAvailIntegral().setScale(2, BigDecimal.ROUND_DOWN)));//定向积分
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
@@ -258,6 +284,18 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         return result;
+    }
+
+    //获取下单商品sku集合
+    private List<String> getSkus(List<OrderVo> orderVos) {
+        List<String> skus = new ArrayList<>();
+        for (OrderVo orderVo : orderVos) {
+            List<OrderItemVo> items = orderVo.getItems();
+            for (OrderItemVo item : items) {
+                skus.add(item.getProductSkuId().split("-")[1]);
+            }
+        }
+        return skus;
     }
 
     //计算手续费和已用额度
@@ -345,6 +383,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdBusiness paramBusiness = new AdBusiness();
         paramBusiness.setId(o.getBussinessId());
         AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
+        AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
@@ -376,7 +415,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral());
+        retJson.put("userIntegral", user.getIntegral().add(userIntegral.getAvailIntegral()));
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
@@ -930,6 +969,22 @@ public class NewPaymentService implements NewPaymentServiceI {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             data.put("orderId",orderVo.getId());
+            return ResultModel.ok(data);
+        } else {
+            return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"));
+        }
+    }
+
+    @Override
+    public ResultModel integralPayV2(JSONObject param) {
+        String orderNum = param.getString("orderNum");
+        JSONObject object = new JSONObject();
+        object.put("param", param.toJSONString());
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            //说明获取成功
+            Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             return ResultModel.ok(data);
         } else {
             return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"));

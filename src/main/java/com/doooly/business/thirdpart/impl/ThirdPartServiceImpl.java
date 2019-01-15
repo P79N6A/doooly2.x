@@ -128,8 +128,8 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                 messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
             }
         }else {
-            messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-            messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+            messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
+            messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
         }
         return messageDataBean;
     }

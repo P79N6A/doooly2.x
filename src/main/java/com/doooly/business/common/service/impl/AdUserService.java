@@ -1577,8 +1577,8 @@ public class AdUserService implements AdUserServiceI {
                     if(isUser != null){
                         if(isUser.getTelephone()!= null && !mobile.equals(isUser.getTelephone())){
                             //手机号不正确
-                            messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
-                            messageDataBean.setMess("手机号不正确，请确认后重试");
+                            messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                            messageDataBean.setMess("该手机号码与工号不匹配,请输入正确的手机号码！");
                         }else {
                             //直接更新用户信息
                             AdUser adUserParam = new AdUser();
@@ -1597,18 +1597,24 @@ public class AdUserService implements AdUserServiceI {
                         //根据手机号
                         AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
                         if(isUser1 != null){
-                            //说明手机号已存在
-                            AdUser user = new AdUser();
-                            user.setId(isUser1.getId());
-                            user.setGroupNum(Long.valueOf(groupId));
-                            user.setName(fItemName);
-                            user.setTelephone(mobile);
-                            adUserDao.updateByPrimaryKeySelective(user);
-                            isUser1.setWorkNumber(FItemNumber);
-                            isUser1.setUserId(String.valueOf(isUser1.getId()));
-                            adUserDao.updatePersonalData(isUser1);
-                            messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-                            messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+                            if(groupId.equals(isUser1.getGroupId())){
+                                //说明手机已经被大华绑定了
+                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                                messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
+                            }else{
+                                //说明手机号已存在
+                                AdUser user = new AdUser();
+                                user.setId(isUser1.getId());
+                                user.setGroupNum(Long.valueOf(groupId));
+                                user.setName(fItemName);
+                                user.setTelephone(mobile);
+                                adUserDao.updateByPrimaryKeySelective(user);
+                                isUser1.setWorkNumber(FItemNumber);
+                                isUser1.setUserId(String.valueOf(isUser1.getId()));
+                                adUserDao.updatePersonalData(isUser1);
+                                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+                                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+                            }
                         }else {
                             // 激活用户
                             JSONObject paramData = new JSONObject();
@@ -1622,8 +1628,9 @@ public class AdUserService implements AdUserServiceI {
                         }
                     }
                 }else {
-                    messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
-                    messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
+                    logger.error("调用大华接口校验token异常，返回结果{}",jsonObject);
+                    messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                    messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
                 }
             }else {
                 messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());

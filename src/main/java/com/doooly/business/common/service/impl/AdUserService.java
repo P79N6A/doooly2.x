@@ -1644,7 +1644,7 @@ public class AdUserService implements AdUserServiceI {
                             paramData.put("name",fItemName);
                             paramData.put("workerNumber",FItemNumber);
                             paramData.put("FBirthDay",FBirthDay);
-                            paramData.put("FSex",FSex.equals("男")?"1":"0");
+                            paramData.put("FSex",FSex.equals("男")?"0":"1");
                             paramData.put("remarks","大华企业登录激活");
                             messageDataBean = this.execCommandActive(paramData);
                             logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));

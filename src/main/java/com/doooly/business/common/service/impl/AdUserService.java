@@ -325,7 +325,7 @@ public class AdUserService implements AdUserServiceI {
 			String channel = param.getString(ConstantsLogin.CHANNEL);
             //20190109 第三方登录激活zhangqing
             MessageDataBean messageDataBean = this.userBind(param);
-            if(messageDataBean.getCode().equals(MessageDataBean.failure_code)){
+            if(!messageDataBean.getCode().equals(MessageDataBean.success_code)){
                 jsonResult.put(ConstantsLogin.CODE, MessageDataBean.failure_code);
                 jsonResult.put(ConstantsLogin.MESS, MessageDataBean.failure_mess);
                 return jsonResult;

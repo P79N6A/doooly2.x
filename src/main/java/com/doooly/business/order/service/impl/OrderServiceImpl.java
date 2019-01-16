@@ -349,8 +349,7 @@ public class OrderServiceImpl implements OrderService {
                 JSONObject cart = new JSONObject();
                 cart.put("businessId",merchantId);
                 cart.put("sku",sku.getId());
-                cart.put("num",buyQuantity);
-                cart.put("userId",userId);
+                cart.put("num",0);//下完单清空购物车传0
                 carts.add(cart);
 			}
 			//自营优惠券
@@ -401,18 +400,20 @@ public class OrderServiceImpl implements OrderService {
             OrderVo order = (OrderVo) jsonObject.get("order");
             OrderExtVo orderExt = (OrderExtVo) jsonObject.get("orderExt");
             List<OrderItemVo> orderItems = (List<OrderItemVo>) jsonObject.get("orderItems");
+            order.setBigOrderNumber(bigOrderNumber);
             saveOrder(order, orderExt, orderItems);
         }
         //清空购物车
-        for (JSONObject cart : carts) {
-            JSONObject result = HttpClientUtil.httpPost(Constants.OrderApiConstants.ORDER_BASE_URL + Constants.OrderApiConstants.SHOP_CART_URL, cart);
-            if(!MessageDataBean.success_code.equals(result.get("code"))){
-                //购物车清空失败,直接抛出异常回滚数据
-                logger.error("购物车清空失败,返回结果{}",result);
-                throw new RuntimeException("购物车清空失败");
-            }
+       JSONObject cart = new JSONObject();
+        cart.put("userId",userId);
+        cart.put("cartList",carts);
+        JSONObject result = HttpClientUtil.httpPost(Constants.OrderApiConstants.ORDER_BASE_URL + Constants.OrderApiConstants.SHOP_CART_URL, cart);
+        if(!MessageDataBean.success_code.equals(result.get("code"))){
+            //购物车清空失败,直接抛出异常回滚数据
+            logger.error("购物车清空失败,返回结果{}",result);
+            throw new RuntimeException("购物车清空失败");
         }
-        msg.getData().put("bigOrderNumber", bigOrderNumber);
+        msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
         return msg;
     }
 
@@ -773,11 +774,6 @@ public class OrderServiceImpl implements OrderService {
 		order.setId(oneOrderId);
 		order.setOrderId(oneOrderId);
 		rows += saveOrder(order);
-        //logger.info("order.id = {}", order.getId());
-        //if (orderExt != null) {
-			//rows += saveOrderExt(order.getId(),orderExt);
-        //}
-        //rows += saveOrderItem(order.getId(), orderItem);
         //20181226改成异步处理
         JSONObject req = new JSONObject();
         req.put("orderId",order.getId());
@@ -807,6 +803,7 @@ public class OrderServiceImpl implements OrderService {
 		o.setCreateDateTime(new Date());
 		o.setState(0);
         o.setSource(3);//兜礼自营
+        o.setBigOrderNumber(order.getBigOrderNumber());
 		orderDao.insert(o);
 		return o.getId();
 	}

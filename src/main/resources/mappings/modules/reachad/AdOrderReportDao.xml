@@ -435,7 +435,8 @@
 		service_charge,
 		voucher,
 		coupon_id,
-		support_pay_type
+		support_pay_type,
+		big_order_number
 		) VALUES (
 		#{id},
 		#{orderId},
@@ -473,7 +474,8 @@
 		#{serviceCharge},
 		#{voucher},
 		#{couponId},
-		#{supportPayType}
+		#{supportPayType},
+		#{bigOrderNumber}
 		)
 	</insert>
 
@@ -1376,7 +1378,7 @@
             now(),
             #{state},
             #{isSource},
-            #{remarks}
+            #{remarks},
             now(),
             now()
           )

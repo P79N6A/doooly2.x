@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-import static com.doooly.common.constants.Constants.MerchantApiConstants.MERCHANT_BASE_URL;
-
 public class Constants {
 
 	/***
@@ -55,7 +53,7 @@ public class Constants {
 	public static class OrderApiConstants{
 		//订单接口base url
 		public final static String ORDER_BASE_URL="http://47.92.199.89:1080/";
-		public final static String SHOP_CART_URL = MERCHANT_BASE_URL+"order/shopCart/handle/v1/";
+		public final static String SHOP_CART_URL = "order/shopCart/batch/v1/";
 	}
 
 	/**

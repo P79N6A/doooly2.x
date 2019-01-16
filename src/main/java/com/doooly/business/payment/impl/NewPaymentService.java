@@ -980,7 +980,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = param.getString("orderNum");
         JSONObject object = new JSONObject();
         object.put("param", param.toJSONString());
-        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL_V2);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功

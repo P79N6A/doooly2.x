@@ -9,6 +9,7 @@ import com.doooly.business.myorder.service.OrderService;
 import com.doooly.common.DooolyResponseStatus;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdAppHomePageDao;
+import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dto.base.BaseResponse;
@@ -57,6 +58,8 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	
 	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
+	@Autowired
+	private AdGroupDao adGroupDao;
 	
 	@Autowired
 	private OrderService orderservice;
@@ -131,7 +134,8 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		} else {
 			homePageData.setNewCancelFlag(false);
 		}
-
+		AdGroup adGroup = adGroupDao.findGroupByUserId(userId+"");
+		homePageData.setAdGroup(adGroup);
 		response.setData(homePageData);
 		response.setStatus(DooolyResponseStatus.SUCCESS);
 		return response;

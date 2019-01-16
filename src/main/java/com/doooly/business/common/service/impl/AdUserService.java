@@ -665,6 +665,10 @@ public class AdUserService implements AdUserServiceI {
 			} else {
 				adUserParam.setIsActive(isActive);
 			}
+            // 认证标识
+            if (!StringUtils.isEmpty(jsonParam.getString("FSex"))) {
+                adUserParam.setSex(jsonParam.getString("FSex"));
+            }
 			adUserParam.setCreateBy("0");
 			adUserParam.setCreateDate(new Date());
 			adUserParam.setUpdateBy("0");
@@ -714,6 +718,10 @@ public class AdUserService implements AdUserServiceI {
 					// 认证标识
 					if (!StringUtils.isEmpty(jsonParam.getString("workerNumber"))) {
 						adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
+					}
+					// 认证标识
+					if (!StringUtils.isEmpty(jsonParam.getString("FBirthDay"))) {
+						adUserPersonalInfo.setBirthday(jsonParam.getString("FBirthDay"));
 					}
 					adUserPersonalInfo.setIsSetPassword(0);
 					adUserPersonalInfoDao.insert(adUserPersonalInfo);
@@ -1671,6 +1679,7 @@ public class AdUserService implements AdUserServiceI {
                     String FItemNumber = result.getString("FItemNumber");//大华工号
                     String FVersionUsed = result.getString("FVersionUsed");
                     String FEmail = result.getString("FEmail");
+                    String FSex = result.getString("FSex");
                     String FBirthDay = result.getString("FBirthDay");
                     String mobile = paramJson.getString("loginName");
                     Map<String,Object> params = new HashMap<>();
@@ -1726,6 +1735,8 @@ public class AdUserService implements AdUserServiceI {
                             paramData.put("groupId",groupId);
                             paramData.put("name",fItemName);
                             paramData.put("workerNumber",FItemNumber);
+                            paramData.put("FBirthDay",FBirthDay);
+                            paramData.put("FSex",FSex.equals("男")?"1":"0");
                             paramData.put("remarks","大华企业登录激活");
                             messageDataBean = this.execCommandActive(paramData);
                             logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));

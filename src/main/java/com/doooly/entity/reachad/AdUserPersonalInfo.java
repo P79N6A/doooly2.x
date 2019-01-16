@@ -15,7 +15,7 @@ public final class AdUserPersonalInfo {
 	private Long id;
 	private AdGroupDepartment adGroupDepartment;
 	private String workNumber;
-	private Date birthday;
+	private String birthday;
 	private Integer isRegularEmployee;
 	private Date entryDate;
 	private Integer hasChild;
@@ -59,11 +59,11 @@ public final class AdUserPersonalInfo {
 		this.workNumber = workNumber;
 	}
 
-	public Date getBirthday() {
+	public String getBirthday() {
 		return birthday;
 	}
 
-	public void setBirthday(Date birthday) {
+	public void setBirthday(String birthday) {
 		this.birthday = birthday;
 	}
 

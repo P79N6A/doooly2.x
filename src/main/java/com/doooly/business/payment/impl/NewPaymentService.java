@@ -267,7 +267,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("cardNumber", user.getTelephone());
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
-        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL_V2);
         param.put("body", "兜礼订单-"+adOrderBig.getId());
         param.put("isSource", adOrderBig.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));
@@ -595,6 +595,31 @@ public class NewPaymentService implements NewPaymentServiceI {
         json.put("code", MessageDataBean.success_code);
         PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
         return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
+    }
+
+    @Override
+    public ResultModel dooolyPayCallbackV2(JSONObject resultJson) {
+        logger.info("收银台支付回调通知结果V2:{}", resultJson);
+        String param = resultJson.getString("param");
+        JSONObject retJson = JSONObject.parseObject(param);
+        String bigOrderNumber = retJson.getString("bigOrderNumber");//大订单号
+        //查询子订单
+        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
+        for (OrderVo orderVo : orderVos) {
+            JSONObject json = new JSONObject();
+            String orderNumber = orderVo.getOrderNumber();
+            json.put("orderNum", orderNumber);
+            json.put("integralPayStatus", retJson.getString("integralPayStatus"));
+            json.put("payAmount", retJson.getString("payAmount"));
+            json.put("payType", retJson.getString("payType"));
+            json.put("realPayType", retJson.getString("realPayType"));
+            json.put("outTradeNo", retJson.getString("outTradeNo"));
+            json.put("payEndTime", retJson.getString("payEndTime"));
+            json.put("code", MessageDataBean.success_code);
+            PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
+            logger.info("收银台支付回调同步结果大订单号:{},子订单号:{},处理结果code:{},处理结果mess,{}",bigOrderNumber,orderNumber,payMsg.getCode(),payMsg.getMess());
+        }
+        return ResultModel.ok();
     }
 
     @Override

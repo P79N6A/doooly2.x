@@ -17,6 +17,8 @@ public class PaymentConstants {
 
 	public static final String PAYMENT_NOTIFY_URL = payBundle.getString("payment.notify.url");// 兜礼支付完成通知接口路径
 
+	public static final String PAYMENT_NOTIFY_URL_V2 = payBundle.getString("payment.notify.url.v2");// 兜礼支付完成通知接口路径
+
 	public static final String PAYMENT_REFUND_NOTIFY_URL = payBundle.getString("payment.refund.notify.url");// 兜礼退款完成通知接口路径
 
 	public static final String AUTHORIZE_URL = PAYMENT_HTTPS+"/auth/authorize";// 授权接口地址

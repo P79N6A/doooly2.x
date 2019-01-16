@@ -30,7 +30,7 @@
                 a.del_flag = 0
                 AND a.type = 1
                 AND a.ad_user_id = #{paramMap.userId}
-                AND b.sku_id
+                AND b.sku_id IN
                 <foreach collection="paramMap.skus" item="sku" open="(" close=")" separator=",">
                     #{sku}
                 </foreach>

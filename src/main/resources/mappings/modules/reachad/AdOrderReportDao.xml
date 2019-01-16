@@ -1391,8 +1391,9 @@
         from
             ad_order_report o,ad_order_detail d
         <where>
+            and o.id = d.order_report_id
             <if test="bigOrderNumber != null and bigOrderNumber != ''">
-                and o.order_number = #{bigOrderNumber}
+                and o.big_order_number = #{bigOrderNumber}
             </if>
         </where>
     </select>

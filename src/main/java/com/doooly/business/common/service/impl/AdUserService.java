@@ -1572,15 +1572,7 @@ public class AdUserService implements AdUserServiceI {
                     //说明请求成功绑定用户信息
                     JSONObject result = JSONObject.parseObject(jsonObject.getString("Result"));
                     String fItemName = result.getString("FItemName");//大华姓名
-                    String FDeptName = result.getString("FDeptName");
-                    String FDeptId = result.getString("FDeptId");
-                    String FIsValid = result.getString("FIsValid");
-                    String FShortTel = result.getString("FShortTel");
-                    String SupervisorId = result.getString("SupervisorId");
-                    String SupervisorName = result.getString("SupervisorName");
                     String FItemNumber = result.getString("FItemNumber");//大华工号
-                    String FVersionUsed = result.getString("FVersionUsed");
-                    String FEmail = result.getString("FEmail");
                     String FSex = result.getString("FSex");
                     String FBirthDay = result.getString("FBirthDay");
                     String mobile = paramJson.getString("loginName");
@@ -1627,6 +1619,13 @@ public class AdUserService implements AdUserServiceI {
                                 isUser1.setWorkNumber(FItemNumber);
                                 isUser1.setUserId(String.valueOf(isUser1.getId()));
                                 adUserDao.updatePersonalData(isUser1);
+                                LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+                                lifeMember.setGroupId(Long.valueOf(groupId));
+                                lifeMember.setName(fItemName);
+                                lifeMember.setIsEnabled(2);
+                                lifeMember.setLoginFailureCount(0);
+                                lifeMember.setModifyDate(new Date());
+                                lifeMemberDao.updateActiveStatus(lifeMember);
                                 messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
                                 messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
                             }

@@ -21,9 +21,11 @@ import com.doooly.dao.reachad.AdReturnPointsDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dao.reachad.OrderDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.payment.VoucherCardFailRecord;
 import com.doooly.entity.payment.VoucherCardRecord;
+import com.doooly.entity.reachad.*;
 import com.doooly.entity.reachad.AdAvailablePoints;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdIntegralAcquireRecord;
@@ -73,7 +75,7 @@ public class MyPoinitService implements MyPointServiceI {
 	private AdUserDao adUserDao;
 	@Autowired
 	private AdUserIntegralDao userIntegralDao;
-	
+
 	@Autowired
 	private AdAvailablePointsDao adAvailablePointsDao;
 	@Autowired
@@ -94,6 +96,9 @@ public class MyPoinitService implements MyPointServiceI {
 	// private AdUserService adUserService;
 	@Autowired
 	protected StringRedisTemplate redisTemplate;
+
+	@Autowired
+	private AdGroupDao adGroupDao;
 
 	/**
 	 * 通过家属邀请的所有id查询到返利的列表和积分的总和
@@ -602,6 +607,8 @@ public class MyPoinitService implements MyPointServiceI {
 		result.put("notReturnPoints", notReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 		result.put("isReturnPoints", isReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 		result.put("doingReturnPoints", doingReturnPoints.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		AdGroup adGroup = adGroupDao.findGroupByUserId(userId+"");
+		result.put("adGroup",adGroup);
 		messageDataBean.setCode(MessageDataBean.success_code);
 		messageDataBean.setData(result);
 		return messageDataBean;

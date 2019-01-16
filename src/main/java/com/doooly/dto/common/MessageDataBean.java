@@ -112,6 +112,10 @@ public class MessageDataBean {
 		this.data = data;
 	}
 
+	public void setData(HashMap<String, Object> data) {
+		this.data = data;
+	}
+
 	public JSONObject getJsonData() {
 		return jsonData;
 	}

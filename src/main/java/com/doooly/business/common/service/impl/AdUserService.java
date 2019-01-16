@@ -1211,7 +1211,7 @@ public class AdUserService implements AdUserServiceI {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
                 if (StringUtils.isNotBlank(staffNum)) {
-                    //福特处理
+                    //福特激活处理
                     if (StringUtils.isBlank(telephone)) {
                         resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
                         resultData.put(ConstantsLogin.MSG, "手机号为空");
@@ -1401,6 +1401,29 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setTelephone(mobile);
 		adUser = adUserDao.get(adUser);
 		if (adUser != null) {
+			//第二次进入页面进行匹配
+            AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+            adUserPersonalInfo.setId(adUser.getId());
+            adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+            if (adUserPersonalInfo != null) {
+                //工号和手机号是否匹配
+                if (staffNum.equals(adUserPersonalInfo.getWorkNumber())) {
+                    //邮箱是否匹配
+                    if (email.equals(adUser.getMailbox())) {
+                        AdActiveCode adActiveCode = new AdActiveCode();
+                        adActiveCode.setAdUserId(adUser.getId());
+                        adActiveCode.setIsUsed("1");//已使用
+                        adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+                        if (adActiveCode != null) {
+                            if (code.equals(adActiveCode.getCode())) {
+                                resultData.put("userId",adUser.getId());
+                                return resultData;
+                            }
+                        }
+                    }
+                }
+            }
+
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 			resultData.put(ConstantsLogin.MSG, "该手机号已经被绑定");
 			return resultData;

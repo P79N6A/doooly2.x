@@ -390,8 +390,8 @@ public class IndexServiceImpl implements IndexServiceI {
             logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expires"));
 
             //查询企业信息
-            AdGroup adGroup = adGroupDao.findGroupByUserId(userId);
-            result.put("adGroup",adGroup);
+            /*AdGroup adGroup = adGroupDao.findGroupByUserId(userId);
+            result.put("adGroup",adGroup);*/
 
 			return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess, result)
 					.toJsonString();
@@ -400,6 +400,26 @@ public class IndexServiceImpl implements IndexServiceI {
 			return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
 		}
 	}
+
+
+
+
+
+	@Override
+	public String getUserGroupInfo(String userId) {
+        //查询企业信息
+        MessageDataBean messageDataBean = new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess);
+        Map<String,Object> map = new HashMap<>();
+        AdGroup adGroup = adGroupDao.findGroupByUserId(userId);
+        if (adGroup != null) {
+            map.put("adGroup",adGroup);
+        } else {
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess("单位信息不存在");
+        }
+        messageDataBean.setData(map);
+        return messageDataBean.toJsonString();
+    }
 
 	/**
 	 * 查询热门商户

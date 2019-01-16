@@ -76,6 +76,29 @@ public class IndexRestService {
         }
 	}
 
+
+
+	@POST
+	@Path("/getUserGroupInfo")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String getUserGroupInfo(JSONObject params) {
+		String userId = params.getString("userId");
+		if (StringUtils.isBlank(userId)) {
+			return new MessageDataBean(MessageDataBean.failure_code, "用户id为空").toJsonString();
+		}
+		String ret = indexService.getUserGroupInfo(userId);
+		logger.info("getUserGroupInfo ret :{}",ret);
+		return ret;
+	}
+
+
+
+
+
+
+
+
 	/**
 	 * 花积分页面楼层接口
 	 *

@@ -119,7 +119,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                     messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
                 }else {
                     AdGroup adGroup = adGroupServiceI.getGroupById(groupId);
-                    map.put("adGroup",adGroup.getMiniLogoUrl());
+                    map.put("adGroup",adGroup);
                     messageDataBean.setData(map);
                     logger.error("用户信息不存在,返回前端跳登录页面");
                     messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
@@ -127,7 +127,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                 }
             }else {
                 AdGroup adGroup = adGroupServiceI.getGroupById(groupId);
-                map.put("adGroup",adGroup.getMiniLogoUrl());
+                map.put("adGroup",adGroup);
                 messageDataBean.setData(map);
                 logger.error("调用大华接口校验token异常，返回结果{}",jsonObject);
                 messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());

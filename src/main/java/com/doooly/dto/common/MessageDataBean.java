@@ -109,7 +109,7 @@ public class MessageDataBean {
 		return data;
 	}
 
-	public void setData(HashMap<String, Object> data) {
+	public void setData(Map<String, Object> data) {
 		this.data = data;
 	}
 

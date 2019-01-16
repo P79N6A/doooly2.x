@@ -1,6 +1,7 @@
 package com.doooly.business.home.v2.servcie;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.dto.common.MessageDataBean;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -42,6 +43,14 @@ public interface IndexServiceI {
 	 * @return
 	 */
 	String listSpendIntegralFloors(Map<String, String> map);
+
+
+	/**
+	 * 获取id
+	 * @param userId
+	 * @return
+	 */
+	String getUserGroupInfo(String userId);
 	
 
 }

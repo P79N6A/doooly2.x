@@ -1,5 +1,7 @@
 package com.doooly.entity.home;
 
+import com.doooly.entity.reachad.AdGroup;
+
 import java.math.BigDecimal;
 
 /**
@@ -36,6 +38,8 @@ public class HomePageDataV2 {
     private String isSetPayPassword;
     //会员返利积分，精确2位小数
     private String returnPoints;
+
+    private AdGroup adGroup;
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -165,7 +169,15 @@ public class HomePageDataV2 {
         this.isSetPayPassword = isSetPayPassword;
     }
 
-//	public Integer getNoviceGuideFinished() {
+	public AdGroup getAdGroup() {
+		return adGroup;
+	}
+
+	public void setAdGroup(AdGroup adGroup) {
+		this.adGroup = adGroup;
+	}
+
+	//	public Integer getNoviceGuideFinished() {
 //		return noviceGuideFinished;
 //	}
 //

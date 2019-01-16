@@ -101,10 +101,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                     String userToken = redisTemplate.opsForValue().get(channel + ":" + String.format(TOKEN_KEY, userId));
                     logger.info("====【userValidateLogin】用户已存在的token-userToken：" + userToken);
                     if (StringUtils.isNotBlank(userToken)) {
-                        // 删除原token用户ID
-                        redisTemplate.delete(userToken);
-                        // 刷新token
-                        token = TokenUtil.refreshUserToken(channel, userId);
+                        token = userToken;
                     } else {
                         token = TokenUtil.getUserToken(channel, userId);
                     }

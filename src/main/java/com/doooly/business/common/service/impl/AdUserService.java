@@ -1620,11 +1620,18 @@ public class AdUserService implements AdUserServiceI {
                                 isUser1.setUserId(String.valueOf(isUser1.getId()));
                                 adUserDao.updatePersonalData(isUser1);
                                 LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-                                lifeMember.setGroupId(Long.valueOf(groupId));
+                                // A库企业编号
+                                String groupNum = "";
+                                if (StringUtils.isNotBlank(groupId)) {
+                                    LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+                                    groupNum = lifeGroup.getId();
+                                }
+                                lifeMember.setGroupId(Long.valueOf(groupNum));
                                 lifeMember.setName(fItemName);
                                 lifeMember.setIsEnabled(2);
                                 lifeMember.setLoginFailureCount(0);
                                 lifeMember.setModifyDate(new Date());
+                                lifeMember.setAdId(String.valueOf(isUser1.getId()));
                                 lifeMemberDao.updateActiveStatus(lifeMember);
                                 messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
                                 messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());

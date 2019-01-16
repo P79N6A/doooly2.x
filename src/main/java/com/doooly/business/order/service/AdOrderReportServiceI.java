@@ -1,8 +1,10 @@
 package com.doooly.business.order.service;
 
+import com.doooly.business.order.vo.AdOrderBig;
 import com.doooly.business.order.vo.OrderVo;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,4 +19,10 @@ public interface AdOrderReportServiceI {
     int getBuyNum(Map<String, Object> paramMap);
 
     OrderVo getOrderLimt(OrderVo order);
+
+    void insertAdBigOrder(AdOrderBig adOrderBig);
+
+    List<OrderVo> getOrders(String bigOrderNumber);
+
+    AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
 }

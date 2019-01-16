@@ -13,4 +13,27 @@
   		AND
   		del_flag=0
   </select>	
+    
+    <select id="getDirIntegral" parameterType="java.util.Map" resultType="com.doooly.entity.reachad.AdUserIntegral">
+        SELECT
+            IFNULL(SUM(temp.avail_integral),0) "availIntegral"
+        FROM
+        (
+            SELECT
+                a.avail_integral
+            FROM
+                ad_user_integral a
+            INNER JOIN ad_group_dir_integral_product b ON a.batch_no = b.batch_no
+            INNER JOIN ad_group_dir_integral c ON a.batch_no = c.batch_no
+            AND c.end_date &gt;= NOW() AND c.status = 0 AND c.begin_date &lt;=NOW()
+            WHERE
+                a.del_flag = 0
+                AND a.type = 1
+                AND a.ad_user_id = #{paramMap.userId}
+                AND b.sku_id
+                <foreach collection="paramMap.skus" item="sku" open="(" close=")" separator=",">
+                    #{sku}
+                </foreach>
+            GROUP BY a.batch_no) temp
+    </select>
 </mapper>

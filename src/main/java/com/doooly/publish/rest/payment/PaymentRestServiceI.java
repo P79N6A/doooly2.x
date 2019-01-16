@@ -16,15 +16,22 @@ public interface PaymentRestServiceI {
 
     // 下单
     String unifiedorder(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 下单 v2
+    String unifiedorderV2(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 获取支付参数
     String getPayForm(JSONObject obj);
+
+    // 获取支付参数
+    String getPayFormV2(JSONObject obj);
 
     // 获取支付信息
     String getTradeInfo(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 获取支付信息
     String integralPay(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 获取支付信息
+    String integralPayV2(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 积分支付回调url
     String dooolyPayCallback(JSONObject obj, HttpServletRequest httpServletRequest);

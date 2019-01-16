@@ -158,7 +158,7 @@
 	      originOrderNumber, state, orderType, 
 	      type, source, isPayPassword, 
 	      isRebate, BusinessRebate, UserRebate, 
-	      createDateTime, check_state, orderDetail
+	      createDateTime, check_state, orderDetail,big_order_number
 	      )
 	    values (#{id,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, #{orderUserId,jdbcType=INTEGER}, 
 	      #{bussinessId,jdbcType=VARCHAR}, #{storesId,jdbcType=VARCHAR}, #{payPassword,jdbcType=VARCHAR}, 
@@ -168,7 +168,7 @@
 	      #{originOrderNumber,jdbcType=VARCHAR}, #{state,jdbcType=INTEGER}, #{orderType,jdbcType=INTEGER}, 
 	      #{type,jdbcType=INTEGER}, #{source,jdbcType=INTEGER}, #{isPayPassword,jdbcType=INTEGER}, 
 	      #{isRebate,jdbcType=INTEGER}, #{businessRebate,jdbcType=DECIMAL}, #{userRebate,jdbcType=DECIMAL}, 
-	      #{createDateTime,jdbcType=TIMESTAMP}, #{checkState,jdbcType=BIT}, #{orderDetail,jdbcType=LONGVARCHAR}
+	      #{createDateTime,jdbcType=TIMESTAMP}, #{checkState,jdbcType=BIT}, #{orderDetail,jdbcType=LONGVARCHAR}, #{bigOrderNumber,jdbcType=INTEGER}
 	      )
 	  </insert>
 	  

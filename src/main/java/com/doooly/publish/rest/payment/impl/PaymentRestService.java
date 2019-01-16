@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.common.IPUtils;
+import com.doooly.common.constants.VersionConstants;
 import com.doooly.publish.rest.payment.PaymentRestServiceI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +57,33 @@ public class PaymentRestService implements PaymentRestServiceI{
 
     @Override
     @POST
+    @Path(value = "/getPayForm/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getPayFormV2(JSONObject json) {
+        logger.info("payment getPayFormV2() json = {}", json);
+        ResultModel payForm = paymentService.getPayFormV2(json);
+        return payForm.toJsonString();
+    }
+
+    @Override
+    @POST
     @Path(value = "/unifiedorder")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String unifiedorder(JSONObject json,@Context HttpServletRequest request) {
         json.put("clientIp", IPUtils.getIpAddr(request));
         ResultModel unifiedorder = paymentService.unifiedorder(json);
+        return unifiedorder.toJsonString();
+    }
+    @Override
+    @POST
+    @Path(value = "/unifiedorder/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String unifiedorderV2(JSONObject json,@Context HttpServletRequest request) {
+        json.put("clientIp", IPUtils.getIpAddr(request));
+        ResultModel unifiedorder = paymentService.unifiedorderV2(json);
         return unifiedorder.toJsonString();
     }
 
@@ -83,6 +105,16 @@ public class PaymentRestService implements PaymentRestServiceI{
     @Consumes(MediaType.APPLICATION_JSON)
     public String integralPay(JSONObject json, HttpServletRequest httpServletRequest) {
         ResultModel resultModel = paymentService.integralPay(json);
+        return resultModel.toJsonString();
+    }
+
+    @Override
+    @POST
+    @Path(value = "/integralPay/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String integralPayV2(JSONObject json, HttpServletRequest httpServletRequest) {
+        ResultModel resultModel = paymentService.integralPayV2(json);
         return resultModel.toJsonString();
     }
 

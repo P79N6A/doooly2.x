@@ -50,6 +50,12 @@ public class Constants {
 		public final static String CHECK_VERIFICATION_CODE_URL = MERCHANT_BASE_URL+"services/rest/checkVerificationCode";
 	}
 
+	public static class OrderApiConstants{
+		//订单接口base url
+		public final static String ORDER_BASE_URL="http://47.92.199.89:1080/";
+		public final static String SHOP_CART_URL = "order/shopCart/batch/v1/";
+	}
+
 	/**
 	 * 消息响应处理结果响应码常量类
 	 * <p>

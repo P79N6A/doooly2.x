@@ -69,6 +69,8 @@ public class Order {
 	
 	private String originOrderNumber;//订单时间字符串格式
 
+    private Long bigOrderNumber;//大订单编号
+
 	public Order() {
 
 	}
@@ -306,5 +308,12 @@ public class Order {
 	public void setOriginOrderNumber(String originOrderNumber) {
 		this.originOrderNumber = originOrderNumber;
 	}
-	
+
+    public Long getBigOrderNumber() {
+        return bigOrderNumber;
+    }
+
+    public void setBigOrderNumber(Long bigOrderNumber) {
+        this.bigOrderNumber = bigOrderNumber;
+    }
 }

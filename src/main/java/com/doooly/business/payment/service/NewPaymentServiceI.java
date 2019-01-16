@@ -35,4 +35,10 @@ public interface NewPaymentServiceI {
     ResultModel refund(JSONObject json);
 
     ResultModel applyRefund(JSONObject json);
+
+    ResultModel unifiedorderV2(JSONObject json);
+
+    ResultModel getPayFormV2(JSONObject json);
+
+    ResultModel integralPayV2(JSONObject param);//积分混合支付
 }

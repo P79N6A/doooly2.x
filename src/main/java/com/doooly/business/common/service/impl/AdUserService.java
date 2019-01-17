@@ -7,6 +7,7 @@ import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.user.service.UserService;
+import com.doooly.business.thirdpart.constant.ThirdPartConstant;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2;
@@ -329,8 +330,8 @@ public class AdUserService implements AdUserServiceI {
             //20190109 第三方登录激活zhangqing
             MessageDataBean messageDataBean = this.userBind(param);
             if(!messageDataBean.getCode().equals(MessageDataBean.success_code)){
-                jsonResult.put(ConstantsLogin.CODE, MessageDataBean.failure_code);
-                jsonResult.put(ConstantsLogin.MESS, MessageDataBean.failure_mess);
+                jsonResult.put(ConstantsLogin.CODE, messageDataBean.getCode());
+                jsonResult.put(ConstantsLogin.MESS, messageDataBean.getMess());
                 return jsonResult;
             }
             final AdUser loginUser = adUserDao.getUserInfo(userParam);
@@ -1703,8 +1704,8 @@ public class AdUserService implements AdUserServiceI {
             String thirdPartyChannel = paramJson.getString(Constants.THIRDPARTYCHANNEL);
             if(DaHuaConstants.THIRDPARTYCHANNEL_DAHUA.equals(thirdPartyChannel)){
                 //大华渠道去绑定的手机号和用户信息
-                String url = configDictServiceI.getValueByTypeAndKey("THIRD_PART_DAHUA", "USER_INFO_URL");
-                String groupId = configDictServiceI.getValueByTypeAndKey("THIRD_PART_DAHUA", DaHuaConstants.THIRDPARTYCHANNEL_DAHUA);
+                String url = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY,DaHuaConstants.THIRD_DAHUA_USER_INFO_URL);
+                String groupId = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY, DaHuaConstants.THIRDPARTYCHANNEL_DAHUA);
                 String thirdUserToken = paramJson.getString("thirdUserToken");
                 JSONObject param = new JSONObject();
                 param.put("jsonData",thirdUserToken);

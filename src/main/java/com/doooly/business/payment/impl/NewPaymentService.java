@@ -54,7 +54,6 @@ import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.ognl.Ognl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +62,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 
@@ -854,8 +859,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (consumptionAmount == null) {
                 consumptionAmount = new BigDecimal("0");
             }
-            //已使用金额+优惠金额+订单实付金额+手续费-每月限制金额
-            BigDecimal subtract = consumptionAmount.add(discountsMonthLimit).add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
+            //已使用金额+订单实付金额+手续费-每月限制金额
+            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
             if (subtract.compareTo(BigDecimal.ZERO) > 0) {
                 //说明已经超出限额
                 return new PayMsg(OrderMsg.failure_code, "您已超出每月限额");

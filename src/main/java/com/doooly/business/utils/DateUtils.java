@@ -31,6 +31,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     public static String DATE_yyyyMMdd_HH_mm_ss = "yyyyMMdd HH:mm:ss";
     public static String DATE_yyyy_MM_dd = "yyyy-MM-dd";
     public static String DATE_yyyyMMdd = "yyyyMMdd";
+    public static String DATE_yyyyMMdd1 = "yyyy/MM/dd";
     public static String DATE_yyyyMMddHHmmss = "yyyyMMddHHmmss";
     // 一天的开始时间
 	

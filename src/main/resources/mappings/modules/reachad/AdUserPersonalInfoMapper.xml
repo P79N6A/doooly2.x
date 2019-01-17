@@ -72,7 +72,8 @@
 		select 
 		aupi.id id,
 		aupi.work_number workNumber,
-        au.telephone telephone
+        au.telephone telephone,
+        au.group_num groupId
 		from ad_user_personal_info aupi
 						left join ad_user au on au.id=aupi.id
 						where 1=1

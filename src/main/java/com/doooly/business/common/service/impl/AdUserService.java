@@ -36,6 +36,7 @@ import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeWechatBinding;
 import com.doooly.publish.rest.life.impl.FamilyInviteService;
+import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -1401,6 +1402,7 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setTelephone(mobile);
 		adUser = adUserDao.get(adUser);
 		if (adUser != null) {
+			logger.info("用户{}已经存在手机号{}，进入二次匹配流程", adUser.getId(),mobile);
 			//第二次进入页面进行匹配
             AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
             adUserPersonalInfo.setId(adUser.getId());
@@ -1418,10 +1420,22 @@ public class AdUserService implements AdUserServiceI {
                             if (code.equals(adActiveCode.getCode())) {
                                 resultData.put("userId",adUser.getId());
                                 return resultData;
-                            }
+                            } else {
+								resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+								resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
+								return resultData;
+							}
                         }
-                    }
-                }
+                    } else {
+						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+						resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+						return resultData;
+					}
+                } else {
+					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+					resultData.put(ConstantsLogin.MSG, "员工工号不正确");
+					return resultData;
+				}
             }
 
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());

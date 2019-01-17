@@ -64,6 +64,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
+import static com.sun.tools.internal.xjc.reader.Ring.add;
 
 /**
  * @Description:
@@ -738,8 +739,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (consumptionAmount == null) {
                 consumptionAmount = new BigDecimal("0");
             }
-            //已使用金额+优惠金额+订单实付金额+手续费-每月限制金额
-            BigDecimal subtract = consumptionAmount.add(discountsMonthLimit).add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
+            //已使用金额+订单实付金额+手续费-每月限制金额
+            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
             if (subtract.compareTo(BigDecimal.ZERO) > 0) {
                 //说明已经超出限额
                 return new PayMsg(OrderMsg.failure_code, "您已超出每月限额");

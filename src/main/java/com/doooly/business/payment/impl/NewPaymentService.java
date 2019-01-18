@@ -657,9 +657,11 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
         // 订单状态
-        Long oid = checkOrderStatus(order);
-        if (oid != null) {
-            return new PayMsg(PayMsg.failure_code, "无效的订单状态");
+        if (order.getState() == OrderService.PayState.PAID.getCode()) {
+            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
+        }
+        if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
+            return new PayMsg(PayMsg.failure_code, "订单已经取消，请重新下单。");
         }
         //校验是否可以支付
         return canPay(order, param);

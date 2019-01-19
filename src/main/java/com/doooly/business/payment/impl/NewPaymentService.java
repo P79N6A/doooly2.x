@@ -30,6 +30,7 @@ import com.doooly.business.utils.RedisLock;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
+import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
@@ -54,7 +55,6 @@ import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.ognl.Ognl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 
@@ -265,6 +271,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         String amount = String.valueOf(adOrderBig.getTotalAmount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
         param.put("cardNumber", user.getTelephone());
+        param.put("businessId", WebService.BUSINESSID);
+        param.put("merchantOrderNo", adOrderBig.getId());
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL_V2);

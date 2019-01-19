@@ -128,6 +128,16 @@ public class PaymentRestService implements PaymentRestServiceI{
         return resultModel.toJsonString();
     }
     
+    @Override
+    @POST
+    @Path(value = "/dooolyPayCallback/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String dooolyPayCallbackV2(JSONObject json, HttpServletRequest httpServletRequest) {
+        ResultModel resultModel = paymentService.dooolyPayCallbackV2(json);
+        return resultModel.toJsonString();
+    }
+
 
     @Override
     @POST

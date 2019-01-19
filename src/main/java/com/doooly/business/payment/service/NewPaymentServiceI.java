@@ -41,4 +41,7 @@ public interface NewPaymentServiceI {
     ResultModel getPayFormV2(JSONObject json);
 
     ResultModel integralPayV2(JSONObject param);//积分混合支付
+
+    ResultModel dooolyPayCallbackV2(JSONObject json);
+
 }

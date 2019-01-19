@@ -36,6 +36,8 @@ public interface PaymentRestServiceI {
     // 积分支付回调url
     String dooolyPayCallback(JSONObject obj, HttpServletRequest httpServletRequest);
 
+    String dooolyPayCallbackV2(JSONObject obj, HttpServletRequest httpServletRequest);
+
     // 兜礼支付查询
     String getPayResult(JSONObject obj, HttpServletRequest httpServletRequest);
 

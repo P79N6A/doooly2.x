@@ -82,7 +82,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
             String thirdUserToken = json.getString("thirdUserToken");
             JSONObject param = new JSONObject();
             param.put("jsonData",thirdUserToken);
-            String jsonResult = HTTPSClientUtils.sendPostNew(param.toJSONString(),url + DaHuaConstants.USER_INFO_URL);
+            String jsonResult = HttpClientUtil.sendPost(param, url + DaHuaConstants.USER_INFO_URL);
             JSONObject jsonObject = JSONObject.parseObject(jsonResult);
             logger.info("大华获取用户信息接口返回：{}",jsonObject);
             if(jsonObject!= null && "200".equals(jsonObject.getString("ResultCode")) && "true".equals(jsonObject.getString("IsSuccess"))){

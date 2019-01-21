@@ -16,4 +16,6 @@ public class ELMConstants {
     public static final String ELM_URL = "https://enterprise-open-api.alta.elenet.me";
     public static final String QUERY_ORDER = "/v1/openapi/order/get";
     public static final String ELM_ADD_METHOD = "/v1/openapi/employee/add";
+
+    public static final String ELM_ORDER_PREFIX = "ELM_ORDER_PREFIX:%s";
 }

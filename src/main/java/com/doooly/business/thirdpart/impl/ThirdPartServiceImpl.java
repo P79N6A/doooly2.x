@@ -9,6 +9,7 @@ import com.doooly.business.thirdpart.constant.ThirdPartConstant;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.DaHuaConstants;
 import com.doooly.common.token.TokenUtil;
+import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdUserPersonalInfoDao;
 import com.doooly.dto.common.ConstantsLogin;
@@ -81,11 +82,19 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
             String thirdUserToken = json.getString("thirdUserToken");
             JSONObject param = new JSONObject();
             param.put("jsonData",thirdUserToken);
-            JSONObject jsonObject = HttpClientUtil.httpPost(url + DaHuaConstants.USER_INFO_URL, param);
+            String jsonResult = HTTPSClientUtils.sendPostNew(param.toJSONString(),url + DaHuaConstants.USER_INFO_URL);
+            JSONObject jsonObject = JSONObject.parseObject(jsonResult);
+            logger.info("大华获取用户信息接口返回：{}",jsonObject);
             if(jsonObject!= null && "200".equals(jsonObject.getString("ResultCode")) && "true".equals(jsonObject.getString("IsSuccess"))){
                 //说明请求成功绑定用户信息
                 JSONObject result = JSONObject.parseObject(jsonObject.getString("Result"));
                 String FItemNumber = result.getString("FItemNumber");//大华工号
+                if(FItemNumber == null){
+                    messageDataBean.setData(map);
+                    messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                    messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
+                    return messageDataBean;
+                }
                 Map<String,Object> params = new HashMap<>();
                 params.put("workNumber",FItemNumber);
                 params.put("adGroupId",groupId);

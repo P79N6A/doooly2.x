@@ -70,7 +70,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Service
 public class AdUserService implements AdUserServiceI {
 
-	private static final Logger logger = LoggerFactory.getLogger(FamilyInviteService.class);
+	private static final Logger logger = LoggerFactory.getLogger(AdUserService.class);
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
 	private Lock lock = new ReentrantLock();

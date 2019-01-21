@@ -8,7 +8,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,7 @@ import com.doooly.publish.rest.reachad.AdUserServicePublishI;
 @Component
 @Path("/member")
 public class AdUserServicePublish implements AdUserServicePublishI {
-	private Logger log = Logger.getLogger(this.getClass());
+	private static Logger log = LoggerFactory.getLogger(AdUserServicePublish.class);
 	@Autowired
 	private AdUserServiceI adUserService;
 	@Autowired
@@ -53,7 +55,7 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 			result.put("code", Constants.ResponseEnum.SUCCESS.getCode());
 			log.info("batchSendSms success=" + result.toJSONString());
 		} catch (Exception e) {
-			log.error(e);
+			log.error("",e);
 			result.put("code", Constants.ResponseEnum.ERROR.getCode());
 			result.put("info", "batchSendSms=" + e.getMessage());
 		}
@@ -101,7 +103,10 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String verifyCodeAndActivation(JSONObject param,@Context HttpServletRequest request) {
 		String groupId = request.getHeader("groupId");
-		param.put("groupId",groupId);
+		log.info("verifyCodeToActive请求参数：{}，{}",param,groupId);
+		if (StringUtils.isNotBlank(groupId)) {
+			param.put("groupId",groupId);
+		}
 		JSONObject resultData = new JSONObject();
 		try {
 			resultData = adUserService.verifyCodeAndActivation(param);

@@ -1212,6 +1212,7 @@ public class AdUserService implements AdUserServiceI {
                         if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
                             isFailed = false;
                             try {
+                                resultData.put(Constants.CHANNEL,Constants.CHANNEL_H5);
                                 resultData = userService.userLogin(resultData);
                             } catch (Exception e) {
                                 logger.info("verifyCodeAndActivation登录异常：",e);

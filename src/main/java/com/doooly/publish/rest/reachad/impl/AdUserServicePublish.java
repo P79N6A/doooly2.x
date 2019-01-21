@@ -1,9 +1,11 @@
 package com.doooly.publish.rest.reachad.impl;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -97,7 +99,9 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 	@Path(value = "/verifyCodeToActive")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String verifyCodeAndActivation(JSONObject param) {
+	public String verifyCodeAndActivation(JSONObject param,@Context HttpServletRequest request) {
+		String groupId = request.getHeader("groupId");
+		param.put("groupId",groupId);
 		JSONObject resultData = new JSONObject();
 		try {
 			resultData = adUserService.verifyCodeAndActivation(param);

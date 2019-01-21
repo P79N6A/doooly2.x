@@ -38,6 +38,26 @@
 		</where>
 	</select>
 
+
+	<select id="selectPersonByCondition" parameterType="java.util.Map" resultMap="AdUserPersonalInfoMap">
+		SELECT
+		p.id,
+		p.ad_group_department_id as "adGroupDepartment.id",
+		p.work_number,
+		p.birthday,
+		p.is_regular_employee,
+		p.entry_date,
+		p.is_set_password,
+		p.has_child
+		FROM
+		ad_user_personal_info p
+		LEFT JOIN ad_user u on p.id = u.id
+		<where>
+			<if test="workNumber != null"> and p.work_number = #{workNumber} </if>
+			<if test="groupId != null"> and u.group_num = #{groupId} </if>
+		</where>
+	</select>
+
 	<select id="selects" parameterType="java.util.List" resultMap="AdUserPersonalInfoMap">
 		SELECT
 		<include refid="TableColumn" />

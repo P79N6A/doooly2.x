@@ -3,6 +3,8 @@ package com.doooly.publish.rest.reachad;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.common.dto.BaseRes;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface AdUserServicePublishI {
 	/**
 	 * 批量发送短信
@@ -41,7 +43,7 @@ public interface AdUserServicePublishI {
 	 * @param
 	 * @return JSONObject 
 	 */
-	String verifyCodeAndActivation(JSONObject param);
+	String verifyCodeAndActivation(JSONObject param, HttpServletRequest request);
 
 	/**
 	 * 企业口令获取企业集合

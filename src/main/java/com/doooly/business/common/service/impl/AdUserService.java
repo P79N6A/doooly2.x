@@ -1209,6 +1209,7 @@ public class AdUserService implements AdUserServiceI {
 		String telephone = paramData.getString("mobile");
         String staffNum = paramData.getString("staffNum");
         String email = paramData.getString("email");
+        String groupId = paramData.getString("groupId");
 		try {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
@@ -1224,10 +1225,11 @@ public class AdUserService implements AdUserServiceI {
                         resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
                         resultData.put(ConstantsLogin.MSG, "邮箱为空");
                     } else {
-                        resultData = validateFordUser(code,telephone,staffNum,email);
+                        resultData = validateFordUser(code,telephone,staffNum,email,groupId);
                         if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
                             isFailed = false;
                             try {
+                                resultData.put(Constants.CHANNEL,Constants.CHANNEL_H5);
                                 resultData = userService.userLogin(resultData);
                             } catch (Exception e) {
                                 logger.info("verifyCodeAndActivation登录异常：",e);
@@ -1394,7 +1396,7 @@ public class AdUserService implements AdUserServiceI {
 	}
 
 
-	JSONObject validateFordUser(String code,String mobile,String staffNum,String email) {
+	JSONObject validateFordUser(String code,String mobile,String staffNum,String email,String groupId) {
 		JSONObject resultData = new JSONObject();
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
@@ -1447,7 +1449,10 @@ public class AdUserService implements AdUserServiceI {
 		//通过员工号查询用户id
 		AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
 		adUserPersonalInfo.setWorkNumber(staffNum);
-		adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+		Map<String,Object> adUserPersonalInfoMap = new HashMap<>();
+		adUserPersonalInfoMap.put("workNumber",staffNum);
+		adUserPersonalInfoMap.put("groupId",groupId);
+		adUserPersonalInfo = adUserPersonalInfoDao.selectPersonByCondition(adUserPersonalInfoMap);
 		if (adUserPersonalInfo == null) {
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 			resultData.put(ConstantsLogin.MSG, "员工号不存在");

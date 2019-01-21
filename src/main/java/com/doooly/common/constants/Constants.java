@@ -52,8 +52,8 @@ public class Constants {
 
 	public static class OrderApiConstants{
 		//订单接口base url
-		public final static String ORDER_BASE_URL="http://47.92.199.89:1080/";
-		public final static String SHOP_CART_URL = "order/shopCart/batch/v1/";
+		public final static String ORDER_BASE_URL="https://admin.doooly.com/order/";
+		public final static String SHOP_CART_URL = "shopCart/batch/v1/";
 	}
 
 	/**

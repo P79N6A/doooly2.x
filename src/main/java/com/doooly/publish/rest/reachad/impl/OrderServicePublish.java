@@ -106,6 +106,7 @@ public class OrderServicePublish {
         try {
             result = orderService.createOrderv2(json).toJsonString();
         } catch (Exception e) {
+            logger.error("创建订单出错，错误原因:{}",e);
            result = new OrderMsg(OrderMsg.failure_code,"系统异常").toJsonString();
         }
         return result;

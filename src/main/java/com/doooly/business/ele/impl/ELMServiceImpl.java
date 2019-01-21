@@ -76,8 +76,10 @@ public class ELMServiceImpl implements ELMServiceI{
         Boolean flag = SignUtils.validParam(consumerNo,timeStamp,sign,obj,eleConfig);
         if(!flag){
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
+        }else {
+            return ResultModel.success_ok("获取订单金额成功");
         }
-        //创建doooly订单
+       /* //创建doooly订单
         String orderNo = obj.getString("orderNo");
         JSONObject orderGetParam = new JSONObject();
         orderGetParam.put("orderNo",orderNo);
@@ -103,7 +105,7 @@ public class ELMServiceImpl implements ELMServiceI{
             return paymentService.unifiedElmorder(data);
         }else {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
-        }
+        }*/
     }
 
     /**
@@ -135,19 +137,19 @@ public class ELMServiceImpl implements ELMServiceI{
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
         //修改doooly订单状态
-        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
+/*        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
             //订单取消
             orderService.cancleOrder(o.getUserId(), orderNo);
         }else {
             //更新
-            OrderItemVo newItem = new OrderItemVo();
-            newItem.setOrderReportId(order.getId());
-            newItem.setRetCode(String.valueOf(status));
-            newItem.setRetMsg(remark);
-            newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
-            logger.info("update elm order status, item = {}",newItem);
-            orderService.updateOrderItem(newItem);
-        }
+        }*/
+        OrderItemVo newItem = new OrderItemVo();
+        newItem.setOrderReportId(order.getId());
+        newItem.setRetCode(String.valueOf(status));
+        newItem.setRetMsg(remark);
+        newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
+        logger.info("update elm order status, item = {}",newItem);
+        orderService.updateOrderItem(newItem);
         return ResultModel.success_ok("收到状态");
     }
 }

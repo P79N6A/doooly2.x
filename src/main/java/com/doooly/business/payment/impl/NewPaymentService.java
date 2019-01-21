@@ -64,7 +64,6 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
-import static com.sun.tools.internal.xjc.reader.Ring.add;
 
 /**
  * @Description:

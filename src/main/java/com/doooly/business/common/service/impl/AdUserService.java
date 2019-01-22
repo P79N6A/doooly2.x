@@ -1207,7 +1207,10 @@ public class AdUserService implements AdUserServiceI {
 					} else if (StringUtils.isBlank(email)) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "邮箱为空");
-					} else {
+					} else if (StringUtils.isBlank(groupId)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "用户单位为空");
+                    } else {
 						resultData = validateFordUser(code,telephone,staffNum,email,groupId);
 						if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;
@@ -1531,17 +1534,19 @@ public class AdUserService implements AdUserServiceI {
                     saveMember(adUser);
                 }
             } else {
-                String groupNum = "";
-                LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-                groupNum = lifeGroup.getId();
-                lifeMember.setGroupId(Long.valueOf(groupNum));
-                lifeMember.setName(adUser.getName());
-                lifeMember.setIsEnabled(2);
-                lifeMember.setMobile(mobile);
-                lifeMember.setLoginFailureCount(0);
-                lifeMember.setModifyDate(new Date());
-                lifeMember.setAdId(String.valueOf(adUser.getId()));
-                lifeMemberDao.updateActiveStatus(lifeMember);
+                if (StringUtils.isNotBlank(groupId)) {
+                    String groupNum = "";
+                    LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+                    groupNum = lifeGroup.getId();
+                    lifeMember.setGroupId(Long.valueOf(groupNum));
+                    lifeMember.setName(adUser.getName());
+                    lifeMember.setIsEnabled(2);
+                    lifeMember.setMobile(mobile);
+                    lifeMember.setLoginFailureCount(0);
+                    lifeMember.setModifyDate(new Date());
+                    lifeMember.setAdId(String.valueOf(adUser.getId()));
+                    lifeMemberDao.updateActiveStatus(lifeMember);
+                }
             }
             adActiveCode.setIsUsed("1");
             adActiveCode.setUsedDate(new Date());

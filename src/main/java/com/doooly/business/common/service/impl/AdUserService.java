@@ -1544,6 +1544,9 @@ public class AdUserService implements AdUserServiceI {
                 if (lifeMember == null) {
                     saveMember(adUser);
                 }
+            } else {
+                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                resultData.put(ConstantsLogin.MSG, "重复会员卡号");
             }
 			adActiveCode.setIsUsed("1");
 			adActiveCode.setUsedDate(new Date());

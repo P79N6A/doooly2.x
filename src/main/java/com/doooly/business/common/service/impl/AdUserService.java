@@ -1438,7 +1438,7 @@ public class AdUserService implements AdUserServiceI {
 									LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
 									// A库企业编号
 									String groupNum = "";
-									if (StringUtils.isNotBlank(groupId) && lifeMember != null) {
+									if (StringUtils.isNotBlank(groupId)) {
 										LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
 										groupNum = lifeGroup.getId();
 										lifeMember.setGroupId(Long.valueOf(groupNum));
@@ -1538,10 +1538,8 @@ public class AdUserService implements AdUserServiceI {
 			resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
 			return resultData;
 		} else {
-			LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
-			if (lifeMember == null) {
-				saveMember(adUser);
-			}
+
+			saveMember(adUser);
 			adActiveCode.setIsUsed("1");
 			adActiveCode.setUsedDate(new Date());
 			adActiveCodeDao.updateByPrimaryKey(adActiveCode);

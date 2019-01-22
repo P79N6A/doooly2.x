@@ -75,6 +75,7 @@
             </if>
             and del_flag = 0
         </where>
+        limit 1
     </select>
   
   <!-- 自动生成 -->

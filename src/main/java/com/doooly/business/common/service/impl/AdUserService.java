@@ -1400,10 +1400,28 @@ public class AdUserService implements AdUserServiceI {
                     if (email.equals(adUser.getMailbox())) {
                         AdActiveCode adActiveCode = new AdActiveCode();
                         adActiveCode.setAdUserId(adUser.getId());
-                        adActiveCode.setIsUsed("1");//已使用
+                        //adActiveCode.setIsUsed("1");//已使用
                         adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
                         if (adActiveCode != null) {
                             if (code.equals(adActiveCode.getCode())) {
+
+								adUser.setIsActive("2");
+								if (StringUtils.isNotBlank(groupId)) {
+                                    adUser.setGroupNum(Long.parseLong(groupId));
+                                }
+								adUser.setUpdateDate(new Date());
+								int i = adUserDao.updateByPrimaryKeySelective(adUser);
+								if (i == 0) {
+									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+									resultData.put(ConstantsLogin.MSG, "切换单位失败");
+									return resultData;
+								} else {
+									adActiveCode.setIsUsed("1");
+									adActiveCode.setUsedDate(new Date());
+									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
+								}
+
+
                                 resultData.put("userId",adUser.getId());
                                 return resultData;
                             } else {

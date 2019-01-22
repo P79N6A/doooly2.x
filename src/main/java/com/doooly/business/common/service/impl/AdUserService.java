@@ -1379,7 +1379,7 @@ public class AdUserService implements AdUserServiceI {
 	}
 
 
-	JSONObject validateFordUser(String code,String mobile,String staffNum,String email,String groupId) {
+	JSONObject validateFordUser(String code,String mobile,String staffNum,String email,String groupId) throws Exception {
 		JSONObject resultData = new JSONObject();
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
@@ -1417,6 +1417,22 @@ public class AdUserService implements AdUserServiceI {
 									resultData.put(ConstantsLogin.MSG, "切换单位失败");
 									return resultData;
 								} else {
+
+                                    LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+                                    // A库企业编号
+                                    String groupNum = "";
+                                    if (StringUtils.isNotBlank(groupId)) {
+                                        LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+                                        groupNum = lifeGroup.getId();
+                                        lifeMember.setGroupId(Long.valueOf(groupNum));
+                                        lifeMember.setName(adUser.getName());
+                                        lifeMember.setIsEnabled(2);
+                                        lifeMember.setLoginFailureCount(0);
+                                        lifeMember.setModifyDate(new Date());
+                                        lifeMember.setAdId(String.valueOf(adUser.getId()));
+                                        lifeMemberDao.updateActiveStatus(lifeMember);
+                                    }
+
 									adActiveCode.setIsUsed("1");
 									adActiveCode.setUsedDate(new Date());
 									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
@@ -1505,6 +1521,8 @@ public class AdUserService implements AdUserServiceI {
 			resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
 			return resultData;
 		} else {
+
+            saveMember(adUser);
             adActiveCode.setIsUsed("1");
             adActiveCode.setUsedDate(new Date());
             adActiveCodeDao.updateByPrimaryKey(adActiveCode);

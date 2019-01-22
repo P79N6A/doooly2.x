@@ -27,8 +27,8 @@
             <if test="businessId != null and businessId != ''">
                 AND a.business_id=#{businessId}
             </if>
-			<if test="clientId != null and clientId != ''">
-				AND a.client_id=#{clientId}
+			<if test="clientSecret != null and clientSecret != ''">
+				AND a.client_secret=#{clientSecret}
 			</if>
         </where>
 	</select>

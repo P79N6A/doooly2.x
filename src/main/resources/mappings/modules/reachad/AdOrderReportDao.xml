@@ -1002,6 +1002,12 @@
         WHERE a.order_number = #{orderNumber}
     </select>
 
+	<select id="getUserIdByOrderNum" resultType="java.lang.Long">
+        SELECT
+        	a.user_id
+        FROM ad_order_report a
+        WHERE a.order_number = #{orderNumber}
+    </select>
 	<select id="getGroupNumByOrderNum" resultType="java.lang.String" parameterType="java.lang.String">
 		select u.group_num as groupNum from ad_order_report ar
 		LEFT JOIN ad_user u on ar.user_id = u.id

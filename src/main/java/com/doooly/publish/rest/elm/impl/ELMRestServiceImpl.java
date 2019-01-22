@@ -72,17 +72,17 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         boolean signResult = checkSign(jsonObject);
         if (checkResult || !signResult) {
             JSONObject res = new JSONObject();
-            res.put("returnCode", ELMConstants.ELM_RESULT_FAIL); //支付请求结果 1: 成功, 2: 失败
-            res.put("returnMsg", PayConstants.PAY_STATUS_0); //支付请求结果或错误信息
+            res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
+            res.put("returnMsg", "请求参数为空");
             if (!signResult) {
-                res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR); //支付请求结果或错误信息
+                res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
             }
-            res.put("transactionId", "");                  //支付网关的订单号
-            res.put("payAmount", "");                      //支付金额(单位:分)
-            res.put("outTradeNo", "");                     //三方交易号
-            res.put("payStatus", PayStatusEnum.PayTypeNotPay.getCode());  //支付状态
-            res.put("nonceStr", RandomUtil.getRandomStr(32));   //随机串（长度32）
-            res.put("returnMsg", PayConstants.PAY_STATUS_0); //支付请求结果或错误信息
+            res.put("transactionId", "");
+            res.put("payAmount", "");
+            res.put("outTradeNo", "");
+            res.put("payStatus", PayStatusEnum.PayTypeNotPay.getCode());
+            res.put("nonceStr", RandomUtil.getRandomStr(32));
+            res.put("returnMsg", PayConstants.PAY_STATUS_0);
             try {
                 String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
                 res.put("sign", signStr); //采用RSA2签名
@@ -100,9 +100,12 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         boolean flag = false;
         try {
             String sign = obj.getString("sign");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, obj, sign);
             obj.remove("sign");
-            obj.remove("uid");
+
+            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);
+            System.out.println("----------------生成签名：" + signStr);
+
+            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, obj, sign);
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(obj), sign);
             }
@@ -118,7 +121,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
                 || StringUtils.isBlank(req.getString("transactionId")) || StringUtils.isBlank(req.getString("payAmount"))
                 || StringUtils.isBlank(req.getString("timestamp")) || StringUtils.isBlank(req.getString("timeExpire"))
                 || StringUtils.isBlank(req.getString("redirectUrl")) || StringUtils.isBlank(req.getString("notifyUrl"))
-                || StringUtils.isBlank(req.getString("uid")) || StringUtils.isBlank(req.getString("nonceStr"))
+                || StringUtils.isBlank(req.getString("nonceStr"))
                 || StringUtils.isBlank(req.getString("sign"))) {
             return true;
         }
@@ -128,18 +131,19 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
 
     public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
-        String charset = request.getParameter("encoding");
+        String sign = request.getHeader("sign");
         Enumeration enu = request.getParameterNames();
         while (enu.hasMoreElements()) {
             String key = (String) enu.nextElement();
             String value = request.getParameter(key);
             try {
-                value = new String(value.getBytes("iso-8859-1"), charset);
+                value = new String(value.getBytes("iso-8859-1"), "utf-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
             jsonObject.put(key, value);
         }
+        jsonObject.put("sign", sign);
         return jsonObject;
     }
 
@@ -148,7 +152,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public String queryElmPayInfo(JSONObject obj, HttpServletRequest httpServletRequest) {
+    public String queryElmPayInfo(JSONObject obj, @Context HttpServletRequest request) {
         logger.info("饿了么调用支付查询接口 queryElmPayInfo：{}", GsonUtils.toString(obj));
         boolean flag = checkPayInfoParam(obj);
         boolean signResult = checkSign(obj);
@@ -159,14 +163,15 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             if (!signResult) {
                 res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
             }
-               /* res.put("appId",  );                //三方分配的应用APPID
-                res.put("erchantNo",  );              //三方分配的商户号
-                res.put("transactionId",  );          //支付网关的订单号
-                res.put("outTradeNo",  );             //第三方交易号，支付成功后必传。
-                res.put("paAount",  );                //支付金额，单位：分
-                res.put("paStatus",  );               //支付状态
-                res.put("thirdUserId",  );            //S三方UserID，风控使用，支付成功后必传。
-                res.put("thirdPaAccount",  );          //S三方收款账户，风控使用，支付成功后必传。*/
+            res.put("appId", ELMConstants.ELM_APP_ID);
+            res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
+            res.put("erchantNo", "");              //三方分配的商户号
+            res.put("transactionId", "");          //支付网关的订单号
+            res.put("outTradeNo", "");             //第三方交易号，支付成功后必传。
+            res.put("paAount", "");                //支付金额，单位：分
+            res.put("paStatus", "");               //支付状态
+            res.put("thirdUserId", "");            //S三方UserID，风控使用，支付成功后必传。
+            res.put("thirdPaAccount", "");          //S三方收款账户，风控使用，支付成功后必传。
             res.put("nonceStr", RandomUtil.getRandomStr(32)); //随机串（长度32）
             String signStr = null;
             try {
@@ -174,10 +179,11 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            res.put("sign", signStr); //采用RSA2签名
+            res.put("sign", signStr);
             return res.toJSONString();
         }
-        ResultModel resultModel = elmServiceI.queryElmPayInfo(obj, httpServletRequest);
+        obj.put("clientIp", IPUtils.getIpAddr(request));
+        ResultModel resultModel = elmServiceI.queryElmPayInfo(obj, request);
         return resultModel.getData().toString();
     }
 
@@ -195,13 +201,34 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public String elmRefund(JSONObject obj, HttpServletRequest request) {
+    public String elmRefund(JSONObject obj, @Context HttpServletRequest request) {
         logger.info("饿了么调用退款接口 createElmOrderAndPay：{}", GsonUtils.toString(obj));
+        Integer payAmount = obj.getInteger("payAmount");
+        Integer refundAmount = obj.getInteger("refundAmount");
+        obj.put("payAmount", String.valueOf(payAmount));
+        obj.put("refundAmount", String.valueOf(refundAmount));
         boolean signResult = checkSign(obj);
         if (!signResult) {
-            JSONObject res = new JSONObject();
-            res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
-            res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
+            try {
+                JSONObject res = new JSONObject();
+                res.put("appId", ELMConstants.ELM_APP_ID);
+                res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
+                res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
+                res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
+                res.put("outTradeNo", "");
+                res.put("outRefundNo", "");
+                res.put("refundStatus", "");
+                res.put("transactionId", "");
+                res.put("refundNo", "");
+                res.put("payAmount", "");
+                res.put("refundAmount", "");
+                res.put("nonceStr", RandomUtil.getRandomStr(32));
+                String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+                res.put("sign", signStr);
+                return res.toJSONString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         obj.put("clientIp", IPUtils.getIpAddr(request));
         ResultModel resultModel = elmServiceI.elmRefund(obj);
@@ -217,9 +244,26 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         logger.info("饿了么调用退款查询接口 queryElmRefundInfo：{}", GsonUtils.toString(obj));
         boolean signResult = checkSign(obj);
         if (!signResult) {
-            JSONObject res = new JSONObject();
-            res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
-            res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
+            try {
+                JSONObject res = new JSONObject();
+                res.put("appId", ELMConstants.ELM_APP_ID);
+                res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
+                res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
+                res.put("returnMsg", ELMConstants.CHECK_PARAM_SIGN_ERROR);
+                res.put("outTradeNo", "");
+                res.put("outRefundNo", "");
+                res.put("transactionId", "");
+                res.put("refundNo", "");
+                res.put("payAmount", "");
+                res.put("refundAmount", "");
+                res.put("refundStatus", "");
+                res.put("nonceStr", RandomUtil.getRandomStr(32));
+                String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+                res.put("sign", signStr);
+                return res.toJSONString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         ResultModel resultModel = elmServiceI.queryElmRefundInfo(obj);
         return resultModel.getData().toString();

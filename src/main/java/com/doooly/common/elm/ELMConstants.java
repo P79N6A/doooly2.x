@@ -22,10 +22,11 @@ public class ELMConstants {
     //饿了么MsgCode add by paul
     public final static String ELM_RESULT_SUCCESS = "1";  //成功处理
     public final static String ELM_RESULT_FAIL = "2";     //处理失败
-
     public static final String CHECK_PARAM_SIGN_ERROR = "参数验签失败";
-    //public final static String ELM_BUSINESS_ID = "9487";
-    public final static String ELM_CLIENT_ID = "Test_doooly_payment_elm";
-    public static final String elm_bussinesss_serial = "Test_wwnsdfsteierlema";
+    //DEV
+    public final static String ELM_APP_ID = "b393552e850e4f8bbf1cfe209e09042c";
+    public final static String ELM_MERCHANT_NO = "Test_wwnsdfsteierlema";
+    //兜里收款账户
+    public final static String DOOOLY_FINANCIAL_ACCOUNT = "9624121301145727303249";
 
 }

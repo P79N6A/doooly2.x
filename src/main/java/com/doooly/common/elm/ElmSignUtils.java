@@ -129,6 +129,7 @@ public class ElmSignUtils {
     public static String getSortSignContent(JSONObject req) {
         TreeMap<String, Object> parameters = new TreeMap<>();
         StringBuffer sb = new StringBuffer();
+        String result = "";
         Iterator it = req.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -154,8 +155,10 @@ public class ElmSignUtils {
             Object value = entry.getValue();
             sb.append(key).append("=").append(value).append("&");
         }
-        String  str =sb.toString().substring(0, sb.toString().length()-1);
-        return str;
+        if (sb.length() > 0) {
+            result =sb.toString().substring(0, sb.toString().length()-1);
+        }
+        return result;
     }
 
     private static String readText(InputStream ins) throws IOException {
@@ -186,7 +189,6 @@ public class ElmSignUtils {
             res.put("outTradeNo", "");                     //三方交易号
             res.put("payStatus", PayStatusEnum.PayTypeNotPay.getCode());  //支付状态
             res.put("nonceStr", RandomUtil.getRandomStr(32));   //随机串（长度32）
-            res.put("sign", "2");
 
             // 根据私钥生成签名
             String signStr = rsaSign( ELM_PRIVATE_KEY, res);

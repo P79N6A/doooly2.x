@@ -390,6 +390,9 @@
       <if test="isActive != null" >
         is_active = #{isActive,jdbcType=CHAR},
       </if>
+        <if test="activeDate !=null">
+            active_date = #{activeDate},
+        </if>
       <if test="isPayPassword != null" >
         is_pay_password = #{isPayPassword,jdbcType=CHAR},
       </if>

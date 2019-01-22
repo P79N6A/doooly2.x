@@ -1436,7 +1436,7 @@ public class AdUserService implements AdUserServiceI {
 									return resultData;
 								} else {
 
-									LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+									LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
 									// A库企业编号
 									String groupNum = "";
 									if (StringUtils.isNotBlank(groupId) && lifeMember != null) {
@@ -1445,6 +1445,7 @@ public class AdUserService implements AdUserServiceI {
 										lifeMember.setGroupId(Long.valueOf(groupNum));
 										lifeMember.setName(adUser.getName());
 										lifeMember.setIsEnabled(2);
+                                        lifeMember.setMobile(mobile);
 										lifeMember.setLoginFailureCount(0);
 										lifeMember.setModifyDate(new Date());
 										lifeMember.setAdId(String.valueOf(adUser.getId()));
@@ -1547,8 +1548,17 @@ public class AdUserService implements AdUserServiceI {
                     saveMember(adUser);
                 }
             } else {
-                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-                resultData.put(ConstantsLogin.MSG, "重复会员卡号");
+                String groupNum = "";
+                LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+                groupNum = lifeGroup.getId();
+                lifeMember.setGroupId(Long.valueOf(groupNum));
+                lifeMember.setName(adUser.getName());
+                lifeMember.setIsEnabled(2);
+                lifeMember.setMobile(mobile);
+                lifeMember.setLoginFailureCount(0);
+                lifeMember.setModifyDate(new Date());
+                lifeMember.setAdId(String.valueOf(adUser.getId()));
+                lifeMemberDao.updateActiveStatus(lifeMember);
             }
 			adActiveCode.setIsUsed("1");
 			adActiveCode.setUsedDate(new Date());

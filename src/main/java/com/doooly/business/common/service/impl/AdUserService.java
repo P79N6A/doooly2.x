@@ -1411,6 +1411,7 @@ public class AdUserService implements AdUserServiceI {
 								}
 								adUser.setUpdateDate(new Date());
 								adUser.setActiveDate(new Date());
+                                adUser.setDataSyn(AdUser.DATA_SYN_ON);
 								int i = adUserDao.updateByPrimaryKeySelective(adUser);
 								if (i == 0) {
 									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1515,6 +1516,7 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setIsActive("2");
 		adUser.setActiveDate(new Date());
 		adUser.setUpdateDate(new Date());
+		adUser.setDataSyn(AdUser.DATA_SYN_ON);
 		int i = adUserDao.updateByPrimaryKeySelective(adUser);
 		if (i == 0) {
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1527,7 +1529,10 @@ public class AdUserService implements AdUserServiceI {
 				if (lifeMember == null) {
 					saveMember(adUser);
 				}
-			}
+			} else {
+                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                resultData.put(ConstantsLogin.MSG, "重复会员卡号");
+            }
 			adActiveCode.setIsUsed("1");
 			adActiveCode.setUsedDate(new Date());
 			adActiveCodeDao.updateByPrimaryKey(adActiveCode);

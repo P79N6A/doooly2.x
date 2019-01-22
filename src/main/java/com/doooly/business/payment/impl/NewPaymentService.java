@@ -275,7 +275,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("merchantOrderNo", adOrderBig.getId());
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
-        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL_V2);
+        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
         param.put("body", "兜礼订单-"+adOrderBig.getId());
         param.put("isSource", adOrderBig.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));

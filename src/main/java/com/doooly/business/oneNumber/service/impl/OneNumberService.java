@@ -12,6 +12,10 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.common.elm.ELMConstants;
+import com.doooly.dao.report.UserSynRecordDao;
+import com.doooly.entity.report.UserSynRecord;
+import com.koalii.bc.util.encoders.Hex;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -33,12 +37,15 @@ import java.util.Map;
 @Service
 public class OneNumberService implements OneNumberServiceI {
 
+
     private static Logger logger = Logger.getLogger(OneNumberService.class);
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
     @Autowired
     private AdUserDao adUserDao;
+	@Autowired
+	private UserSynRecordDao userSynRecordDao;
 
     @Override
     public MessageDataBean getTargetUrl(String userId, String businessId, String targetUrl)
@@ -85,7 +92,40 @@ public class OneNumberService implements OneNumberServiceI {
         return messageDataBean;
     }
 
-    /**
+	/**
+	 * 饿了么专属连接
+	 * @param adUser
+	 * @param adBusinessExpandInfo
+	 * @return
+	 */
+	private String getElmUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+		StringBuilder url = new StringBuilder();
+		long timeStamp = new Date().getTime();
+		String consumerNo = adBusinessExpandInfo.getShopId();
+		String consumerSecret = adBusinessExpandInfo.getShopKey();
+		JSONObject synJson = new JSONObject();
+		synJson.put("userId", adUser.getId());
+		synJson.put("businessId", adBusinessExpandInfo.getBusinessId());
+		synJson.put("shopId", adBusinessExpandInfo.getShopId());
+		synJson.put("shopKey", adBusinessExpandInfo.getShopKey());
+		JSONObject jsonObject = addStaff(synJson);
+
+		JSONObject json = new JSONObject();
+		json.put("uNo", adUser.getTelephone());
+		json.put("bNo", adUser.getCardNumber());
+		String org = Hex.encode(json.toJSONString().getBytes()).toString();
+		int type = 3;
+		String sign = MD5Util.MD5Psw(org + consumerSecret + timeStamp);
+		url.append("https://entu.ele.me?");
+		url.append("consumerNo=" + consumerNo);
+		url.append("&type=" + type);
+		url.append("&timeStamp=" + timeStamp);
+		url.append("&sign=" + sign);
+		url.append("&type=" + type);
+		return url.toString();
+	}
+
+	/**
      * 一嗨租车专属连接
      *
      * @param targetUrl
@@ -227,25 +267,91 @@ public class OneNumberService implements OneNumberServiceI {
      */
     private String getDooolyUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo,
                                 long timestamp) throws UnsupportedEncodingException {
-        String resultUrl;// 加密字符串需要shopKey
-        String str = "shopId=" + adBusinessExpandInfo.getShopId() + "&shopKey=" + adBusinessExpandInfo.getShopKey()
-                + "&mobile=" + adUser.getTelephone() + "&cardNumber=" + adUser.getCardNumber() + "&actionTime="
-                + timestamp;
-        String sign = MD5Util.MD5Encode(str, "UTF-8");
-        String encode = "";
-        if (StringUtils.isNotBlank(targetUrl)) {
-            encode = URLEncoder.encode(targetUrl, "UTF-8");
-        }
-        targetUrl = "&targetUrl=" + encode;
-        // 拼接访问地址不传shopKey
-        String str1 = "shopId=" + adBusinessExpandInfo.getShopId() + "&mobile=" + adUser.getTelephone() + "&cardNumber="
-                + adUser.getCardNumber() + "&actionTime=" + timestamp;
+		String resultUrl;// 加密字符串需要shopKey
+		String str = "shopId=" + adBusinessExpandInfo.getShopId() + "&shopKey=" + adBusinessExpandInfo.getShopKey()
+				+ "&mobile=" + adUser.getTelephone() + "&cardNumber=" + adUser.getCardNumber() + "&actionTime="
+				+ timestamp;
+		String sign = MD5Util.MD5Encode(str, "UTF-8");
+		String encode = "";
+		if (StringUtils.isNotBlank(targetUrl)) {
+			encode = URLEncoder.encode(targetUrl, "UTF-8");
+		}
+		targetUrl = "&targetUrl=" + encode;
+		// 拼接访问地址不传shopKey
+		String str1 = "shopId=" + adBusinessExpandInfo.getShopId() + "&mobile=" + adUser.getTelephone() + "&cardNumber="
+				+ adUser.getCardNumber() + "&actionTime=" + timestamp;
 
-        if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
-            resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str1 + "&sign=" + sign + targetUrl;
-        } else {
-            resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str1 + "&sign=" + sign + targetUrl;
-        }
-        return resultUrl;
-    }
+		if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str1 + "&sign=" + sign + targetUrl;
+		} else {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str1 + "&sign=" + sign + targetUrl;
+		}
+		return resultUrl;
+	}
+		public JSONObject addStaff(JSONObject json) {
+			JSONObject resutlJson = new JSONObject();
+			String userId = json.get("userId").toString();
+			String businessId = json.get("businessId").toString();
+			String consumerNo = json.get("shopId").toString();
+			String consumerSecret = json.get("shopKey").toString();
+			UserSynRecord userSynRecord = userSynRecordDao.findByUserIdAndBusinessId(userId, businessId);
+
+			if (userSynRecord != null && "用户同步成功".equals(userSynRecord.getRemarks())) {
+				resutlJson.put("code", "1000");
+				resutlJson.put("message", "用户已同步");
+			} else {
+				AdUser adUser = adUserDao.get(userId);
+
+				if (adUser != null) {
+					JSONObject result = synStaff(adUser, consumerNo, consumerSecret);
+
+					if ("200".equals(result.get("code").toString())) {
+						UserSynRecord synRecord = new UserSynRecord();
+						synRecord.setBussinessId(businessId);
+						synRecord.setUserId(Integer.valueOf(userId));
+						synRecord.setRemarks(result.get("code") + "用户同步成功");
+						synRecord.setCreateDate(new Date());
+						userSynRecordDao.insert(synRecord);
+						resutlJson.put("code", "1000");
+						resutlJson.put("message", "用户同步成功");
+					}
+				} else {
+					resutlJson.put("code", "1001");
+					resutlJson.put("message", "用户未找到");
+				}
+			}
+			return resutlJson;
+		}
+
+		/**
+		 * 向饿了么同步添加会员信息
+		 * @param adUser
+		 * @param consumerNo
+		 * @param consumerSecret
+		 * @return
+		 */
+		private JSONObject synStaff(AdUser adUser, String consumerNo, String consumerSecret){
+			JSONObject resultJson = new JSONObject();
+			Long timeStamp = new Date().getTime();
+			// 整理参数
+			String url = ELMConstants.ELM_URL + ELMConstants.ELM_ADD_METHOD;
+			JSONObject userJson = new JSONObject();
+			userJson.put("employeeNo", adUser.getCardNumber());
+			userJson.put("name", adUser.getName());
+			userJson.put("phoneNumber", adUser.getTelephone());
+
+			String jsonStr = org.apache.commons.codec.binary.Hex.encodeHexString(userJson.toJSONString().getBytes());
+
+			HashMap<String, String> headerMap = new HashMap<>();
+			headerMap.put("consumerNo", consumerNo);
+			headerMap.put("timeStamp", timeStamp.toString());
+			headerMap.put("sign", MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp.toString(), "UTF-8"));
+			Map<String, String> paramMap = new HashMap<>();
+			paramMap.put("json", jsonStr);
+
+			String resultStr = HttpClientUtil.doPost(url, headerMap, paramMap);
+			resultJson = JSONObject.parseObject(resultStr);
+			return resultJson;
+		}
 }
+

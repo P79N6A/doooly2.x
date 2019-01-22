@@ -58,5 +58,4 @@ public class ConfigDictServiceImpl implements ConfigDictServiceI {
 		return values;
 	}
 
-
 }

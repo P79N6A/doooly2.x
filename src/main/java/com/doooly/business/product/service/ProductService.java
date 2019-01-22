@@ -49,7 +49,7 @@ public interface ProductService {
 
 
 	public ActivityInfo getActivityInfo(String groupId, int skuId);
-
+	
 	AdGroupSelfProductPrice getSelfProductSkuListByName(String activityName, Integer groupId);
 
 	List<AdGroupSelfProductPrice> getSelfProductAirport(String activityName,String selfProductId);

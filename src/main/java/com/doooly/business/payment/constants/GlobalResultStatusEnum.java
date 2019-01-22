@@ -6,6 +6,7 @@ package com.doooly.business.payment.constants;
  * Created by liangjun on 2017/3/17.
  */
 public enum GlobalResultStatusEnum {
+    SUCCESS_OK(200, "成功"),
     SUCCESS(1000, "成功"),
     FAIL(1001, "失败"),
     BAD_REQUEST(400, "Bad Request!"),

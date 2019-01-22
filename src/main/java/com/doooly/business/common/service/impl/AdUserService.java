@@ -1224,7 +1224,10 @@ public class AdUserService implements AdUserServiceI {
 					} else if (StringUtils.isBlank(email)) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "邮箱为空");
-					} else {
+					} else if (StringUtils.isBlank(groupId)) {
+                        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
+                        resultData.put(ConstantsLogin.MSG, "用户单位为空");
+                    } else {
 						resultData = validateFordUser(code,telephone,staffNum,email,groupId);
 						if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;

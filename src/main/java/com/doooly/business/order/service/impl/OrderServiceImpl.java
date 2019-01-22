@@ -654,7 +654,7 @@ public class OrderServiceImpl implements OrderService {
 		OrderItemVo orderItem = new OrderItemVo();
 		orderItem.setOrderReportId(0l);
 		orderItem.setCategoryId(category.toString());
-		orderItem.setCode(sku.getNumber());
+		orderItem.setCode(sku.getId());
 		orderItem.setGoods(product.getName());
 		orderItem.setAmount(sellPrice);
 		orderItem.setPrice(marketPrice);

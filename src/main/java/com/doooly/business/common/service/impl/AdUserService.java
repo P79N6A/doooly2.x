@@ -1410,6 +1410,7 @@ public class AdUserService implements AdUserServiceI {
                                     adUser.setGroupNum(Long.parseLong(groupId));
                                 }
 								adUser.setUpdateDate(new Date());
+								adUser.setActiveDate(new Date());
 								int i = adUserDao.updateByPrimaryKeySelective(adUser);
 								if (i == 0) {
 									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1496,6 +1497,7 @@ public class AdUserService implements AdUserServiceI {
 		//绑定手机号
 		adUser.setTelephone(mobile);
 		adUser.setIsActive("2");
+        adUser.setActiveDate(new Date());
 		adUser.setUpdateDate(new Date());
 		int i = adUserDao.updateByPrimaryKeySelective(adUser);
 		if (i == 0) {

@@ -1428,6 +1428,7 @@ public class AdUserService implements AdUserServiceI {
 								}
 								adUser.setUpdateDate(new Date());
 								adUser.setActiveDate(new Date());
+                                adUser.setDataSyn(AdUser.DATA_SYN_ON);
 								int i = adUserDao.updateByPrimaryKeySelective(adUser);
 								if (i == 0) {
 									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1532,6 +1533,7 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setIsActive("2");
 		adUser.setActiveDate(new Date());
 		adUser.setUpdateDate(new Date());
+        adUser.setDataSyn(AdUser.DATA_SYN_ON);
 		int i = adUserDao.updateByPrimaryKeySelective(adUser);
 		if (i == 0) {
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());

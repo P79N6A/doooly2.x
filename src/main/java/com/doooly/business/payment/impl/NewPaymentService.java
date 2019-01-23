@@ -833,6 +833,23 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     @Override
+    public ResultModel getPayResultV2(JSONObject json) {
+        String bigOrderNumber = json.getString("bigOrderNumber");
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        //查询大订单状态
+        AdOrderBig adOrderBig1 = adOrderReportServiceI.getAdOrderBig(adOrderBig);
+        ResultModel payMsg;
+        if (OrderService.PayState.PAID.getCode() == adOrderBig1.getState()) {
+            //得到支付平台通知并已经处理过支付结果, 直接返回结果
+            payMsg = ResultModel.ok();
+        } else {
+            payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);
+        }
+        return payMsg;
+    }
+
+    @Override
     public ResultModel queryNewPayResult(JSONObject param) {
         String id = param.getString("id");//商户表主键
         //20181227 --收银台缓存改造

@@ -26,6 +26,8 @@ public interface NewPaymentServiceI {
 
     ResultModel getPayResult(JSONObject json);
 
+    ResultModel getPayResultV2(JSONObject json);
+
     ResultModel queryNewPayResult(JSONObject json);
 
     ResultModel dooolyPayRefund(JSONObject json);

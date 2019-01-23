@@ -40,6 +40,8 @@ public interface PaymentRestServiceI {
 
     // 兜礼支付查询
     String getPayResult(JSONObject obj, HttpServletRequest httpServletRequest);
+    // 兜礼支付查询
+    String getPayResultV2(JSONObject obj, HttpServletRequest httpServletRequest);
 
     // 兜礼退款回调
     String dooolyRefundCallback(JSONObject obj, HttpServletRequest httpServletRequest);

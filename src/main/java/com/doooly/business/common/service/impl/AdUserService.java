@@ -1497,6 +1497,15 @@ public class AdUserService implements AdUserServiceI {
 									adActiveCode.setIsUsed("1");
 									adActiveCode.setUsedDate(new Date());
 									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
+
+                                    //更新老的
+                                    AdUserPersonalInfo adUserPersonalInfoOld = new AdUserPersonalInfo();
+                                    adUserPersonalInfoOld.setId(adUser.getId());
+                                    adUserPersonalInfoOld = adUserPersonalInfoDao.select(adUserPersonalInfoOld);
+                                    if (adUserPersonalInfoOld != null) {
+                                        adUserPersonalInfoOld.setWorkNumber(staffNum);
+                                        adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfoOld);
+                                    }
 								}
 								resultData.put("userId",adUser.getId());
 								return resultData;

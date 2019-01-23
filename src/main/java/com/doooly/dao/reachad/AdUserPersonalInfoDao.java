@@ -26,4 +26,6 @@ public interface AdUserPersonalInfoDao extends BaseDaoI<AdUserPersonalInfo> {
     Integer updatePayPassword(@Param("userId") String userId, @Param("payPassword") String payPassword,@Param("isPayPassword") String isPayPassword);
 
     AdUserPersonalInfo selectPersonByWorknumAndGroup(AdUserPersonalInfo adUserPersonalInfo);
+
+    int updateWorkNum(AdUserPersonalInfo adUserPersonalInfo);
 }

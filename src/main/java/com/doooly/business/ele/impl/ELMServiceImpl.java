@@ -300,7 +300,7 @@ public class ELMServiceImpl implements ELMServiceI {
         queryObj.setClientSecret(ELMConstants.ELM_APP_ID);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryObj);
 
-        reqParam.put("businessId", adBusinessExpandInfo.getBusinessId());           //商户ID
+        reqParam.put("businessId", param.getString("merchantNo"));           //商户ID即ad_business 表的 business_id
         reqParam.put("merchantOrderNo", transactionId);     //商户订单号码
         reqParam.put("nonceStr", param.getString("nonceStr"));                 //随机字符串
 

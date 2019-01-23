@@ -1,6 +1,7 @@
 package com.doooly.business.payment.impl;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.AdBusinessServiceI;
@@ -53,11 +54,13 @@ import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -258,13 +261,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         paramMap.put("userId",adOrderBig.getUserId());
         List<String> skus = getSkus(orderVos);
         paramMap.put("skus",skus);
-        AdUserIntegral adUserIntegral = userIntegralDao.getDirIntegral(paramMap);
-        JSONObject retJson = new JSONObject();
-        retJson.put("totalFree",adOrderBig.getTotalAmount().toString());
-        retJson.put("dirIntegral",String.valueOf(adUserIntegral.getAvailIntegral().setScale(2, BigDecimal.ROUND_DOWN)));//定向积分
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
+        String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
+        JSONObject retJson = new JSONObject();
+        retJson.put("totalFree",adOrderBig.getTotalAmount().toString());
+        retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
         getServiceCharge(orderVos,retJson,user);
         //组建预支付订单参数
         String price = String.valueOf(adOrderBig.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
@@ -292,6 +295,80 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         return result;
+    }
+
+    public String getDirIntegral( List<OrderVo> orderVos ,AdOrderBig adOrderBig,AdUser adUser) {
+        //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
+        String getDirIntegralUrl ="http://47.92.199.89:8080/api/services/rest/getDirIntegral/V2";
+        //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
+        JSONObject params = new JSONObject();
+        params.put("businessId", "111");
+        params.put("dirIntegralSwitch", "1");
+        params.put("totalAmount", String.valueOf(adOrderBig.getTotalAmount()));
+        params.put("payPassword", adUser.getIsPayPassword());
+        params.put("verificationCode", "111");
+        params.put("cardNumber", adUser.getCardNumber());
+        params.put("bigOrderNumber", adOrderBig.getId());
+        JSONArray subOrders = new JSONArray();
+        //List<JSONObject> subOrders = new ArrayList<>();
+        for (OrderVo order : orderVos) {
+            JSONObject js = new JSONObject();
+            js.put("amount",String.valueOf(order.getTotalMount()));
+            js.put("price",String.valueOf(order.getTotalPrice()));
+            js.put("storesId","001");
+            js.put("orderDate", DateUtil.formatDate(order.getOrderDate(),"yyyy-MM-dd hh:mm:ss"));
+            js.put("orderNumber",order.getOrderNumber());
+            js.put("serialNumber",order.getOrderNumber());
+            js.put("businessId",order.getBussinessId());
+            List<OrderItemVo> items = order.getItems();
+            JSONArray array = new JSONArray();
+            for (OrderItemVo adOrderDetailDomain : items) {
+                BigDecimal tax = adOrderDetailDomain.getTax() == null ? new BigDecimal("0"): adOrderDetailDomain.getTax();
+                array.add(createGoods(adOrderDetailDomain.getCode(), adOrderDetailDomain.getGoods(), adOrderDetailDomain.getNumber().toString(), adOrderDetailDomain.getPrice().toString(), adOrderDetailDomain.getCategoryId(), adOrderDetailDomain.getAmount().toString(), tax.toEngineeringString()));
+            }
+            js.put("orderDetails",array);
+            subOrders.add(js);
+        }
+        params.put("subOrders",subOrders);
+        logger.info("查询可用定向积分V2，参数{}",params.toJSONString());
+        String resposeResult = HTTPSClientUtils.sendPost(params, getDirIntegralUrl);
+        logger.info("查询可用定向积分V2，结果{}",resposeResult);
+        JSONObject resultJson = JSON.parseObject(resposeResult);
+        String dirIntegral1 = "0";
+        if(resultJson!= null && resultJson.getString("code").equals("0")){
+            dirIntegral1 = resultJson.getString("dirIntegral");
+        }
+        return dirIntegral1;
+    }
+
+    // 构造商品JSON
+    public static JSONObject createGoods(String code, String goods, String number, String price, String category,
+                                         String amount, String tax) {
+        JSONObject json = new JSONObject();
+        json.put("code", code);
+        json.put("goods", goods);
+        json.put("number", number);
+        json.put("price", price);
+        json.put("category", category);
+        json.put("amount", amount);
+        json.put("tax", tax);
+        // json.put("firstCategory", "服饰");
+        // json.put("brandName", "李宁");
+        return json;
+    }
+
+    private String createOrderDetailForVerificationCode18() {
+        JSONArray array = new JSONArray();
+        JSONObject orderDetail = new JSONObject();
+        orderDetail.put("code", "1001");
+        orderDetail.put("goods", "获取验证码");
+        orderDetail.put("number", "1");
+        orderDetail.put("price", "0");
+        orderDetail.put("category", "0");
+        orderDetail.put("amount", "0");
+        orderDetail.put("tax", "0");
+        array.add(orderDetail);
+        return array.toString();
     }
 
     //获取下单商品sku集合

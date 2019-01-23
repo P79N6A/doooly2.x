@@ -1393,25 +1393,65 @@ public class AdUserService implements AdUserServiceI {
         if (adUser != null) {
             logger.info("用户{}已经存在手机号{}，进入二次匹配流程", adUser.getId(),mobile);
             //第二次进入页面进行匹配
-            AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-            adUserPersonalInfo.setId(adUser.getId());
-            adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
-            if (adUserPersonalInfo != null) {
-                //工号和手机号是否匹配
-                if (staffNum.equals(adUserPersonalInfo.getWorkNumber())) {
-                    //邮箱是否匹配
-                    if (email.equals(adUser.getMailbox())) {
-                        AdActiveCode adActiveCode = new AdActiveCode();
-                        adActiveCode.setAdUserId(adUser.getId());
-                        //adActiveCode.setIsUsed("1");//已使用
-                        adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
-                        if (adActiveCode != null) {
-                            if (code.equals(adActiveCode.getCode())) {
 
+			//已经在福特
+			if (groupId.equals(String.valueOf(adUser.getGroupNum()))) {
+				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+				adUserPersonalInfo.setId(adUser.getId());
+				adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+				if (adUserPersonalInfo != null) {
+					//工号和手机号是否匹配
+					if (staffNum.equals(adUserPersonalInfo.getWorkNumber())) {
+						//邮箱是否匹配
+						if (email.equals(adUser.getMailbox())) {
+							AdActiveCode adActiveCode = new AdActiveCode();
+							adActiveCode.setAdUserId(adUser.getId());
+							//adActiveCode.setIsUsed("1");//已使用
+							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+							if (adActiveCode != null) {
+								if (code.equals(adActiveCode.getCode())) {
+									resultData.put("userId",adUser.getId());
+									return resultData;
+								} else {
+									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+									resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
+									return resultData;
+								}
+							}
+						} else {
+							resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+							resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+							return resultData;
+						}
+					} else {
+						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+						resultData.put(ConstantsLogin.MSG, "员工工号不正确");
+						return resultData;
+					}
+				}
+			} else {
+				//原来不在福特
+				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+                adUserPersonalInfo.setWorkNumber(staffNum);
+                adUserPersonalInfo.setGroupId(Long.parseLong(groupId));
+                adUserPersonalInfo = adUserPersonalInfoDao.selectPersonByWorknumAndGroup(adUserPersonalInfo);
+                if (adUserPersonalInfo != null) {
+                    AdUser adUserNew = new AdUser();
+                    adUserNew.setId(adUserPersonalInfo.getId());
+                    adUserNew = adUserDao.getById(Integer.parseInt(adUserPersonalInfo.getId() +""));
+                    if (adUserNew != null) {
+                        if (email.equals(adUserNew.getMailbox())) {
+                            AdActiveCode adActiveCode = new AdActiveCode();
+                            adActiveCode.setAdUserId(adUserNew.getId());
+                            adActiveCode.setIsUsed("0");
+                            adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+                            if (adActiveCode != null) {
+                                //更新原来的user
                                 adUser.setIsActive("2");
                                 if (StringUtils.isNotBlank(groupId)) {
                                     adUser.setGroupNum(Long.parseLong(groupId));
                                 }
+                                adUser.setMailbox(email);
                                 adUser.setUpdateDate(new Date());
                                 adUser.setActiveDate(new Date());
                                 adUser.setDataSyn(AdUser.DATA_SYN_ON);
@@ -1421,7 +1461,6 @@ public class AdUserService implements AdUserServiceI {
                                     resultData.put(ConstantsLogin.MSG, "切换单位失败");
                                     return resultData;
                                 } else {
-
                                     LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
                                     // A库企业编号
                                     String groupNum = "";
@@ -1442,8 +1481,6 @@ public class AdUserService implements AdUserServiceI {
                                     adActiveCode.setUsedDate(new Date());
                                     adActiveCodeDao.updateByPrimaryKey(adActiveCode);
                                 }
-
-
                                 resultData.put("userId",adUser.getId());
                                 return resultData;
                             } else {
@@ -1451,10 +1488,14 @@ public class AdUserService implements AdUserServiceI {
                                 resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
                                 return resultData;
                             }
+                        } else {
+                            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                            resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+                            return resultData;
                         }
                     } else {
                         resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-                        resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+                        resultData.put(ConstantsLogin.MSG, "员工工号不正确");
                         return resultData;
                     }
                 } else {
@@ -1462,7 +1503,7 @@ public class AdUserService implements AdUserServiceI {
                     resultData.put(ConstantsLogin.MSG, "员工工号不正确");
                     return resultData;
                 }
-            }
+			}
 
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "该手机号已经被绑定");

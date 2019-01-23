@@ -1480,6 +1480,15 @@ public class AdUserService implements AdUserServiceI {
                                         lifeMemberDao.updateActiveStatus(lifeMember);
                                     }
 
+                                    //更新老的
+                                    AdUserPersonalInfo adUserPersonalInfoOld = new AdUserPersonalInfo();
+                                    adUserPersonalInfoOld.setId(adUser.getId());
+                                    adUserPersonalInfoOld = adUserPersonalInfoDao.select(adUserPersonalInfoOld);
+                                    if (adUserPersonalInfoOld != null) {
+                                        adUserPersonalInfoOld.setWorkNumber(staffNum);
+                                        adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfoOld);
+                                    }
+
                                     adActiveCode.setIsUsed("1");
                                     adActiveCode.setUsedDate(new Date());
                                     adActiveCodeDao.updateByPrimaryKey(adActiveCode);

@@ -7,6 +7,7 @@ import com.doooly.business.freeCoupon.service.task.SaveOrderExtTask;
 import com.doooly.business.freeCoupon.service.thread.impl.MyThreadPoolServiceImpl;
 import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
+import com.doooly.business.order.vo.AdOrderBig;
 import com.doooly.business.order.vo.MerchantProdcutVo;
 import com.doooly.business.order.vo.OrderExtVo;
 import com.doooly.business.order.vo.OrderItemVo;
@@ -21,7 +22,11 @@ import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.business.product.service.AdSelfProductImageServiceI;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.recharge.AdRechargeConfServiceI;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.util.Generator;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
+import com.doooly.common.util.SnowflakeIdWorker;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
@@ -236,7 +241,184 @@ public class OrderServiceImpl implements OrderService {
 		return msg;
 	}
 
+
+	@Override
 	@Transactional(rollbackFor = Exception.class)
+	public OrderMsg createOrderv2(JSONObject json) {
+		long s = System.currentTimeMillis();
+		logger.info("Start creating order. json = {}", json);
+		OrderVo orderVo = json.toJavaObject(OrderVo.class);
+		//检查订单参数
+		OrderMsg checkMsg = checkOrderParams(orderVo);
+		if (checkMsg != null) {
+			return checkMsg;
+		}
+		OrderExtVo orderExtVo = orderVo.getOrderExt();
+		List<MerchantProdcutVo> merchants = orderVo.getMerchantProduct();
+		long userId = orderVo.getUserId();
+		String actType = ActivityType.COMMON_ORDER.getActType();
+        //订单集合
+        List<JSONObject> orders = new ArrayList<>();
+        BigDecimal totalAllMount = new BigDecimal("0");//大订单实付金额
+        BigDecimal totalAllPrice = new BigDecimal("0");//大订单应付金额
+        List<JSONObject> carts = new ArrayList<>();
+        for (MerchantProdcutVo merchantProduct : merchants) {
+            String orderNum = IdGeneratorUtil.getOrderNumber(orderVo.getIsSource());
+            int merchantId = merchantProduct.getMerchantId();
+            String remarks = merchantProduct.getRemarks();
+            List<OrderItemVo> orderItems = new ArrayList<>();
+			BigDecimal totalMount = new BigDecimal("0");//实付金额
+			BigDecimal totalPrice = new BigDecimal("0");//应付金额
+			List<ProductSkuVo> prodcutSkus = merchantProduct.getProductSku();
+			//商家对应的商品SKU
+			for (ProductSkuVo productSkuVo : prodcutSkus) {
+				int productId = productSkuVo.getProductId();
+				int skuId = productSkuVo.getSkuId();
+				int buyQuantity = productSkuVo.getBuyNum();
+                int productType = productSkuVo.getProductType();
+                Map<String,Object> paramMap = new HashMap<>();
+                paramMap.put("merchantId",merchantId);
+                paramMap.put("productId",productId);
+                paramMap.put("skuId",skuId);
+				AdSelfProduct product = productService.getCacheProductSku(paramMap);
+				if (product == null) {
+					return new OrderMsg(OrderMsg.failure_code, "未找到商品信息.");
+				}
+				List<AdSelfProductSku> skus = product.getProductSku();
+				AdSelfProductSku sku = skus.get(0);
+				if (CollectionUtils.isEmpty(product.getProductSku()) || (sku == null)) {
+					return new OrderMsg(OrderMsg.failure_code, "未找到商品规格信息.");
+				}
+				BigDecimal sellPrice = new BigDecimal(sku.getSellPrice());
+				if (productType == ProductType.MOBILE_RECHARGE.getCode()) {
+					//话费充值计算手续费
+					OrderMsg msg = getServiceChargeAndCheckLimit(orderVo, sku);
+					if (OrderMsg.success_code.equals(msg.getCode())) {
+						if(msg.data != null) {
+							orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+						}
+					} else {
+						return msg;
+					}
+				} else if (orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()) {
+					// do nothing
+				} else {
+					//活动
+					OrderMsg msg = getActInfo(orderVo, productSkuVo);
+					if (OrderMsg.success_code.equals(msg.getCode())) {
+						if (msg.data != null) {
+							actType = (String) msg.data.get("actType");
+							sellPrice = (BigDecimal) msg.data.get("actPrice");
+						}
+
+						if (productType == ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
+						    sku.setSellPrice(sellPrice.toString());
+							msg = getServiceChargeAndCheckLimit(orderVo, sku);
+							if (OrderMsg.success_code.equals(msg.getCode())) {
+								if(msg.data != null) {
+									orderVo.setServiceCharge((BigDecimal) msg.data.get("serviceCharge"));
+								}
+							} else {
+								return msg;
+							}
+						}
+					} else {
+						return msg;
+					}
+				}
+				//校验库存并扣除库存
+                //商品从缓存取这里库存单独查询
+                Integer inventory = productService.getSelfProductSku(sku).getInventory();
+                if (inventory != null) {
+                    if (inventory < buyQuantity) {
+                        logger.error("product.inventory = {},{},{}", inventory,buyQuantity,skuId);
+                        return new OrderMsg(OrderMsg.out_of_stock_code1, OrderMsg.out_of_stock_mess1);
+                    }
+                    //库存优化根据数量扣减
+                    int rows = productService.decInventoryByNum(skuId,buyQuantity);
+                    logger.info("decInventory() skuId={},inventor={},buyQuantity={},rows={}", skuId, inventory,buyQuantity, rows);
+                    if (rows == 0) {
+                        return new OrderMsg(OrderMsg.create_order_failed_code, OrderMsg.create_order_failed_mess);
+                    }
+                }
+				BigDecimal marketPrice = new BigDecimal(sku.getMarketPrice());
+				totalMount = totalMount.add(sellPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
+				totalPrice = totalPrice.add(marketPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
+				OrderItemVo orderItem = buildOrderItem(orderVo, userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
+				orderItems.add(orderItem);
+                JSONObject cart = new JSONObject();
+                cart.put("businessId",merchantId);
+                cart.put("sku",sku.getId());
+                cart.put("num",0);//下完单清空购物车传0
+                carts.add(cart);
+			}
+			//自营优惠券
+			OrderMsg msg = getDisAmountAndSetCoupon(orderVo, totalMount);
+			BigDecimal couponValue = null;
+			String couponId = null;
+			if (OrderMsg.success_code.equals(msg.getCode())) {
+				BigDecimal discountAmount = (BigDecimal) msg.data.get("discountAmount");
+				totalMount = discountAmount != null ? discountAmount : totalMount;
+				couponValue = (BigDecimal) msg.data.get("couponValue");
+				couponId = (String) msg.data.get("couponId");
+			}else{
+				return msg;
+			}
+			//扣券后的订单明细金额
+			orderItems.get(0).setAmount(totalMount);
+			//保存订单
+			OrderExtVo orderExt = buildOrderExt(orderExtVo);
+			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
+            JSONObject addorder = new JSONObject();
+            addorder.put("order",order);
+            addorder.put("orderExt",orderExt);
+            addorder.put("orderItems",orderItems);
+            orders.add(addorder);
+            totalAllMount = totalMount.add(totalAllMount);
+            totalAllPrice = totalPrice.add(totalPrice);
+			logger.info("Create order successfully. orderNumber = {},execution time : {} milliseconds.", orderNum, System.currentTimeMillis() - s);
+        }
+        //保存订单信息
+        OrderMsg msg = saveOrders(orders,totalAllMount,totalAllPrice,userId,carts);
+		return msg;
+	}
+
+	//保存订单
+    private OrderMsg saveOrders(List<JSONObject> orders, BigDecimal totalAllMount, BigDecimal totalAllPrice, Long userId, List<JSONObject> carts) {
+        //下单成功返回信息
+        OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
+        AdOrderBig adOrderBig = new AdOrderBig();
+        long bigOrderNumber = Generator.nextValue();
+        adOrderBig.setId(bigOrderNumber);
+        adOrderBig.setTotalPrice(totalAllPrice);
+        adOrderBig.setTotalAmount(totalAllMount);
+        adOrderBig.setState(0);
+        adOrderBig.setUserId(userId);
+        adOrderBig.setIsSource("3");
+        adOrderReportServiceI.insertAdBigOrder(adOrderBig);
+        for (JSONObject jsonObject : orders) {
+            OrderVo order = (OrderVo) jsonObject.get("order");
+            OrderExtVo orderExt = (OrderExtVo) jsonObject.get("orderExt");
+            List<OrderItemVo> orderItems = (List<OrderItemVo>) jsonObject.get("orderItems");
+            order.setBigOrderNumber(bigOrderNumber);
+            saveOrder(order, orderExt, orderItems);
+        }
+        //清空购物车
+       JSONObject cart = new JSONObject();
+        cart.put("userId",userId);
+        cart.put("cartList",carts);
+        JSONObject result = HttpClientUtil.httpPost(Constants.OrderApiConstants.ORDER_BASE_URL + Constants.OrderApiConstants.SHOP_CART_URL, cart);
+        if(!MessageDataBean.success_code.equals(result.get("code"))){
+            //购物车清空失败,直接抛出异常回滚数据
+            logger.error("购物车清空失败,返回结果{}",result);
+            throw new RuntimeException("购物车清空失败");
+        }
+        msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
+        return msg;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
 	public int lockCoupon(long userId,String couponId){
 		return adCouponCodeDao.lockCoupon(userId,couponId);
 	}
@@ -472,7 +654,7 @@ public class OrderServiceImpl implements OrderService {
 		OrderItemVo orderItem = new OrderItemVo();
 		orderItem.setOrderReportId(0l);
 		orderItem.setCategoryId(category.toString());
-		orderItem.setCode(sku.getNumber());
+		orderItem.setCode(sku.getId());
 		orderItem.setGoods(product.getName());
 		orderItem.setAmount(sellPrice);
 		orderItem.setPrice(marketPrice);
@@ -592,11 +774,6 @@ public class OrderServiceImpl implements OrderService {
 		order.setId(oneOrderId);
 		order.setOrderId(oneOrderId);
 		rows += saveOrder(order);
-        //logger.info("order.id = {}", order.getId());
-        //if (orderExt != null) {
-			//rows += saveOrderExt(order.getId(),orderExt);
-        //}
-        //rows += saveOrderItem(order.getId(), orderItem);
         //20181226改成异步处理
         JSONObject req = new JSONObject();
         req.put("orderId",order.getId());
@@ -626,6 +803,7 @@ public class OrderServiceImpl implements OrderService {
 		o.setCreateDateTime(new Date());
 		o.setState(0);
         o.setSource(3);//兜礼自营
+        o.setBigOrderNumber(order.getBigOrderNumber());
 		orderDao.insert(o);
 		return o.getId();
 	}
@@ -742,73 +920,93 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional
 	public OrderMsg cancleOrder(long userId, String orderNum) {
 		logger.info("cancleOrder() orderNum = {},userId = {}", orderNum, userId);
-		if (StringUtils.isEmpty(orderNum) || userId <= 0) {
-			return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
-		}
-		OrderVo orderParam = new OrderVo();
-		orderParam.setOrderNumber(orderNum);
-		orderParam.setUserId(userId);
-		//检查订单状态,交易完成的订单不能取消
-		List<OrderVo> orders = this.getOrder(orderParam);
-		OrderVo order = null;
-		if (!CollectionUtils.isEmpty(orders) && (order = orders.get(0)) != null) {
-			if (order.getType() == OrderStatus.CANCELLED_ORDER.getCode() || order.getType() == OrderStatus.HAD_FINISHED_ORDER.getCode() || order.getType() == OrderStatus.NEED_TO_DELIVER.getCode()) {
-				logger.error("订单不能取消. orderNum = {},type = {}", order.getOrderNumber(), order.getType());
-				return new OrderMsg(MessageDataBean.failure_code, "订单不能取消");
-			}
-		} else {
-			logger.info("cancleOrder() orders = {},order = {}", orders, order);
-			return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
-		}
-		//2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
+        OrderMsg payMsg1 = cancelOrderv1(userId, orderNum);
+        if (payMsg1 != null) return payMsg1;
+        return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
+	}
+	/***
+	 * 取消订单
+	 */
+	@Override
+	@Transactional
+	public OrderMsg cancleOrderV2(long userId, String bigOrderNumber) {
+		logger.info("cancleOrder() bigOrderNumber = {},userId = {}", bigOrderNumber, userId);
+        List<OrderVo> orders = adOrderReportServiceI.getOrders(bigOrderNumber);
+        for (OrderVo order : orders) {
+            OrderMsg payMsg1 = cancelOrderv1(userId, order.getOrderNumber());
+            if (payMsg1 != null && payMsg1.getCode().equals(MessageDataBean.failure_code)) return payMsg1;
+        }
+		return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
+	}
+
+    private OrderMsg cancelOrderv1(long userId, String orderNum) {
+        if (StringUtils.isEmpty(orderNum) || userId <= 0) {
+            return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
+        }
+        OrderVo orderParam = new OrderVo();
+        orderParam.setOrderNumber(orderNum);
+        orderParam.setUserId(userId);
+        //检查订单状态,交易完成的订单不能取消
+        List<OrderVo> orders = this.getOrder(orderParam);
+        OrderVo order = null;
+        if (!CollectionUtils.isEmpty(orders) && (order = orders.get(0)) != null) {
+            if (order.getType() == OrderStatus.CANCELLED_ORDER.getCode() || order.getType() == OrderStatus.HAD_FINISHED_ORDER.getCode() || order.getType() == OrderStatus.NEED_TO_DELIVER.getCode()) {
+                logger.error("订单不能取消. orderNum = {},type = {}", order.getOrderNumber(), order.getType());
+                return new OrderMsg(MessageDataBean.failure_code, "订单不能取消");
+            }
+        } else {
+            logger.info("cancleOrder() orders = {},order = {}", orders, order);
+            return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
+        }
+        //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
         PayMsg payMsg = refundService.autoRefund(userId, orderNum);
         if(!payMsg.getCode().equals(PayMsg.success_code)){
             //退款失败
             return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());
         }
         //修改为取消状态
-		orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
-		orderParam.setState(PayState.CANCELLED.getCode());
-		int updateStatus = adOrderReportDao.cancleOrder(orderParam);
+        orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
+        orderParam.setState(PayState.CANCELLED.getCode());
+        int updateStatus = adOrderReportDao.cancleOrder(orderParam);
         //删除_order 删掉未null的
         Order order1 = new Order();
         order1.setId(order.getOrderId());
         orderDao.delete(order1);
-		//恢复活动库存
-		OrderItemVo item = order.getItems().get(0);
-		String str[] = item.getProductSkuId().split("-");
-		int skuId = Integer.valueOf(str[1]);
-		if (!ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
-			AdUser user = adUserDao.getById(order.getUserId().intValue());
-			ActivityInfo actInfo = this.getActivityInfo(String.valueOf(user.getGroupNum()), Integer.valueOf(str[1]));
-			logger.info("actInfo = {}", actInfo);
-			int rows = productService.incStock(actInfo.getNumber(), skuId);
-			logger.info("cancleOrder() orderNum={},incStock.rows = {}", orderNum, rows);
-		}
-		//恢复商品库存
-		int incInventoryRows = productService.incInventory(skuId);
-		logger.info("cancleOrder() orderNum={},incInventoryRows = {}", orderNum, incInventoryRows);
-		//解锁券
-		String couponId = order.getCouponId();
-		int unlockCouponRows = adCouponCodeDao.unlockCoupon(userId, couponId);
-		logger.info("unlockCoupon userId = {},couponId = {},unlockCouponRows={}", userId, couponId, unlockCouponRows);
-		//如果是话费优惠订单参与修改记录
-		if(order.getProductType() == ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
-			int updateStateOrDelFlagRows = adRechargeRecordDao.updateStateOrDelFlag(order.getOrderNumber(), 1);
-			logger.info("updateStateOrDelFlag.rows = {}", updateStateOrDelFlagRows);
-		}
-		//返回取消结果
-		if (updateStatus > 0) {
-			logger.info("cancleOrder() orderNum={},cancleOrder.updateStatus = {}", orderNum, updateStatus);
-			OrderMsg msg = new OrderMsg(MessageDataBean.success_code, MessageDataBean.success_mess, new HashMap<String, Object>());
-			msg.data.put("order_status_code", OrderStatus.CANCELLED_ORDER.getCode());
-			msg.data.put("order_status_msg", OrderStatus.CANCELLED_ORDER.getStatus());
-			return msg;
-		}
-		return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
-	}
+        //恢复活动库存
+        OrderItemVo item = order.getItems().get(0);
+        String str[] = item.getProductSkuId().split("-");
+        int skuId = Integer.valueOf(str[1]);
+        if (!ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
+            AdUser user = adUserDao.getById(order.getUserId().intValue());
+            ActivityInfo actInfo = this.getActivityInfo(String.valueOf(user.getGroupNum()), Integer.valueOf(str[1]));
+            logger.info("actInfo = {}", actInfo);
+            int rows = productService.incStock(actInfo.getNumber(), skuId);
+            logger.info("cancleOrder() orderNum={},incStock.rows = {}", orderNum, rows);
+        }
+        //恢复商品库存
+        int incInventoryRows = productService.incInventory(skuId);
+        logger.info("cancleOrder() orderNum={},incInventoryRows = {}", orderNum, incInventoryRows);
+        //解锁券
+        String couponId = order.getCouponId();
+        int unlockCouponRows = adCouponCodeDao.unlockCoupon(userId, couponId);
+        logger.info("unlockCoupon userId = {},couponId = {},unlockCouponRows={}", userId, couponId, unlockCouponRows);
+        //如果是话费优惠订单参与修改记录
+        if(order.getProductType() == ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
+            int updateStateOrDelFlagRows = adRechargeRecordDao.updateStateOrDelFlag(order.getOrderNumber(), 1);
+            logger.info("updateStateOrDelFlag.rows = {}", updateStateOrDelFlagRows);
+        }
+        //返回取消结果
+        if (updateStatus > 0) {
+            logger.info("cancleOrder() orderNum={},cancleOrder.updateStatus = {}", orderNum, updateStatus);
+            OrderMsg msg = new OrderMsg(MessageDataBean.success_code, MessageDataBean.success_mess, new HashMap<String, Object>());
+            msg.data.put("order_status_code", OrderStatus.CANCELLED_ORDER.getCode());
+            msg.data.put("order_status_msg", OrderStatus.CANCELLED_ORDER.getStatus());
+            return msg;
+        }
+        return null;
+    }
 
-	/**
+    /**
 	 * 更新订单状态-成功
 	 * @param orders
 	 * @return

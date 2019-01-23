@@ -1149,7 +1149,7 @@ public class AdUserService implements AdUserServiceI {
 				lifemember.setMobile(userdata.getTelephone()); // TODO
 				lifemember.setName(userdata.getName());
 				lifemember.setEmail(userdata.getMailbox());
-				if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+				if (StringUtils.isNotBlank(userdata.getSex())) {
 					lifemember.setGender(Integer.valueOf(userdata.getSex()));
 				}
 				lifemember.setIdentityCard(userdata.getIdentityCard());
@@ -1372,7 +1372,7 @@ public class AdUserService implements AdUserServiceI {
 		}
 		String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT + telephone);
 		if (isFailed) {
-			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+			if (StringUtils.isBlank(old)) {
 				redisTemplate.opsForValue().set(ACTIVATE_CODE_FAIL_COUNT + telephone, "1", 5 * 60 * 1000,
 						TimeUnit.MILLISECONDS);
 				resultData.put("failCount", 1);
@@ -1388,7 +1388,7 @@ public class AdUserService implements AdUserServiceI {
 		} else {
 			// String old =
 			// redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
-			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+			if (StringUtils.isBlank(old)) {
 				resultData.put("failCount", 0);
 			} else {
 				resultData.put("failCount", Integer.valueOf(old));
@@ -1632,7 +1632,7 @@ public class AdUserService implements AdUserServiceI {
 			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(user.getGroupNum() + "");
 			member.setAdId(userdata.getId() + "");
 			member.setName(userdata.getName());
-			if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+			if (StringUtils.isNotBlank(userdata.getSex())) {
 				member.setGender(Integer.valueOf(userdata.getSex()));
 			}
 			member.setIdentityCard(userdata.getIdentityCard());

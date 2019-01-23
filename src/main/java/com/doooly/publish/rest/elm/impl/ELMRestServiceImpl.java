@@ -3,10 +3,8 @@ package com.doooly.publish.rest.elm.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.ele.ELMServiceI;
 import com.doooly.business.payment.bean.ResultModel;
-import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.common.IPUtils;
 import com.doooly.common.elm.ELMConstants;
-import com.doooly.common.elm.PayStatusEnum;
 import com.doooly.common.elm.ElmSignUtils;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.publish.rest.elm.ELMRestServiceI;
@@ -95,55 +93,6 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         return resultModel.getData().toString();
     }
 
-    private boolean checkSign(JSONObject obj) {
-        boolean flag = false;
-        try {
-            String sign = obj.getString("sign");
-            obj.remove("sign");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, obj, sign);
-            if (!flag) {
-                logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(obj), sign);
-                String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);
-                logger.info("----------------生成可用的签名：" + signStr);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return flag;
-    }
-
-    private boolean checkParam(JSONObject req) {
-        if (StringUtils.isBlank(req.getString("appId")) || StringUtils.isBlank(req.getString("merchantNo"))
-                || StringUtils.isBlank(req.getString("subject")) || StringUtils.isBlank(req.getString("body"))
-                || StringUtils.isBlank(req.getString("transactionId")) || StringUtils.isBlank(req.getString("payAmount"))
-                || StringUtils.isBlank(req.getString("timestamp")) || StringUtils.isBlank(req.getString("timeExpire"))
-                || StringUtils.isBlank(req.getString("redirectUrl")) || StringUtils.isBlank(req.getString("notifyUrl"))
-                || StringUtils.isBlank(req.getString("nonceStr"))
-                || StringUtils.isBlank(req.getString("sign"))) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
-        JSONObject jsonObject = new JSONObject();
-        String sign = request.getHeader("sign");
-        Enumeration enu = request.getParameterNames();
-        while (enu.hasMoreElements()) {
-            String key = (String) enu.nextElement();
-            String value = request.getParameter(key);
-            try {
-                value = new String(value.getBytes("iso-8859-1"), "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            jsonObject.put(key, value);
-        }
-        jsonObject.put("sign", sign);
-        return jsonObject;
-    }
-
     @POST
     @Path(value = "/getPayInfo")
     @Produces(MediaType.APPLICATION_JSON)
@@ -184,14 +133,6 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         return resultModel.getData().toString();
     }
 
-    private boolean checkPayInfoParam(JSONObject obj) {
-        if (StringUtils.isBlank(obj.getString("appId")) || StringUtils.isBlank(obj.getString("merchantNo"))
-                || StringUtils.isBlank(obj.getString("transactionId")) || StringUtils.isBlank(obj.getString("nonceStr"))
-                || StringUtils.isBlank(obj.getString("sign"))) {
-            return true;
-        }
-        return false;
-    }
 
     @POST
     @Path(value = "/refund")
@@ -232,6 +173,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         return resultModel.getData().toString();
     }
 
+
     @POST
     @Path(value = "/getRefundInfo")
     @Produces(MediaType.APPLICATION_JSON)
@@ -265,4 +207,63 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         ResultModel resultModel = elmServiceI.queryElmRefundInfo(obj);
         return resultModel.getData().toString();
     }
+
+    private boolean checkSign(JSONObject obj) {
+        boolean flag = false;
+        try {
+            String sign = obj.getString("sign");
+            obj.remove("sign");
+            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, obj, sign);
+            if (!flag) {
+                logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(obj), sign);
+                String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);
+                logger.info("----------------生成可用的签名：" + signStr);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    private boolean checkPayInfoParam(JSONObject obj) {
+        if (StringUtils.isBlank(obj.getString("appId")) || StringUtils.isBlank(obj.getString("merchantNo"))
+                || StringUtils.isBlank(obj.getString("transactionId")) || StringUtils.isBlank(obj.getString("nonceStr"))
+                || StringUtils.isBlank(obj.getString("sign"))) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkParam(JSONObject req) {
+        if (StringUtils.isBlank(req.getString("appId")) || StringUtils.isBlank(req.getString("merchantNo"))
+                || StringUtils.isBlank(req.getString("subject")) || StringUtils.isBlank(req.getString("body"))
+                || StringUtils.isBlank(req.getString("transactionId")) || StringUtils.isBlank(req.getString("payAmount"))
+                || StringUtils.isBlank(req.getString("timestamp")) || StringUtils.isBlank(req.getString("timeExpire"))
+                || StringUtils.isBlank(req.getString("redirectUrl")) || StringUtils.isBlank(req.getString("notifyUrl"))
+                || StringUtils.isBlank(req.getString("nonceStr"))
+                || StringUtils.isBlank(req.getString("sign"))) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
+        JSONObject jsonObject = new JSONObject();
+        String sign = request.getHeader("sign");
+        Enumeration enu = request.getParameterNames();
+        while (enu.hasMoreElements()) {
+            String key = (String) enu.nextElement();
+            String value = request.getParameter(key);
+            try {
+                value = new String(value.getBytes("iso-8859-1"), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            jsonObject.put(key, value);
+        }
+        jsonObject.put("sign", sign);
+        return jsonObject;
+    }
+
 }

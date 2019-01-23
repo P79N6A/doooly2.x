@@ -10,6 +10,7 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
+import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.payment.constants.PayConstants;
@@ -22,8 +23,10 @@ import com.doooly.common.elm.ElmSignUtils;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.dao.reachad.*;
+import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdOrderReport;
+import com.doooly.entity.reachad.AdReturnFlow;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +51,11 @@ public class ELMServiceImpl implements ELMServiceI {
     @Autowired
     private ConfigDictServiceI configDictServiceI;
     @Autowired
-    private AdBusinessServiceI adBusinessServiceI;
-    @Autowired
-    private NewPaymentServiceI paymentService;
-    @Autowired
     private OrderService orderService;
     @Autowired
     private AdOrderReportServiceI adOrderReportServiceI;
     @Autowired
-    private AdOrderDetailDao detailDao;
-    @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private AdUserDao adUserDao;
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
     @Autowired
@@ -71,6 +66,10 @@ public class ELMServiceImpl implements ELMServiceI {
     private AdOrderReportDao adOrderReportDao;
     @Autowired
     private AdPayFlowDao adPayFlowDao;
+    @Autowired
+    private RefundService refundService;
+    @Autowired
+    private AdReturnFlowDao adReturnFlowDao;
 
     /**
      * 推送信息
@@ -165,7 +164,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, "会员手机号或会员卡号为空",
                         PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
                 resultModel.setData(res);
-                return  resultModel;
+                return resultModel;
             }
             JSONObject redisObj = (JSONObject) JSONObject.parse(redisTel);
             String telephone = redisObj.getString("bNo");
@@ -400,140 +399,53 @@ public class ELMServiceImpl implements ELMServiceI {
         return res;
     }
 
-    public ResultModel authorize(String businessId) {
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
-        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
-        SortedMap<Object, Object> parameters = new TreeMap<>();
-        String clientId = adBusinessExpandInfo.getClientId();
-        parameters.put("client_id", clientId);
-        parameters.put("timestamp", timestamp);
-        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
-        JSONObject object = new JSONObject();
-        object.put("client_id", clientId);
-        object.put("timestamp", timestamp);
-        object.put("sign", sign);
-        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.AUTHORIZE_URL);
-        JSONObject jsonResult = JSONObject.parseObject(result);
-        if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
-            //说明获取成功
-            Map<Object, Object> data = (Map<Object, Object>) jsonResult.get("data");
-            return ResultModel.ok(data);
-        } else {
-            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
-        }
-    }
-
     @Override
     public ResultModel elmRefund(JSONObject req) {
         ResultModel resultModel = new ResultModel();
-        JSONObject param = new JSONObject();
-        String returnCode = ""; //		支付请求结果 1: 成功, 2: 失败
-        String returnMsg = ""; //		支付请求错误信息 当 returnCode为 2 时, message 不应为空
-        String transactionId = req.getString("transactionId"); //	支付网关的订单号
-        String outTradeNo = ""; //		三方支付交易号
-        String refundNo = req.getString("refundNo"); //		支付网关退款单号
-        String outRefundNo = ""; //		三方退款单号
-        String payAmount = req.getString("payAmount"); //		支付金额(单位分)
-        String refundAmount = req.getString("refundAmount"); //	退款金额(单位分)
-        String refundStatus = ""; //	退款状态
-        String nonceStr = req.getString("nonceStr");           //		随机串（长度32）
-        String notifyUrl = req.getString("notifyUrl");
-        String businessId = req.getString("merchantNo");    //商户编号
-
-       String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX, req.getString("transactionId")));
-        if (StringUtils.isBlank(redisTel)) {
-            JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "会员手机号或会员卡号为空",
-                    transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
-                    refundAmount, refundStatus, nonceStr);
-            resultModel.setData(ress);
-            return  resultModel;
+        String returnCode = ELMConstants.ELM_RESULT_FAIL;           //支付请求结果 1: 成功, 2: 失败
+        String transactionId = req.getString("transactionId"); //支付网关的订单号
+        String outTradeNo = "";                                      //三方支付交易号
+        String refundNo = req.getString("refundNo");            //支付网关退款单号
+        String outRefundNo = "";                                     //	三方退款单号
+        int payAmount = 0;                                           //支付金额(单位分)
+        int refundAmount = 0;                                        //退款金额(单位分)
+        String refundStatus = "";                                    //退款状态
+        String nonceStr = req.getString("nonceStr");            //随机串（长度32）
+        String orderNum = req.getString("transactionId");
+        List<OrderVo> orderList = adOrderReportDao.getByOrderNum(orderNum);
+        if (null == orderList || orderList.size() == 0) {
+            JSONObject res = getElmRefundResult(returnCode, "无效的订单号", transactionId, outTradeNo,
+                    refundNo, outRefundNo, payAmount, refundAmount, refundStatus, nonceStr);
+            resultModel.setData(res);
+            return resultModel;
         }
-        JSONObject redisObj = (JSONObject) JSONObject.parse(redisTel);
-        String telephone = redisObj.getString("bNo");
-
-        AdBusinessExpandInfo queryParam = new AdBusinessExpandInfo();
-        queryParam.setClientSecret(ELMConstants.ELM_APP_ID);
-        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryParam);
-        if (null == adBusinessExpandInfo) {
-            JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "商户号不存在", transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
-                    refundAmount, refundStatus, nonceStr);
-            resultModel.setData(ress);
-            return  resultModel;
+        OrderVo orderVo = orderList.get(0);
+        PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
+        if (null == payMsg) {
+            JSONObject res = getElmRefundResult(returnCode, "退款失败,请稍后在试", transactionId,
+                    outTradeNo, refundNo, outRefundNo, payAmount, refundAmount, refundStatus, nonceStr);
+            resultModel.setData(res);
+            return resultModel;
         }
-        param.put("businessId", businessId);
-        param.put("storesId", "ELM001");
-        param.put("cardNumber", telephone);
-        param.put("merchantOrderNo", transactionId);
-        param.put("merchantRefundNo", refundNo); //商户退款订单号码，商户内部退款订单唯一，位数12-32位内
-        param.put("refundPrice", payAmount);
-        param.put("refundAmount", refundAmount);
-        param.put("notifyUrl", notifyUrl);
-        param.put("clientIp", req.get("clientIp"));
-        param.put("nonceStr", nonceStr);
-
-        JSONArray jsonArray = new JSONArray();
-        JSONObject jsonDetail = new JSONObject();
-        jsonDetail.put("code", "1002"); //饿了么没有传，目前写个假数据
-        jsonDetail.put("goods", "饿了么商品退款");
-        jsonDetail.put("number", 1);
-        jsonDetail.put("amount", payAmount);
-        jsonDetail.put("category", "0000");
-        jsonDetail.put("price", payAmount);
-        jsonDetail.put("tax", 0);
-        jsonArray.add(jsonDetail);
-        param.put("orderDetail", jsonArray.toJSONString()); // 订单详情
-
-        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
-        SortedMap<Object, Object> parameters = new TreeMap<>();
-        String clientId = adBusinessExpandInfo.getClientId();
-        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
-        if (accessToken == null) {
-            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
-            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
-                accessToken = (String) data.get("access_token");
-            } else {
-                JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "接口授权认证失败",
-                        transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
-                        refundAmount, refundStatus, nonceStr);
-                resultModel.setData(ress);
-                return  resultModel;
+        if (PayMsg.success_code.equals(payMsg.getCode())) {
+            payAmount = req.getInteger("payAmount");       //支付金额(单位分)
+            refundAmount = req.getInteger("refundAmount"); //	退款金额(单位分)
+            refundStatus = RefundStatusEnum.RefundTypeSuccess.getCode();
+            // 支付流水
+            PayFlow payFlow = adPayFlowDao.getByOrderNum(orderNum, null, null);
+            if (null != payFlow) {
+                outTradeNo = String.valueOf(payFlow.getTransNo());
             }
-        }
-        parameters.put("client_id", clientId);
-        parameters.put("timestamp", timestamp);
-        parameters.put("access_token", accessToken);
-        parameters.put("param", param.toJSONString());
-        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
-        JSONObject object = new JSONObject();
-        object.put("client_id", clientId);
-        object.put("timestamp", timestamp);
-        object.put("access_token", accessToken);
-        object.put("param", param.toJSONString());
-        object.put("sign", sign);
-        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_REFUND_URL);
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        logger.info("退款返回结果,{}", jsonObject.toJSONString());
-        if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
-            Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
-            String refundSt = String.valueOf(data.get("refundStatus"));
-            returnCode = ELMConstants.ELM_RESULT_SUCCESS;
-            returnMsg = "处理成功";
-            outTradeNo = data.get("outTradeNo").toString();
-            outRefundNo = data.get("outRefundNo").toString();
-            if (PayConstants.REFUND_STATUS_S.equals(refundSt)) {
-                //说明退款成功处理结果
-                refundStatus = RefundStatusEnum.RefundTypeSuccess.getCode();
-            } else if (PayConstants.REFUND_STATUS_F.equals(refundSt)) {
-                refundStatus = RefundStatusEnum.RefundTypeFail.getCode();
-            } else {
-                refundStatus = RefundStatusEnum.RefundTypeProcessing.getCode();
+            // 退款流水
+            AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(orderVo.getOrderId(), null, null);
+            if (null != adReturnFlow) {
+                outRefundNo = String.valueOf(adReturnFlow.getReturnFlowNumber());
             }
         } else {
             returnCode = ELMConstants.ELM_RESULT_FAIL;
-            returnMsg = "退款失败，请稍后在试";
-            refundStatus = RefundStatusEnum.RefundTypeFail.getCode();
+            refundStatus = RefundStatusEnum.RefundTypeProcessing.getCode();
         }
+        String returnMsg = PayMsg.success_mess;
         JSONObject ress = getElmRefundResult(returnCode, returnMsg, transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
                 refundAmount, refundStatus, nonceStr);
         resultModel.setData(ress);
@@ -541,21 +453,21 @@ public class ELMServiceImpl implements ELMServiceI {
     }
 
     private JSONObject getElmRefundResult(String returnCode, String returnMsg, String transactionId,
-                                          String outTradeNo, String refundNo, String outRefundNo, String payAmount,
-                                          String refundAmount, String refundStatus, String nonceStr) {
+                                          String outTradeNo, String refundNo, String outRefundNo, int payAmount,
+                                          int refundAmount, String refundStatus, String nonceStr) {
         JSONObject res = new JSONObject();
         try {
             res.put("appId", ELMConstants.ELM_APP_ID);
             res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
             res.put("returnCode", returnCode);
             res.put("returnMsg", returnMsg);
-            res.put("outTradeNo", outTradeNo);
-            res.put("outRefundNo", outRefundNo);
-            res.put("refundStatus", refundStatus);
             res.put("transactionId", transactionId);
+            res.put("outTradeNo", outTradeNo);
             res.put("refundNo", refundNo);
+            res.put("outRefundNo", outRefundNo);
             res.put("payAmount", payAmount);
             res.put("refundAmount", refundAmount);
+            res.put("refundStatus", refundStatus);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
@@ -581,10 +493,16 @@ public class ELMServiceImpl implements ELMServiceI {
             if (null != orderList && orderList.size() > 0) {
                 res.put("refundStatus", RefundStatusEnum.RefundTypeSuccess.getCode());
                 OrderVo orderVo = orderList.get(0);
-                outRefundNo = String.valueOf(orderVo.getOrderId());
-                PayFlow payFlow = adPayFlowDao.getByOrderNum(orderNumber, null, null);
+                // 支付流水
+                PayFlow payFlow = adPayFlowDao.getByOrderNum(orderVo.getOrderNumber(), null, null);
                 if (null != payFlow) {
-                    outTradeNo = String.valueOf(payFlow.getId());
+                    outTradeNo = String.valueOf(payFlow.getTransNo());
+                }
+
+                // 退款流水
+                AdReturnFlow adReturnFlow = adReturnFlowDao.getByOrderId(orderVo.getOrderId(), null, null);
+                if (null != adReturnFlow) {
+                    outRefundNo = String.valueOf(adReturnFlow.getReturnFlowNumber());
                 }
             }
             res.put("returnCode", ELMConstants.ELM_RESULT_SUCCESS);

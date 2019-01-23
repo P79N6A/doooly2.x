@@ -162,7 +162,7 @@ public class ELMServiceImpl implements ELMServiceI {
 
             String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX, json.getString("transactionId")));
             if (StringUtils.isBlank(redisTel)) {
-                JSONObject res = getCreateOrderResult(PayConstants.PAY_STATUS_2, "会员手机号 或 会员卡号 为空",
+                JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, "会员手机号或会员卡号为空",
                         PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
                 resultModel.setData(res);
                 return  resultModel;
@@ -174,7 +174,12 @@ public class ELMServiceImpl implements ELMServiceI {
             AdBusinessExpandInfo queryObj = new AdBusinessExpandInfo();
             queryObj.setClientSecret(ELMConstants.ELM_APP_ID);
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryObj);
-
+            if (null == adBusinessExpandInfo) {
+                JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, "商户号不存在",
+                        PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
+                resultModel.setData(res);
+                return resultModel;
+            }
             JSONObject param = new JSONObject();
             param.put("businessId", adBusinessExpandInfo.getBusinessId());
             param.put("cardNumber", telephone);
@@ -202,7 +207,6 @@ public class ELMServiceImpl implements ELMServiceI {
             jsonArray.add(jsonDetail);
             param.put("orderDetail", jsonArray.toJSONString());
             logger.info("饿了么下单参数param=========" + param);
-
 
             String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY,
                     adBusinessExpandInfo.getClientId()));
@@ -263,14 +267,13 @@ public class ELMServiceImpl implements ELMServiceI {
     private JSONObject getCreateOrderResult(String returnCode, String returnMsg, String payStatus, String payId,
                                             String transactionId, String payAmount) {
         JSONObject res = new JSONObject();
-        res.put("returnCode", returnCode);              //支付请求结果 1: 成功, 2: 失败
+        res.put("returnCode", returnCode);             //支付请求结果 1: 成功, 2: 失败
         res.put("returnMsg", returnMsg);               //支付请求结果或错误信息
-        res.put("transactionId", transactionId);                  //支付网关的订单号
-        res.put("payAmount", payAmount);                      //支付金额(单位:分)
-        res.put("outTradeNo", payId);                     //三方交易号
-        res.put("payStatus", payStatus);                //支付状态
-        res.put("nonceStr", RandomUtil.getRandomStr(32));   //随机串（长度32）
-        res.put("returnMsg", payStatus);                //支付请求结果或错误信息
+        res.put("transactionId", transactionId);       //支付网关的订单号
+        res.put("payAmount", payAmount);               //支付金额(单位:分)
+        res.put("outTradeNo", payId);                  //三方交易号
+        res.put("payStatus", payStatus);               //支付状态
+        res.put("nonceStr", RandomUtil.getRandomStr(32)); //随机串（长度32）
         try {
             String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);                   //采用RSA2签名
@@ -280,14 +283,13 @@ public class ELMServiceImpl implements ELMServiceI {
         return res;
     }
 
-
     @Override
     public ResultModel queryElmPayInfo(JSONObject param, HttpServletRequest httpServletRequest) {
         ResultModel resultModel = new ResultModel();
         JSONObject res = new JSONObject();
         JSONObject reqParam = new JSONObject();
         String transactionId = param.getString("transactionId");
-        String returnCode = "";
+        String returnCode = ELMConstants.ELM_RESULT_FAIL;
         String returnsg = "";
         String paAount = "";
         String outTradeNo = "";
@@ -299,20 +301,21 @@ public class ELMServiceImpl implements ELMServiceI {
         AdBusinessExpandInfo queryObj = new AdBusinessExpandInfo();
         queryObj.setClientSecret(ELMConstants.ELM_APP_ID);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryObj);
-
-        reqParam.put("businessId", adBusinessExpandInfo.getBusinessId());           //商户ID
-        reqParam.put("merchantOrderNo", transactionId);     //商户订单号码
-        reqParam.put("nonceStr", param.getString("nonceStr"));                 //随机字符串
+        if (null == adBusinessExpandInfo) {
+            JSONObject ress = getQueryPayResult(returnCode, "商户号不存在", transactionId, paAount,
+                    outTradeNo, paStatus, thirdUserId, thirdPaAccount);
+            resultModel.setData(ress);
+            return resultModel;
+        }
+        reqParam.put("businessId", param.getString("merchantNo"));   //商户ID即ad_business 表的 business_id
+        reqParam.put("merchantOrderNo", transactionId);                  //商户订单号码
+        reqParam.put("nonceStr", param.getString("nonceStr"));     //随机字符串
 
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
         String clientId = adBusinessExpandInfo.getClientId();
-        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
-        parameters.put("client_id", clientId);
-        parameters.put("timestamp", timestamp);
-        parameters.put("access_token", accessToken);
-        parameters.put("param", param.toJSONString());
-        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY,
+                clientId));
         logger.info("下预付单参数=======accessToken========" + accessToken);
         if (accessToken == null) {
             ResultModel authorize = newPaymentServiceI.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
@@ -320,27 +323,18 @@ public class ELMServiceImpl implements ELMServiceI {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
             } else {
-                returnCode = ELMConstants.ELM_RESULT_FAIL;
-                returnsg = "接口授权认证失败";
-                JSONObject ress = getQueryPayResult(returnCode, returnsg, transactionId, paAount,
+                JSONObject ress = getQueryPayResult(returnCode, "接口授权认证失败", transactionId, paAount,
                         outTradeNo, paStatus, thirdUserId, thirdPaAccount);
                 resultModel.setData(ress);
                 return resultModel;
             }
-            /*
-            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
-            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
-                accessToken = (String) data.get("access_token");
-            } else {
-                returnCode =  ELMConstants.ELM_RESULT_FAIL;
-                returnsg = "接口授权认证失败";
-                JSONObject ress =getQueryPayResult(returnCode, returnsg, transactionId, paAount,
-                        outTradeNo, paStatus, thirdUserId, thirdPaAccount);
-                resultModel.setData(ress);
-                return resultModel;
-            }*/
         }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", reqParam.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+
         JSONObject object = new JSONObject();
         object.put("client_id", clientId);
         object.put("timestamp", timestamp);
@@ -352,9 +346,8 @@ public class ELMServiceImpl implements ELMServiceI {
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
-            Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             returnCode = ELMConstants.ELM_RESULT_SUCCESS;
-            returnsg = "请求成功";
+            Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             String payStatus = String.valueOf(data.get("payStatus"));   //支付状态 0 未支付 1支付成功 2支付失败
             outTradeNo = String.valueOf(data.get("outTradeNo"));        //兜礼平台订单号
             paAount = String.valueOf(data.get("orderAmount"));
@@ -374,9 +367,10 @@ public class ELMServiceImpl implements ELMServiceI {
                 paStatus = PayStatusEnum.PayTypeNotPay.getCode();
             }
         } else {
-            returnCode = ELMConstants.ELM_RESULT_FAIL;
-            returnsg = "支付查询异常，请稍后在试";
+            returnCode = ELMConstants.ELM_RESULT_SUCCESS;
+            paStatus = PayStatusEnum.PayTypeNotPay.getCode();
         }
+        returnsg = jsonObject.getString("info");
         JSONObject ress = getQueryPayResult(returnCode, returnsg, transactionId, paAount,
                 outTradeNo, paStatus, thirdUserId, thirdPaAccount);
         resultModel.setData(ress);
@@ -433,8 +427,6 @@ public class ELMServiceImpl implements ELMServiceI {
     public ResultModel elmRefund(JSONObject req) {
         ResultModel resultModel = new ResultModel();
         JSONObject param = new JSONObject();
-        JSONObject res = new JSONObject();
-
         String returnCode = ""; //		支付请求结果 1: 成功, 2: 失败
         String returnMsg = ""; //		支付请求错误信息 当 returnCode为 2 时, message 不应为空
         String transactionId = req.getString("transactionId"); //	支付网关的订单号
@@ -444,12 +436,14 @@ public class ELMServiceImpl implements ELMServiceI {
         String payAmount = req.getString("payAmount"); //		支付金额(单位分)
         String refundAmount = req.getString("refundAmount"); //	退款金额(单位分)
         String refundStatus = ""; //	退款状态
-        String nonceStr = req.getString("nonceStr"); //		随机串（长度32）
+        String nonceStr = req.getString("nonceStr");           //		随机串（长度32）
         String notifyUrl = req.getString("notifyUrl");
+        String businessId = req.getString("merchantNo");    //商户编号
 
-        String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX, req.getString("transactionId")));
+       String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX, req.getString("transactionId")));
         if (StringUtils.isBlank(redisTel)) {
-            JSONObject ress = getElmRefundResult(returnCode, "会员手机号 或 会员卡号 为空", transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
+            JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "会员手机号或会员卡号为空",
+                    transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
                     refundAmount, refundStatus, nonceStr);
             resultModel.setData(ress);
             return  resultModel;
@@ -460,8 +454,13 @@ public class ELMServiceImpl implements ELMServiceI {
         AdBusinessExpandInfo queryParam = new AdBusinessExpandInfo();
         queryParam.setClientSecret(ELMConstants.ELM_APP_ID);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryParam);
-
-        param.put("businessId", adBusinessExpandInfo.getBusinessId());
+        if (null == adBusinessExpandInfo) {
+            JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "商户号不存在", transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
+                    refundAmount, refundStatus, nonceStr);
+            resultModel.setData(ress);
+            return  resultModel;
+        }
+        param.put("businessId", businessId);
         param.put("storesId", "ELM001");
         param.put("cardNumber", telephone);
         param.put("merchantOrderNo", transactionId);
@@ -494,7 +493,11 @@ public class ELMServiceImpl implements ELMServiceI {
                 Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
                 accessToken = (String) data.get("access_token");
             } else {
-                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+                JSONObject ress = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, "接口授权认证失败",
+                        transactionId, outTradeNo, refundNo, outRefundNo, payAmount,
+                        refundAmount, refundStatus, nonceStr);
+                resultModel.setData(ress);
+                return  resultModel;
             }
         }
         parameters.put("client_id", clientId);

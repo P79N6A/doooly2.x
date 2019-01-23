@@ -502,5 +502,4 @@ public class IndexServiceImpl implements IndexServiceI {
         }
         return beans;
     }
-
 }

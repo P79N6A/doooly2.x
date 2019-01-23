@@ -2,28 +2,23 @@ package doooly;
 
 //package com.redis;package com.redis.test;
 
+import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
-import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
-import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdReturnPointsDao;
-import com.doooly.dao.reachad.AdReturnPointsLogDao;
-import com.doooly.dao.reachad.OrderDao;
-import com.doooly.entity.reachad.AdReturnPoints;
-import com.doooly.entity.reachad.AdReturnPointsLog;
-import com.doooly.entity.reachad.Order;
+import com.doooly.common.meituan.MeituanProductTypeEnum;
+import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import com.doooly.entity.reachad.AdUser;
+import com.github.pagehelper.PageHelper;
 import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 //package com.redis;
@@ -53,98 +48,74 @@ public class TestService {
     @Autowired
     private RefundSyncOrderProcessor refundSyncOrderProcessor;
 
+    @Autowired
+    private MeituanService meituanService;
+
     @Test
-    public void test(){
-       /* ValueOperations<String, String> ops = redis.opsForValue();
-        System.out.println(ops.setIfAbsent("t1", "1"));
-        System.out.println(ops.setIfAbsent("t1", "1"));
-        System.out.println(redis.expire("t1", 1000, TimeUnit.SECONDS));*/
-        /*AdReturnPoints adReturnPoints = new AdReturnPoints();
-        adReturnPoints.setReportId("121");
-       adReturnPoints = adReturnPointsDao.getByCondition(adReturnPoints);
-        System.out.println(new Gson().toJson(adReturnPoints));*/
-        //synAdReturnPointsLog("199295666","vipte00001223","TEST_14754724c5a9067880bafaa4d046be9e","1");
+    public void test() throws Exception{
+        String ret = meituanService.easyLogin("8e348852107ccc2b299648cd832dafdc","29352788035","15711667873", MeituanProductTypeEnum.WAIMAI);
+        System.out.println("ret1 = " + ret);
+    }
 
+    @Test
+    public void test2() throws Exception{
+        /*Map<String,Object> map = new HashMap<>();
+        map.put("entId",15795);
+        map.put("appKey","slt");
+        map.put("entToken","ehvihi");
+        map.put("nounce","wqfmwei15l694cwjqh5pd7z5lv0p49w7dfus");
+        map.put("productType","mt_waimai");
+        map.put("requestTime","20181128151427");
+        map.put("staffNo","ljxtest1121");
+        map.put("staffPhoneNo","18842612302");
+        map =  BeanMapUtil.sortMapByKey(map);
+        String sign = meituanService.getSiginature(map);
+        System.out.println("sign = " + sign);*/
 
-        //插入ad_return_points
-        /*AdReturnPoints adReturnPoints = new AdReturnPoints();
-        adReturnPoints.setReportId("199295818");
-        AdReturnPoints adReturnPoints1 = adReturnPointsDao.getByCondition(adReturnPoints);
-        System.out.println(new Gson().toJson(adReturnPoints1));*/
+        /*RSAPrivateKey rsaPrivateKey = RsaUtil.loadPrivateKey(MeituanConstants.private_key);
+        String signature = RsaUtil.sign("a".getBytes(),rsaPrivateKey);*/
+        //signature = URLEncoder.encode(signature,"utf-8");
+       /* System.out.println(signature);*/
 
-        /*OrderVo o = new OrderVo();
-        o.setOrderNumber("dly006867648905842");
-        o = orderService.getOrder(o).get(0);
+    }
 
-        Order order = new Order();
-        order = orderDao.get("199296320");
+    //https://m-sqt.meituan.com/open/commonaccess/access
+    // ?appKey=slt
+    // &entId=15795&entToken=ehvihi
+    // &nounce=wqfmwei15l694cwjqh5pd7z5lv0p49w7dfus
+    // &productType=mt_waimai&requestTime=20181128151427
+    // &staffNo=ljxtest1121&staffPhoneNo=18842612302
+    // &signature=h0OitEyE97Puw02U3MT2NWNhEA7IS3%2FkoWq4IK2B%2BiDmLqZIIgl3jLvkydNS3%2B9TWP6j%2BEjljhoFfSbjOMnBTiLj6xMgjYqg2pP%2FUBERRm7VhNggR6Wt1Oxg2NyZf2V05ZH71J%2FhSJylJUO5w6aVSFNrRhk1DH5XLjSLDZ91paI%3D
 
-        refundSyncOrderProcessor.process(o,order);*/
-        //afterRefundProcess(o,order);
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
-        //dly006861034619425(String), 1(Integer), 5(Integer)
-        /*Order order = new Order();
-        order.setOrderNumber("dly006861034619425");
-        order.setState(1);
-        order.setType(5);
-        List<Order> list = orderDao.findList(order);
-        System.out.println(new Gson().toJson(list));*/
+    @Autowired
+    private AdUserDao adUserDao;
 
+    @Test
+    public void test3() {
 
-        OrderVo o1 = new OrderVo();
-        o1.setId(199296251L);
-        BigDecimal userRebate = BigDecimal.ZERO ;
-        o1.setUserRebate(BigDecimal.ZERO);
-        o1.setActType("100");
-        o1.setUpdateDate(new Date());
-        adOrderReportDao.update(o1);
+        PageHelper.startPage(2,6);
+        AdUser adUser = new AdUser();
+        long x = adUserDao.getIdByPhoneOrCard("");
+
+    }
+
+    @Autowired
+    private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
+
+    @Test
+    public void test4() {
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId("9486");
+        System.out.println(new Gson().toJson(adBusinessExpandInfo));
     }
 
 
 
-    /**
-     * 插入synAdReturnPointsLog
-     * @param orderId
-     * @param orderNumber
-     * @param businessId
-     */
-    private void synAdReturnPointsLog(String orderId,String orderNumber,String businessId,String type) {
 
 
-        //插入ad_return_points_log
-        AdReturnPointsLog adReturnPointsLog = new AdReturnPointsLog();
-        adReturnPointsLog.setOrderId(Long.parseLong(orderId));
-        adReturnPointsLog.setType(type);
-        AdReturnPointsLog adReturnPointsLog1 = adReturnPointsLogDao.getByCondition(adReturnPointsLog);
-        if (adReturnPointsLog1 != null) {
-            return;
-        }
-        adReturnPointsLog.setAdReturnPointsId(Long.parseLong("22"));
-        adReturnPointsLog.setOperateAmount(BigDecimal.ZERO);
-        if ("1".equals(type)) {
-            adReturnPointsLog.setOperateType("1");
-        } else if ("5".equals(type)) {
-            adReturnPointsLog.setOperateType("2");
-        }
-        adReturnPointsLog.setDelFlag("0");
-        adReturnPointsLog.setCreateDate(new Date());
-        adReturnPointsLog.setUpdateDate(new Date());
-        adReturnPointsLogDao.save(adReturnPointsLog);
 
-    }
-
-
-    private void afterRefundProcess(OrderVo order, Order o) {
-        List<AfterRefundProcessor> afterPayProcessors = AfterRefundProcessorFactory.getAllProcessors();
-        for (AfterRefundProcessor afterRefundProcessor : afterPayProcessors) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    afterRefundProcessor.process(order, o);
-                }
-            }).start();
-        }
-    }
 }
 
 

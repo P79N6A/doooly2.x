@@ -48,6 +48,10 @@ public class OrderMsg extends MessageDataBean {
 	public static String valid_pass_code = "2000";
 	public static String valid_pass__mess = "订单校验通过";
 
+	//验签失败
+	public static String invalid_sign_code = "2012";
+	public static String invalid_sign_mess = "签名验证失败";
+
 	public OrderMsg() {
 		super();
 	}

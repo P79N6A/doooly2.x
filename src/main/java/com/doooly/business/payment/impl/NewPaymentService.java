@@ -406,6 +406,133 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     /**
+     * 饿了么下单
+     * @param jsonObject
+     * @return
+     */
+    @Override
+    public ResultModel unifiedElmorder(JSONObject jsonObject) {
+        JSONObject orderSummary = getElmOrderSummary(jsonObject);
+        if (orderSummary == null) {
+            return new ResultModel(GlobalResultStatusEnum.FAIL, "系统异常");
+        }
+        logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
+        JSONObject param = orderSummary.getJSONObject("param");
+        JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
+        String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
+        //改造缓存 === zhangqing 20181227
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+        logger.info(sign);
+        JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
+        object.put("param", param.toJSONString());
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
+        JSONObject jsonResult = JSONObject.parseObject(result);
+        if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+            return ResultModel.success_ok(retJson);
+        } else {
+            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
+        }
+    }
+
+    /**
+     * 获取商品信息
+     *
+     * @param json
+     * @return
+     */
+    private JSONObject getElmOrderSummary(JSONObject json) {
+        logger.info("getElmOrderSummary() json = {}", json);
+        JSONObject result = new JSONObject();
+        String orderNo = json.getString("orderNo");
+        long businessId = json.getLong("businessId");
+        String bNo = json.getString("bNo");
+        JSONArray foodsInfo = json.getJSONArray("foodsInfo");
+        JSONArray orderExtras = json.getJSONArray("orderExtras");
+        JSONObject foodsInfo1 = foodsInfo.getJSONObject(0);
+        AdUser paramUser = new AdUser();
+        paramUser.setCardNumber(bNo);
+        AdUser user = adUserServiceI.getUser(paramUser);
+        //组建预支付订单参数
+        AdBusiness paramBusiness = new AdBusiness();
+        paramBusiness.setId(businessId);
+        AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
+        String price = json.getString("totalFee");
+        String amount = json.getString("totalFee");
+        JSONObject param = new JSONObject();
+        param.put("businessId", business.getBusinessId());//商户编号
+        param.put("cardNumber", user.getTelephone());
+        param.put("merchantOrderNo", orderNo);
+        param.put("tradeType", "DOOOLY_JS");
+        param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("body", foodsInfo1.getString("foodName"));
+        param.put("isSource", "0");
+        param.put("orderDate", DateUtils.formatDateTime(new Date()));
+        param.put("storesId", "A001");
+        param.put("price", price);
+        param.put("amount", amount);
+        param.put("clientIp", json.get("clientIp"));
+        param.put("nonceStr", RandomUtil.getRandomStr(16));
+        param.put("isPayPassword", user.getIsPayPassword());
+        JSONArray jsonArray = new JSONArray();
+        //商品信息
+        for (Object jsonObject : foodsInfo) {
+            JSONObject params = (JSONObject) jsonObject;
+            JSONObject jsonDetail = new JSONObject();
+            jsonDetail.put("code",params.getString("foodId"));
+            jsonDetail.put("goods", params.getString("foodName"));
+            jsonDetail.put("number", params.getString("count"));
+            jsonDetail.put("price", params.getString("price"));
+            jsonDetail.put("category", "0000");
+            jsonDetail.put("tax", "0");
+            jsonDetail.put("amount", params.getString("price"));
+            jsonArray.add(jsonDetail);
+        }
+        //拓展信息
+        for (Object orderExtra : orderExtras) {
+            JSONObject params = (JSONObject) orderExtra;
+            JSONObject jsonDetail = new JSONObject();
+            jsonDetail.put("code",params.getString("categoryId"));
+            jsonDetail.put("goods", params.getString("name"));
+            jsonDetail.put("number", params.getString("quantity"));
+            jsonDetail.put("price", params.getString("price"));
+            jsonDetail.put("category", "0000");
+            jsonDetail.put("tax", "0");
+            jsonDetail.put("amount", params.getString("price"));
+            jsonArray.add(jsonDetail);
+        }
+        param.put("orderDetail", jsonArray.toJSONString());
+        logger.info("下单参数param=========" + param);
+        result.put("param", param);
+        result.put("businessId",business.getId());//商户id
+        return result;
+    }
+
+    /**
      * 获取商品信息
      *
      * @param json

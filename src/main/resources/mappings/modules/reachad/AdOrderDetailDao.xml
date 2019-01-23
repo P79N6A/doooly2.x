@@ -127,9 +127,6 @@
     <update id="update" parameterType="com.doooly.business.order.vo.OrderItemVo">
          update ad_order_detail
 	    <set >
-	      <if test="orderReportId != null and orderReportId != ''" >
-	        order_report_id = #{orderReportId,jdbcType=BIGINT},
-	      </if>
 	      <if test="categoryId != null and categoryId != ''" >
 	        category_id = #{categoryId,jdbcType=VARCHAR},
 	      </if>
@@ -194,7 +191,14 @@
 	        card_pass = #{cardPass,jdbcType=VARCHAR},
 	      </if>
 	    </set>
-	    where id = #{id,jdbcType=BIGINT}
+        <where>
+            <if test="id != null and id != ''" >
+                AND id = #{id,jdbcType=BIGINT}
+            </if>
+            <if test="orderReportId != null and orderReportId != ''" >
+                AND order_report_id = #{orderReportId,jdbcType=BIGINT}
+            </if>
+        </where>
     </update>
 
 

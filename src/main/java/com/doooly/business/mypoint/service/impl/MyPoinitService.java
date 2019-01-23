@@ -34,6 +34,7 @@ import com.doooly.entity.reachad.AdReturnPoints;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

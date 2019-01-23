@@ -80,9 +80,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("transactionId", "");
             res.put("payAmount", "");
             res.put("outTradeNo", "");
-            res.put("payStatus", PayStatusEnum.PayTypeNotPay.getCode());
+            res.put("payStatus", "");
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            res.put("returnMsg", PayConstants.PAY_STATUS_0);
             try {
                 String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
                 res.put("sign", signStr); //采用RSA2签名
@@ -101,7 +100,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = obj.getString("sign");
             obj.remove("sign");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, obj, sign);
+            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, obj, sign);
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(obj), sign);
                 String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);

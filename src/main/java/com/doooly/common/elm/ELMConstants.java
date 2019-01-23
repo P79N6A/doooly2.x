@@ -25,7 +25,7 @@ public class ELMConstants {
     public static final String CHECK_PARAM_SIGN_ERROR = "参数验签失败";
     //DEV
     public final static String ELM_APP_ID = "b393552e850e4f8bbf1cfe209e09042c";
-    public final static String ELM_MERCHANT_NO = "Test_wwnsdfsteierlema";
+    public final static String ELM_MERCHANT_NO = "Doooly_Elm";
     //兜里收款账户
     public final static String DOOOLY_FINANCIAL_ACCOUNT = "9624121301145727303249";
 

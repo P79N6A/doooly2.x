@@ -16,8 +16,10 @@ public class OrderVo {
 	private long id;
 	// 订单编号
 	private long orderId;
-	// 商户编号
+	// 商户表id编号
 	private long bussinessId;
+	// 商户表商户编号
+	private long bussinessBussinessId;
 	// 会员ID
 	private Long userId;
 	// 企业ID
@@ -137,7 +139,15 @@ public class OrderVo {
 		this.bussinessId = bussinessId;
 	}
 
-	public Long getUserId() {
+    public long getBussinessBussinessId() {
+        return bussinessBussinessId;
+    }
+
+    public void setBussinessBussinessId(long bussinessBussinessId) {
+        this.bussinessBussinessId = bussinessBussinessId;
+    }
+
+    public Long getUserId() {
 		return userId;
 	}
 

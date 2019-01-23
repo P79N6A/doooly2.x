@@ -1149,7 +1149,7 @@ public class AdUserService implements AdUserServiceI {
 				lifemember.setMobile(userdata.getTelephone()); // TODO
 				lifemember.setName(userdata.getName());
 				lifemember.setEmail(userdata.getMailbox());
-				if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+				if (StringUtils.isNotBlank(userdata.getSex())) {
 					lifemember.setGender(Integer.valueOf(userdata.getSex()));
 				}
 				lifemember.setIdentityCard(userdata.getIdentityCard());
@@ -1372,7 +1372,7 @@ public class AdUserService implements AdUserServiceI {
 		}
 		String old = redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT + telephone);
 		if (isFailed) {
-			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+			if (StringUtils.isBlank(old)) {
 				redisTemplate.opsForValue().set(ACTIVATE_CODE_FAIL_COUNT + telephone, "1", 5 * 60 * 1000,
 						TimeUnit.MILLISECONDS);
 				resultData.put("failCount", 1);
@@ -1388,7 +1388,7 @@ public class AdUserService implements AdUserServiceI {
 		} else {
 			// String old =
 			// redisTemplate.opsForValue().get(ACTIVATE_CODE_FAIL_COUNT+telephone);
-			if (org.apache.commons.lang3.StringUtils.isBlank(old)) {
+			if (StringUtils.isBlank(old)) {
 				resultData.put("failCount", 0);
 			} else {
 				resultData.put("failCount", Integer.valueOf(old));
@@ -1410,35 +1410,74 @@ public class AdUserService implements AdUserServiceI {
 		if (adUser != null) {
 			logger.info("用户{}已经存在手机号{}，进入二次匹配流程", adUser.getId(),mobile);
 			//第二次进入页面进行匹配
-			AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-			adUserPersonalInfo.setId(adUser.getId());
-			adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
-			if (adUserPersonalInfo != null) {
-				//工号和手机号是否匹配
-				if (staffNum.equals(adUserPersonalInfo.getWorkNumber())) {
-					//邮箱是否匹配
-					if (email.equals(adUser.getMailbox())) {
-						AdActiveCode adActiveCode = new AdActiveCode();
-						adActiveCode.setAdUserId(adUser.getId());
-						//adActiveCode.setIsUsed("1");//已使用
-						adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
-						if (adActiveCode != null) {
-							if (code.equals(adActiveCode.getCode())) {
 
+			//已经在福特
+			if (groupId.equals(String.valueOf(adUser.getGroupNum()))) {
+				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+				adUserPersonalInfo.setId(adUser.getId());
+				adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+				if (adUserPersonalInfo != null) {
+					//工号和手机号是否匹配
+					if (staffNum.equals(adUserPersonalInfo.getWorkNumber())) {
+						//邮箱是否匹配
+						if (email.equals(adUser.getMailbox())) {
+							AdActiveCode adActiveCode = new AdActiveCode();
+							adActiveCode.setAdUserId(adUser.getId());
+							//adActiveCode.setIsUsed("1");//已使用
+							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+							if (adActiveCode != null) {
+								if (code.equals(adActiveCode.getCode())) {
+									resultData.put("userId",adUser.getId());
+									return resultData;
+								} else {
+									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+									resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
+									return resultData;
+								}
+							}
+						} else {
+							resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+							resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+							return resultData;
+						}
+					} else {
+						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+						resultData.put(ConstantsLogin.MSG, "员工工号不正确");
+						return resultData;
+					}
+				}
+			} else {
+				//原来不在福特
+				AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+				adUserPersonalInfo.setWorkNumber(staffNum);
+				adUserPersonalInfo.setGroupId(Long.parseLong(groupId));
+				adUserPersonalInfo = adUserPersonalInfoDao.selectPersonByWorknumAndGroup(adUserPersonalInfo);
+				if (adUserPersonalInfo != null) {
+					AdUser adUserNew = new AdUser();
+					adUserNew.setId(adUserPersonalInfo.getId());
+					adUserNew = adUserDao.getById(Integer.parseInt(adUserPersonalInfo.getId() +""));
+					if (adUserNew != null) {
+						if (email.equals(adUserNew.getMailbox())) {
+							AdActiveCode adActiveCode = new AdActiveCode();
+							adActiveCode.setAdUserId(adUserNew.getId());
+							adActiveCode.setIsUsed("0");
+							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
+							if (adActiveCode != null) {
+								//更新原来的user
 								adUser.setIsActive("2");
 								if (StringUtils.isNotBlank(groupId)) {
 									adUser.setGroupNum(Long.parseLong(groupId));
 								}
+								adUser.setMailbox(email);
 								adUser.setUpdateDate(new Date());
 								adUser.setActiveDate(new Date());
-                                adUser.setDataSyn(AdUser.DATA_SYN_ON);
+								adUser.setDataSyn(AdUser.DATA_SYN_ON);
 								int i = adUserDao.updateByPrimaryKeySelective(adUser);
 								if (i == 0) {
 									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 									resultData.put(ConstantsLogin.MSG, "切换单位失败");
 									return resultData;
 								} else {
-
 									LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
 									// A库企业编号
 									String groupNum = "";
@@ -1448,7 +1487,7 @@ public class AdUserService implements AdUserServiceI {
 										lifeMember.setGroupId(Long.valueOf(groupNum));
 										lifeMember.setName(adUser.getName());
 										lifeMember.setIsEnabled(2);
-                                        lifeMember.setMobile(mobile);
+										lifeMember.setMobile(mobile);
 										lifeMember.setLoginFailureCount(0);
 										lifeMember.setModifyDate(new Date());
 										lifeMember.setAdId(String.valueOf(adUser.getId()));
@@ -1458,9 +1497,16 @@ public class AdUserService implements AdUserServiceI {
 									adActiveCode.setIsUsed("1");
 									adActiveCode.setUsedDate(new Date());
 									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
+
+                                    //更新老的
+                                    AdUserPersonalInfo adUserPersonalInfoOld = new AdUserPersonalInfo();
+                                    adUserPersonalInfoOld.setId(adUser.getId());
+                                    adUserPersonalInfoOld = adUserPersonalInfoDao.select(adUserPersonalInfoOld);
+                                    if (adUserPersonalInfoOld != null) {
+                                        adUserPersonalInfoOld.setWorkNumber(staffNum);
+                                        adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfoOld);
+                                    }
 								}
-
-
 								resultData.put("userId",adUser.getId());
 								return resultData;
 							} else {
@@ -1468,10 +1514,14 @@ public class AdUserService implements AdUserServiceI {
 								resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
 								return resultData;
 							}
+						} else {
+							resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+							resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+							return resultData;
 						}
 					} else {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-						resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
+						resultData.put(ConstantsLogin.MSG, "员工工号不正确");
 						return resultData;
 					}
 				} else {
@@ -1537,32 +1587,34 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setIsActive("2");
 		adUser.setActiveDate(new Date());
 		adUser.setUpdateDate(new Date());
-        adUser.setDataSyn(AdUser.DATA_SYN_ON);
+		adUser.setDataSyn(AdUser.DATA_SYN_ON);
 		int i = adUserDao.updateByPrimaryKeySelective(adUser);
 		if (i == 0) {
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 			resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
 			return resultData;
 		} else {
-            LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
-            if (lifeMember == null) {
-                lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-                if (lifeMember == null) {
-                    saveMember(adUser);
-                }
-            } else {
-                String groupNum = "";
-                LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-                groupNum = lifeGroup.getId();
-                lifeMember.setGroupId(Long.valueOf(groupNum));
-                lifeMember.setName(adUser.getName());
-                lifeMember.setIsEnabled(2);
-                lifeMember.setMobile(mobile);
-                lifeMember.setLoginFailureCount(0);
-                lifeMember.setModifyDate(new Date());
-                lifeMember.setAdId(String.valueOf(adUser.getId()));
-                lifeMemberDao.updateActiveStatus(lifeMember);
-            }
+			LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
+			if (lifeMember == null) {
+				lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+				if (lifeMember == null) {
+					saveMember(adUser);
+				}
+			} else {
+				if (StringUtils.isNotBlank(groupId)) {
+					String groupNum = "";
+					LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+					groupNum = lifeGroup.getId();
+					lifeMember.setGroupId(Long.valueOf(groupNum));
+					lifeMember.setName(adUser.getName());
+					lifeMember.setIsEnabled(2);
+					lifeMember.setMobile(mobile);
+					lifeMember.setLoginFailureCount(0);
+					lifeMember.setModifyDate(new Date());
+					lifeMember.setAdId(String.valueOf(adUser.getId()));
+					lifeMemberDao.updateActiveStatus(lifeMember);
+				}
+			}
 			adActiveCode.setIsUsed("1");
 			adActiveCode.setUsedDate(new Date());
 			adActiveCodeDao.updateByPrimaryKey(adActiveCode);
@@ -1572,7 +1624,6 @@ public class AdUserService implements AdUserServiceI {
 		resultData.put("userId",adUser.getId());
 		return resultData;
 	}
-
 	/*  @Override
       @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
               expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
@@ -1632,7 +1683,7 @@ public class AdUserService implements AdUserServiceI {
 			LifeGroup lifegroup = lifeGroupService.getGroupByGroupId(user.getGroupNum() + "");
 			member.setAdId(userdata.getId() + "");
 			member.setName(userdata.getName());
-			if (org.apache.commons.lang3.StringUtils.isNotBlank(userdata.getSex())) {
+			if (StringUtils.isNotBlank(userdata.getSex())) {
 				member.setGender(Integer.valueOf(userdata.getSex()));
 			}
 			member.setIdentityCard(userdata.getIdentityCard());

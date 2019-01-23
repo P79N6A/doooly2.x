@@ -72,6 +72,21 @@
 		</where>
 	</select>
 
+	<select id="selectPersonByWorknumAndGroup" parameterType="com.doooly.entity.reachad.AdUserPersonalInfo" resultType="com.doooly.entity.reachad.AdUserPersonalInfo">
+		select
+			p.id as id,
+			p.ad_group_department_id as "adGroupDepartment.id",
+			p.work_number,
+			p.birthday,
+			p.is_regular_employee,
+			p.entry_date,
+			p.is_set_password,
+			p.has_child
+		from ad_user_personal_info p
+		LEFT JOIN ad_user u ON p.id = u.id
+		where p.work_number = #{workNumber} and u.group_num = #{groupId} and u.telephone is null;
+	</select>
+
 	<select id="selectAll" resultMap="AdUserPersonalInfoMap">
 		SELECT
 		<include refid="TableColumn" />
@@ -201,6 +216,13 @@
 			data_sources = #{dataSources},
 			is_audit = #{isAudit}
 		</set>
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateWorkNum" parameterType="com.doooly.entity.reachad.AdUserPersonalInfo">
+		UPDATE ad_user_personal_info
+		SET
+		  work_number = #{workNumber}
 		WHERE id = #{id}
 	</update>
 

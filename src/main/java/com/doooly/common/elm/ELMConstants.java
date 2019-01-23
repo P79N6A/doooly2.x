@@ -16,4 +16,17 @@ public class ELMConstants {
     public static final String ELM_URL = "https://enterprise-open-api.alta.elenet.me";
     public static final String QUERY_ORDER = "/v1/openapi/order/get";
     public static final String ELM_ADD_METHOD = "/v1/openapi/employee/add";
+
+    public static final String ELM_ORDER_PREFIX = "ELM_ORDER_PREFIX:%s";
+
+    //饿了么MsgCode add by paul
+    public final static String ELM_RESULT_SUCCESS = "1";  //成功处理
+    public final static String ELM_RESULT_FAIL = "2";     //处理失败
+    public static final String CHECK_PARAM_SIGN_ERROR = "参数验签失败";
+    //DEV
+    public final static String ELM_APP_ID = "b393552e850e4f8bbf1cfe209e09042c";
+    public final static String ELM_MERCHANT_NO = "Doooly_Elm";
+    //兜里收款账户
+    public final static String DOOOLY_FINANCIAL_ACCOUNT = "9624121301145727303249";
+
 }

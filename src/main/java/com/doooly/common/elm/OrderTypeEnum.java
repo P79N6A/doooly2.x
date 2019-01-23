@@ -19,7 +19,10 @@ public enum OrderTypeEnum {
     OrderTypeEnum60(60, "配送中"),
     OrderTypeEnum70(70, "确认送达"),
     OrderTypeEnum80(80, "配送异常"),
-    OrderTypeEnum90(90, "完成订单");
+    OrderTypeEnum90(90, "完成订单"),
+    OrderTypeEnum100(100, "申请退单"),
+    OrderTypeEnum105(105, "退单失败"),
+    OrderTypeEnum110(110, "退单成功");
 
     protected int code;
 

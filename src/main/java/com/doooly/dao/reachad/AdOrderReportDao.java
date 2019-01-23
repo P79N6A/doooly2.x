@@ -62,14 +62,22 @@ public interface AdOrderReportDao {
      * 查询都市旅游卡，账户信息
      */
     AdUserBusinessExpansion findSctcdAccount(AdOrderReport adOrderReport);
-    
+
     /**
      * 根据订单号查询orderreportId
-     * 
+     *
      * @param adOrderReport
      * @return
      */
     AdOrderReport getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
+
+    /**
+     *
+     * @param adOrderReport
+     * @return
+     */
+    Long  getUserIdByOrderNum(AdOrderReport adOrderReport);
+
     
     /**
      * 订单列表

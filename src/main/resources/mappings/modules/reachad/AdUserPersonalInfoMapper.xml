@@ -218,6 +218,13 @@
 		WHERE id = #{id}
 	</update>
 
+	<update id="updateWorkNum" parameterType="com.doooly.entity.reachad.AdUserPersonalInfo">
+		UPDATE ad_user_personal_info
+		SET
+		  work_number = #{workNumber}
+		WHERE id = #{id}
+	</update>
+
 	<update id="updateDeleteStatus">
 		UPDATE
 		ad_user_personal_info

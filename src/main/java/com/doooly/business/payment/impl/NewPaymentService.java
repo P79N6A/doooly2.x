@@ -75,6 +75,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
+import static com.doooly.common.webservice.WebService.WEBURL;
 
 /**
  * @Description:
@@ -299,7 +300,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     public String getDirIntegral( List<OrderVo> orderVos ,AdOrderBig adOrderBig,AdUser adUser) {
         //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
-        String getDirIntegralUrl ="http://47.92.199.89:8080/api/services/rest/getDirIntegral/V2";
+        String getDirIntegralUrl =WebService.WEBURL+"/services/rest/getDirIntegral/V2";
         //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
         params.put("businessId", "111");

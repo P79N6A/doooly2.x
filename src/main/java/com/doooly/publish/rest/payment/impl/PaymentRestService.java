@@ -141,6 +141,16 @@ public class PaymentRestService implements PaymentRestServiceI{
 
     @Override
     @POST
+    @Path(value = "/getPayResult/"+ VersionConstants.INTERFACE_VERSION_V2)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getPayResultV2(JSONObject json, HttpServletRequest httpServletRequest) {
+        ResultModel resultModel = paymentService.getPayResultV2(json);
+        return resultModel.toJsonString();
+    }
+
+    @Override
+    @POST
     @Path(value = "/getPayResult")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

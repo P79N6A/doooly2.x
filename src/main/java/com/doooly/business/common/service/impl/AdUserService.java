@@ -1462,6 +1462,9 @@ public class AdUserService implements AdUserServiceI {
                                     return resultData;
                                 } else {
                                     LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
+                                    if (lifeMember == null) {
+                                        lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+                                    }
                                     // A库企业编号
                                     String groupNum = "";
                                     if (StringUtils.isNotBlank(groupId) && lifeMember != null) {

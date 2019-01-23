@@ -653,11 +653,11 @@ public class AdUserService implements AdUserServiceI {
 			String md5Pwd = MD5Utils.encode(password);
 			// 新增用户参数
 			adUserParam.setTelephone(telephone);
-			adUserParam.setName(jsonParam.get("name").toString());
+			adUserParam.setName(String.valueOf(jsonParam.get("name")));
 			adUserParam.setPassword(md5Pwd);
 //			adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
-			adUserParam.setRemarks(jsonParam.get("remarks").toString());
+			adUserParam.setRemarks(String.valueOf(jsonParam.get("remarks")));
 			String isActive = jsonParam.getString("isActive");
 			if (StringUtils.isEmpty(isActive)) {
 				adUserParam.setIsActive(AdUser.USER_ACTIVATION_ON);

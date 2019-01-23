@@ -303,7 +303,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String getDirIntegralUrl =WebService.WEBURL+"services/rest/getDirIntegral/V2";
         //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
-        params.put("businessId", "111");
+        params.put("businessId", WebService.BUSINESSID);
         params.put("dirIntegralSwitch", "1");
         params.put("totalAmount", String.valueOf(adOrderBig.getTotalAmount()));
         params.put("payPassword", adUser.getIsPayPassword());

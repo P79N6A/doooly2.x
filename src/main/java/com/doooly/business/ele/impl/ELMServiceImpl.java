@@ -8,10 +8,8 @@ import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.utils.AESTool;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
-import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.MD5Util;
@@ -90,7 +88,7 @@ public class ELMServiceImpl implements ELMServiceI{
         headerMap.put("sign", MD5Util.MD5Encode(orderParam + elmConsumerSecret + timeNow, ELMConstants.CHARSET));
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("org",orderParam);
-        String result = HttpClientUtil.doPost(ELMConstants.ELM_URL + ELMConstants.QUERY_ORDER, headerMap, paramMap);
+        String result = HttpClientUtil.doPost(ELMConstants.ELM_URL + ELMConstants.QUERY_ORDER, headerMap, paramMap, null);
         JSONObject jsonResult = JSONObject.parseObject(result);
         Integer code = jsonResult.getInteger("code");
         if(code == GlobalResultStatusEnum.SUCCESS_OK.getCode()){

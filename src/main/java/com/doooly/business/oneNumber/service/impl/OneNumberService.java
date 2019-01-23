@@ -14,7 +14,6 @@ import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.report.UserSynRecord;
-import com.koalii.bc.util.encoders.Hex;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -79,6 +78,7 @@ public class OneNumberService implements OneNumberServiceI {
 		case 5:
 			resultUrl = getYiHaiUrl(targetUrl, adUser, adBusinessExpandInfo);
 			break;
+		// 饿了么专属
 		case 6:
 			resultUrl = getElmUrl(adUser, adBusinessExpandInfo);
 			break;
@@ -107,20 +107,21 @@ public class OneNumberService implements OneNumberServiceI {
         String consumerSecret = adBusinessExpandInfo.getShopKey();
         JSONObject synJson = new JSONObject();
         synJson.put("userId", adUser.getId());
-        synJson.put("businessId", adBusinessExpandInfo.getBusinessId());
+        synJson.put("businessId", ELMConstants.ELM_BUSINESS_ID);
         synJson.put("shopId", adBusinessExpandInfo.getShopId());
         synJson.put("shopKey", adBusinessExpandInfo.getShopKey());
         JSONObject jsonObject = addStaff(synJson);
 
         JSONObject json = new JSONObject();
-        json.put("uNo", adUser.getTelephone());
-        json.put("bNo", adUser.getCardNumber());
-        String org = Hex.encode(json.toJSONString().getBytes()).toString();
+		json.put("bNo", adUser.getTelephone());
+		json.put("uNo", adUser.getCardNumber());
+		String jsonStr = org.apache.commons.codec.binary.Hex.encodeHexString(json.toJSONString().getBytes());
         int type = 3;
-        String sign = MD5Util.MD5Psw(org + consumerSecret + timeStamp);
-        url.append("https://entu.ele.me?");
-        url.append("consumerNo=" + consumerNo);
-        url.append("&type=" + type);
+        String sign = MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp, "UTF-8");
+//        url.append("https://entu.ele.me?");
+		url.append("https://entu.alta.elenet.me?");
+		url.append("org=" + jsonStr);
+        url.append("&consumerNo=" + consumerNo);
         url.append("&timeStamp=" + timeStamp);
         url.append("&sign=" + sign);
         url.append("&type=" + type);
@@ -317,21 +318,21 @@ public class OneNumberService implements OneNumberServiceI {
             resutlJson.put("code", "1000");
             resutlJson.put("message", "用户已同步");
         } else {
-            AdUser adUser = adUserDao.get(userId);
+            AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 
             if (adUser != null) {
                 JSONObject result = synStaff(adUser, consumerNo, consumerSecret);
 
-                if ("200".equals(result.get("code").toString())) {
+                if (("200".equals(result.get("code").toString())) || ("E3000027".equals(result.get("code").toString()))) {
                     UserSynRecord synRecord = new UserSynRecord();
                     synRecord.setBussinessId(businessId);
                     synRecord.setUserId(Integer.valueOf(userId));
-                    synRecord.setRemarks(result.get("code") + "用户同步成功");
+                    synRecord.setRemarks("用户同步成功");
                     synRecord.setCreateDate(new Date());
                     userSynRecordDao.insert(synRecord);
                     resutlJson.put("code", "1000");
                     resutlJson.put("message", "用户同步成功");
-                }
+				}
             } else {
                 resutlJson.put("code", "1001");
                 resutlJson.put("message", "用户未找到");
@@ -362,11 +363,8 @@ public class OneNumberService implements OneNumberServiceI {
         HashMap<String, String> headerMap = new HashMap<>();
         headerMap.put("consumerNo", consumerNo);
         headerMap.put("timeStamp", timeStamp.toString());
-        headerMap.put("sign", MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp.toString(), "UTF-8"));
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("json", jsonStr);
-
-        String resultStr = HttpClientUtil.doPost(url, headerMap, paramMap);
+        headerMap.put("sign", MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp, "UTF-8"));
+        String resultStr = HttpClientUtil.doPost(url, headerMap, null,jsonStr);
         resultJson = JSONObject.parseObject(resultStr);
         return resultJson;
     }

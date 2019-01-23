@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.activity.AbstractActivityService;
-import com.doooly.business.common.service.impl.AdUserService;
+import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.common.constants.ActivityConstants.ActivityEnum;
 import com.doooly.common.constants.Constants.MerchantApiConstants;

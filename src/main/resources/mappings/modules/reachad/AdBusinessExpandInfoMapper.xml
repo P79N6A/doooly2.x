@@ -27,6 +27,9 @@
             <if test="businessId != null and businessId != ''">
                 AND a.business_id=#{businessId}
             </if>
+			<if test="clientSecret != null and clientSecret != ''">
+				AND a.client_secret=#{clientSecret}
+			</if>
         </where>
 	</select>
 </mapper>

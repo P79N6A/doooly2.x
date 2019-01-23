@@ -25,6 +25,7 @@ import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.payment.VoucherCardFailRecord;
 import com.doooly.entity.payment.VoucherCardRecord;
+import com.doooly.entity.reachad.*;
 import com.doooly.entity.reachad.AdAvailablePoints;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdIntegralAcquireRecord;

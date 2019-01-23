@@ -174,7 +174,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 		return messageDataBean.toJsonString();
 	}
 
-	@POST
+    @POST
     @Path(value = "/getActivityByType")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -189,6 +189,7 @@ public class SelfProductRestService implements SelfProductRestServiceI {
 
         return result;
     }
+
 
 
 

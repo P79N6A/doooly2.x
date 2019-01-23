@@ -38,6 +38,12 @@ public class ConfigDictServiceImpl implements ConfigDictServiceI {
 	}
 
 	@Override
+	public String getValueByTypeAndKeyNoCache(String dictType, String dictKey) {
+		String value = dictDao.getValueByTypeAndKey(dictType, dictKey);
+		return value;
+	}
+
+	@Override
 	public List<String> getValueListByTypeAndKey(String dictType, String dictKey) {
 		List<String> values = new ArrayList<>();
 		String value = stringRedis.opsForValue().get(dictKey);
@@ -50,13 +56,6 @@ public class ConfigDictServiceImpl implements ConfigDictServiceI {
 		}
 		values = JSONArray.parseArray(value, String.class);
 		return values;
-	}
-
-
-	@Override
-	public String getValueByTypeAndKeyNoCache(String dictType, String dictKey) {
-		String	value = dictDao.getValueByTypeAndKey(dictType, dictKey);
-		return value;
 	}
 
 }

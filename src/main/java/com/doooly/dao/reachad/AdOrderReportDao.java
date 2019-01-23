@@ -71,7 +71,12 @@ public interface AdOrderReportDao {
      * @return
      */
     AdOrderReport getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
-    
+    /**
+     *
+     * @param adOrderReport
+     * @return
+     */
+    Long  getUserIdByOrderNum(AdOrderReport adOrderReport);
     /**
      * 订单列表
      * @param orderReq
@@ -140,5 +145,4 @@ public interface AdOrderReportDao {
     List<OrderVo> getOrders(@Param("bigOrderNumber")String bigOrderNumber);
 
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
-
 }

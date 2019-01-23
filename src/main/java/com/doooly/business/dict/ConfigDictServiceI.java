@@ -33,4 +33,5 @@ public interface ConfigDictServiceI {
 	* @return
 	 */
 	List<String> getValueListByTypeAndKey(String dictType, String dictKey);
+
 }

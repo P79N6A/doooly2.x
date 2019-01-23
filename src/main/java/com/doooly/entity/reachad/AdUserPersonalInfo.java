@@ -23,6 +23,7 @@ public final class AdUserPersonalInfo {
 	private Integer dataSources;// '数据来源 0:平台导入，1：员工自主申请',
 	private String authFlag;// 认证标识,默认非认证会员(0-非认证会员,1-认证会员),
 	private Integer isSetPassword;// 是否设置过支付密码 0 ，未设置；1，已设置
+	private Long groupId;
 
 	public Long getId() {
 		return id;
@@ -41,6 +42,14 @@ public final class AdUserPersonalInfo {
 			adGroupDepartment = new AdGroupDepartment();
 		}
 		adGroupDepartment.setId(id);
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
 	}
 
 	public AdGroupDepartment getAdGroupDepartment() {

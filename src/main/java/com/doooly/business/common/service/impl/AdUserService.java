@@ -7,6 +7,7 @@ import com.doooly.business.myaccount.service.impl.AdSystemNoitceService;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.user.service.UserService;
+import com.doooly.business.thirdpart.constant.ThirdPartConstant;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2;
@@ -36,7 +37,6 @@ import com.doooly.entity.reachlife.LifeGroup;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.entity.reachlife.LifeWechatBinding;
 import com.doooly.publish.rest.life.impl.FamilyInviteService;
-import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,14 +63,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- *
+ * 
  * @author linking
  *
  */
 @Service
 public class AdUserService implements AdUserServiceI {
 
-	private static final Logger logger = LoggerFactory.getLogger(AdUserService.class);
+	private static final Logger logger = LoggerFactory.getLogger(FamilyInviteService.class);
 	public static final String invite_url = ResourceBundle.getBundle("doooly").getString("invite_url");
 	private static final String ACTIVATE_CODE_FAIL_COUNT = "activate_code_fail_count_";
 	private Lock lock = new ReentrantLock();
@@ -122,12 +122,12 @@ public class AdUserService implements AdUserServiceI {
 
 	@Autowired
 	private StringRedisTemplate redisTemplate;
-	@Autowired
-	private ConfigDictServiceI configDictServiceI;
+    @Autowired
+    private ConfigDictServiceI configDictServiceI;
 
 
 
-	public AdUser getById(Integer id) {
+    public AdUser getById(Integer id) {
 		return adUserDao.getById(id);
 	}
 
@@ -249,7 +249,7 @@ public class AdUserService implements AdUserServiceI {
 	 * 批量给会员发送活动通知短信
 	 */
 	public JSONObject batchSendSms(AdUser user, JSONObject paramSmSJson, String mobiles, String alidayuSmsCode,
-								   String smsContent, Boolean alidayuFlag) {
+			String smsContent, Boolean alidayuFlag) {
 		JSONObject result = new JSONObject();
 		int sendResult = -1;
 		List<String> failedTelList = new ArrayList<String>();
@@ -457,7 +457,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 会员验证,有卡激活
-	 *
+	 * 
 	 */
 	@Override
 	@Transactional
@@ -490,7 +490,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 企业口令激活
-	 *
+	 * 
 	 */
 	@Override
 	@Transactional
@@ -695,7 +695,7 @@ public class AdUserService implements AdUserServiceI {
 			adUserDao.saveUser(adUserParam);
 			// 回传明文密码,发短信
 			adUserParam.setPassword(password);
-
+			
 			// 异步保存用户工号等信息
 			new Thread(new Runnable() {
 				@Override
@@ -1016,7 +1016,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * app家属邀请验证手机是否可以添加
-	 *
+	 * 
 	 * @param data
 	 * @return
 	 */
@@ -1158,7 +1158,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 根据会员卡号获取会员信息
-	 *
+	 * 
 	 * @param cardNumber
 	 * @return
 	 */
@@ -1599,7 +1599,14 @@ public class AdUserService implements AdUserServiceI {
         return resultData;
     }
 
-	private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
+  /*  @Override
+    @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
+            expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
+    public AdUser getUser(AdUser adUser) {
+        return adUserDao.getUser(adUser);
+    }
+
+    private AdUser newAdUser(String telephone, AdGroup group, String md5Pwd) {
 		AdUser u = new AdUser();
 		u.setTelephone(telephone);
 		u.setGroupNum(Long.valueOf(group.getId()));

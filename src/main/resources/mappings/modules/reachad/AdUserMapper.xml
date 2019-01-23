@@ -669,6 +669,9 @@
 	      <if test="appHeadImageUrl != null and appHeadImageUrl != ''" >
 	        b.app_head_image_url = #{appHeadImageUrl},
 	      </if>
+	      <if test="workNumber != null and workNumber != ''" >
+	        b.work_number = #{workNumber},
+	      </if>
 	    </set>
 		WHERE b.id = #{userId}
   	</update>
@@ -958,6 +961,9 @@
 		FROM ad_user a WHERE 1=1 
 		<if test="cardNumber!=null and cardNumber!=''">
 			and a.card_number=#{cardNumber}
+		</if>
+		<if test="id!=null and id!=''">
+			and a.id=#{id}
 		</if>
 		<if test="telephone!=null and telephone!=''">
 			and a.telephone=#{telephone}

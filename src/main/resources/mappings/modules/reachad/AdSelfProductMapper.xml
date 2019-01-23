@@ -66,6 +66,10 @@
 	<update id="decStock">
 		update ad_group_self_product_price_expand set inventory = inventory - 1 where sku_id =  #{skuId} and number = #{number} and inventory > 0
 	</update>
+	<!-- 根据购买数量扣减活动库存 -->
+	<update id="decStockNumber">
+		update ad_group_self_product_price_expand set inventory = inventory - #{buyNum} where sku_id =  #{skuId} and number = #{number} and inventory > 0
+	</update>
 	<update id="incStock">
 		update ad_group_self_product_price_expand set inventory = inventory + 1 where sku_id =  #{skuId} and number = #{number}
 	</update>
@@ -73,6 +77,9 @@
 	<!-- 商品库存 -->
 	<update id="decInventory">
 		update ad_self_product_sku set inventory = inventory - 1 where id =  #{skuId} and inventory > 0
+	</update>
+	<update id="decInventoryByNum">
+		update ad_self_product_sku set inventory = inventory - #{buyNum} where id =  #{skuId} and inventory > 0
 	</update>
 	<update id="incInventory">
 		update ad_self_product_sku set inventory = inventory + 1 where id =  #{skuId}
@@ -121,9 +128,9 @@
         	FROM 
         		ad_self_product p,
         		ad_self_product_sku s 
-        WHERE 
-        		p.id = s.self_product_id
-				and s.del_flag = '0'
+        WHERE
+				s.del_flag = '0'
+				and p.id = s.self_product_id
         		<if test="merchantId != null and merchantId != ''" >
         			and p.business_id = #{merchantId}
         		</if>
@@ -132,6 +139,20 @@
         		</if>
         		<if test="skuId != null and skuId != ''" >
         			and s.id = #{skuId}
+        		</if>
+    </select>
+
+	<!-- 下单查询商品sku信息 -->
+    <select id="getSelfProductSku" resultType="com.doooly.business.product.entity.AdSelfProductSku" parameterType="com.doooly.business.product.entity.AdSelfProductSku">
+        SELECT
+        		s.id AS sid, s.specification, s.number,s.title, s.state, s.market_price,s.supply_price, s.sell_price,
+        		s.freight,s.delivery_type, s.audit_description, s.self_product_id,s.update_date, s.update_user,s.external_number,s.del_flag,s.inventory
+        	FROM
+        		ad_self_product_sku s
+        WHERE
+				s.del_flag = '0'
+        		<if test="id != null and id != ''" >
+        			and s.id = #{id}
         		</if>
     </select>
 

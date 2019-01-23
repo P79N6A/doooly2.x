@@ -12,6 +12,11 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 				<value>indexServiceImpl</value><!-- 添加需要拦截的service bean-->
 				<value>adArticleService</value>
 				<value>hotBusinessService</value>
+				<value>productServiceImpl</value>
+				<value>adRechargeConfServiceImpl</value>
+				<value>adSelfProductImageServiceImpl</value>
+				<value>adBusinessServiceImpl</value>
+				<value>adUserService</value>
 			</list>
 		</property>
  		

@@ -11,6 +11,7 @@ import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.reachad.AdAppHomePageDao;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dto.base.BaseResponse;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.coupon.FindExclusiveCouponResponse;
@@ -53,6 +54,9 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	@Autowired
 	private AdUserDao adUserDao;
 	@Autowired
+	private AdUserIntegralDao userIntegralDao;
+	
+	@Autowired
 	private FreeCouponBusinessServiceI freeCouponBusinessServiceI;
 	@Autowired
 	private AdGroupDao adGroupDao;
@@ -74,8 +78,15 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		homePageData.setMemberCompanyName(adUserInfos.getEnterpriseName());
 		homePageData.setMemberHeadImgUrl(StringUtils.isBlank(adUserInfos.getMemberHeadImgURL())
 				? adUserInfos.getEnterpriseLogoURL() : adUserInfos.getMemberHeadImgURL());
-		homePageData.setAvailablePoints(adUserInfos.getAvailablePoints() == null ? zeroBigDecimal
-				: adUserInfos.getAvailablePoints().setScale(2, BigDecimal.ROUND_DOWN));
+		//会员通用积分
+		BigDecimal generalIntegral = adUserInfos.getAvailablePoints() == null ? zeroBigDecimal
+				: adUserInfos.getAvailablePoints().setScale(2, BigDecimal.ROUND_DOWN);
+		//查詢定向積分
+		AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(request.getUserId()));
+		homePageData.setGeneralIntegral(generalIntegral);
+		homePageData.setDirIntegralPoints(userIntegral.getAvailIntegral());
+		//會員總積分（通用積分+定向積分）
+		homePageData.setAvailablePoints(generalIntegral.add(userIntegral.getAvailIntegral()));
 		homePageData.setAuthFlag(adUserInfos.getAuthFlag() == null ? 0 : adUserInfos.getAuthFlag());
 		// 查询会员的福利券
 		int expiredNum = 0;

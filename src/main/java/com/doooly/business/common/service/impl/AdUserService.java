@@ -1406,18 +1406,17 @@ public class AdUserService implements AdUserServiceI {
 						if (email.equals(adUser.getMailbox())) {
 							AdActiveCode adActiveCode = new AdActiveCode();
 							adActiveCode.setAdUserId(adUser.getId());
+							adActiveCode.setCode(code);
 							//adActiveCode.setIsUsed("1");//已使用
 							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
 							if (adActiveCode != null) {
-								if (code.equals(adActiveCode.getCode())) {
-									resultData.put("userId",adUser.getId());
-									return resultData;
-								} else {
-									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-									resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
-									return resultData;
-								}
-							}
+                                resultData.put("userId",adUser.getId());
+                                return resultData;
+							} else {
+                                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                                resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
+                                return resultData;
+                            }
 						} else {
 							resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 							resultData.put(ConstantsLogin.MSG, "员工邮箱不正确");
@@ -1462,6 +1461,9 @@ public class AdUserService implements AdUserServiceI {
                                     return resultData;
                                 } else {
                                     LifeMember lifeMember = lifeMemberDao.findMemberByUsername(adUser.getCardNumber());
+                                    if (lifeMember == null) {
+                                        lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+                                    }
                                     // A库企业编号
                                     String groupNum = "";
                                     if (StringUtils.isNotBlank(groupId) && lifeMember != null) {
@@ -1477,7 +1479,17 @@ public class AdUserService implements AdUserServiceI {
                                         lifeMemberDao.updateActiveStatus(lifeMember);
                                     }
 
+                                    //更新老的
+                                    AdUserPersonalInfo adUserPersonalInfoOld = new AdUserPersonalInfo();
+                                    adUserPersonalInfoOld.setId(adUser.getId());
+                                    adUserPersonalInfoOld = adUserPersonalInfoDao.select(adUserPersonalInfoOld);
+                                    if (adUserPersonalInfoOld != null) {
+                                        adUserPersonalInfoOld.setWorkNumber(staffNum);
+                                        adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfoOld);
+                                    }
+
                                     adActiveCode.setIsUsed("1");
+                                    adActiveCode.setAdUserId(adUser.getId());
                                     adActiveCode.setUsedDate(new Date());
                                     adActiveCodeDao.updateByPrimaryKey(adActiveCode);
                                 }
@@ -1545,17 +1557,14 @@ public class AdUserService implements AdUserServiceI {
         AdActiveCode adActiveCode = new AdActiveCode();
         adActiveCode.setAdUserId(adUser.getId());
         adActiveCode.setIsUsed("0");//未使用
+        adActiveCode.setCode(code);
         adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
         if (adActiveCode == null) {
-            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-            resultData.put(ConstantsLogin.MSG, "用户激活码不存在");
-            return resultData;
-        }
-        if (!code.equals(adActiveCode.getCode())) {
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "请输入正确的激活码");
             return resultData;
         }
+
         //绑定手机号
         adUser.setTelephone(mobile);
         adUser.setIsActive("2");

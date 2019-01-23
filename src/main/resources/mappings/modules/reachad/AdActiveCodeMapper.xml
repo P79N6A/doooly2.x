@@ -73,6 +73,9 @@
             <if test="isUsed != null">
                 and is_used = #{isUsed}
             </if>
+            <if test="code != null">
+                and code = #{code}
+            </if>
             and del_flag = 0
         </where>
         limit 1

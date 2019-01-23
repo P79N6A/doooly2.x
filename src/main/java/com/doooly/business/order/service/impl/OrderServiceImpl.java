@@ -330,7 +330,7 @@ public class OrderServiceImpl implements OrderService {
                 //商品从缓存取这里库存单独查询
                 Integer inventory = productService.getSelfProductSku(sku).getInventory();
                 if (inventory != null) {
-                    if (inventory <= 0) {
+                    if (inventory < buyQuantity) {
                         logger.error("product.inventory = {}", inventory);
                         return new OrderMsg(OrderMsg.out_of_stock_code1, OrderMsg.out_of_stock_mess1);
                     }

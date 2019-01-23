@@ -24,6 +24,8 @@ public interface NewPaymentServiceI {
 
     ResultModel getPayResult(JSONObject json);
 
+    ResultModel getPayResultV2(JSONObject json);
+
     ResultModel queryNewPayResult(JSONObject json);
 
     ResultModel dooolyPayRefund(JSONObject json);
@@ -35,4 +37,13 @@ public interface NewPaymentServiceI {
     ResultModel refund(JSONObject json);
 
     ResultModel applyRefund(JSONObject json);
+
+    ResultModel unifiedorderV2(JSONObject json);
+
+    ResultModel getPayFormV2(JSONObject json);
+
+    ResultModel integralPayV2(JSONObject param);//积分混合支付
+
+    ResultModel dooolyPayCallbackV2(JSONObject json);
+
 }

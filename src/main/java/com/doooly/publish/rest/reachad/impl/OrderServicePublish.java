@@ -5,6 +5,7 @@ import com.doooly.business.mall.service.Impl.MallBusinessService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
+import com.doooly.common.constants.VersionConstants;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdUserDao;
@@ -78,6 +79,40 @@ public class OrderServicePublish {
 	}
 
 	@POST
+	@Path(value = "/createOrder/"+ VersionConstants.INTERFACE_VERSION_V2)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String createOrderv2(JSONObject json, HttpServletRequest request){
+		OrderMsg orderMsg = new OrderMsg();
+		String groupId = json.getString("groupId");
+		if (StringUtils.isBlank(groupId)) {
+			String userId = json.getString("userId");
+			if (StringUtils.isNotBlank(userId)) {
+				AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
+				if (adUser != null) {
+					json.put("groupId",adUser.getGroupNum());
+				} else {
+					orderMsg.setCode("1001");
+					orderMsg.setMess("用户不存在");
+					return orderMsg.toJsonString();
+				}
+			} else {
+				orderMsg.setCode("1001");
+				orderMsg.setMess("用户不存在");
+				return orderMsg.toJsonString();
+			}
+		}
+        String result = null;
+        try {
+            result = orderService.createOrderv2(json).toJsonString();
+        } catch (Exception e) {
+            logger.error("创建订单出错，错误原因:{}",e);
+           result = new OrderMsg(OrderMsg.failure_code,"系统异常").toJsonString();
+        }
+        return result;
+	}
+
+	@POST
 	@Path(value = "/getConsumptionAmount")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -116,6 +151,16 @@ public class OrderServicePublish {
 	}
 	
 	@POST
+	@Path(value = "/cancleOrder/"+ VersionConstants.INTERFACE_VERSION_V2)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String cancleOrderV2(JSONObject json){
+		long userId = json.getLongValue("userId");
+		String bigOrderNumber = json.getString("bigOrderNumber");//上一个接口返回的是大订单号
+		return orderService.cancleOrderV2(userId, bigOrderNumber).toJsonString();
+	}
+
+	@POST
 	@Path(value = "/cancleOrder")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -124,7 +169,7 @@ public class OrderServicePublish {
 		String orderNum = json.getString("orderNum");
 		return orderService.cancleOrder(userId, orderNum).toJsonString();
 	}
-	
+
 	
 	/**
 	 * 获得商品简要

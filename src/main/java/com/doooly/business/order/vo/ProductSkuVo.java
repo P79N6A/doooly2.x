@@ -11,6 +11,10 @@ public class ProductSkuVo {
 	private int skuId;
 	//购买数量
 	private int buyNum;
+    //商品类型
+    private int productType;
+    //话费充值运营商 cmcc cucc ctc
+    private String operator;
 	public int getProductId() {
 		return productId;
 	}
@@ -29,4 +33,20 @@ public class ProductSkuVo {
 	public void setBuyNum(int buyNum) {
 		this.buyNum = buyNum;
 	}
+
+    public int getProductType() {
+        return productType;
+    }
+
+    public void setProductType(int productType) {
+        this.productType = productType;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
 }

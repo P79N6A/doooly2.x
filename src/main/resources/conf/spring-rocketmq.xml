@@ -7,9 +7,6 @@
          http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<!-- 加载rocketmq配置 -->
-	<context:property-placeholder location="classpath:/rocketmq.properties"
-		ignore-unresolvable="true" />
-
 
 	<!-- 定义consumer的参数 -->
 	<bean id="producer" class="com.easy.mq.config.producer.RocketProducerConfig">

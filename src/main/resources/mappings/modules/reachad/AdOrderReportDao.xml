@@ -7,6 +7,7 @@
 		<id column="id" property="id" jdbcType="BIGINT" />
 		<result column="order_id" property="orderId" jdbcType="BIGINT" />
 		<result column="bussiness_id" property="bussinessId" jdbcType="BIGINT" />
+		<result column="bussiness_bussiness_id" property="bussinessBussinessId" jdbcType="BIGINT" />
 		<result column="user_id" property="userId" jdbcType="BIGINT" />
 		<result column="order_number" property="orderNumber" jdbcType="VARCHAR" />
 		<result column="stores_id" property="storesId" jdbcType="VARCHAR" />
@@ -1394,11 +1395,13 @@
     <select id="getOrders" resultMap="orderMap" parameterType="java.lang.String">
         select
             <include refid="getAdOrderReportColumns" />,
-            <include refid="adOrderDetailColumns" />
+            <include refid="adOrderDetailColumns" />,
+            b.business_id AS bussiness_bussiness_id
         from
-            ad_order_report o,ad_order_detail d
+            ad_order_report o
+            INNER JOIN ad_order_detail d ON o.id = d.order_report_id
+            INNER JOIN ad_business b ON b.id = o.bussiness_id
         <where>
-            and o.id = d.order_report_id
             <if test="bigOrderNumber != null and bigOrderNumber != ''">
                 and o.big_order_number = #{bigOrderNumber}
             </if>

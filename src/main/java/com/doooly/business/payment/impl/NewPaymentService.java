@@ -320,7 +320,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             js.put("orderDate", DateUtil.formatDate(order.getOrderDate(),"yyyy-MM-dd hh:mm:ss"));
             js.put("orderNumber",order.getOrderNumber());
             js.put("serialNumber",order.getOrderNumber());
-            js.put("businessId",order.getBussinessId());
+            js.put("businessId",order.getBussinessBussinessId());
             List<OrderItemVo> items = order.getItems();
             JSONArray array = new JSONArray();
             for (OrderItemVo adOrderDetailDomain : items) {

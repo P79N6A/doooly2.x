@@ -70,6 +70,7 @@ import com.reach.constrant.Group;
 import com.reach.constrant.Topic;
 import com.reach.dto.UserEventReq;
 import com.reach.enums.EventType;
+import com.reach.redis.utils.JsonUtil;
 
 /**
  * 会员服务类(主)
@@ -646,6 +647,7 @@ public class UserService implements UserServiceI {
 				req.setChannel(request.getHeader("appSource"));
 				message.setBody(SerializationUtils.serialize(req));
 				rocketClient.send(message, true);
+				logger.info("action data:{}",JsonUtil.bean2Json(req));
 			}catch(Exception e){
 				e.printStackTrace();
 			}

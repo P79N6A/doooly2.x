@@ -869,7 +869,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
-                JSONObject retJson = new JSONObject();
+               /* JSONObject retJson = new JSONObject();
                 retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                 retJson.put("orderNum", orderNum);
                 retJson.put("integralPayStatus", data.get("payStatus"));
@@ -877,7 +877,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("realPayType", data.get("payType"));
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
-                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());*/
             }
         }
         // 跳转支付结果页面需要数据

@@ -629,6 +629,7 @@ public class AdUserService implements AdUserServiceI {
 				lifeMember = this.saveMember(adUser);
 
                 //更新类型为企业口令激活
+                //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
                 logger.info("更新类型为企业口令激活:{}",adUser.getTelephone());
                 userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),3);
 
@@ -1016,6 +1017,7 @@ public class AdUserService implements AdUserServiceI {
 			}
 
             //更新类型为专属码激活
+            //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
             logger.info("更新类型为专属码激活:{}",telephone);
             userServiceI.updatePersonInfoDataSources(telephone,4);
 
@@ -1353,6 +1355,7 @@ public class AdUserService implements AdUserServiceI {
 
 
 					//更新类型为卡激活
+                    //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
                     logger.info("更新类型为卡激活:{}",telephone);
                     userServiceI.updatePersonInfoDataSources(telephone,2);
 

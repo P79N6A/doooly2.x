@@ -721,7 +721,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
         if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "无效的订单状态");
+            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
         }
         //构建收银台接口需要参数
         AdUser paramUser = new AdUser();
@@ -920,6 +920,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (OrderService.PayState.PAID.getCode() == adOrderBig1.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
+            Map<String, Object> map = new HashMap<>();
+            map.put("totalAmount", adOrderBig1.getTotalAmount());
+            payMsg.setData(map);
         } else {
             payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);
         }

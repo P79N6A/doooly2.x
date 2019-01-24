@@ -623,6 +623,18 @@ public class AdUserService implements AdUserServiceI {
 			if (adUser != null) {
 				// 新增A库xx_member表用户数据
 				lifeMember = this.saveMember(adUser);
+
+                //更新类型为企业口令激活
+                AdUser adUser1 = adUserDao.findByMobile(adUser.getTelephone());
+                if (adUser1 != null) {
+                    AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+                    adUserPersonalInfo.setId(adUser1.getId());
+                    adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+                    if (adUserPersonalInfo != null) {
+                        adUserPersonalInfo.setDataSources(2);
+                        adUserPersonalInfoDao.update(adUserPersonalInfo);
+                    }
+                }
 			}
 			// 返回数据
 			HashMap<String, Object> dataMap = new HashMap<String, Object>();
@@ -852,7 +864,7 @@ public class AdUserService implements AdUserServiceI {
 	}
 
 	/**
-	 * 有卡激活-执行激活
+	 * 有卡激活-执行激活（专属码）
 	 */
 	public JSONObject doActive(JSONObject data) throws Exception {
 		logger.info("====【doActive】-传入参数：" + data.toJSONString());
@@ -1005,6 +1017,18 @@ public class AdUserService implements AdUserServiceI {
 					result.put("password", password);
 				}
 			}
+
+            //更新类型为专属码激活
+           adUser = adUserDao.findByMobile(telephone);
+            if (adUser != null) {
+                adUserPersonalInfo = new AdUserPersonalInfo();
+                adUserPersonalInfo.setId(adUser.getId());
+                adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+                if (adUserPersonalInfo != null) {
+                    adUserPersonalInfo.setDataSources(3);
+                    adUserPersonalInfoDao.update(adUserPersonalInfo);
+                }
+            }
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1334,7 +1358,23 @@ public class AdUserService implements AdUserServiceI {
 					// activation_code_use_time
 					voucherCardRecord.setActivationCodeUseStatus(1);
 					voucherCardRecord.setActivationCodeUseTime(new Date());
+					voucherCardRecord.setCardUseTime(new Date());
 					voucherCardRecordDao.updateActiveData(voucherCardRecord);
+
+
+					//更新类型为卡激活
+                    AdUser adUser = adUserDao.findByMobile(telephone);
+                    if (adUser != null) {
+                        AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+                        adUserPersonalInfo.setId(adUser.getId());
+                        adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+                        if (adUserPersonalInfo != null) {
+                            adUserPersonalInfo.setDataSources(1);
+                            adUserPersonalInfoDao.update(adUserPersonalInfo);
+                        }
+                    }
+
+
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
 					isFailed = false;

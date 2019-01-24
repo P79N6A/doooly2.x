@@ -664,7 +664,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
-                JSONObject retJson = new JSONObject();
+               /* JSONObject retJson = new JSONObject();
                 retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                 retJson.put("orderNum", orderNum);
                 retJson.put("integralPayStatus", data.get("payStatus"));
@@ -672,34 +672,31 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("realPayType", data.get("payType"));
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
-                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());*/
             }
         }
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
             List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
-            if (!CollectionUtils.isEmpty(orders)) {
-                OrderVo order1 = orders.get(0);
-                Map<String, Object> map = new HashMap<>();
-                map.put("orderNum", order1.getOrderNumber());
-                map.put("orderId", order.getOrderId());
-                map.put("oid", order.getId());
-                map.put("totalAmount", order.getTotalMount());
-                //最终支付结果code
-                map.put("code", payMsg.getCode());
-                //手续费
-                if (order.getServiceCharge() != null) {
-                    map.put("serviceCharge", order.getServiceCharge());
+            Map<String, Object> map = new HashMap<>();
+            map.put("orderId", order.getOrderId());
+            map.put("oid", order.getId());
+            map.put("totalAmount", order.getTotalMount());
+            //最终支付结果code
+            map.put("code", payMsg.getCode());
+            //手续费
+            if (order.getServiceCharge() != null) {
+                map.put("serviceCharge", order.getServiceCharge());
 
-                }
-                //话费优惠活动- 分享需要的参数
-                if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
-                    AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
-                    map.put("openId", record.getOpenId());
-                    map.put("activityParam", record.getActivityParam());
-                }
-                payMsg.setData(map);
             }
+            map.put("orderNum", order.getOrderNumber());
+            //话费优惠活动- 分享需要的参数
+            if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
+                AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+                map.put("openId", record.getOpenId());
+                map.put("activityParam", record.getActivityParam());
+            }
+            payMsg.setData(map);
         }
         return payMsg;
     }

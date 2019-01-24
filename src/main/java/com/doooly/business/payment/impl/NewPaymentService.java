@@ -920,6 +920,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (OrderService.PayState.PAID.getCode() == adOrderBig1.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
+            Map<String, Object> map = new HashMap<>();
+            map.put("totalAmount", adOrderBig1.getTotalAmount());
+            payMsg.setData(map);
         } else {
             payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);
         }

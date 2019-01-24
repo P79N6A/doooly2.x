@@ -10,7 +10,7 @@
 
 	<!-- 定义consumer的参数 -->
 	<bean id="producer" class="com.easy.mq.config.producer.RocketProducerConfig">
-		<property name="address" value="39.98.195.15:9876"  />
+		<property name="address" value="${mq.address}"  />
 	</bean>
 
 	<bean id="rocketClient" class="com.easy.mq.client.RocketClient">

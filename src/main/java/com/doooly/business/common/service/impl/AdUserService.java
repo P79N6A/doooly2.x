@@ -9,6 +9,7 @@ import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.user.service.UserService;
 import com.doooly.business.thirdpart.constant.ThirdPartConstant;
+import com.doooly.business.user.service.UserServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2;
@@ -610,6 +611,9 @@ public class AdUserService implements AdUserServiceI {
 		}
 	}
 
+	@Autowired
+	private UserServiceI userServiceI;
+
 	/**
 	 * 企业口令激活-执行激活
 	 */
@@ -625,16 +629,10 @@ public class AdUserService implements AdUserServiceI {
 				lifeMember = this.saveMember(adUser);
 
                 //更新类型为企业口令激活
-                AdUser adUser1 = adUserDao.findByMobile(adUser.getTelephone());
-                if (adUser1 != null) {
-                    AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-                    adUserPersonalInfo.setId(adUser1.getId());
-                    adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
-                    if (adUserPersonalInfo != null) {
-                        adUserPersonalInfo.setDataSources(2);
-                        adUserPersonalInfoDao.update(adUserPersonalInfo);
-                    }
-                }
+                //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                logger.info("更新类型为企业口令激活:{}",adUser.getTelephone());
+                userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),3);
+
 			}
 			// 返回数据
 			HashMap<String, Object> dataMap = new HashMap<String, Object>();
@@ -1019,16 +1017,10 @@ public class AdUserService implements AdUserServiceI {
 			}
 
             //更新类型为专属码激活
-           adUser = adUserDao.findByMobile(telephone);
-            if (adUser != null) {
-                adUserPersonalInfo = new AdUserPersonalInfo();
-                adUserPersonalInfo.setId(adUser.getId());
-                adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
-                if (adUserPersonalInfo != null) {
-                    adUserPersonalInfo.setDataSources(3);
-                    adUserPersonalInfoDao.update(adUserPersonalInfo);
-                }
-            }
+            //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+            logger.info("更新类型为专属码激活:{}",telephone);
+            userServiceI.updatePersonInfoDataSources(telephone,4);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
@@ -1363,16 +1355,10 @@ public class AdUserService implements AdUserServiceI {
 
 
 					//更新类型为卡激活
-                    AdUser adUser = adUserDao.findByMobile(telephone);
-                    if (adUser != null) {
-                        AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
-                        adUserPersonalInfo.setId(adUser.getId());
-                        adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
-                        if (adUserPersonalInfo != null) {
-                            adUserPersonalInfo.setDataSources(1);
-                            adUserPersonalInfoDao.update(adUserPersonalInfo);
-                        }
-                    }
+                    //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                    logger.info("更新类型为卡激活:{}",telephone);
+                    userServiceI.updatePersonInfoDataSources(telephone,2);
+
 
 
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
@@ -1691,4 +1677,6 @@ public class AdUserService implements AdUserServiceI {
 		logger.info("====【userBind】-返回数据：" + messageDataBean.toJsonString());
 		return messageDataBean;
 	}
+
+
 }

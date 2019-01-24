@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdActiveCodeServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.reachLife.LifeGroupService;
+import com.doooly.business.user.service.UserServiceI;
 import com.doooly.dao.reachad.AdActiveCodeDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserPersonalInfoDao;
@@ -59,6 +60,9 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 
 	@Autowired
 	private AdUserServiceI adUserServiceI;
+
+	@Autowired
+	private UserServiceI userServiceI;
 
 	
 	@Override
@@ -208,9 +212,13 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 									adActiveCode.setAdUserId(adUser.getId());
 									adActiveCode.setUsedDate(new Date());
 									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
+                                    //更新类型为专属码激活
+                                    //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                                    logger.info("更新类型为专属码激活:{}",adUser.getTelephone());
+                                    userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),4);
+                                    resultData.put("userId",adUser.getId());
+                                    return resultData;
 								}
-								resultData.put("userId",adUser.getId());
-								return resultData;
 							} else {
 								resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 								resultData.put(ConstantsLogin.MSG, "员工激活码不正确");
@@ -318,6 +326,12 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 			adActiveCode.setUsedDate(new Date());
 			adActiveCodeDao.updateByPrimaryKey(adActiveCode);
 		}
+
+        //更新类型为专属码激活
+        //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+        logger.info("更新类型为专属码激活:{}",adUser.getTelephone());
+        userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),4);
+
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
 		resultData.put("userId",adUser.getId());

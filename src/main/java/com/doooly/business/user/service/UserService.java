@@ -802,9 +802,9 @@ public class UserService implements UserServiceI {
 			lifeMember.setIsEnabled(Integer.valueOf(AdUser.USER_ACTIVATION_ON));
 			memberDao.updateMemberActiveStatus(lifeMember);
 			//更新类型为白名单激活
-			//数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+            //数据来源 0:平台导入 1:员工自主申请，2：企业口令激活，3：卡激活，4：专属码
 			logger.info("更新类型为白名单激活:{}",mobile);
-			updatePersonInfoDataSources(mobile,1);
+			//updatePersonInfoDataSources(mobile,1);
 			logger.info(String.format("快捷登录签名认证通过且已存在但未激活，已激活成功。mobile=%s, name=%s", mobile, name));
 		}
 		// 4.1.2 会员姓名不匹配

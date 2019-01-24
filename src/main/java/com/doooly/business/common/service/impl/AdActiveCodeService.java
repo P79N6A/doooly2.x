@@ -213,7 +213,7 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 									adActiveCode.setUsedDate(new Date());
 									adActiveCodeDao.updateByPrimaryKey(adActiveCode);
                                     //更新类型为专属码激活
-                                    //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                                    //数据来源 0:平台导入 2：企业口令激活，3：卡激活，4：专属码
                                     logger.info("更新类型为专属码激活:{}",adUser.getTelephone());
                                     userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),4);
                                     resultData.put("userId",adUser.getId());

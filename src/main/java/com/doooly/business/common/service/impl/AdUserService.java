@@ -232,8 +232,9 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setPassword(param.get("password").toString());// 设置登录密码
 		adUser.setPayPassword(param.get("password").toString());// 设置支付密码
         //白名单激活
+        //数据来源 0:平台导入 1:员工自主申请(白名单)，2：企业口令激活，3：卡激活，4：专属码
         logger.info("类型标示为白名单激活：{}",param.get("mobile").toString());
-        userServiceI.updatePersonInfoDataSources(param.get("mobile").toString(),1);
+        //userServiceI.updatePersonInfoDataSources(param.get("mobile").toString(),1);
 		return adUserDao.updateActiveStatus(adUser);
 	}
 
@@ -631,9 +632,9 @@ public class AdUserService implements AdUserServiceI {
 				lifeMember = this.saveMember(adUser);
 
                 //更新类型为企业口令激活
-                //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                //数据来源 0:平台导入 1:员工自主申请，2：企业口令激活，3：卡激活，4：专属码
                 logger.info("更新类型为企业口令激活:{}",adUser.getTelephone());
-                userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),3);
+                userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),2);
 
 			}
 			// 返回数据
@@ -1019,7 +1020,7 @@ public class AdUserService implements AdUserServiceI {
 			}
 
             //更新类型为专属码激活
-            //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+            //数据来源 0:默认 2：卡激活，3：企业口令激活，4：专属码
             logger.info("更新类型为专属码激活:{}",telephone);
             userServiceI.updatePersonInfoDataSources(telephone,4);
 
@@ -1357,9 +1358,9 @@ public class AdUserService implements AdUserServiceI {
 
 
 					//更新类型为卡激活
-                    //数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+                    //数据来源 0:平台导入 2：企业口令激活，3：卡激活，4：专属码
                     logger.info("更新类型为卡激活:{}",telephone);
-                    userServiceI.updatePersonInfoDataSources(telephone,2);
+                    userServiceI.updatePersonInfoDataSources(telephone,3);
 
 
 

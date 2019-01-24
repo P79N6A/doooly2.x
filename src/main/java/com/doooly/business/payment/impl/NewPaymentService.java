@@ -678,25 +678,28 @@ public class NewPaymentService implements NewPaymentServiceI {
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
             List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
-            Map<String, Object> map = new HashMap<>();
-            map.put("orderId", order.getOrderId());
-            map.put("oid", order.getId());
-            map.put("totalAmount", order.getTotalMount());
-            //最终支付结果code
-            map.put("code", payMsg.getCode());
-            //手续费
-            if (order.getServiceCharge() != null) {
-                map.put("serviceCharge", order.getServiceCharge());
+            if (!CollectionUtils.isEmpty(orders)) {
+                OrderVo order1 = orders.get(0);
+                Map<String, Object> map = new HashMap<>();
+                map.put("orderNum", order1.getOrderNumber());
+                map.put("orderId", order.getOrderId());
+                map.put("oid", order.getId());
+                map.put("totalAmount", order.getTotalMount());
+                //最终支付结果code
+                map.put("code", payMsg.getCode());
+                //手续费
+                if (order.getServiceCharge() != null) {
+                    map.put("serviceCharge", order.getServiceCharge());
 
+                }
+                //话费优惠活动- 分享需要的参数
+                if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
+                    AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+                    map.put("openId", record.getOpenId());
+                    map.put("activityParam", record.getActivityParam());
+                }
+                payMsg.setData(map);
             }
-            map.put("orderNum", order.getOrderNumber());
-            //话费优惠活动- 分享需要的参数
-            if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
-                AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
-                map.put("openId", record.getOpenId());
-                map.put("activityParam", record.getActivityParam());
-            }
-            payMsg.setData(map);
         }
         return payMsg;
     }

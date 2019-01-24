@@ -213,11 +213,12 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = obj.getString("sign");
             obj.remove("sign");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, obj, sign);
+            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, obj, sign); // PRD OPEN
+            //flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, obj, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(obj), sign);
-                String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);
-                logger.info("----------------生成可用的签名：" + signStr);
+                //String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, obj);   //LOCAL DEV OPEN, PRD DELETE
+                //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
         } catch (Exception e) {
             e.printStackTrace();

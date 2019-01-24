@@ -231,7 +231,9 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setActiveDate(new Date());// 设置激活时间
 		adUser.setPassword(param.get("password").toString());// 设置登录密码
 		adUser.setPayPassword(param.get("password").toString());// 设置支付密码
-
+        //白名单激活
+        logger.info("类型标示为白名单激活：{}",param.get("mobile").toString());
+        userServiceI.updatePersonInfoDataSources(param.get("mobile").toString(),1);
 		return adUserDao.updateActiveStatus(adUser);
 	}
 

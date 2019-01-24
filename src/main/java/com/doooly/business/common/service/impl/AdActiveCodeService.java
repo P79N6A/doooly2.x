@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdActiveCodeServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.reachLife.LifeGroupService;
+import com.doooly.business.user.service.UserServiceI;
 import com.doooly.dao.reachad.AdActiveCodeDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserPersonalInfoDao;
@@ -59,6 +60,9 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 
 	@Autowired
 	private AdUserServiceI adUserServiceI;
+
+	@Autowired
+	private UserServiceI userServiceI;
 
 	
 	@Override
@@ -318,6 +322,11 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 			adActiveCode.setUsedDate(new Date());
 			adActiveCodeDao.updateByPrimaryKey(adActiveCode);
 		}
+
+        //更新类型为专属码激活
+        logger.info("更新类型为专属码激活:{}",adUser.getTelephone());
+        userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),4);
+
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
 		resultData.put("userId",adUser.getId());

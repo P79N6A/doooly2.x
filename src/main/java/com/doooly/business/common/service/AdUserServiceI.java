@@ -3,6 +3,7 @@ package com.doooly.business.common.service;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachlife.LifeMember;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -128,4 +129,6 @@ public interface AdUserServiceI {
     AdUser saveUserAndPersonal(JSONObject userJson) throws Exception;
 
     JSONObject checkTelephone(JSONObject data);
+
+	LifeMember saveMember(AdUser adUser) throws Exception;
 }

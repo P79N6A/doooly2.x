@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.SerializationUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -69,7 +71,14 @@ import com.doooly.entity.reachad.AppClient;
 import com.doooly.entity.reachad.AppToken;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.pay.dto.BasePayRes;
+import com.easy.mq.client.RocketClient;
+import com.easy.mq.result.RocketProducerMessage;
+import com.easy.mq.result.RocketSendResult;
 import com.google.gson.Gson;
+import com.reach.constrant.Group;
+import com.reach.constrant.Topic;
+import com.reach.dto.UserEventReq;
+import com.reach.enums.EventType;
 
 /**
  * 会员服务类(主)
@@ -119,6 +128,9 @@ public class UserService implements UserServiceI {
 
 	// 会员token名称
 	private static String TOKEN_NAME = "token";
+	
+	@Resource(name = "rocketClient")
+	private RocketClient rocketClient;
 
 	/**
 	 * 处理会员登录
@@ -625,6 +637,25 @@ public class UserService implements UserServiceI {
 			redisTemplate.delete(token);
 			messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
 			messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+			try{
+				RocketProducerMessage message = new RocketProducerMessage();
+				message.setTopic(Topic.ACTION_TOPIC);
+				message.setGroup(Group.ACTION_GROUP);
+
+				UserEventReq req = new UserEventReq();
+				req.setEvent(EventType.LOGOUT);
+				if(request.getHeader("deviceNo") != null) {
+					req.setDeviceId(request.getHeader("deviceNo"));
+				}else if(request.getHeader("deviceId") != null){
+					req.setDeviceId(request.getHeader("deviceId"));
+				}
+				req.setUserId(userId);
+				req.setChannel(request.getHeader("appSource"));
+				message.setBody(SerializationUtils.serialize(req));
+				rocketClient.send(message, true);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		} catch (Exception e) {
 			messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
 			messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());

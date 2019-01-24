@@ -8,6 +8,8 @@ import java.util.HashMap;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,11 +40,6 @@ import com.doooly.common.constants.Constants.ResponseCode;
 import com.doooly.common.constants.Constants.ResponseEnum;
 import com.doooly.common.dto.BaseRes;
 import com.doooly.common.token.TokenUtil;
-import com.doooly.dao.reachad.AdBlocBlackUserDao;
-import com.doooly.dao.reachad.AdBlocGroupLoginDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdReturnPointsDao;
-import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
@@ -63,12 +60,6 @@ import com.doooly.dto.user.ModifyPwdRes;
 import com.doooly.dto.user.UserActiveNewReq;
 import com.doooly.dto.user.UserActiveReq;
 import com.doooly.dto.user.UserActiveRes;
-import com.doooly.entity.reachad.AdBlocBlackUser;
-import com.doooly.entity.reachad.AdBlocGroupLogin;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AppClient;
-import com.doooly.entity.reachad.AppToken;
 import com.doooly.entity.reachlife.LifeMember;
 import com.doooly.pay.dto.BasePayRes;
 import com.easy.mq.client.RocketClient;
@@ -123,6 +114,8 @@ public class UserService implements UserServiceI {
 	private AdReturnPointsDao returnPointsDao;
 	@Autowired
 	protected MyAccountServiceI myAccountService;
+	@Autowired
+	private AdUserPersonalInfoDao adUserPersonalInfoDao;
 
 	// 会员token，唯一标识，放入缓存
 	private static String TOKEN_KEY = "token:%s";
@@ -841,6 +834,10 @@ public class UserService implements UserServiceI {
 			lifeMember.setModifyDate(activeDate);
 			lifeMember.setIsEnabled(Integer.valueOf(AdUser.USER_ACTIVATION_ON));
 			memberDao.updateMemberActiveStatus(lifeMember);
+			//更新类型为白名单激活
+			//数据来源 0:默认 1:平台导入(白名单)，2：卡激活，3：企业口令激活，4：专属码
+			logger.info("更新类型为白名单激活:{}",mobile);
+			updatePersonInfoDataSources(mobile,1);
 			logger.info(String.format("快捷登录签名认证通过且已存在但未激活，已激活成功。mobile=%s, name=%s", mobile, name));
 		}
 		// 4.1.2 会员姓名不匹配
@@ -965,4 +962,19 @@ public class UserService implements UserServiceI {
 		return null;
 	}
 
+	@Override
+	public int updatePersonInfoDataSources(String mobile, Integer dataSources) {
+		//更新数据来源
+		AdUser adUser = adUserDao.findByMobile(mobile);
+		if (adUser != null) {
+			AdUserPersonalInfo adUserPersonalInfo = new AdUserPersonalInfo();
+			adUserPersonalInfo.setId(adUser.getId());
+			adUserPersonalInfo = adUserPersonalInfoDao.select(adUserPersonalInfo);
+			if (adUserPersonalInfo != null) {
+				adUserPersonalInfo.setDataSources(dataSources);
+				return adUserPersonalInfoDao.update(adUserPersonalInfo);
+			}
+		}
+		return 0;
+	}
 }

@@ -182,6 +182,9 @@ public interface UserServiceI {
 	 */
 	Long cancelUserByphoneNo(String phoneNo);
 
+
+	int updatePersonInfoDataSources(String mobile,Integer dataSources);
+
 	// public void scheduleUpdateUser();
 	//
 	// public void initializeScheduleUpdateUser();

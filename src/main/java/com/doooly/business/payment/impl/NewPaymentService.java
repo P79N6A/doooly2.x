@@ -721,7 +721,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
         if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "无效的订单状态");
+            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
         }
         //构建收银台接口需要参数
         AdUser paramUser = new AdUser();

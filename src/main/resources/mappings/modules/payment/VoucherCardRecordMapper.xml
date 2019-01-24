@@ -78,7 +78,8 @@
 		 set 
 		 activation_code_use_status = #{activationCodeUseStatus},
 		 activation_code_use_uid= #{activationCodeUseUid},
-		 activation_code_use_time= #{activationCodeUseTime}
+		 activation_code_use_time= #{activationCodeUseTime},
+		 card_use_time = #{cardUseTime}
 		WHERE id = #{id}
   	</update>
   	<update id="updateRechargeData" >

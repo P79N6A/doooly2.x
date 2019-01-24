@@ -1,5 +1,7 @@
 package com.doooly.business.common.service;
 
+import com.alibaba.fastjson.JSONObject;
+
 /**
  * 激活码服务接口
  * @author 赵清江
@@ -28,5 +30,8 @@ public interface AdActiveCodeServiceI {
 	 * @throws Exception
 	 */
 	public int useActiveCode(String cardNumber) throws Exception;
+
+
+	JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId) throws Exception;
 	
 }

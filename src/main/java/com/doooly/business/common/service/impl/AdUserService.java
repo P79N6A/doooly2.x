@@ -1738,7 +1738,7 @@ public class AdUserService implements AdUserServiceI {
         } catch (Exception e) {
             messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
             messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
-            logger.info("====【userBind】系统错误==========");
+            logger.info("====【userBind】系统错误==========",e);
         }
         logger.info("====【userBind】-返回数据：" + messageDataBean.toJsonString());
         return messageDataBean;

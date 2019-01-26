@@ -1655,10 +1655,15 @@ public class AdUserService implements AdUserServiceI {
                                 //说明手机已经被大华绑定了
                                 messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
                                 messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
-                            }else{
+                            }else if(isUser1 != null) {
+                                //说明手机已经被其他企业绑定了
+                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                                messageDataBean.setMess("该手机号码已被其他企业绑定，请重新更换手机号码");
+                            }else {
+                                //手机号查询不到更新用户信息
                                 //更新用户
                                 AdUser user = new AdUser();
-                                user.setId(isUser1.getId());
+                                user.setId(isUser.getId());
                                 user.setGroupNum(Long.valueOf(groupId));
                                 user.setName(fItemName);
                                 user.setTelephone(mobile);
@@ -1667,10 +1672,10 @@ public class AdUserService implements AdUserServiceI {
                                     user.setDeviceNumber(deviceID);
                                 }
                                 adUserDao.updateByPrimaryKeySelective(user);
-                                isUser1.setWorkNumber(FItemNumber);
-                                isUser1.setUserId(String.valueOf(isUser1.getId()));
-                                isUser1.setBirthday(FBirthDay);
-                                adUserDao.updatePersonalData(isUser1);
+                                isUser.setWorkNumber(FItemNumber);
+                                isUser.setUserId(String.valueOf(isUser.getId()));
+                                isUser.setBirthday(FBirthDay);
+                                adUserDao.updatePersonalData(isUser);
                                 LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
                                 // A库企业编号
                                 String groupNum = "";
@@ -1683,7 +1688,7 @@ public class AdUserService implements AdUserServiceI {
                                 lifeMember.setIsEnabled(2);
                                 lifeMember.setLoginFailureCount(0);
                                 lifeMember.setModifyDate(new Date());
-                                lifeMember.setAdId(String.valueOf(isUser1.getId()));
+                                lifeMember.setAdId(String.valueOf(isUser.getId()));
                                 lifeMemberDao.updateActiveStatus(lifeMember);
                                 messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
                                 messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());

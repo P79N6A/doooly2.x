@@ -100,7 +100,7 @@ public class ThirdPartServiceImpl implements ThirdPartServiceI{
                 params.put("adGroupId",groupId);
                 //根据工号和企业查询
                 AdUserConn isUser = adUserPersonalInfoDao.getIsUser(params);
-                if(isUser != null && isUser.getTelephone()!= null){
+                if(isUser != null && StringUtils.isNotBlank(isUser.getTelephone())){
                     String userId = String.valueOf(isUser.getId());
                     // 终端渠道
                     String channel = request.getHeader(Constants.CHANNEL);

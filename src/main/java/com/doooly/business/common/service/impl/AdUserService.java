@@ -730,15 +730,6 @@ public class AdUserService implements AdUserServiceI {
 					if (!StringUtils.isEmpty(jsonParam.getString("workerNumber"))) {
 						adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 					}
-                    String fBirthDay1 = jsonParam.getString("FBirthDay");
-                    if (!StringUtils.isEmpty(fBirthDay1)) {
-                        Date fBirthDay = DateUtils.parse(fBirthDay1, DateUtils.DATE_yyyyMMdd1);
-                        if(fBirthDay != null){
-                            adUserPersonalInfo.setBirthday(DateUtils.formatDate(fBirthDay,DateUtils.DATE_yyyy_MM_dd));
-                        }else {
-                            adUserPersonalInfo.setBirthday(fBirthDay1);
-                        }
-                    }
 					adUserPersonalInfo.setIsSetPassword(0);
 					adUserPersonalInfoDao.insert(adUserPersonalInfo);
 
@@ -1640,6 +1631,10 @@ public class AdUserService implements AdUserServiceI {
                     }
                     String FSex = result.getString("FSex");
                     String FBirthDay = result.getString("FBirthDay");
+                    if (StringUtils.isNotBlank(FBirthDay)) {
+                        Date fBirthDay = DateUtils.parse(FBirthDay, DateUtils.DATE_yyyyMMdd1);
+                        FBirthDay =  DateUtils.formatDate(fBirthDay, DateUtils.DATE_yyyy_MM_dd);
+                    }
                     String mobile = paramJson.getString("loginName");
                     Map<String,Object> params = new HashMap<>();
                     params.put("workNumber",FItemNumber);
@@ -1662,6 +1657,11 @@ public class AdUserService implements AdUserServiceI {
                                 adUserParam.setDeviceNumber(deviceID);
                             }
                             adUserDao.updateByPrimaryKeySelective(adUserParam);
+                            //更新扩展信息
+                            isUser.setWorkNumber(FItemNumber);
+                            isUser.setUserId(String.valueOf(isUser.getId()));
+                            isUser.setBirthday(FBirthDay);
+                            adUserDao.updatePersonalData(isUser);
                             //更新a库
                             LifeMember bean = new LifeMember();
                             bean.setAdId(String.valueOf(isUser.getId()));
@@ -1693,6 +1693,7 @@ public class AdUserService implements AdUserServiceI {
                                 adUserDao.updateByPrimaryKeySelective(user);
                                 isUser1.setWorkNumber(FItemNumber);
                                 isUser1.setUserId(String.valueOf(isUser1.getId()));
+                                isUser1.setBirthday(FBirthDay);
                                 adUserDao.updatePersonalData(isUser1);
                                 LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
                                 // A库企业编号

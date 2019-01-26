@@ -13,7 +13,7 @@ import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.ConstantsV2;
 import com.doooly.common.constants.DaHuaConstants;
-import com.doooly.common.util.HTTPSClientUtils;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.MD5Utils;
 import com.doooly.common.util.ThirdPartySMSUtil;
 import com.doooly.common.util.WechatUtil;
@@ -1615,7 +1615,7 @@ public class AdUserService implements AdUserServiceI {
                 String thirdUserToken = paramJson.getString("thirdUserToken");
                 JSONObject param = new JSONObject();
                 param.put("jsonData",thirdUserToken);
-                String jsonResult = HTTPSClientUtils.sendPostNew(param.toJSONString(),url + DaHuaConstants.USER_INFO_URL);
+                String jsonResult = HttpClientUtil.sendPost(param, url + DaHuaConstants.USER_INFO_URL);
                 JSONObject jsonObject = JSONObject.parseObject(jsonResult);
                 logger.info("大华获取用户信息接口返回：{}",jsonObject);
                 if(jsonObject!= null && "200".equals(jsonObject.getString("ResultCode")) && "true".equals(jsonObject.getString("IsSuccess"))){

@@ -1623,6 +1623,7 @@ public class AdUserService implements AdUserServiceI {
                     JSONObject result = JSONObject.parseObject(jsonObject.getString("Result"));
                     String fItemName = result.getString("FItemName");//大华姓名
                     String FItemNumber = result.getString("FItemNumber");//大华工号
+                    String deviceID = result.getString("DeviceID");//登录设备号
                     if(FItemNumber == null){
                         messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
                         messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
@@ -1647,6 +1648,10 @@ public class AdUserService implements AdUserServiceI {
                             adUserParam.setId(isUser.getId());
                             adUserParam.setName(fItemName);
                             adUserParam.setTelephone(mobile);
+                            if(StringUtils.isNotBlank(deviceID)){
+                                //设备号
+                                adUserParam.setDeviceNumber(deviceID);
+                            }
                             adUserDao.updateByPrimaryKeySelective(adUserParam);
                             //更新a库
                             LifeMember bean = new LifeMember();

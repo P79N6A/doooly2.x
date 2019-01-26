@@ -730,6 +730,15 @@ public class AdUserService implements AdUserServiceI {
 					if (!StringUtils.isEmpty(jsonParam.getString("workerNumber"))) {
 						adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 					}
+                    String fBirthDay1 = jsonParam.getString("FBirthDay");
+                    if (!StringUtils.isEmpty(fBirthDay1)) {
+                        Date fBirthDay = DateUtils.parse(fBirthDay1, DateUtils.DATE_yyyyMMdd1);
+                        if(fBirthDay != null){
+                            adUserPersonalInfo.setBirthday(DateUtils.formatDate(fBirthDay,DateUtils.DATE_yyyy_MM_dd));
+                        }else {
+                            adUserPersonalInfo.setBirthday(fBirthDay1);
+                        }
+                    }
 					adUserPersonalInfo.setIsSetPassword(0);
 					adUserPersonalInfoDao.insert(adUserPersonalInfo);
 

@@ -1637,7 +1637,7 @@ public class AdUserService implements AdUserServiceI {
                     //根据工号和企业查询
                     AdUserConn isUser = adUserPersonalInfoDao.getIsUser(params);
                     if(isUser != null){
-                        if(isUser.getTelephone()!= null && !mobile.equals(isUser.getTelephone())){
+                        if(StringUtils.isNotBlank(isUser.getTelephone()) && !mobile.equals(isUser.getTelephone())){
                             //手机号不正确
                             messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
                             messageDataBean.setMess("该手机号码与工号不匹配,请输入正确的手机号码！");

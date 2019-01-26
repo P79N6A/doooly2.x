@@ -1651,44 +1651,42 @@ public class AdUserService implements AdUserServiceI {
                             params1.put("telephone",mobile);
                             //根据手机号
                             AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
-                            if(isUser1 != null){
-                                if(groupId.equals(isUser1.getGroupId())){
-                                    //说明手机已经被大华绑定了
-                                    messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                                    messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
-                                }else{
-                                    //更新用户
-                                    AdUser user = new AdUser();
-                                    user.setId(isUser1.getId());
-                                    user.setGroupNum(Long.valueOf(groupId));
-                                    user.setName(fItemName);
-                                    user.setTelephone(mobile);
-                                    if(StringUtils.isNotBlank(deviceID)){
-                                        //设备号
-                                        user.setDeviceNumber(deviceID);
-                                    }
-                                    adUserDao.updateByPrimaryKeySelective(user);
-                                    isUser1.setWorkNumber(FItemNumber);
-                                    isUser1.setUserId(String.valueOf(isUser1.getId()));
-                                    isUser1.setBirthday(FBirthDay);
-                                    adUserDao.updatePersonalData(isUser1);
-                                    LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-                                    // A库企业编号
-                                    String groupNum = "";
-                                    if (StringUtils.isNotBlank(groupId)) {
-                                        LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-                                        groupNum = lifeGroup.getId();
-                                    }
-                                    lifeMember.setGroupId(Long.valueOf(groupNum));
-                                    lifeMember.setName(fItemName);
-                                    lifeMember.setIsEnabled(2);
-                                    lifeMember.setLoginFailureCount(0);
-                                    lifeMember.setModifyDate(new Date());
-                                    lifeMember.setAdId(String.valueOf(isUser1.getId()));
-                                    lifeMemberDao.updateActiveStatus(lifeMember);
-                                    messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-                                    messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+                            if(isUser1 != null && groupId.equals(isUser1.getGroupId())){
+                                //说明手机已经被大华绑定了
+                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+                                messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
+                            }else{
+                                //更新用户
+                                AdUser user = new AdUser();
+                                user.setId(isUser1.getId());
+                                user.setGroupNum(Long.valueOf(groupId));
+                                user.setName(fItemName);
+                                user.setTelephone(mobile);
+                                if(StringUtils.isNotBlank(deviceID)){
+                                    //设备号
+                                    user.setDeviceNumber(deviceID);
                                 }
+                                adUserDao.updateByPrimaryKeySelective(user);
+                                isUser1.setWorkNumber(FItemNumber);
+                                isUser1.setUserId(String.valueOf(isUser1.getId()));
+                                isUser1.setBirthday(FBirthDay);
+                                adUserDao.updatePersonalData(isUser1);
+                                LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+                                // A库企业编号
+                                String groupNum = "";
+                                if (StringUtils.isNotBlank(groupId)) {
+                                    LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+                                    groupNum = lifeGroup.getId();
+                                }
+                                lifeMember.setGroupId(Long.valueOf(groupNum));
+                                lifeMember.setName(fItemName);
+                                lifeMember.setIsEnabled(2);
+                                lifeMember.setLoginFailureCount(0);
+                                lifeMember.setModifyDate(new Date());
+                                lifeMember.setAdId(String.valueOf(isUser1.getId()));
+                                lifeMemberDao.updateActiveStatus(lifeMember);
+                                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+                                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
                             }
                         }
                     }else {

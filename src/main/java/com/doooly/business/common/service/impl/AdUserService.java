@@ -1639,6 +1639,9 @@ public class AdUserService implements AdUserServiceI {
 						return messageDataBean;
 					}
 					String FSex = result.getString("FSex");
+                    if(StringUtils.isNotBlank(FSex)){
+                        FSex = "男".equals(FSex) ? "0" : "1";
+                    }
 					String FBirthDay = result.getString("FBirthDay");
 					if (StringUtils.isNotBlank(FBirthDay)) {
 						Date fBirthDay = DateUtils.parse(FBirthDay, DateUtils.DATE_yyyyMMdd1);
@@ -1676,7 +1679,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
-                                user.setSex("男".equals(FSex) ? "0" : "1");
+                                user.setSex(FSex);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 user.setActiveDate(new Date());
 								adUserDao.updateByPrimaryKeySelective(user);
@@ -1731,7 +1734,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setTelephone(mobile);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 user.setActiveDate(new Date());
-                                user.setSex("男".equals(FSex) ? "0" : "1");
+                                user.setSex(FSex);
 								adUserDao.updateByPrimaryKeySelective(user);
 								isUser1.setWorkNumber(FItemNumber);
 								isUser1.setUserId(String.valueOf(isUser1.getId()));
@@ -1769,7 +1772,7 @@ public class AdUserService implements AdUserServiceI {
 							paramData.put("name", fItemName);
 							paramData.put("workerNumber", FItemNumber);
 							paramData.put("FBirthDay", FBirthDay);
-							paramData.put("FSex", "男".equals(FSex) ? "0" : "1");
+							paramData.put("FSex", FSex);
 							paramData.put("remarks", "大华企业登录激活");
                             paramData.put("deviceID",deviceID);
 							messageDataBean = this.execCommandActive(paramData);

@@ -1663,11 +1663,11 @@ public class AdUserService implements AdUserServiceI {
 							params1.put("telephone", mobile);
 							// 根据手机号
 							AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
-							if (isUser1 != null && groupId.equals(isUser1.getGroupId())) {
+							if (isUser1 != null && groupId.equals(isUser1.getGroupId()) && isUser.getId()!=isUser1.getId()) {
 								// 说明手机已经被大华绑定了
 								messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
 								messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
-							} else if (isUser1 != null) {
+							} else if (isUser1 != null && isUser.getId()!=isUser1.getId()) {
 								// 说明手机已经被其他企业绑定了
 								messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
 								messageDataBean.setMess("该手机号码已被其他企业绑定，请重新更换手机号码");

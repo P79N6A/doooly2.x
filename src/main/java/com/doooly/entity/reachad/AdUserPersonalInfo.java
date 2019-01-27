@@ -24,6 +24,7 @@ public final class AdUserPersonalInfo {
 	private String authFlag;// 认证标识,默认非认证会员(0-非认证会员,1-认证会员),
 	private Integer isSetPassword;// 是否设置过支付密码 0 ，未设置；1，已设置
 	private Long groupId;
+    private String deviceNumber;//设备号
 
 	public Long getId() {
 		return id;
@@ -131,6 +132,14 @@ public final class AdUserPersonalInfo {
 
     public void setIsSetPassword(Integer isSetPassword) {
         this.isSetPassword = isSetPassword;
+    }
+
+    public String getDeviceNumber() {
+        return deviceNumber;
+    }
+
+    public void setDeviceNumber(String deviceNumber) {
+        this.deviceNumber = deviceNumber;
     }
 
     @Override

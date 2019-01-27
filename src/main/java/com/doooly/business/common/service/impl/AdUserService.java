@@ -728,6 +728,10 @@ public class AdUserService implements AdUserServiceI {
 					if (!StringUtils.isEmpty(jsonParam.getString("workerNumber"))) {
 						adUserPersonalInfo.setWorkNumber(jsonParam.get("workerNumber").toString());
 					}
+					//设备号
+					if (!StringUtils.isEmpty(jsonParam.getString("deviceID"))) {
+						adUserPersonalInfo.setDeviceNumber(jsonParam.get("deviceID").toString());
+					}
 					adUserPersonalInfo.setIsSetPassword(0);
 					adUserPersonalInfoDao.insert(adUserPersonalInfo);
 
@@ -1675,11 +1679,11 @@ public class AdUserService implements AdUserServiceI {
                                 user.setSex("男".equals(FSex) ? "0" : "1");
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 user.setActiveDate(new Date());
-								if (StringUtils.isNotBlank(deviceID)) {
-									// 设备号
-									user.setDeviceNumber(deviceID);
-								}
 								adUserDao.updateByPrimaryKeySelective(user);
+                                if (StringUtils.isNotBlank(deviceID)) {
+                                    // 设备号
+                                    isUser.setDeviceNumber(deviceID);
+                                }
 								isUser.setWorkNumber(FItemNumber);
 								isUser.setUserId(String.valueOf(isUser.getId()));
 								isUser.setBirthday(FBirthDay);
@@ -1732,6 +1736,10 @@ public class AdUserService implements AdUserServiceI {
 								isUser1.setWorkNumber(FItemNumber);
 								isUser1.setUserId(String.valueOf(isUser1.getId()));
 								isUser1.setBirthday(FBirthDay);
+                                if (StringUtils.isNotBlank(deviceID)) {
+                                    // 设备号
+                                    isUser1.setDeviceNumber(deviceID);
+                                }
 								adUserDao.updatePersonalData(isUser1);
 								LifeMember lifeMember = new LifeMember();
 								lifeMember.setAdId(String.valueOf(isUser1.getId()));
@@ -1763,6 +1771,7 @@ public class AdUserService implements AdUserServiceI {
 							paramData.put("FBirthDay", FBirthDay);
 							paramData.put("FSex", "男".equals(FSex) ? "0" : "1");
 							paramData.put("remarks", "大华企业登录激活");
+                            paramData.put("deviceID",deviceID);
 							messageDataBean = this.execCommandActive(paramData);
 							logger.info(
 									"====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));

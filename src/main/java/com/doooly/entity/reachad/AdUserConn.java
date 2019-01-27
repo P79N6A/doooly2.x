@@ -91,6 +91,8 @@ public class AdUserConn {
 	/** 集团名称 */
 	private String blocName;
 
+    private String deviceNumber;//设备号
+
 	public BigDecimal getDirIntegal() {
 		return dirIntegal;
 	}
@@ -409,5 +411,13 @@ public class AdUserConn {
 
     public void setIsSetPayPassword(String isSetPayPassword) {
         this.isSetPayPassword = isSetPayPassword;
+    }
+
+    public String getDeviceNumber() {
+        return deviceNumber;
+    }
+
+    public void setDeviceNumber(String deviceNumber) {
+        this.deviceNumber = deviceNumber;
     }
 }

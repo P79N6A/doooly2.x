@@ -1672,6 +1672,8 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
+                                user.setIsActive(AdUser.USER_ACTIVATION_ON);
+                                user.setActiveDate(new Date());
 								if (StringUtils.isNotBlank(deviceID)) {
 									// 设备号
 									user.setDeviceNumber(deviceID);
@@ -1680,13 +1682,10 @@ public class AdUserService implements AdUserServiceI {
 								isUser.setWorkNumber(FItemNumber);
 								isUser.setUserId(String.valueOf(isUser.getId()));
 								isUser.setBirthday(FBirthDay);
-								isUser.setIsActive("2");
 								adUserDao.updatePersonalData(isUser);
 								LifeMember lifeMember = new LifeMember();
 								lifeMember.setAdId(String.valueOf(isUser.getId()));
 								lifeMember = lifeMemberDao.findLifeMemberByAdId(lifeMember);
-								// LifeMember lifeMember =
-								// lifeMemberDao.findMemberByMobile(mobile);
 								// A库企业编号
 								String groupNum = "";
 								if (StringUtils.isNotBlank(groupId)) {
@@ -1725,17 +1724,16 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
+                                user.setIsActive(AdUser.USER_ACTIVATION_ON);
+                                user.setActiveDate(new Date());
 								adUserDao.updateByPrimaryKeySelective(user);
 								isUser1.setWorkNumber(FItemNumber);
 								isUser1.setUserId(String.valueOf(isUser1.getId()));
 								isUser1.setBirthday(FBirthDay);
 								adUserDao.updatePersonalData(isUser1);
-								// LifeMember lifeMember =
-								// lifeMemberDao.findMemberByMobile(mobile);
 								LifeMember lifeMember = new LifeMember();
 								lifeMember.setAdId(String.valueOf(isUser1.getId()));
 								lifeMember = lifeMemberDao.findLifeMemberByAdId(lifeMember);
-								//
 								// A库企业编号
 								String groupNum = "";
 								if (StringUtils.isNotBlank(groupId)) {

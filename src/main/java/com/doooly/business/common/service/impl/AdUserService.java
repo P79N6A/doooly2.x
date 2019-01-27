@@ -1672,6 +1672,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
+                                user.setSex("男".equals(FSex) ? "0" : "1");
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 user.setActiveDate(new Date());
 								if (StringUtils.isNotBlank(deviceID)) {
@@ -1726,6 +1727,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setTelephone(mobile);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 user.setActiveDate(new Date());
+                                user.setSex("男".equals(FSex) ? "0" : "1");
 								adUserDao.updateByPrimaryKeySelective(user);
 								isUser1.setWorkNumber(FItemNumber);
 								isUser1.setUserId(String.valueOf(isUser1.getId()));
@@ -1759,7 +1761,7 @@ public class AdUserService implements AdUserServiceI {
 							paramData.put("name", fItemName);
 							paramData.put("workerNumber", FItemNumber);
 							paramData.put("FBirthDay", FBirthDay);
-							paramData.put("FSex", FSex.equals("男") ? "0" : "1");
+							paramData.put("FSex", "男".equals(FSex) ? "0" : "1");
 							paramData.put("remarks", "大华企业登录激活");
 							messageDataBean = this.execCommandActive(paramData);
 							logger.info(

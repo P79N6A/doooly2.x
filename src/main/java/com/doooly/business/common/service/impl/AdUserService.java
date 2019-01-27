@@ -1681,7 +1681,9 @@ public class AdUserService implements AdUserServiceI {
 								user.setTelephone(mobile);
                                 user.setSex(FSex);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
-                                user.setActiveDate(new Date());
+                                if(isUser.getActiveDate()!=null){
+                                    user.setActiveDate(new Date());
+                                }
 								adUserDao.updateByPrimaryKeySelective(user);
                                 if (StringUtils.isNotBlank(deviceID)) {
                                     // 设备号
@@ -1704,7 +1706,6 @@ public class AdUserService implements AdUserServiceI {
 								lifeMember.setMobile(mobile);
 								lifeMember.setGroupId(Long.valueOf(groupNum));
 								lifeMember.setName(fItemName);
-								lifeMember.setIsEnabled(2);
 								lifeMember.setLoginFailureCount(0);
 								lifeMember.setModifyDate(new Date());
 								lifeMember.setAdId(String.valueOf(isUser.getId()));
@@ -1733,7 +1734,9 @@ public class AdUserService implements AdUserServiceI {
 								user.setName(fItemName);
 								user.setTelephone(mobile);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
-                                user.setActiveDate(new Date());
+                                if(isUser1.getActiveDate()!=null){
+                                    user.setActiveDate(new Date());
+                                }
                                 user.setSex(FSex);
 								adUserDao.updateByPrimaryKeySelective(user);
 								isUser1.setWorkNumber(FItemNumber);

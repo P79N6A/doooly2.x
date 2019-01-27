@@ -93,6 +93,8 @@ public class AdUserConn {
 
     private String deviceNumber;//设备号
 
+    private String activeDate;//激活时间
+
 	public BigDecimal getDirIntegal() {
 		return dirIntegal;
 	}
@@ -419,5 +421,13 @@ public class AdUserConn {
 
     public void setDeviceNumber(String deviceNumber) {
         this.deviceNumber = deviceNumber;
+    }
+
+    public String getActiveDate() {
+        return activeDate;
+    }
+
+    public void setActiveDate(String activeDate) {
+        this.activeDate = activeDate;
     }
 }

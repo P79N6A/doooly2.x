@@ -1681,7 +1681,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setTelephone(mobile);
                                 user.setSex(FSex);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
-                                if(isUser.getActiveDate()!=null){
+                                if(isUser.getActiveDate()==null){
                                     user.setActiveDate(new Date());
                                 }
 								adUserDao.updateByPrimaryKeySelective(user);
@@ -1734,7 +1734,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setName(fItemName);
 								user.setTelephone(mobile);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
-                                if(isUser1.getActiveDate()!=null){
+                                if(isUser1.getActiveDate()==null){
                                     user.setActiveDate(new Date());
                                 }
                                 user.setSex(FSex);

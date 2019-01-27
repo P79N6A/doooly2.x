@@ -129,8 +129,6 @@ public class AdUserService implements AdUserServiceI {
 	@Autowired
 	private AdActiveCodeServiceI adActiveCodeServiceI;
 
-
-
 	public AdUser getById(Integer id) {
 		return adUserDao.getById(id);
 	}
@@ -230,10 +228,10 @@ public class AdUserService implements AdUserServiceI {
 		adUser.setActiveDate(new Date());// 设置激活时间
 		adUser.setPassword(param.get("password").toString());// 设置登录密码
 		adUser.setPayPassword(param.get("password").toString());// 设置支付密码
-        //白名单激活
-        //数据来源 0:平台导入 1:员工自主申请(白名单)，2：企业口令激活，3：卡激活，4：专属码
-        logger.info("类型标示为白名单激活：{}",param.get("mobile").toString());
-        //userServiceI.updatePersonInfoDataSources(param.get("mobile").toString(),1);
+		// 白名单激活
+		// 数据来源 0:平台导入 1:员工自主申请(白名单)，2：企业口令激活，3：卡激活，4：专属码
+		logger.info("类型标示为白名单激活：{}", param.get("mobile").toString());
+		// userServiceI.updatePersonInfoDataSources(param.get("mobile").toString(),1);
 		return adUserDao.updateActiveStatus(adUser);
 	}
 
@@ -256,7 +254,7 @@ public class AdUserService implements AdUserServiceI {
 	 * 批量给会员发送活动通知短信
 	 */
 	public JSONObject batchSendSms(AdUser user, JSONObject paramSmSJson, String mobiles, String alidayuSmsCode,
-								   String smsContent, Boolean alidayuFlag) {
+			String smsContent, Boolean alidayuFlag) {
 		JSONObject result = new JSONObject();
 		int sendResult = -1;
 		List<String> failedTelList = new ArrayList<String>();
@@ -333,9 +331,9 @@ public class AdUserService implements AdUserServiceI {
 			String inputPassword = param.getString("password");
 			// 终端渠道
 			String channel = param.getString(ConstantsLogin.CHANNEL);
-			//20190109 第三方登录激活zhangqing
+			// 20190109 第三方登录激活zhangqing
 			MessageDataBean messageDataBean = this.userBind(param);
-			if(!messageDataBean.getCode().equals(MessageDataBean.success_code)){
+			if (!messageDataBean.getCode().equals(MessageDataBean.success_code)) {
 				jsonResult.put(ConstantsLogin.CODE, messageDataBean.getCode());
 				jsonResult.put(ConstantsLogin.MESS, messageDataBean.getMess());
 				return jsonResult;
@@ -570,6 +568,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 用户自动激活
+	 * 
 	 * @param adUser
 	 * @return Is
 	 */
@@ -593,8 +592,7 @@ public class AdUserService implements AdUserServiceI {
 			int updateCount = this.userActivationLogin(activeParam);
 			// 激活A系统数据
 			boolean updateStatus = lifeMemberService.memberActivationLogin(activeParam);
-			logger.info("====【validateUserInfo】B系统更新updateCount：" + updateCount + ",A系统更新updateStatus："
-					+ updateStatus);
+			logger.info("====【validateUserInfo】B系统更新updateCount：" + updateCount + ",A系统更新updateStatus：" + updateStatus);
 			if (!updateStatus || updateCount == 0) {
 				jsonResult.put(ConstantsLogin.CODE, ConstantsLogin.Login.FAIL.getCode());
 				jsonResult.put(ConstantsLogin.MESS, ConstantsLogin.Login.FAIL.getMsg());
@@ -630,10 +628,10 @@ public class AdUserService implements AdUserServiceI {
 				// 新增A库xx_member表用户数据
 				lifeMember = this.saveMember(adUser);
 
-                //更新类型为企业口令激活
-                //数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
-                logger.info("更新类型为企业口令激活:{}",adUser.getTelephone());
-                userServiceI.updatePersonInfoDataSources(adUser.getTelephone(),2);
+				// 更新类型为企业口令激活
+				// 数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
+				logger.info("更新类型为企业口令激活:{}", adUser.getTelephone());
+				userServiceI.updatePersonInfoDataSources(adUser.getTelephone(), 2);
 
 			}
 			// 返回数据
@@ -671,7 +669,7 @@ public class AdUserService implements AdUserServiceI {
 			adUserParam.setTelephone(telephone);
 			adUserParam.setName(String.valueOf(jsonParam.get("name")));
 			adUserParam.setPassword(md5Pwd);
-//			adUserParam.setPayPassword(md5Pwd);
+			// adUserParam.setPayPassword(md5Pwd);
 			adUserParam.setDataSyn(AdUser.DATA_SYN_ON);
 			adUserParam.setRemarks(String.valueOf(jsonParam.get("remarks")));
 			String isActive = jsonParam.getString("isActive");
@@ -1018,10 +1016,10 @@ public class AdUserService implements AdUserServiceI {
 				}
 			}
 
-            //更新类型为专属码激活
-            //数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
-            logger.info("更新类型为专属码激活:{}",telephone);
-            userServiceI.updatePersonInfoDataSources(telephone,4);
+			// 更新类型为专属码激活
+			// 数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
+			logger.info("更新类型为专属码激活:{}", telephone);
+			userServiceI.updatePersonInfoDataSources(telephone, 4);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1135,6 +1133,7 @@ public class AdUserService implements AdUserServiceI {
 
 	/**
 	 * 同步添加，修改账户信息
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
@@ -1219,7 +1218,7 @@ public class AdUserService implements AdUserServiceI {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
 				if (StringUtils.isNotBlank(staffNum)) {
-					//福特激活处理
+					// 福特激活处理
 					if (StringUtils.isBlank(telephone)) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "手机号为空");
@@ -1233,21 +1232,23 @@ public class AdUserService implements AdUserServiceI {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "用户单位为空");
 					} else {
-						resultData = adActiveCodeServiceI.validateFordUser(code,telephone,staffNum,email,groupId);
-						if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
+						resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId);
+						if (resultData != null
+								&& ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;
 							try {
-								resultData.put(Constants.CHANNEL,Constants.CHANNEL_H5);
+								resultData.put(Constants.CHANNEL, Constants.CHANNEL_H5);
 								resultData = userService.userLogin(resultData);
 							} catch (Exception e) {
-								logger.info("verifyCodeAndActivation登录异常：",e);
+								logger.info("verifyCodeAndActivation登录异常：", e);
 							}
 						}
 					}
 				} else {
 					// 个人专属码
 					JSONObject validateResult = this.validateCode(code);
-					if (ConstantsLogin.CodeActive.SUCCESS.getCode().equals(validateResult.getString(ConstantsLogin.CODE))) {
+					if (ConstantsLogin.CodeActive.SUCCESS.getCode()
+							.equals(validateResult.getString(ConstantsLogin.CODE))) {
 						// resultData = this.doActive(validateResult);
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 						resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
@@ -1355,13 +1356,10 @@ public class AdUserService implements AdUserServiceI {
 					voucherCardRecord.setCardUseTime(new Date());
 					voucherCardRecordDao.updateActiveData(voucherCardRecord);
 
-
-					//更新类型为卡激活
-                    //数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
-                    logger.info("更新类型为卡激活:{}",telephone);
-                    userServiceI.updatePersonInfoDataSources(telephone,3);
-
-
+					// 更新类型为卡激活
+					// 数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
+					logger.info("更新类型为卡激活:{}", telephone);
+					userServiceI.updatePersonInfoDataSources(telephone, 3);
 
 					resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 					resultData.put(ConstantsLogin.MESS, ConstantsLogin.CodeActive.SUCCESS.getMsg());
@@ -1413,9 +1411,13 @@ public class AdUserService implements AdUserServiceI {
 		return resultData;
 	}
 
-	/*  @Override
-      @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
-              expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required = true)*/
+	/*
+	 * @Override
+	 * 
+	 * @Cacheable(module = "ADUSERSERVICE", event = "GETUSER", key = "id",
+	 * expires = RedisConstants.REDIS_USER_CACHE_EXPIRATION_DATE, required =
+	 * true)
+	 */
 	public AdUser getUser(AdUser adUser) {
 		return adUserDao.getUser(adUser);
 	}
@@ -1600,170 +1602,185 @@ public class AdUserService implements AdUserServiceI {
 		return resultData;
 	}
 
-    @Override
-    public MessageDataBean userBind(JSONObject paramJson) {
-        // 开始毫秒数
-        Long startTime = System.currentTimeMillis();
-        MessageDataBean messageDataBean = new MessageDataBean();
-        try {
-            //获取渠道来源第三方
-            String thirdPartyChannel = paramJson.getString(Constants.THIRDPARTYCHANNEL);
-            if(DaHuaConstants.THIRDPARTYCHANNEL_DAHUA.equals(thirdPartyChannel)){
-                //大华渠道去绑定的手机号和用户信息
-                String url = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY,DaHuaConstants.THIRD_DAHUA_USER_INFO_URL);
-                String groupId = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY, DaHuaConstants.THIRDPARTYCHANNEL_DAHUA);
-                String thirdUserToken = paramJson.getString("thirdUserToken");
-                JSONObject param = new JSONObject();
-                param.put("jsonData",thirdUserToken);
-                String jsonResult = HttpClientUtil.sendPost(param, url + DaHuaConstants.USER_INFO_URL);
-                JSONObject jsonObject = JSONObject.parseObject(jsonResult);
-                logger.info("大华获取用户信息接口返回：{}",jsonObject);
-                if(jsonObject!= null && "200".equals(jsonObject.getString("ResultCode")) && "true".equals(jsonObject.getString("IsSuccess"))){
-                    //说明请求成功绑定用户信息
-                    JSONObject result = JSONObject.parseObject(jsonObject.getString("Result"));
-                    String fItemName = result.getString("FItemName");//大华姓名
-                    String FItemNumber = result.getString("FItemNumber");//大华工号
-                    String deviceID = result.getString("DeviceID");//登录设备号
-                    if(FItemNumber == null){
-                        messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                        messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
-                        return messageDataBean;
-                    }
-                    String FSex = result.getString("FSex");
-                    String FBirthDay = result.getString("FBirthDay");
-                    if (StringUtils.isNotBlank(FBirthDay)) {
-                        Date fBirthDay = DateUtils.parse(FBirthDay, DateUtils.DATE_yyyyMMdd1);
-                        FBirthDay =  DateUtils.formatDate(fBirthDay, DateUtils.DATE_yyyy_MM_dd);
-                    }
-                    String mobile = paramJson.getString("loginName");
-                    Map<String,Object> params = new HashMap<>();
-                    params.put("workNumber",FItemNumber);
-                    params.put("adGroupId",groupId);
-                    //根据工号和企业查询
-                    AdUserConn isUser = adUserPersonalInfoDao.getIsUser(params);
-                    if(isUser != null){
-                        if(StringUtils.isNotBlank(isUser.getTelephone()) && !mobile.equals(isUser.getTelephone())){
-                            //手机号不正确
-                            messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                            messageDataBean.setMess("该手机号码与工号不匹配,请输入正确的手机号码！");
-                        }else {
-                            Map<String,Object> params1 = new HashMap<>();
-                            params1.put("telephone",mobile);
-                            //根据手机号
-                            AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
-                            if(isUser1 != null && groupId.equals(isUser1.getGroupId())){
-                                //说明手机已经被大华绑定了
-                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                                messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
-                            }else if(isUser1 != null) {
-                                //说明手机已经被其他企业绑定了
-                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                                messageDataBean.setMess("该手机号码已被其他企业绑定，请重新更换手机号码");
-                            }else {
-                                //手机号查询不到更新用户信息
-                                //更新用户
-                                AdUser user = new AdUser();
-                                user.setId(isUser.getId());
-                                user.setGroupNum(Long.valueOf(groupId));
-                                user.setName(fItemName);
-                                user.setTelephone(mobile);
-                                if(StringUtils.isNotBlank(deviceID)){
-                                    //设备号
-                                    user.setDeviceNumber(deviceID);
-                                }
-                                adUserDao.updateByPrimaryKeySelective(user);
-                                isUser.setWorkNumber(FItemNumber);
-                                isUser.setUserId(String.valueOf(isUser.getId()));
-                                isUser.setBirthday(FBirthDay);
-                                adUserDao.updatePersonalData(isUser);
-                                LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-                                // A库企业编号
-                                String groupNum = "";
-                                if (StringUtils.isNotBlank(groupId)) {
-                                    LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-                                    groupNum = lifeGroup.getId();
-                                }
-                                lifeMember.setGroupId(Long.valueOf(groupNum));
-                                lifeMember.setName(fItemName);
-                                lifeMember.setIsEnabled(2);
-                                lifeMember.setLoginFailureCount(0);
-                                lifeMember.setModifyDate(new Date());
-                                lifeMember.setAdId(String.valueOf(isUser.getId()));
-                                lifeMemberDao.updateActiveStatus(lifeMember);
-                                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-                                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
-                            }
-                        }
-                    }else {
-                        //说明没有绑定过工号，直接走激活流程
-                        //查看手机号是否存在
-                        Map<String,Object> params1 = new HashMap<>();
-                        params1.put("telephone",mobile);
-                        //根据手机号
-                        AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
-                        if(isUser1 != null){
-                            if(groupId.equals(isUser1.getGroupId())){
-                                //说明手机已经被大华绑定了
-                                messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                                messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
-                            }else{
-                                //说明手机号已存在
-                                AdUser user = new AdUser();
-                                user.setId(isUser1.getId());
-                                user.setGroupNum(Long.valueOf(groupId));
-                                user.setName(fItemName);
-                                user.setTelephone(mobile);
-                                adUserDao.updateByPrimaryKeySelective(user);
-                                isUser1.setWorkNumber(FItemNumber);
-                                isUser1.setUserId(String.valueOf(isUser1.getId()));
-                                isUser1.setBirthday(FBirthDay);
-                                adUserDao.updatePersonalData(isUser1);
-                                LifeMember lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-                                // A库企业编号
-                                String groupNum = "";
-                                if (StringUtils.isNotBlank(groupId)) {
-                                    LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-                                    groupNum = lifeGroup.getId();
-                                }
-                                lifeMember.setGroupId(Long.valueOf(groupNum));
-                                lifeMember.setName(fItemName);
-                                lifeMember.setIsEnabled(2);
-                                lifeMember.setLoginFailureCount(0);
-                                lifeMember.setModifyDate(new Date());
-                                lifeMember.setAdId(String.valueOf(isUser1.getId()));
-                                lifeMemberDao.updateActiveStatus(lifeMember);
-                                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-                                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
-                            }
-                        }else {
-                            // 激活用户
-                            JSONObject paramData = new JSONObject();
-                            paramData.put("mobile",mobile);
-                            paramData.put("groupId",groupId);
-                            paramData.put("name",fItemName);
-                            paramData.put("workerNumber",FItemNumber);
-                            paramData.put("FBirthDay",FBirthDay);
-                            paramData.put("FSex",FSex.equals("男")?"0":"1");
-                            paramData.put("remarks","大华企业登录激活");
-                            messageDataBean = this.execCommandActive(paramData);
-                            logger.info("====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
-                        }
-                    }
-                }else {
-                    logger.error("调用大华接口校验token异常，返回结果{}",jsonObject);
-                    messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
-                    messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
-                }
-            }else {
-                messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
-                messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
-            }
-        } catch (Exception e) {
-            messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
-            messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
-            logger.info("====【userBind】系统错误==========",e);
-        }
-        logger.info("====【userBind】-返回数据：" + messageDataBean.toJsonString());
-        return messageDataBean;
-    }
+	@Override
+	public MessageDataBean userBind(JSONObject paramJson) {
+		// 开始毫秒数
+		Long startTime = System.currentTimeMillis();
+		MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+			// 获取渠道来源第三方
+			String thirdPartyChannel = paramJson.getString(Constants.THIRDPARTYCHANNEL);
+			if (DaHuaConstants.THIRDPARTYCHANNEL_DAHUA.equals(thirdPartyChannel)) {
+				// 大华渠道去绑定的手机号和用户信息
+				String url = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY,
+						DaHuaConstants.THIRD_DAHUA_USER_INFO_URL);
+				String groupId = configDictServiceI.getValueByTypeAndKey(ThirdPartConstant.THIRD_PART_DICT_KEY,
+						DaHuaConstants.THIRDPARTYCHANNEL_DAHUA);
+				String thirdUserToken = paramJson.getString("thirdUserToken");
+				JSONObject param = new JSONObject();
+				param.put("jsonData", thirdUserToken);
+				String jsonResult = HttpClientUtil.sendPost(param, url + DaHuaConstants.USER_INFO_URL);
+				JSONObject jsonObject = JSONObject.parseObject(jsonResult);
+				logger.info("大华获取用户信息接口返回：{}", jsonObject);
+				if (jsonObject != null && "200".equals(jsonObject.getString("ResultCode"))
+						&& "true".equals(jsonObject.getString("IsSuccess"))) {
+					// 说明请求成功绑定用户信息
+					JSONObject result = JSONObject.parseObject(jsonObject.getString("Result"));
+					String fItemName = result.getString("FItemName");// 大华姓名
+					String FItemNumber = result.getString("FItemNumber");// 大华工号
+					String deviceID = result.getString("DeviceID");// 登录设备号
+					if (FItemNumber == null) {
+						messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+						messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
+						return messageDataBean;
+					}
+					String FSex = result.getString("FSex");
+					String FBirthDay = result.getString("FBirthDay");
+					if (StringUtils.isNotBlank(FBirthDay)) {
+						Date fBirthDay = DateUtils.parse(FBirthDay, DateUtils.DATE_yyyyMMdd1);
+						FBirthDay = DateUtils.formatDate(fBirthDay, DateUtils.DATE_yyyy_MM_dd);
+					}
+					String mobile = paramJson.getString("loginName");
+					Map<String, Object> params = new HashMap<>();
+					params.put("workNumber", FItemNumber);
+					params.put("adGroupId", groupId);
+					// 根据工号和企业查询
+					AdUserConn isUser = adUserPersonalInfoDao.getIsUser(params);
+					if (isUser != null) {
+						if (StringUtils.isNotBlank(isUser.getTelephone()) && !mobile.equals(isUser.getTelephone())) {
+							// 手机号不正确
+							messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+							messageDataBean.setMess("该手机号码与工号不匹配,请输入正确的手机号码！");
+						} else {
+							Map<String, Object> params1 = new HashMap<>();
+							params1.put("telephone", mobile);
+							// 根据手机号
+							AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
+							if (isUser1 != null && groupId.equals(isUser1.getGroupId())) {
+								// 说明手机已经被大华绑定了
+								messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+								messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
+							} else if (isUser1 != null) {
+								// 说明手机已经被其他企业绑定了
+								messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+								messageDataBean.setMess("该手机号码已被其他企业绑定，请重新更换手机号码");
+							} else {
+								// 手机号查询不到更新用户信息
+								// 更新用户
+								AdUser user = new AdUser();
+								user.setId(isUser.getId());
+								user.setGroupNum(Long.valueOf(groupId));
+								user.setName(fItemName);
+								user.setTelephone(mobile);
+								if (StringUtils.isNotBlank(deviceID)) {
+									// 设备号
+									user.setDeviceNumber(deviceID);
+								}
+								adUserDao.updateByPrimaryKeySelective(user);
+								isUser.setWorkNumber(FItemNumber);
+								isUser.setUserId(String.valueOf(isUser.getId()));
+								isUser.setBirthday(FBirthDay);
+								adUserDao.updatePersonalData(isUser);
+								LifeMember lifeMember = new LifeMember();
+								lifeMember.setAdId(String.valueOf(isUser.getId()));
+								lifeMember = lifeMemberDao.findLifeMemberByAdId(lifeMember);
+								// LifeMember lifeMember =
+								// lifeMemberDao.findMemberByMobile(mobile);
+								// A库企业编号
+								String groupNum = "";
+								if (StringUtils.isNotBlank(groupId)) {
+									LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+									groupNum = lifeGroup.getId();
+								}
+								lifeMember.setMobile(mobile);
+								lifeMember.setGroupId(Long.valueOf(groupNum));
+								lifeMember.setName(fItemName);
+								lifeMember.setIsEnabled(2);
+								lifeMember.setLoginFailureCount(0);
+								lifeMember.setModifyDate(new Date());
+								lifeMember.setAdId(String.valueOf(isUser.getId()));
+								lifeMemberDao.updateActiveStatus(lifeMember);
+								messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+								messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+							}
+						}
+					} else {
+						// 说明没有绑定过工号，直接走激活流程
+						// 查看手机号是否存在
+						Map<String, Object> params1 = new HashMap<>();
+						params1.put("telephone", mobile);
+						// 根据手机号
+						AdUserConn isUser1 = adUserPersonalInfoDao.getIsUser(params1);
+						if (isUser1 != null) {
+							if (groupId.equals(isUser1.getGroupId())) {
+								// 说明手机已经被大华绑定了
+								messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+								messageDataBean.setMess("该手机号码已被其他工号绑定，请重新更换手机号码");
+							} else {
+								// 说明手机号已存在
+								AdUser user = new AdUser();
+								user.setId(isUser1.getId());
+								user.setGroupNum(Long.valueOf(groupId));
+								user.setName(fItemName);
+								user.setTelephone(mobile);
+								adUserDao.updateByPrimaryKeySelective(user);
+								isUser1.setWorkNumber(FItemNumber);
+								isUser1.setUserId(String.valueOf(isUser1.getId()));
+								isUser1.setBirthday(FBirthDay);
+								adUserDao.updatePersonalData(isUser1);
+								// LifeMember lifeMember =
+								// lifeMemberDao.findMemberByMobile(mobile);
+								LifeMember lifeMember = new LifeMember();
+								lifeMember.setAdId(String.valueOf(isUser1.getId()));
+								lifeMember = lifeMemberDao.findLifeMemberByAdId(lifeMember);
+								//
+								// A库企业编号
+								String groupNum = "";
+								if (StringUtils.isNotBlank(groupId)) {
+									LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+									groupNum = lifeGroup.getId();
+								}
+								lifeMember.setMobile(mobile);
+								lifeMember.setGroupId(Long.valueOf(groupNum));
+								lifeMember.setName(fItemName);
+								lifeMember.setIsEnabled(2);
+								lifeMember.setLoginFailureCount(0);
+								lifeMember.setModifyDate(new Date());
+								lifeMember.setAdId(String.valueOf(isUser1.getId()));
+								lifeMemberDao.updateActiveStatus(lifeMember);
+								messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+								messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+							}
+						} else {
+							// 激活用户
+							JSONObject paramData = new JSONObject();
+							paramData.put("mobile", mobile);
+							paramData.put("groupId", groupId);
+							paramData.put("name", fItemName);
+							paramData.put("workerNumber", FItemNumber);
+							paramData.put("FBirthDay", FBirthDay);
+							paramData.put("FSex", FSex.equals("男") ? "0" : "1");
+							paramData.put("remarks", "大华企业登录激活");
+							messageDataBean = this.execCommandActive(paramData);
+							logger.info(
+									"====【userBind】-【userBind】验证,激活总耗时：" + (System.currentTimeMillis() - startTime));
+						}
+					}
+				} else {
+					logger.error("调用大华接口校验token异常，返回结果{}", jsonObject);
+					messageDataBean.setCode(ConstantsLogin.ValidCode.VALID_ERROR.getCode());
+					messageDataBean.setMess("身份验证失败，请退出重新登录或联系企业管理员，谢谢！");
+				}
+			} else {
+				messageDataBean.setCode(ConstantsLogin.Login.SUCCESS.getCode());
+				messageDataBean.setMess(ConstantsLogin.Login.SUCCESS.getMsg());
+			}
+		} catch (Exception e) {
+			messageDataBean.setCode(ConstantsLogin.Login.FAIL.getCode());
+			messageDataBean.setMess(ConstantsLogin.Login.FAIL.getMsg());
+			logger.info("====【userBind】系统错误==========", e);
+		}
+		logger.info("====【userBind】-返回数据：" + messageDataBean.toJsonString());
+		return messageDataBean;
+	}
 }

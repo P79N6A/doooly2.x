@@ -1680,6 +1680,7 @@ public class AdUserService implements AdUserServiceI {
 								isUser.setWorkNumber(FItemNumber);
 								isUser.setUserId(String.valueOf(isUser.getId()));
 								isUser.setBirthday(FBirthDay);
+								isUser.setIsActive("2");
 								adUserDao.updatePersonalData(isUser);
 								LifeMember lifeMember = new LifeMember();
 								lifeMember.setAdId(String.valueOf(isUser.getId()));
@@ -1692,6 +1693,7 @@ public class AdUserService implements AdUserServiceI {
 									LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
 									groupNum = lifeGroup.getId();
 								}
+								lifeMember.setIsEnabled(2);
 								lifeMember.setMobile(mobile);
 								lifeMember.setGroupId(Long.valueOf(groupNum));
 								lifeMember.setName(fItemName);

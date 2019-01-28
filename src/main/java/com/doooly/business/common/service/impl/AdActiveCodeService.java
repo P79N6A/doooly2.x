@@ -206,8 +206,11 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 									if (adUserPersonalInfoOld != null) {
 										adUserPersonalInfoOld.setWorkNumber(staffNum);
 										adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfoOld);
-										//删除新的AdUserPersonalInfo
-										adUserPersonalInfoDao.deleteAdUserPersonalInfoById(adUserPersonalInfo.getId());
+										//更新的AdUserPersonalInfo工号为空
+										adUserPersonalInfo.setWorkNumber("");
+										adUserPersonalInfoDao.updateWorkNum(adUserPersonalInfo);
+										//对新的user做逻辑删除
+										adUserDao.deleteAdUser(adUserNew);
 									}
 
 									adActiveCode.setIsUsed("1");

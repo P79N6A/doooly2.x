@@ -868,7 +868,7 @@
 	</update>
 	
 	<!-- 删除用户信息 -->
-	<update id="deleteAdUser">
+	<update id="deleteAdUser" parameterType="com.doooly.entity.reachad.AdUser">
 		update 
 			ad_user 
 		set 

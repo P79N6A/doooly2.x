@@ -90,8 +90,8 @@
 		parameterType="java.lang.String">
 		Select
         <include refid="adGroupColumns" />
-		From ad_group
-			Where ud_id = #{0}
+		From ad_group a
+			Where a.ud_id = #{0}
 	</select>
 
 
@@ -380,16 +380,16 @@
 		parameterType="java.lang.String">
 		Select
         <include refid="adGroupColumns" />
-		From ad_group
-		Where id = #{0}
+		From ad_group a
+		Where a.id = #{0}
 	</select>
 
 	<select id="findGroupByGroupNum" resultType="com.doooly.entity.reachad.AdGroup"
 		parameterType="java.lang.String">
 		Select
         <include refid="adGroupColumns" />
-		From ad_group
-		Where group_num = #{0}
+		From ad_group a
+		Where a.group_num = #{0}
 	</select>
 	
 	<!-- 根据企业口令获取企业集合 -->

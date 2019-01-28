@@ -1679,6 +1679,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
+                                user.setDataSyn(AdUser.DATA_SYN_ON);
                                 user.setSex(FSex);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 if(isUser.getActiveDate()==null){
@@ -1733,6 +1734,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setGroupNum(Long.valueOf(groupId));
 								user.setName(fItemName);
 								user.setTelephone(mobile);
+                                user.setDataSyn(AdUser.DATA_SYN_ON);
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 if(isUser1.getActiveDate()==null){
                                     user.setActiveDate(new Date());

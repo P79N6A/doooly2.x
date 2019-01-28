@@ -212,9 +212,9 @@ public class OneNumberService implements OneNumberServiceI {
     private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
         String mobile = null;
         logger.info("--------->中民--------->会员手机号:" + adUser.getTelephone());
-        logger.info("--------->中民--------->加密公钥:" + PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY"));
-        String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(
-                PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")), adUser.getTelephone());
+        logger.info("--------->中民--------->加密公钥:" + RSAEncryptUtil.ONE_NUM_PRD_PUB_KEY);
+        String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(RSAEncryptUtil.ONE_NUM_PRD_PUB_KEY),
+                adUser.getTelephone());
         logger.info("--------->中民--------->加密公钥手机号:" + rsaMobile);
         try {
             mobile = URLEncoder.encode(rsaMobile, "UTF-8");// 进行编码传输

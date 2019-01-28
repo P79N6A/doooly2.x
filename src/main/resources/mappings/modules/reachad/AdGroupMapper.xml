@@ -325,7 +325,8 @@
 	</select>
 	<select id="findGroupByID" resultType="com.doooly.entity.reachad.AdGroup"
 		parameterType="java.lang.String">
-		Select *
+		Select
+        <include refid="Base_Column_List" />
 		From ad_group
 		Where id = #{0}
 	</select>

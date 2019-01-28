@@ -1216,6 +1216,7 @@ public class AdUserService implements AdUserServiceI {
 		String staffNum = paramData.getString("staffNum");
 		String email = paramData.getString("email");
 		String groupId = paramData.getString("groupId");
+		String channel = paramData.getString(Constants.CHANNEL);
 		try {
 			Long startTime = System.currentTimeMillis();
 			if (code.length() == 6) {
@@ -1238,7 +1239,7 @@ public class AdUserService implements AdUserServiceI {
 						if (resultData != null && ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;
 							try {
-								resultData.put(Constants.CHANNEL,Constants.CHANNEL_H5);
+								resultData.put(Constants.CHANNEL,channel);
 								resultData = userService.userLogin(resultData);
 							} catch (Exception e) {
 								logger.info("verifyCodeAndActivation登录异常：",e);

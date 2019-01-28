@@ -103,9 +103,13 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String verifyCodeAndActivation(JSONObject param,@Context HttpServletRequest request) {
 		String groupId = request.getHeader("groupId");
-		log.info("verifyCodeToActive请求参数：{}，{}",param,groupId);
+		String channel = request.getHeader(Constants.CHANNEL);
+		log.info("verifyCodeToActive请求参数：{}，{},{}",param,groupId,channel);
 		if (StringUtils.isNotBlank(groupId)) {
 			param.put("groupId",groupId);
+		}
+		if (StringUtils.isNotBlank(channel)) {
+			param.put(Constants.CHANNEL,channel);
 		}
 		JSONObject resultData = new JSONObject();
 		try {

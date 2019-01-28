@@ -2,12 +2,14 @@ package com.doooly.business.common.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.common.service.AdGroupServiceI;
+import com.doooly.common.constants.RedisConstants;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.SysDictDao;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.SysDict;
+import com.reach.redis.annotation.Cacheable;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -116,6 +118,8 @@ public class AdGroupService implements AdGroupServiceI {
 		return dataBean;
 	}
 
+    @Cacheable(module = "ADGROUPSERVICE", event = "getGroupById",
+            key = "groupId",expires = RedisConstants.REDIS_RECHARGE_CACHE_EXPIRATION_DATE, required = true)
 	@Override
 	public AdGroup getGroupById(String groupId) {
 		return adGroupDao.findGroupByID(groupId);

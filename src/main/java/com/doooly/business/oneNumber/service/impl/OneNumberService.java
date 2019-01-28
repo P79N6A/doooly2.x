@@ -211,8 +211,8 @@ public class OneNumberService implements OneNumberServiceI {
      */
     private String getKuYaoDaiUrl(String targetUrl, AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
         String mobile = null;
-        String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(
-                PropertiesHolder.getProperty("ONE_NUM_PRD_PUB_KEY")), adUser.getTelephone());
+        String rsaMobile = RSAEncryptUtil.encryptByRSAPubKey(Base64.decodeBase64(RSAEncryptUtil.ONE_NUM_PRD_PUB_KEY),
+                adUser.getTelephone());
         try {
             mobile = URLEncoder.encode(rsaMobile, "UTF-8");// 进行编码传输
         } catch (UnsupportedEncodingException e) {

@@ -1,11 +1,5 @@
 package com.doooly.business.activity.impl;
 
-import com.doooly.business.common.service.AdUserServiceI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.activity.AbstractActivityService;
 import com.doooly.business.common.service.AdUserServiceI;
@@ -38,7 +32,7 @@ import java.util.HashMap;
 @Service
 public class XingFuJiaoHangActivityService extends AbstractActivityService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private static final String PRJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("prject.activity.url");
+	private static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
 	@Autowired
 	private AdUserServiceI userService;
 	@Autowired
@@ -185,7 +179,7 @@ public class XingFuJiaoHangActivityService extends AbstractActivityService {
 		JSONObject json = new JSONObject();
 		json.put("activityId", activityId);
 		json.put("userId", userId);
-		JSONObject resultJson = HttpClientUtil.httpPost(PRJECT_ACTIVITY_URL + "lottery/getCode", json);
+		JSONObject resultJson = HttpClientUtil.httpPost(PROJECT_ACTIVITY_URL + "lottery/getCode", json);
 		log.info("根据活动获得券码：" + resultJson.toJSONString());
 
 		if (MessageDataBean.success_code.equals(resultJson.getString("code")) ||

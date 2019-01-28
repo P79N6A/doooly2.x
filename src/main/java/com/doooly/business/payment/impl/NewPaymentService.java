@@ -320,7 +320,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             js.put("orderDate", DateUtil.formatDate(order.getOrderDate(),"yyyy-MM-dd hh:mm:ss"));
             js.put("orderNumber",order.getOrderNumber());
             js.put("serialNumber",order.getOrderNumber());
-            js.put("businessId",order.getBussinessId());
+            js.put("businessId",order.getBussinessBussinessId());
             List<OrderItemVo> items = order.getItems();
             JSONArray array = new JSONArray();
             for (OrderItemVo adOrderDetailDomain : items) {
@@ -721,7 +721,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
         if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "无效的订单状态");
+            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
         }
         //构建收银台接口需要参数
         AdUser paramUser = new AdUser();
@@ -869,7 +869,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 Map<Object, Object> data = (Map<Object, Object>) payMsg.getData();
                 logger.info("查询结果data{}", data);
                 //说明支付成功处理结果
-                JSONObject retJson = new JSONObject();
+               /* JSONObject retJson = new JSONObject();
                 retJson.put("code", GlobalResultStatusEnum.SUCCESS.getCode());
                 retJson.put("orderNum", orderNum);
                 retJson.put("integralPayStatus", data.get("payStatus"));
@@ -877,7 +877,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 retJson.put("realPayType", data.get("payType"));
                 retJson.put("outTradeNo", data.get("outTradeNo"));
                 retJson.put("payEndTime", data.get("payEndTime"));
-                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());
+                payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, retJson.toJSONString());*/
             }
         }
         // 跳转支付结果页面需要数据
@@ -920,6 +920,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (OrderService.PayState.PAID.getCode() == adOrderBig1.getState()) {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
+            Map<String, Object> map = new HashMap<>();
+            map.put("totalAmount", adOrderBig1.getTotalAmount());
+            payMsg.setData(map);
         } else {
             payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);
         }

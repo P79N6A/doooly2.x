@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.json.XML;
@@ -116,12 +117,15 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 			if (WechatConstants.MESSAGE_TYPE_TEXT.equals(msgType)) {
 				String conent = json.getString("Content");
 				// 添加回复文本消息内容
-				String contentJson = createMessageReqJson(channel, fromUserName, conent);
-				//若匹配不到，则默认发送客服消息
-				if(StringUtils.isBlank(contentJson)){
-					contentJson = createMessageReqJson(channel, fromUserName, "service");
+				// String contentJson = createMessageReqJson(channel,
+				// fromUserName, conent);
+				List<String> contentList = createMessageReqJsonList(channel, fromUserName, conent);
+				// 若匹配不到，则默认发送客服消息
+				if (CollectionUtils.isEmpty(contentList)) {
+					messageList.add(createMessageReqJson(channel, fromUserName, "service"));
+				}else{
+					messageList.addAll(contentList);
 				}
-				messageList.add(contentJson);
 				// 推送事件
 			} else {
 				String event = json.getString("Event");
@@ -158,12 +162,13 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 					// 存储微信推送信息
 					count = this.saveWechatEventPush(json);
 					// 若为0则插入失败，不再执行后续业务
-//					if (count == 0) {
-//						List<String> msgJsonList = createMessageReqJsonList(channel, fromUserName,
-//								WechatConstants.EVENT_TYPE_SUBSCRIBE);
-//						messageList.addAll(msgJsonList);
-//						return messageList;
-//					}
+					// if (count == 0) {
+					// List<String> msgJsonList =
+					// createMessageReqJsonList(channel, fromUserName,
+					// WechatConstants.EVENT_TYPE_SUBSCRIBE);
+					// messageList.addAll(msgJsonList);
+					// return messageList;
+					// }
 					eventKey = json.getString("EventKey").replace("qrscene_", "");
 					// 话费充值活动
 					if (eventKey.contains(RECHARGE_ACTIVITY)) {
@@ -280,7 +285,7 @@ public class WechatDevServiceImpl implements WechatDevCallbackServiceI {
 	private String createMessageReqJson(String channel, String toUserName, String switchType) {
 		String dictKey = channel + "_" + switchType;
 		String msgJson = configService.getValueByTypeAndKey(WECHAT_MSG, dictKey.toUpperCase());
-		if(StringUtils.isNotBlank(msgJson)){
+		if (StringUtils.isNotBlank(msgJson)) {
 			msgJson = msgJson.replace("OPENID", toUserName);
 		}
 		return msgJson;

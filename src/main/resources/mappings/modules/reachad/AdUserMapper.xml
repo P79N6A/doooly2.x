@@ -672,6 +672,9 @@
 	      <if test="workNumber != null and workNumber != ''" >
 	        b.work_number = #{workNumber},
 	      </if>
+	      <if test="deviceNumber != null and deviceNumber != ''" >
+	        b.device_number = #{deviceNumber},
+	      </if>
 	    </set>
 		WHERE b.id = #{userId}
   	</update>

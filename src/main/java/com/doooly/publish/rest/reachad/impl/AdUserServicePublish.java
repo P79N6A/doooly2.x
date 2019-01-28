@@ -1,5 +1,21 @@
 package com.doooly.publish.rest.reachad.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.common.service.AdGroupServiceI;
+import com.doooly.business.common.service.AdUserServiceI;
+import com.doooly.business.user.service.UserServiceI;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.dto.BaseRes;
+import com.doooly.dto.common.ConstantsLogin;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.publish.rest.reachad.AdUserServicePublishI;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -7,24 +23,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.common.service.AdUserServiceI;
-import com.doooly.business.common.service.impl.AdGroupService;
-import com.doooly.business.user.service.UserServiceI;
-import com.doooly.common.constants.Constants;
-import com.doooly.common.dto.BaseRes;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dto.common.ConstantsLogin;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.publish.rest.reachad.AdUserServicePublishI;
 
 @Component
 @Path("/member")
@@ -36,7 +34,7 @@ public class AdUserServicePublish implements AdUserServicePublishI {
 	private UserServiceI userService;
 
 	@Autowired
-	private AdGroupService adGroupService;
+	private AdGroupServiceI adGroupService;
 
 	@POST
 	@Path(value = "/batchSendSms")

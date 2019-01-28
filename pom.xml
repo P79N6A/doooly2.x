@@ -626,6 +626,32 @@
 			<version>1.18.2</version>
 			<scope>provided</scope>
 		</dependency>-->
+		<!-- 集成RocketMQ -->
+		  <dependency>
+			<groupId>com.reach</groupId>
+			<artifactId>easy-mq</artifactId>
+			<version>1.0.34</version>
+		</dependency> 
+		<dependency>
+			<groupId>org.apache.rocketmq</groupId>
+			<artifactId>rocketmq-client</artifactId>
+			<version>4.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.reach</groupId>
+			<artifactId>common-client</artifactId>
+			<version>1.0.18</version>
+		</dependency>
+		<dependency>
+		    <groupId>commons-lang</groupId>
+		    <artifactId>commons-lang</artifactId>
+		    <version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>Doooly</finalName>

@@ -102,6 +102,8 @@ public class AdUser {
 	/** 激活时间dateStr */
 	private String activeDateStr;
 
+    private String deviceNumber;
+
 	public Long getOldGroupNum() {
 		return oldGroupNum;
 	}
@@ -414,4 +416,11 @@ public class AdUser {
 		this.oldTelephone = oldTelephone;
 	}
 
+    public String getDeviceNumber() {
+        return deviceNumber;
+    }
+
+    public void setDeviceNumber(String deviceNumber) {
+        this.deviceNumber = deviceNumber;
+    }
 }

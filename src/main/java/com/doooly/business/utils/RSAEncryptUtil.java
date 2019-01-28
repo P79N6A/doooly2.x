@@ -48,6 +48,10 @@ public class RSAEncryptUtil {
 	public static final org.slf4j.Logger logger = LoggerFactory.getLogger(RSAEncryptUtil.class);
 	/** RSA 公钥、私钥对 */
 	public static final String RSAPUBLICKEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCMeROxYWBQada7c4PY+oBZ07aj8426815padAjwTOlfbisdpIE+AVPfEatdaktPUgfke5/dLTJ1s1MDaygtIgmDgzhAuYRA7QZ9abfSH2u9aQcmWLQRyZMKZ9alEeQwfVAHXjxI4HCKSlND/9iJD119bKoSPao9KqVHwec8wOnWQIDAQAB";
+
+	//中民I基金 生产环境公私钥
+	public static final String ONE_NUM_PRD_PUB_KEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCh+8ubaJTICB+I0lvQjKkw+fAebI2rPL9SuJAzoy24a8qOQaj4bDsxCw1y6xLgeBpZ1i31FnDAJvqmZJ3QQh+DSib6182u6sd6fByaTxbLqyetE4t90oUncuwnWX0R8HVREgOV718VKQIIcj+sULJIZ0LMpYLU37XVYfTDlrz0iwIDAQAB";
+
 	public static Map<String,byte[]> generateKeyPair(String algorithmStr) throws Exception{
 		Map<String,byte[]> keyPairMap = new ConcurrentHashMap<String,byte[]>();
 		/** 1. initiallize KeyPairGenerator wiht rsa and parameter */

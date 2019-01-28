@@ -17,6 +17,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 				<value>adSelfProductImageServiceImpl</value>
 				<value>adBusinessServiceImpl</value>
 				<value>adUserService</value>
+				<value>adGroupService</value>
 			</list>
 		</property>
  		

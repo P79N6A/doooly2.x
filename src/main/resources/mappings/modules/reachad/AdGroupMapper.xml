@@ -34,9 +34,62 @@
 		del_flag, remarks, update_date, update_by, create_date
 	</sql>
 
+    <sql id="adGroupColumns">
+        a.id AS "id",
+        a.group_name AS "groupName",
+        a.group_num AS "groupNum",
+        a.avail_groups AS "availGroups",
+        a.is_active AS "isActive",
+        a.last_is_active AS "lastIsActive",
+        a.official_integral AS "officialIntegral",
+        a.official_number AS "officialNumber",
+        a.relation_start_no AS "relationStartNo",
+        a.relation_end_no AS "relationEndNo",
+        a.super_group_id AS "superGroupId",
+        a.ud_id AS "udId",
+        a.un_official_integral AS "unOfficialIntegral",
+        a.active_date As "activeDate",
+        a.create_by AS "createBy",
+        a.del_flag AS "delFlag",
+        a.remarks AS "remarks",
+        a.update_date AS "updateDate",
+        a.update_by AS "updateBy",
+        a.create_date AS "createDate",
+        a.active_code_option as "activeCodeOption",
+        a.group_short_name as "groupShortName",
+        a.data_syn as "dataSyn",
+        a.web_url AS "webUrl",
+        a.phone_num AS "phone_num",
+        a.email_addr AS "emailAddr",
+        a.fax_addr AS "faxAddr",
+        a.address AS "address",
+        a.display_picture AS "displayPicture",
+        a.logo AS "logo",
+        a.introduction,
+        a.contact,
+        a.contact_telephone,
+        a.contact_email,
+        a.scale,
+        a.industry,
+        a.manager,
+        a.manager_post,
+        a.manager_tel,
+        a.admin_id,
+        a.bloc_id AS "blocId",
+        a.logo_url as 'logoUrl',
+        a.mini_logo_url as 'miniLogoUrl',
+        a.display_url as 'displayUrl',
+        a.background_url as 'backgroundUrl',
+        a.app_start_up_url as 'appStartUpUrl',
+        a.app_start_up_verions as 'appStartUpVerions',
+        a.daily_limit as 'dailyLimit',
+        a.charges as 'charges'
+    </sql>
+
 	<select id="findGroupByUDID" resultType="com.doooly.entity.reachad.AdGroup"
 		parameterType="java.lang.String">
-		Select *
+		Select
+        <include refid="adGroupColumns" />
 		From ad_group
 			Where ud_id = #{0}
 	</select>
@@ -326,14 +379,15 @@
 	<select id="findGroupByID" resultType="com.doooly.entity.reachad.AdGroup"
 		parameterType="java.lang.String">
 		Select
-        <include refid="Base_Column_List" />
+        <include refid="adGroupColumns" />
 		From ad_group
 		Where id = #{0}
 	</select>
 
 	<select id="findGroupByGroupNum" resultType="com.doooly.entity.reachad.AdGroup"
 		parameterType="java.lang.String">
-		Select *
+		Select
+        <include refid="adGroupColumns" />
 		From ad_group
 		Where group_num = #{0}
 	</select>

@@ -28,4 +28,6 @@ public interface AdUserPersonalInfoDao extends BaseDaoI<AdUserPersonalInfo> {
     AdUserPersonalInfo selectPersonByWorknumAndGroup(AdUserPersonalInfo adUserPersonalInfo);
 
     int updateWorkNum(AdUserPersonalInfo adUserPersonalInfo);
+
+    int deleteAdUserPersonalInfoById(Long id);
 }

@@ -227,6 +227,11 @@
 		WHERE id = #{id}
 	</update>
 
+	<delete id="deleteAdUserPersonalInfoById" parameterType="java.lang.Long">
+		DELETE FROM ad_user_personal_info
+		where id = #{id}
+	</delete>
+
 	<update id="updateDeleteStatus">
 		UPDATE
 		ad_user_personal_info

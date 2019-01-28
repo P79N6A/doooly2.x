@@ -1681,6 +1681,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setTelephone(mobile);
                                 user.setDataSyn(AdUser.DATA_SYN_ON);
                                 user.setSex(FSex);
+                                user.setUpdateDate(new Date());
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 if(isUser.getActiveDate()==null){
                                     user.setActiveDate(new Date());
@@ -1735,6 +1736,7 @@ public class AdUserService implements AdUserServiceI {
 								user.setName(fItemName);
 								user.setTelephone(mobile);
                                 user.setDataSyn(AdUser.DATA_SYN_ON);
+                                user.setUpdateDate(new Date());
                                 user.setIsActive(AdUser.USER_ACTIVATION_ON);
                                 if(isUser1.getActiveDate()==null){
                                     user.setActiveDate(new Date());

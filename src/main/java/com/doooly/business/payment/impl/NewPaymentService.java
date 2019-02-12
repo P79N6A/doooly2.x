@@ -66,13 +66,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 import static com.doooly.common.webservice.WebService.WEBURL;
@@ -554,6 +548,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
         //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
+
+
+
         JSONObject retJson = new JSONObject();
         retJson.put("productType", o.getProductType());
         retJson.put("totalFree", o.getTotalMount().toString());
@@ -563,6 +560,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("productImg", item.getProductImg());
         retJson.put("supportPayType", o.getSupportPayType());
         retJson.put("orderNum", orderNum);
+
         if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
         ) && o.getServiceCharge() != null) {
@@ -573,6 +571,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdUser paramUser = new AdUser();
         paramUser.setId(order.getUserId());
         AdUser user = adUserServiceI.getUser(paramUser);
+
+        List<OrderVo> orderVos = Arrays.asList(order);
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(order.getId());
+        adOrderBig.setTotalAmount(order.getTotalMount());
+        String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
+        retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
+
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {

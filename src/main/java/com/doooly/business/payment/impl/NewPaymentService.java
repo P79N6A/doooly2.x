@@ -574,8 +574,8 @@ public class NewPaymentService implements NewPaymentServiceI {
 
         List<OrderVo> orderVos = Arrays.asList(o);
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(order.getId());
-        adOrderBig.setTotalAmount(order.getTotalMount());
+        adOrderBig.setId(o.getId());
+        adOrderBig.setTotalAmount(o.getTotalMount());
         String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
         retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
 

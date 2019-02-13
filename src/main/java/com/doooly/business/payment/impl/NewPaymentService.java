@@ -602,7 +602,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdBusiness paramBusiness = new AdBusiness();
         paramBusiness.setId(o.getBussinessId());
         AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
-        AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
+        //AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
@@ -634,7 +634,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral().add(userIntegral.getAvailIntegral()));
+        retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);

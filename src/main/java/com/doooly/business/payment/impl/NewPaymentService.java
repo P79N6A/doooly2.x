@@ -572,7 +572,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         paramUser.setId(order.getUserId());
         AdUser user = adUserServiceI.getUser(paramUser);
 
-        List<OrderVo> orderVos = Arrays.asList(order);
+        List<OrderVo> orderVos = Arrays.asList(o);
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(order.getId());
         adOrderBig.setTotalAmount(order.getTotalMount());

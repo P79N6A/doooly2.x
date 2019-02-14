@@ -1217,6 +1217,7 @@ public class AdUserService implements AdUserServiceI {
 		String telephone = paramData.getString("mobile");
 		String staffNum = paramData.getString("staffNum");
 		String email = paramData.getString("email");
+		String verificationCode = paramData.getString("verificationCode");
 		String groupId = paramData.getString("groupId");
 		String channel = paramData.getString(Constants.CHANNEL);
 		try {
@@ -1237,7 +1238,7 @@ public class AdUserService implements AdUserServiceI {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "用户单位为空");
 					} else {
-						resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId);
+						resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId,verificationCode);
 						if (resultData != null
 								&& ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;

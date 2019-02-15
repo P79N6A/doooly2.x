@@ -233,6 +233,72 @@ public class AdArticleService implements AdArticleServiceI {
         return messageDataBean;
     }
 
+    @Cacheable(module = "GUIDEPRODUCT", event = "getGuideProductListv3",
+            key = "groupId, recommendHomepage, guideCategoryId, currentPage",
+            expiresKey = "expires")
+    @Override
+    public MessageDataBean getGuideProductListv3(Map<String, String> paramMap) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        String userId = paramMap.get("userId");
+        String guideCategoryId = paramMap.get("guideCategoryId");
+        String recommendHomepage = paramMap.get("recommendHomepage");
+        Integer currentPage = Integer.valueOf(paramMap.get("currentPage"));
+        Integer pageSize = Integer.valueOf(paramMap.get("pageSize"));
+
+        paramMap.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Pagelab pagelab = new Pagelab(currentPage, pageSize);
+        // 查询总数
+        int totalNum = adProductDao.getTotalNumv2(guideCategoryId,recommendHomepage);
+        if (totalNum > 0) {
+            HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+            Object o = hashOperations.get(GUIDE_RECORD_KEY, userId);
+            if (o == null) {
+                hashOperations.put(GUIDE_RECORD_KEY, userId, "1");
+                AdPortRecord adPortRecord = new AdPortRecord();
+                adPortRecord.setPortName("getGuideProductList");
+                adPortRecord.setUserId(Long.valueOf(userId));
+                adPortRecordDao.insert(adPortRecord);
+                map.put("isNew", 0);
+            } else {
+                map.put("isNew", 1);
+            }
+            pagelab.setTotalNum(totalNum);// 这里会计算总页码
+            // 查询详情
+            List<AdProduct> adProducts = adProductDao.getGuideProductListv3(guideCategoryId,
+                    pagelab.getStartIndex(), pagelab.getPageSize(), recommendHomepage);
+            for (AdProduct adProduct : adProducts) {
+                calculate(adProduct);
+            }
+            map.put("adProducts", adProducts);// 数据
+            map.put("countPage", pagelab.getCountPage());// 总页码
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setData(map);
+
+            // 失效时间
+            Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
+            for (AdProduct adProduct : adProducts) {
+                // 如果失效时间大于商品结束时间，则修改失效时间为商品结束时间
+                if (date > (adProduct.getBuyEndTime().getTime()) / 1000) {
+                    date = (adProduct.getBuyEndTime().getTime()) / 1000;
+                }
+            }
+
+            date = date - (System.currentTimeMillis() / 1000);
+
+            logger.info("getGuideProductListv2>>失效时间(实际会减去1s)===" + date);
+            paramMap.put("expires", date + "");
+
+            map.put("expires", (date - 1) + "");
+        } else {
+            messageDataBean.setCode(MessageDataBean.no_data_code);
+            messageDataBean.setMess("查询导购商品数据为空");
+        }
+        return messageDataBean;
+    }
+
     /**
      * 计算兜礼价和用户返利积分
      *

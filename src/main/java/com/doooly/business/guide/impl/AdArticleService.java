@@ -5,6 +5,7 @@ import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.RedisConstants;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.dto.reachad.AdProductExtend;
 import com.doooly.entity.reachad.*;
 import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
@@ -17,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,10 +268,11 @@ public class AdArticleService implements AdArticleServiceI {
             }
             pagelab.setTotalNum(totalNum);// 这里会计算总页码
             // 查询详情
-            List<AdProduct> adProducts = adProductDao.getGuideProductListv3(guideCategoryId,
+            List<AdProductExtend> adProducts = adProductDao.getGuideProductListv3(guideCategoryId,
                     pagelab.getStartIndex(), pagelab.getPageSize(), recommendHomepage);
-            for (AdProduct adProduct : adProducts) {
+            for (AdProductExtend adProduct : adProducts) {
                 calculate(adProduct);
+                isStar(adProduct); //品牌馆判断
             }
             map.put("adProducts", adProducts);// 数据
             map.put("countPage", pagelab.getCountPage());// 总页码
@@ -288,7 +291,7 @@ public class AdArticleService implements AdArticleServiceI {
 
             date = date - (System.currentTimeMillis() / 1000);
 
-            logger.info("getGuideProductListv2>>失效时间(实际会减去1s)===" + date);
+            logger.info("getGuideProductListv3>>失效时间(实际会减去1s)===" + date);
             paramMap.put("expires", date + "");
 
             map.put("expires", (date - 1) + "");
@@ -297,6 +300,21 @@ public class AdArticleService implements AdArticleServiceI {
             messageDataBean.setMess("查询导购商品数据为空");
         }
         return messageDataBean;
+    }
+
+    /**
+     * 目前-南京祖祖祖祖租是品牌馆
+     * @param adProduct
+     */
+    private void isStar(AdProductExtend adProduct) {
+        if (StringUtils.equals("Test_nanjingzuzu", adProduct.getBusinessNum())) {
+            adProduct.setIsStar("1");
+        } else {
+            adProduct.setIsStar("0");
+        }
+        BigDecimal userRebate = adProduct.getUserRebate().divide(new BigDecimal(100),2,
+                RoundingMode.HALF_UP);
+        adProduct.setUserRebate(userRebate);
     }
 
     /**

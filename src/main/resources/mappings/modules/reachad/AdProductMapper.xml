@@ -235,7 +235,7 @@
     </select>
 
 
-	<select id="getGuideProductListv3" resultType="com.doooly.entity.reachad.AdProduct">
+	<select id="getGuideProductListv3" resultType="com.doooly.dto.reachad.AdProductExtend">
 		SELECT
 			a.id AS "id",
 			a.image_wechat AS "imageWechat",
@@ -254,7 +254,8 @@
 			ab.logo AS "businessLogo",
 			ab.company AS "businessName",
 			IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
-			ab.deal_type AS "dealType"
+			ab.deal_type AS "dealType",
+			ab.business_id AS "businessNum"
 		FROM
 			ad_product a
 		LEFT JOIN ad_business ab ON a.business_id= ab.business_id

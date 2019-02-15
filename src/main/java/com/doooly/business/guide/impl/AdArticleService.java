@@ -6,6 +6,7 @@ import com.doooly.common.constants.RedisConstants;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.*;
+import com.reach.base.utils.number.NumberUtils;
 import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -267,9 +268,12 @@ public class AdArticleService implements AdArticleServiceI {
                             .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN).doubleValue();
                 }
                 //前折计算兜礼价
-                adProduct.setPrice(factPrice.setScale(2, BigDecimal.ROUND_DOWN));
+                //adProduct.setPrice(factPrice.setScale(2, BigDecimal.ROUND_DOWN));
                 //设置返利
-                adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
+               // adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
+                
+                adProduct.setPrice(new BigDecimal(NumberUtils.format(factPrice, "##.##")));
+                adProduct.setRebate(NumberUtils.format(new BigDecimal(rebate), "##.##"));
             }
         } else {
             adProduct.setPrice(marketPrice);

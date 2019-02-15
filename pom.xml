@@ -652,6 +652,11 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.3</version>
 		</dependency>
+		<dependency>
+			  <groupId>com.reach</groupId>
+			  <artifactId>base-utils</artifactId>
+			  <version>1.0.4</version>
+			</dependency>
 	</dependencies>
 	<build>
 		<finalName>Doooly</finalName>

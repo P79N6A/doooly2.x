@@ -5,11 +5,16 @@ import com.doooly.business.common.service.AdActiveCodeServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.user.service.UserServiceI;
+import com.doooly.common.constants.ActivityConstants;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.util.HTTPSClientUtils;
+import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdActiveCodeDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserPersonalInfoDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdActiveCode;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
@@ -91,6 +96,22 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 		return adActiveCodeDao.updateUseStatus(code);
 	}
 
+
+	public boolean checkVerificationCode(String mobile,String code) {
+		// 1.验证短信验证码是否有效
+		JSONObject verificationReq = new JSONObject();
+		verificationReq.put("businessId", WebService.BUSINESSID);
+		verificationReq.put("storesId", WebService.STOREID);
+		verificationReq.put("verificationCode", code);
+		verificationReq.put("cardNumber", mobile);
+		logger.info("checkVerificationCode请求：{}",verificationReq);
+		String result = HTTPSClientUtils.sendPost(verificationReq, Constants.MerchantApiConstants.CHECK_VERIFICATION_CODE_URL);
+		logger.info("checkVerificationCode返回：{}",result);
+		return JSONObject.parseObject(result).getInteger("code") == 0;
+	}
+
+
+
 	/**
 	 *
 	 * @param code
@@ -102,7 +123,7 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 	 * @throws Exception
 	 * TODO(需要重构)
 	 */
-	public JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId) throws Exception {
+	public JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId,String verificationCode) throws Exception {
 		JSONObject resultData = new JSONObject();
 		resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
 		resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
@@ -130,6 +151,12 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 							//adActiveCode.setIsUsed("1");//已使用
 							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
 							if (adActiveCode != null) {
+								//短信验证码校验
+								if (!checkVerificationCode(mobile,verificationCode)) {
+									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+									resultData.put(ConstantsLogin.MSG, "短信验证码不正确");
+									return resultData;
+								}
 								resultData.put("userId",adUser.getId());
 								return resultData;
 							} else {
@@ -165,6 +192,14 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 							adActiveCode.setIsUsed("0");
 							adActiveCode = adActiveCodeDao.getByCondition(adActiveCode);
 							if (adActiveCode != null) {
+
+								//短信验证码校验
+								if (!checkVerificationCode(mobile,verificationCode)) {
+									resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+									resultData.put(ConstantsLogin.MSG, "短信验证码不正确");
+									return resultData;
+								}
+
 								//更新原来的user
 								adUser.setIsActive("2");
 								if (StringUtils.isNotBlank(groupId)) {
@@ -291,6 +326,13 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 		if (adActiveCode == null) {
 			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
 			resultData.put(ConstantsLogin.MSG, "请输入正确的激活码");
+			return resultData;
+		}
+
+		//短信验证码校验
+		if (!checkVerificationCode(mobile,verificationCode)) {
+			resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+			resultData.put(ConstantsLogin.MSG, "短信验证码不正确");
 			return resultData;
 		}
 

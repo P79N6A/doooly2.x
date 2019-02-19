@@ -312,9 +312,6 @@ public class AdArticleService implements AdArticleServiceI {
         } else {
             adProduct.setIsStar("0");
         }
-        BigDecimal userRebate = adProduct.getUserRebate().divide(new BigDecimal(100),2,
-                RoundingMode.HALF_UP);
-        adProduct.setUserRebate(userRebate);
     }
 
     /**

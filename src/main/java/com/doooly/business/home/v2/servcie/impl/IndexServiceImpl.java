@@ -480,7 +480,8 @@ public class IndexServiceImpl implements IndexServiceI {
                             itemJson.put("linkUrl", product.getLinkUrlWechat());
                             itemJson.put("title", product.getName());
                             itemJson.put("marketPrice", product.getMarketPrice());
-                            itemJson.put("dooolyPrice", product.getDooolyPrice());
+                            itemJson.put("price", product.getPrice());  //不是品牌馆取折后价
+                            itemJson.put("dooolyPrice", product.getDooolyPrice());  //品牌馆取兜礼价格
                             itemJson.put("rebate", product.getRebate());
                             itemJson.put("expressage", product.getBusinessName());
                             itemJson.put("isHot", product.getIsHot());

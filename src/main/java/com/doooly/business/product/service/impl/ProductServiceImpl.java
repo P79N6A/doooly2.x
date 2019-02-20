@@ -9,15 +9,11 @@ import com.doooly.business.product.entity.AdSelfProductType;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.RedisConstants;
-import com.doooly.dao.reachad.AdConfigDictDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdSelfProductDao;
-import com.doooly.dao.reachad.AdSelfProductImageDao;
-import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.UserIntegral;
 import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -193,6 +189,9 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private AdConfigDictDao adConfigDictDao;
 
+	@Autowired
+	private UserIntegralMapper userIntegralMapper;
+
 	@Override
 	public HashMap<String, Object> getSelfProductDetail(String productId, String userId,String activityName) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -258,6 +257,10 @@ public class ProductServiceImpl implements ProductService {
 
 			// 6.获取可用积分
 			BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
+			UserIntegral userIntegral = new UserIntegral();
+			userIntegral.setAdUserId(Long.parseLong(userId));
+			BigDecimal dirIntegal = userIntegralMapper.getAvailIntegal(userIntegral);
+			availablePoint = availablePoint.add(dirIntegal);
 
 			map.put("code", MessageDataBean.success_code);
 			map.put("selfProduct", adSelfProduct);

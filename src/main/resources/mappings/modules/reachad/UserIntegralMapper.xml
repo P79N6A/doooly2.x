@@ -155,6 +155,7 @@
     select IFNULL(sum(avail_integral),0) from ad_user_integral
      where ad_user_id = #{adUserId}
      and type = 1
+     and del_flag=0
   </select>
 
 </mapper>

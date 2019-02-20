@@ -5,8 +5,7 @@ import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.service.OrderService.OrderStatus;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
-import com.doooly.business.pay.service.PayFlowService;
-import com.doooly.business.pay.service.PayFlowService.PayType;
+import com.doooly.business.pay.bean.PayTypeEnum;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdBusiness;
@@ -50,18 +49,15 @@ public class SynToOrderProcessor implements AfterPayProcessor{
             }
 			logger.info("同步订单到_order开始. orderNum = {}", order.getOrderNumber());
             BigDecimal amount = new BigDecimal("0");
-            String payType = "doooly";
-            if(realPayType.equals("2")){
+            if(realPayType.equals(String.valueOf(PayTypeEnum.WEIXIN_DOOOLY.getCode())) || realPayType.equals(String.valueOf(PayTypeEnum.ALIPAY_DOOOLY.getCode()))){
                 //混合支付需要重新计算实付金额,先查询微信支付的用总金额减去
                 Order o = new Order();
                 o.setOrderNumber(order.getOrderNumber());
-                o.setPayType(PayFlowService.PayType.getCodeByName("weixin"));
+                o.setPayType(PayTypeEnum.getDooolyCodeByCode(Integer.parseInt(realPayType)));
                 o.setState(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
                 Order order1 = orderDao.getSyncOrder(o);
                 amount = order1.getAmount();
-            }else if(realPayType.equals("1")){
-                payType = "weixin";
             }
 			AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
 			Order o = new Order();
@@ -76,7 +72,8 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 			o.setTotalAmount(order.getTotalMount());
 			o.setPrice(order.getTotalPrice());
 			o.setTotalPrice(order.getTotalPrice());
-			o.setPayType(PayType.getCodeByName(payType));
+            short payType = getPayType(realPayType);
+            o.setPayType((int) payType);
 			o.setOrderNumber(order.getOrderNumber());
 			o.setSerialNumber(order.getOrderNumber());
 			o.setOrderDate(order.getOrderDate());
@@ -141,7 +138,18 @@ public class SynToOrderProcessor implements AfterPayProcessor{
 		}
 		return null;
 	}
-	
-	
+
+
+    private short getPayType(String realPayType) {
+        short payType;//其他
+        if(realPayType.equals("1")){
+            payType = 3;//微信支付
+        }else if(realPayType.equals("6")){
+            payType = 6;//支付宝
+        }else {
+            payType = 0;//积分支付
+        }
+        return payType;
+    }
 	
 }

@@ -11,6 +11,7 @@ import com.doooly.common.constants.RedisConstants;
 import com.doooly.common.constants.VersionConstants;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.dto.reachad.AdProductExtend;
 import com.doooly.entity.reachad.*;
 import com.reach.redis.annotation.Cacheable;
 import com.reach.redis.annotation.EnableCaching;
@@ -402,7 +403,148 @@ public class IndexServiceImpl implements IndexServiceI {
 	}
 
 
+    /**
+     * 兜礼权益
+     * @return
+     */
+    @Cacheable(module = "TEMPLATE", event = "selectFloorsByV3_3", key = "groupId, address",
+            expiresKey = "expires", required = true)
+    @Override
+    public String selectFloorsByV3_3(Map<String, String> map) {
+        long start = System.currentTimeMillis();
+        String userId = map.get("userId");
+        String address = map.get("address");
+        String groupId = map.get("groupId");
 
+        map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+
+        long guideExpores = RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+//        long bussinessExpores = RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+
+        try {
+            List<AdBasicType> floors = adBasicTypeDao.getFloors(userId, AdBasicType.DOOOLY_RIGHTS_TYPE, 1);
+
+            if (CollectionUtils.isEmpty(floors)) {
+                return new MessageDataBean("1005", "floors is null").toJsonString();
+            }
+            Map<String, Object> result = new HashMap<>();
+            JSONArray floorArrays = new JSONArray();
+            JSONObject itemJson = null;
+            Integer floorType = null;
+
+            for (AdBasicType floor : floors) {
+                floorType = floor.getFloorType();
+                JSONObject floorJson = new JSONObject();
+                floorJson.put("mainTitle", floor.getName());
+                floorJson.put("subTitle", floor.getSubTitle());
+                floorJson.put("type", floorType);
+
+                if (floorType == DooolyRightConstants.FLOOR_TYPE_GOUWUTEQUAN) {
+                    // 兜礼权益商户（线上/线下）
+                    List<AdConsumeRecharge> bussinessList = getBussiness(userId, address,
+                            Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE), VersionConstants.INTERFACE_VERSION_V2_2);
+
+
+                    floorJson.put("list", bussinessList);
+
+//                    // 失效时间
+//                    Long date = (System.currentTimeMillis() / 1000) + RedisConstants.REDIS_CACHE_EXPIRATION_DATE;
+//
+//                    for (AdConsumeRecharge adConsumeRecharge : bussinessList) {
+//                        // 如果失效时间大于商户服务结束时间，则修改失效时间为商户服务结束时间
+//                        if (date > (adConsumeRecharge.getServerEndTime().getTime()) / 1000) {
+//                            date = (adConsumeRecharge.getServerEndTime().getTime()) / 1000;
+//                        }
+//                    }
+//                    bussinessExpores = date - (System.currentTimeMillis() / 1000);
+
+                } else if (floorType == DooolyRightConstants.FLOOR_TYPE_NEIBUJIA) {
+                    // 员工内部专享价
+                    Map<String, String> paramMap = new HashMap<>();
+                    paramMap.put("userId", userId);
+                    paramMap.put("guideCategoryId", null);
+                    paramMap.put("recommendHomepage", "1");
+                    paramMap.put("currentPage", "1");
+                    paramMap.put("pageSize", "20");
+                    paramMap.put("groupId", groupId);
+                    MessageDataBean guideData = guideService.getGuideProductListv3(paramMap);
+
+                    if (MessageDataBean.success_code.equals(guideData.getCode())) {
+                        List<AdProductExtend> datas = (List<AdProductExtend>) guideData.getData().get("adProducts");
+                        JSONArray listJson = new JSONArray();
+                        guideExpores = Long.valueOf(guideData.getData().get("expires").toString());
+
+                        for (AdProductExtend product : datas) {
+                            itemJson = new JSONObject();
+                            itemJson.put("iconUrl", product.getImageWechat());
+                            itemJson.put("linkUrl", product.getLinkUrlWechat());
+                            itemJson.put("title", product.getName());
+                            itemJson.put("marketPrice", product.getMarketPrice());
+                            itemJson.put("price", product.getPrice());  //不是品牌馆取折后价
+                            itemJson.put("dooolyPrice", product.getDooolyPrice());  //品牌馆取兜礼价格
+                            itemJson.put("rebate", product.getRebate());
+                            itemJson.put("expressage", product.getBusinessName());
+                            itemJson.put("isHot", product.getIsHot());
+                            itemJson.put("shippingMethod", product.getShippingMethod());
+                            itemJson.put("isStar", product.getIsStar());
+                            itemJson.put("userRebate", product.getUserRebate());
+                            listJson.add(itemJson);
+                        }
+                        floorJson.put("list", listJson);
+                    }
+
+                } else {
+                    List<AdConsumeRecharge> adConsumeRechargeList = adConsumeRechargeDao
+                            .getConsumeRecharges(floor.getTemplateId(), floor.getFloorId());
+                    JSONArray listJson = new JSONArray();
+
+                    for (AdConsumeRecharge recharge : adConsumeRechargeList) {
+                        itemJson = new JSONObject();
+                        itemJson.put("iconUrl", recharge.getIconUrl());
+                        String linkUrl = recharge.getLinkUrl();
+                        itemJson.put("linkUrl", linkUrl);
+                        itemJson.put("mainTitle", recharge.getMainTitle());
+                        itemJson.put("subTitle", recharge.getSubTitle());
+
+                        if (StringUtils.isNotBlank(recharge.getGuideIconUrl())) {
+                            // 热销品牌导购图
+                            itemJson.put("guideIconUrl", recharge.getGuideIconUrl());
+                        }
+
+                        if (StringUtils.isNotBlank(linkUrl) && linkUrl.indexOf("#") > -1) {
+                            itemJson.put("subUrl", linkUrl.substring(linkUrl.indexOf("#") + 1, linkUrl.length()));
+                        }
+
+                        if (floorType == DooolyRightConstants.FLOOR_TYPE_DAOHANG) {
+                            itemJson.put("cornerMark", recharge.getCornerMark());
+                        }
+                        listJson.add(itemJson);
+                    }
+                    floorJson.put("list", listJson);
+                }
+                floorArrays.add(floorJson);
+            }
+            result.put("floors", floorArrays);
+            logger.info("selectFloorsByV2_2(), execution time = {}", System.currentTimeMillis() - start);
+
+            if (guideExpores > RedisConstants.REDIS_CACHE_EXPIRATION_DATE) {
+                map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE + "");
+            } else {
+                map.put("expires", guideExpores + "");
+            }
+            logger.info("selectFloorsByV2_2>>有效时间====" + map.get("expires"));
+
+            //查询企业信息
+            /*AdGroup adGroup = adGroupDao.findGroupByUserId(userId);
+            result.put("adGroup",adGroup);*/
+
+            return new MessageDataBean(MessageDataBean.success_code, MessageDataBean.success_mess, result)
+                    .toJsonString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
+        }
+    }
 
 
 	@Override

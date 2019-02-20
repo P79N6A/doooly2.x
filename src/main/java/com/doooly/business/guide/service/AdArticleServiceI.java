@@ -23,4 +23,5 @@ public interface AdArticleServiceI {
 
     MessageDataBean addSellCount(String productId);
 
+    MessageDataBean getGuideProductListv3(Map<String, String> map);
 }

@@ -22,6 +22,8 @@ public class AdProduct {
 
 	private BigDecimal marketPrice;// 市场价
 
+	private BigDecimal dooolyPrice;		// 兜礼价格
+
 	private Double discount;// 折扣
 
 	private BigDecimal price;// 折后价
@@ -489,5 +491,13 @@ public class AdProduct {
 
 	public void setShippingMethod(String shippingMethod) {
 		this.shippingMethod = shippingMethod;
+	}
+
+	public BigDecimal getDooolyPrice() {
+		return dooolyPrice;
+	}
+
+	public void setDooolyPrice(BigDecimal dooolyPrice) {
+		this.dooolyPrice = dooolyPrice;
 	}
 }

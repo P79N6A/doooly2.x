@@ -51,6 +51,13 @@ public interface IndexServiceI {
 	 * @return
 	 */
 	String getUserGroupInfo(String userId);
-	
 
+	/**
+	 * 兜礼权益接口查询楼层v.3_3
+	 * 内部价增加兜里价格字段、是否是品牌馆
+	 * add paul 2019/2/19
+	 * @param map
+	 * @return
+	 */
+	String selectFloorsByV3_3(Map<String, String> map);
 }

@@ -76,7 +76,47 @@ public class IndexRestService {
         }
 	}
 
+	/**
+	 * 首页楼层查询
+	 *
+	 * 接口v3.3:首页接口新增楼层
+	 *
+	 * @author  paul
+	 * @date 创建时间：2019年2月19日 下午4:13:36
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	@POST
+	@Path(value = "/index/v3_3")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String indexV3_3(JSONObject params, @Context HttpServletRequest request) {
+		String userToken = request.getHeader(Constants.TOKEN_NAME);
+		logger.info("selectFloorsByV3_3() userToken={}", userToken);
+		if (StringUtils.isEmpty(userToken)) {
+			return new MessageDataBean("1001", "userToken is null").toJsonString();
+		}
+		String userId = String.valueOf(redisTemplate.opsForValue().get(userToken));
 
+		String address = params.getString("address");
+		String groupId = request.getHeader("groupId");
+		try {
+			logger.info("selectFloorsByV3_3() userToken={},userId={},groupId={} ,params={}", userToken, userId, groupId, params);
+
+			Map<String, String> map = new HashMap<>();
+			map.put("userId", userId);
+			map.put("groupId", groupId);
+			map.put("address", address);
+
+			return indexService.selectFloorsByV3_3(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.warn("indexV3_3() obj={} exception={}", params, e.getMessage());
+			return new MessageDataBean(MessageDataBean.failure_code, e.getMessage()).toJsonString();
+		}
+	}
 
 	@POST
 	@Path("/getUserGroupInfo")

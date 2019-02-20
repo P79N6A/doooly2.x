@@ -262,6 +262,7 @@ public class HotBusinessService implements HotBusinessServiceI {
 				adUser.setId(Long.valueOf(redisTemplate.opsForValue().get(token).toString()));
 				adUser = adUserDao.getUserActiveInfo(adUser);
 				adBusiness.setsWechatJumpUrl(adBusiness.getsWechatJumpUrl() + "?mobile=" + adUser.getTelephone());
+				adBusiness.setUrl(adBusiness.getUrl() + "?mobile=" + adUser.getTelephone());
 			}
 			messageDataBean.setData(map);
 			messageDataBean.setCode(MessageDataBean.success_code);

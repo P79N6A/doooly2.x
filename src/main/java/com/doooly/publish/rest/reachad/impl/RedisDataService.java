@@ -1,18 +1,19 @@
 package com.doooly.publish.rest.reachad.impl;
 
-import java.util.List;
+import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.redisUtil.RedisUtilService;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.publish.rest.reachad.RedisDataServiceI;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import com.alibaba.fastjson.JSONObject;
-import com.doooly.business.redisUtil.RedisUtilService;
-import com.doooly.dto.common.MessageDataBean;
-import com.doooly.publish.rest.reachad.RedisDataServiceI;
+import java.util.List;
 
 @Component
 @Path("/redis")
@@ -58,6 +59,7 @@ public class RedisDataService implements RedisDataServiceI {
 	public JSONObject popDataToRedis(JSONObject paramJSON) {
 		JSONObject result = new JSONObject();
 		try {
+			log.info("popDataFromRedis=paramJSON:{" + paramJSON.toJSONString() + "}");
 			// redis 兑换码key
 			String codeKey = paramJSON.getString("codeKey").toString();
 			// redis 兑换码数量

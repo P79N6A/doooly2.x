@@ -387,10 +387,10 @@ public class AdArticleService implements AdArticleServiceI {
                 //设置返利
                 adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
             }
-             String devStarBusinessId ="Test_nanjingzuzu";
-             //String prdStarBusinessId ="nanjingzuzu";
+             //String devStarBusinessId ="Test_nanjingzuzu";
+             String prdStarBusinessId ="nanjingzuzu";
             // 品牌馆判断
-            if (StringUtils.equals(devStarBusinessId, adProduct.getBusinessNum())) {
+            if (StringUtils.equals(prdStarBusinessId, adProduct.getBusinessNum())) {
                 adProduct.setIsStar("1");
             } else {
                 adProduct.setIsStar("0");

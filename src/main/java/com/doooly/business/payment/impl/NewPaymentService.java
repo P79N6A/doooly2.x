@@ -1368,7 +1368,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 int payType1 = Integer.parseInt(payType);
                 if (payType1 != 0 && refundFee != null && refundFee != null && (new BigDecimal(refundFee).compareTo(new BigDecimal("0")) > 0)) {
                     //非积分需要插入流水
-                    payType1 = 3;//微信
                     saveOneOrder(order, payType1, refundFee, refundFee, merchantRefundNo);
                 }
                 //积分退款要修改businessId一致

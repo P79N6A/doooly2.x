@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class SimpleStringCypher {
 
-    private static String DEFAULT_SECRET = "0vno63ufgaght892";
+    private static String DEFAULT_SECRET = "cs1CKRonxDhBZKoi1W0x4g==";
     private byte[] linebreak = {}; // Remove Base64 encoder default linebreak
     private SecretKey key;
     private Cipher cipher;

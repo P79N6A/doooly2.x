@@ -345,8 +345,8 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	 * 查询用户激活时间
 	 */
 	AdUser getUserActiveInfo(AdUser adUser);
-	
-	
-	
+
+
+	List<Map<String,Object>> selectUserToDelete(Map<String,Object> param);
 	
 }

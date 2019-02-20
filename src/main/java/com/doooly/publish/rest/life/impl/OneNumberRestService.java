@@ -45,7 +45,7 @@ public class OneNumberRestService implements OneNumberRestServiceI{
             String businessId = json.getString("businessId");
             String targetUrl = json.getString("targetUrl");
             String token = request.getHeader("token");
-            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl);
+            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl,token);
             Map<String,Object> map = messageDataBean.getData();
             String resultUrl = String.valueOf(map.get("resultUrl"));
             if (!resultUrl.contains("userId=")) {

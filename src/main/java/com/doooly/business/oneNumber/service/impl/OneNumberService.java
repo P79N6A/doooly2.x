@@ -39,7 +39,7 @@ public class OneNumberService implements OneNumberServiceI {
 	private AdUserDao adUserDao;
 
 	@Override
-	public MessageDataBean getTargetUrl(String userId, String businessId, String targetUrl)
+	public MessageDataBean getTargetUrl(String userId, String businessId, String targetUrl,String token)
 			throws UnsupportedEncodingException {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		HashMap<String, Object> map = new HashMap<>();
@@ -71,6 +71,9 @@ public class OneNumberService implements OneNumberServiceI {
 		// 一嗨租车专属
 		case 5:
 			resultUrl = getYiHaiUrl(targetUrl, adUser, adBusinessExpandInfo);
+			break;
+		case 7:
+			resultUrl = getMeituanUrl(adUser,token,adBusinessExpandInfo);
 			break;
 		default:
 			resultUrl = "";
@@ -256,6 +259,25 @@ public class OneNumberService implements OneNumberServiceI {
 			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str1 + "&sign=" + sign + targetUrl;
 		} else {
 			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str1 + "&sign=" + sign + targetUrl;
+		}
+		return resultUrl;
+	}
+
+
+	/**
+	 *
+	 * @param adUser
+	 * @param token
+	 * @param adBusinessExpandInfo
+	 * @return
+	 */
+	private String getMeituanUrl(AdUser adUser,String token,AdBusinessExpandInfo adBusinessExpandInfo) {
+		String resultUrl = "";
+		String str = "userId=" + adUser.getId() + "&token=" + token;
+		if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str;
+		} else {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str;
 		}
 		return resultUrl;
 	}

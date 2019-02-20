@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.HttpClientUtil;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
+import com.doooly.business.meituan.StaffService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
@@ -17,6 +18,7 @@ import com.doooly.common.meituan.StaffTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.meituan.StaffInfoVO;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
@@ -72,6 +74,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    private StaffService staffService;
+
 
     @GET
     @Path("/getMeituanEasyLoginUrl")
@@ -96,30 +101,19 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             if (adUser != null) {
                 try {
                     //判断是否已经同步
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("staffs",Arrays.asList(adUser.getTelephone()));
-                    jsonObject.put("staffType", StaffTypeEnum.StaffTypeEnum50.getCode());
-                    String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
-                    String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/getStaffs",jsonObject.toJSONString());
-                    List<Map<String,Object>> listMap = GsonUtils.son.fromJson(ret,new TypeToken<List<Map<String,Object>>>(){}.getType());
-                    logger.info("美团免登录查询员工结果：{}",ret);
-                    if (listMap != null && listMap.size() > 0) {
+                    List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getTelephone()),StaffTypeEnum.StaffTypeEnum50);
+                    logger.info("美团免登录查询员工结果：{}",GsonUtils.son.toJson(staffInfoVOS));
+                    if (staffInfoVOS != null && staffInfoVOS.size() > 0) {
                         loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                     } else {
                         //先同步用户
-                        JSONObject jsonObjectUser = new JSONObject();
-                        jsonObjectUser.put("name",adUser.getName());
-                        jsonObjectUser.put("phone",adUser.getTelephone());
-                        jsonObjectUser.put("entStaffNum",adUser.getCardNumber());
-                        JSONArray jsonArray = new JSONArray();
-                        jsonArray.add(jsonObjectUser);
-                        JSONObject jsonObjectParam = new JSONObject();
-                        jsonObjectParam.put("staffInfoVOList",jsonArray);
-                        jsonObjectParam.put("staffType",StaffTypeEnum.StaffTypeEnum30.getCode());
-                        String retStaff = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/batchSynStaffs",jsonObjectParam.toJSONString());
-                        List<Map<String,Object>> listStaffMap = GsonUtils.son.fromJson(retStaff,new TypeToken<List<Map<String,Object>>>(){}.getType());
-                        logger.info("美团免登录同步员工结果：{}",retStaff);
-                        if (listStaffMap != null && listStaffMap.size() > 0) {
+                        StaffInfoVO staffInfoVO = new StaffInfoVO();
+                        staffInfoVO.setName(adUser.getName());
+                        staffInfoVO.setPhone(adUser.getTelephone());
+                        staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                        List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
+                        logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
+                        if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
                             loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                         }
                     }

@@ -319,8 +319,7 @@ public class AdArticleService implements AdArticleServiceI {
             List<AdProductExtend> adProducts = adProductDao.getGuideProductListv3(guideCategoryId,
                     pagelab.getStartIndex(), pagelab.getPageSize(), recommendHomepage);
             for (AdProductExtend adProduct : adProducts) {
-                calculate(adProduct);
-                isStar(adProduct); //品牌馆判断
+                calculateExtend(adProduct);
             }
             map.put("adProducts", adProducts);// 数据
             map.put("countPage", pagelab.getCountPage());// 总页码
@@ -351,16 +350,61 @@ public class AdArticleService implements AdArticleServiceI {
     }
 
     /**
-     * 目前-南京祖租是品牌馆
-     * @param adProduct
+     * 计算兜礼价和用户返利积分
+     * add by paul 升级接口：增加品牌馆判断、 拼接第三方转义链接
+     * @param adProduct 商品
+     * @return
      */
-    private void isStar(AdProductExtend adProduct) {
-        //String starBusinessId = "Test_nanjingzuzu";  //测试环境--品牌馆商户编号
-        String starBusinessId = "nanjingzuzu";         //生产环境--品牌馆商户编号
-        if (StringUtils.equals(starBusinessId, adProduct.getBusinessNum())) {
-            adProduct.setIsStar("1");
+    public void calculateExtend(AdProductExtend adProduct) {
+        if (StringUtils.isBlank(adProduct.getMaxUserRebate())) {
+            adProduct.setMaxUserRebate("0");
+        }
+        adProduct.setShippingMethod(adProduct.getShippingMethod() != null ? adProduct.getShippingMethod() : "");
+        Double rebate;
+        BigDecimal factPrice;//前台根据折扣计算价格
+        BigDecimal marketPrice = adProduct.getMarketPrice().setScale(2, BigDecimal.ROUND_DOWN);//后台商品配置导购价
+        BigDecimal chu = new BigDecimal("10000");
+        AdBusiness adBusiness = adBusinessDao.get(adProduct.getBusinessId());
+        if (adBusiness != null) {
+            if (adBusiness.getBussinessRebate() != null && adBusiness.getUserRebate() != null) {
+                BigDecimal userRebate = adProduct.getUserRebate();
+                //前折计算兜礼价 折扣0保持原价
+                if (new BigDecimal(adProduct.getDiscount()).equals(BigDecimal.ZERO)) {
+                    factPrice = marketPrice;
+                } else {
+                    factPrice = marketPrice.multiply(new BigDecimal(adProduct.getDiscount())).divide(new BigDecimal("10"), 2, BigDecimal.ROUND_HALF_UP);
+                }
+                if ("京东返利".equals(adBusiness.getCompany())) {
+                    //京东开普勒订单实际分层比例
+                    rebate = marketPrice.multiply(adProduct.getBussinesRebate()).multiply(adProduct.getLayeredRebate())
+                            .divide(chu, 2, BigDecimal.ROUND_DOWN).doubleValue();
+                } else {
+                    rebate = marketPrice.multiply(userRebate)
+                            .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN).doubleValue();
+                }
+                //前折计算兜礼价
+                adProduct.setPrice(factPrice.setScale(2, BigDecimal.ROUND_DOWN));
+                //设置返利
+                adProduct.setRebate(String.valueOf(new BigDecimal(rebate).setScale(2, BigDecimal.ROUND_DOWN)));
+            }
+             String devStarBusinessId ="Test_nanjingzuzu";
+             //String prdStarBusinessId ="nanjingzuzu";
+            // 品牌馆判断
+            if (StringUtils.equals(devStarBusinessId, adProduct.getBusinessNum())) {
+                adProduct.setIsStar("1");
+            } else {
+                adProduct.setIsStar("0");
+            }
+
+            // 拼接第三方转义链接，商户是否开通1号通 0， 未开通 1，已开通
+            if (1 == adBusiness.getOpenOneNnumber()) {
+                StringBuffer linkUrl = new StringBuffer("https://reach-life.com/pro_dist/dist/#/openOneNnumber/121/");
+                linkUrl.append(adProduct.getLinkUrlWechat());
+                adProduct.setLinkUrlWechat(linkUrl.toString());
+            }
         } else {
-            adProduct.setIsStar("0");
+            adProduct.setPrice(marketPrice);
+            adProduct.setRebate("0.00");
         }
     }
 }

@@ -351,11 +351,13 @@ public class AdArticleService implements AdArticleServiceI {
     }
 
     /**
-     * 目前-南京祖祖祖祖租是品牌馆
+     * 目前-南京祖租是品牌馆
      * @param adProduct
      */
     private void isStar(AdProductExtend adProduct) {
-        if (StringUtils.equals("Test_nanjingzuzu", adProduct.getBusinessNum())) {
+        //String starBusinessId = "Test_nanjingzuzu";  //测试环境--品牌馆商户编号
+        String starBusinessId = "nanjingzuzu";         //生产环境--品牌馆商户编号
+        if (StringUtils.equals(starBusinessId, adProduct.getBusinessNum())) {
             adProduct.setIsStar("1");
         } else {
             adProduct.setIsStar("0");

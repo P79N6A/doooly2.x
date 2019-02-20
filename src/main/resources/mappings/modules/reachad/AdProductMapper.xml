@@ -234,6 +234,43 @@
 		LIMIT #{startIndex},#{pageSize}
     </select>
 
+
+	<select id="getGuideProductListv3" resultType="com.doooly.dto.reachad.AdProductExtend">
+		SELECT
+			a.id AS "id",
+			a.image_wechat AS "imageWechat",
+			a.name AS "name",
+			a.market_price AS "marketPrice",
+			a.doooly_price AS "dooolyPrice",
+			a.sell_count AS "sellCount",
+			a.user_rebate AS "userRebate",
+			a.bussiness_rebate AS "bussinesRebate",
+			a.link_url_wechat AS "linkUrlWechat",
+			a.layered_rebate AS "layeredRebate",
+			a.shipping_method AS "shippingMethod",
+			a.buy_end_time AS "buyEndTime",
+			ab.id AS "businessId",
+			IFNULL(ab.discount,0) AS "discount",
+			ab.logo AS "businessLogo",
+			ab.company AS "businessName",
+			IFNULL(ab.max_user_rebate,0) AS "maxUserRebate",
+			ab.deal_type AS "dealType",
+			ab.business_id AS "businessNum"
+		FROM
+			ad_product a
+		LEFT JOIN ad_business ab ON a.business_id= ab.business_id
+		WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+		<if test="guideCategoryId != null">
+			and a.guide_category_id = #{guideCategoryId}
+		</if>
+		<!-- 这个判断条件必须在最后，因为有排序方式-->
+		<if test="recommendHomepage != null and recommendHomepage==1">
+			and a.recommend_homepage = #{recommendHomepage}
+		</if>
+		ORDER BY a.update_date DESC
+			LIMIT #{startIndex},#{pageSize}
+	</select>
+
     <update id="updateSellCount" parameterType="com.doooly.entity.reachad.AdProduct">
         UPDATE ad_product a
         SET a.sell_count = a.sell_count +#{sellCount}

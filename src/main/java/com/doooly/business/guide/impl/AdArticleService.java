@@ -395,14 +395,6 @@ public class AdArticleService implements AdArticleServiceI {
             } else {
                 adProduct.setIsStar("0");
             }
-
-            // 拼接第三方转义链接, 商户是否开通1号通 0， 未开通 1，已开通
-            if (1 == adBusiness.getOpenOneNnumber()) {
-                StringBuffer linkUrl = new StringBuffer("https://reach-life.com/pro_dist/dist/#/openOneNnumber/"
-                        + adBusiness.getId() +"/");
-                linkUrl.append(adProduct.getLinkUrlWechat());
-                adProduct.setLinkUrlWechat(linkUrl.toString());
-            }
         } else {
             adProduct.setPrice(marketPrice);
             adProduct.setRebate("0.00");

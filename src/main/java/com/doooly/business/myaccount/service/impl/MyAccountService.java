@@ -116,7 +116,6 @@ public class MyAccountService implements MyAccountServiceI {
 			if (!StringUtils.isEmpty(adUserConn.getBirthday())
 					|| !StringUtils.isEmpty(adUserConn.getAppHeadImageUrl())) {
 				int result = adUserDao.getPersonalInfoByUserId(adUserConn);
-				adUserConn.setBirthday(DateUtils.parse(adUserConn.getBirthday(), "yyyy-MM-dd").toString());
 				if (result > 0) {
 					adUserDao.updatePersonalData(adUserConn);
 				} else {

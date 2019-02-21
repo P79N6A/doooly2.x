@@ -664,7 +664,7 @@
 		UPDATE ad_user_personal_info b	
 		<set>
 	      <if test="birthday != null and birthday != ''" >
-	      	b.birthday = STR_TO_DATE(#{birthday},'%Y-%m-%d'),
+	      	b.birthday = STR_TO_DATE(#{birthday},'%Y-%m-%d %H:%m:%s'),
 	      </if>
 	      <if test="appHeadImageUrl != null and appHeadImageUrl != ''" >
 	        b.app_head_image_url = #{appHeadImageUrl},

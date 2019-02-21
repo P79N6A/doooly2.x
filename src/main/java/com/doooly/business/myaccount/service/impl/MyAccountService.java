@@ -5,6 +5,7 @@ import com.business.common.util.AESUtils;
 import com.business.common.util.EncryptDecryptUtil;
 import com.doooly.business.myaccount.service.MyAccountServiceI;
 import com.doooly.business.mypoint.service.impl.MyPoinitService;
+import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.KeyConstants;
 import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.util.FileUtils;
@@ -115,6 +116,7 @@ public class MyAccountService implements MyAccountServiceI {
 			if (!StringUtils.isEmpty(adUserConn.getBirthday())
 					|| !StringUtils.isEmpty(adUserConn.getAppHeadImageUrl())) {
 				int result = adUserDao.getPersonalInfoByUserId(adUserConn);
+				adUserConn.setBirthday(DateUtils.parse(adUserConn.getBirthday(), "yyyy-MM-dd").toString());
 				if (result > 0) {
 					adUserDao.updatePersonalData(adUserConn);
 				} else {

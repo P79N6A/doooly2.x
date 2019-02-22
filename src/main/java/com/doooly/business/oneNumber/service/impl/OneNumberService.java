@@ -138,14 +138,14 @@ public class OneNumberService implements OneNumberServiceI {
         Map<String, Object> msgMap = new HashMap<String, Object>();
         msgMap.put("appId", adBusinessExpandInfo.getShopId());
         msgMap.put("appSecret", adBusinessExpandInfo.getShopKey());
-        msgMap.put("openId", "/fastorder/hospital");
-        msgMap.put("IdType", "0");
+        msgMap.put("openId", adUser.getTelephone());
+        msgMap.put("IdType", "1");
 
-        JSONObject jsonResponse = HttpClientUtil.httpPost("https://m.1hai.cn/MediaPlatform/Hybrid/PreAuthCode", new JSONObject(msgMap));
+        String url = adBusinessExpandInfo.getBusinessUrl();
+        JSONObject jsonResponse = HttpClientUtil.httpPost(url+"/MediaPlatform/Hybrid/PreAuthCode", new JSONObject(msgMap));
         if ("0".equals(jsonResponse.getString("Errcode"))) {
             String preAuthCode = jsonResponse.getString("PreAuthCode");
-            String url = adBusinessExpandInfo.getBusinessUrl();
-            return String.format("%s?appId=%s&preAuthCode=%s", url, adBusinessExpandInfo.getShopId(), preAuthCode);
+            return String.format("%s?appId=%s&preAuthCode=%s", url+"/MediaPlatform/Hybrid/FederatedLogin", adBusinessExpandInfo.getShopId(), preAuthCode);
         } else {
             return null;
         }

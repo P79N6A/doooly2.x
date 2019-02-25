@@ -186,8 +186,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/json;charset=utf-8")
-    public OrderMsg pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-        JSONObject jsonObject = getJsonObjectFromRequest(request);
+    public OrderMsg pay(JSONObject jsonObject,@Context HttpServletRequest request,@Context HttpServletResponse response) {
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
         OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);
@@ -203,13 +202,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 //商家未支付订单同步接口
                 //下单接口
                 jsonObject.put("clientIp", IPUtils.getIpAddr(request));
-                jsonObject.put("notifyUrl",MeituanConstants.url_meituan_pay_notify_doooly);
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 logger.info("美团创建订单返回：{}",GsonUtils.son.toJson(orderMsg));
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put("userId",orderMsg.getData().get("userId"));
                 jsonObject1.put("orderSource","meituan");
-                jsonObject1.put("return_url","https://app.jia-fu.cn/app-takeaway/h5/rec/sqt/checkstand");
+                jsonObject1.put("return_url",jsonObject.get("returnUrl"));
                 String redirectUrl = configDictServiceI.getValueByTypeAndKeyNoCache("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
                         orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject1);
                 logger.info("美团pay跳转url：{}",redirectUrl);

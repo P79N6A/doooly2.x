@@ -186,8 +186,28 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/x-www-form-urlencoded;charset=utf-8")
-    public Map<String,Object> pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-        JSONObject jsonObject = getJsonObjectFromRequest(request);
+    public Map<String,Object> pay(@FormParam("tradeNo") Long tradeNo,@FormParam("sqtOrderId") Long sqtOrderId,
+                                  @FormParam("serialNum") String serialNum,@FormParam("tradeAmount") String tradeAmount,
+                                  @FormParam("goodsName") String goodsName,@FormParam("tradeTime") String tradeTime,
+                                  @FormParam("notifyUrl") String notifyUrl,@FormParam("returnUrl") String returnUrl,
+                                  @FormParam("entId") Long entId,@FormParam("mobile") String mobile,
+                                  @FormParam("businessType") Integer businessType,@FormParam("appKey") String appKey,
+                                  @FormParam("clientType") Integer clientType,@FormParam("encoding") String encoding,@Context HttpServletRequest request) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("tradeNo",tradeNo);
+        jsonObject.put("sqtOrderId",sqtOrderId);
+        jsonObject.put("serialNum",serialNum);
+        jsonObject.put("tradeAmount",tradeAmount);
+        jsonObject.put("goodsName",goodsName);
+        jsonObject.put("tradeTime",tradeTime);
+        jsonObject.put("notifyUrl",notifyUrl);
+        jsonObject.put("returnUrl",returnUrl);
+        jsonObject.put("entId",entId);
+        jsonObject.put("mobile",mobile);
+        jsonObject.put("businessType",businessType);
+        jsonObject.put("appKey",appKey);
+        jsonObject.put("clientType",clientType);
+        jsonObject.put("encoding",encoding);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
         Map<String,Object> retMap = new HashMap<>();

@@ -185,10 +185,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @POST
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
-    @Consumes("application/json;charset=utf-8")
-    public OrderMsg pay(JSONObject jsonObject,@Context HttpServletRequest request,@Context HttpServletResponse response) {
+    @Consumes("application/x-www-form-urlencoded;charset=utf-8")
+    public Map<String,Object> pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
+        JSONObject jsonObject = getJsonObjectFromRequest(request);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
+        Map<String,Object> retMap = new HashMap<>();
         OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);
         try {
             if (signValid) {
@@ -211,15 +213,27 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 String redirectUrl = configDictServiceI.getValueByTypeAndKeyNoCache("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
                         orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject1);
                 logger.info("美团pay跳转url：{}",redirectUrl);
-                orderMsg.getData().put("redirectUrl",redirectUrl);
-                response.sendRedirect(redirectUrl);
+
+                if (orderMsg.getData().get("orderNum") != null) {
+                    retMap.put("status",0);
+                    retMap.put("msg","成功");
+                    Map<String,Object> data =  new HashMap<>();
+                    data.put("thirdPayOrderId",orderMsg.getData().get("orderNum"));
+                    data.put("thirdPayUrl",redirectUrl);
+                    retMap.put("data",data);
+                } else {
+                    retMap.put("status",500);
+                    retMap.put("msg",orderMsg.getMess());
+                }
+
             } else {
-                orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
+                retMap.put("status",500);
+                retMap.put("msg","签名错误");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return orderMsg;
+        return retMap;
     }
 
 

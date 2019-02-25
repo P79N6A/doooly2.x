@@ -182,7 +182,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
      * @param response
      * @return
      */
-    @GET
+    @POST
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/json;charset=utf-8")

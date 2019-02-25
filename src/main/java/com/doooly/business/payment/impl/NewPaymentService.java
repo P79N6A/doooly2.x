@@ -997,7 +997,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(MeituanOrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

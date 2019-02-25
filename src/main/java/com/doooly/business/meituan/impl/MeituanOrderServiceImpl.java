@@ -1,6 +1,6 @@
 package com.doooly.business.meituan.impl;
 
-import com.doooly.business.meituan.OrderService;
+import com.doooly.business.meituan.MeituanOrderService;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanRequest;
 import com.doooly.common.meituan.OrderStatusEnum;
@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by wanghai on 2018/12/19.
  */
 @Service
-public class MeituanOrderServiceImpl implements OrderService {
+public class MeituanOrderServiceImpl implements MeituanOrderService {
 
     private static Logger logger = LoggerFactory.getLogger(MeituanOrderServiceImpl.class);
 

@@ -147,7 +147,7 @@ public class MeituanServiceImpl implements MeituanService{
 
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
-        String phone = json.getString("buyer_openid");
+        String phone = json.getString("mobile");
         OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
         if (StringUtils.isEmpty(phone)) {
             msg.setCode(OrderMsg.failure_code);
@@ -163,20 +163,15 @@ public class MeituanServiceImpl implements MeituanService{
             return msg;
         }
 
-        BigDecimal total = json.getBigDecimal("total");
-        String orderNum = json.getString("outer_trade_no");
-        if (orderNum.contains(MeituanConstants.app_id)) {
-            String[] a = orderNum.split(MeituanConstants.app_id);
-            orderNum = a[1];
-        }
-        Map<String,Object> tradeInfoMap = GsonUtils.son.fromJson(json.getString("tradeInfoMap"),Map.class);
+        BigDecimal total = json.getBigDecimal("tradeAmount");
+        String orderNum = json.getString("sqtOrderId");
         JSONObject param = new JSONObject();
         param.put("businessId", MeituanConstants.meituan_bussinesss_serial);//商户编号
         param.put("cardNumber", adUser.getTelephone());
         param.put("merchantOrderNo", orderNum);
         param.put("tradeType", "DOOOLY_JS");
-        param.put("notifyUrl", json.getString("notify_url"));
-        param.put("body", json.getString("subject"));
+        param.put("notifyUrl", json.getString("notifyUrl"));
+        param.put("body", json.getString("goodsName"));
         param.put("isSource", 2);
         param.put("orderDate", DateUtils.formatDateTime(new Date()));
         param.put("storesId", "A001");
@@ -187,8 +182,8 @@ public class MeituanServiceImpl implements MeituanService{
         param.put("isPayPassword", adUser.getIsPayPassword());
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonDetail = new JSONObject();
-        jsonDetail.put("code", tradeInfoMap == null ? "" : tradeInfoMap.get("biz_code"));
-        jsonDetail.put("goods", json.getString("subject"));
+        jsonDetail.put("code", "");
+        jsonDetail.put("goods", json.getString("goodsName"));
         jsonDetail.put("number", 1);
         jsonDetail.put("price", total);
         jsonDetail.put("category", "0000");

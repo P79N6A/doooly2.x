@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2018/12/19.
  */
-public interface OrderService {
+public interface MeituanOrderService {
 
     Order queryOrderByOrderSN(String orderSN) throws Exception;
 

@@ -192,7 +192,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                                   @FormParam("notifyUrl") String notifyUrl,@FormParam("returnUrl") String returnUrl,
                                   @FormParam("entId") Long entId,@FormParam("mobile") String mobile,
                                   @FormParam("businessType") Integer businessType,@FormParam("appKey") String appKey,
-                                  @FormParam("clientType") Integer clientType,@FormParam("encoding") String encoding,@Context HttpServletRequest request) {
+                                  @FormParam("clientType") Integer clientType,@FormParam("encoding") String encoding,
+                                  @FormParam("content") String content,
+                                  @Context HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("tradeNo",tradeNo);
         jsonObject.put("sqtOrderId",sqtOrderId);
@@ -208,6 +210,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         jsonObject.put("appKey",appKey);
         jsonObject.put("clientType",clientType);
         jsonObject.put("encoding",encoding);
+        jsonObject.put("content",content);
         logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
         Map<String,Object> retMap = new HashMap<>();

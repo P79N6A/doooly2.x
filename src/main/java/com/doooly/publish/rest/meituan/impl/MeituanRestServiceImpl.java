@@ -214,7 +214,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                         orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject1);
                 logger.info("美团pay跳转url：{}",redirectUrl);
                 orderMsg.getData().put("redirectUrl",redirectUrl);
-                //response.sendRedirect(redirectUrl);
+                response.sendRedirect(redirectUrl);
             } else {
                 orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
             }

@@ -192,7 +192,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                                   @Context HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         try {
-            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey);
+            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
             jsonObject = GsonUtils.son.fromJson(contentStr,JSONObject.class);
         } catch (Exception e) {
             e.printStackTrace();

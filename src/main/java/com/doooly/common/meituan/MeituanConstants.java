@@ -86,6 +86,8 @@ public class MeituanConstants {
     public final static String meituan_bussinesss_serial = "TEST_bb841e7227asehtmeituan";
 
 
-    public final static String aesKey = "30Barz8IDtwtBekmhV5AvA==";
+    public final static String aesKey_test = "30Barz8IDtwtBekmhV5AvA==";
+
+    public final static String aesKey_prod = "x2KkxE4lP/MMyL2lpLni8A==";
 
 }

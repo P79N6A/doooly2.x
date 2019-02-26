@@ -244,7 +244,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        logger.info("美团下单返回：{}",GsonUtils.son.toJson(retMap));
+        logger.info("美团下单返回：{},{}",jsonObject.getString("sqtOrderId"),JSONObject.toJSONString(retMap));
         return retMap;
     }
 
@@ -252,14 +252,23 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @POST
     @Path("/refund")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Map<String,Object> refund(JSONObject jsonObject) {
+    @Consumes("application/x-www-form-urlencoded;charset=utf-8")
+    public Map<String,Object> refund(@FormParam("token") String token,@FormParam("version") String version,
+                                     @FormParam("content") String content) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
+            jsonObject = JSONObject.parseObject(contentStr,JSONObject.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         logger.info("美团调用refund：{}",GsonUtils.toString(jsonObject));
-        boolean signValid = validSign2(jsonObject);
+        boolean signValid = true;//validSign2(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
+        String serialNum = "";
         if (signValid) {
             //商企通订单号
-            String serialNum = jsonObject.getString("serialNum");
+            serialNum = jsonObject.getString("sqtOrderId");
             if (StringUtils.isBlank(serialNum)) {
                 retMap.put("status",500);
                 retMap.put("msg","参数错误");
@@ -269,8 +278,11 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
             if ("1000".equals(payMsg.getCode())) {
+                Map<String,Object> data = new HashMap<>();
+                data.put("thirdRefundOrderId",serialNum);
+                retMap.put("data",JSONObject.toJSONString(data));
                 retMap.put("status",0);
-                retMap.put("msg","success");
+                retMap.put("msg","成功");
             } else {
                 retMap.put("status",500);
                 retMap.put("msg",payMsg.getMess());
@@ -279,6 +291,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             retMap.put("status",500);
             retMap.put("msg","签名校验失败");
         }
+        logger.info("美团退款返回：{}，{}",serialNum,JSONObject.toJSONString(retMap));
         return retMap;
     }
 

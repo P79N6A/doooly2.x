@@ -25,6 +25,8 @@ import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.LongSerializationPolicy;
 import com.google.gson.reflect.TypeToken;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -193,11 +195,14 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         JSONObject jsonObject = new JSONObject();
         try {
             String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
-            jsonObject = GsonUtils.son.fromJson(contentStr,JSONObject.class);
+            Gson gson = new GsonBuilder()
+                    .setLongSerializationPolicy(LongSerializationPolicy.STRING)
+                    .create();
+            jsonObject = gson.fromJson(contentStr,JSONObject.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        logger.info("美团调用pay：{},{}",content,GsonUtils.toString(jsonObject));
+        logger.info("美团调用pay：{},{},{},{}",token,version,content,GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
         OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);
@@ -229,7 +234,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                     Map<String,Object> data =  new HashMap<>();
                     data.put("thirdPayOrderId",orderMsg.getData().get("orderNum"));
                     data.put("thirdPayUrl",redirectUrl);
-                    retMap.put("data",data);
+                    retMap.put("data",GsonUtils.toString(data));
                 } else {
                     retMap.put("status",500);
                     retMap.put("msg",orderMsg.getMess());
@@ -242,6 +247,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        logger.info("美团下单返回：{}",GsonUtils.son.toJson(retMap));
         return retMap;
     }
 

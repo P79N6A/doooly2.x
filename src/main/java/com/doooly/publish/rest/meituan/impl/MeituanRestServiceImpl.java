@@ -231,7 +231,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                     Map<String,Object> data =  new HashMap<>();
                     data.put("thirdPayOrderId",orderMsg.getData().get("orderNum"));
                     data.put("thirdPayUrl",redirectUrl);
-                    retMap.put("data",JSONObject.toJSONString(data));
+                    retMap.put("data",EncryptUtil.aesEncrypt(JSONObject.toJSONString(data),MeituanConstants.aesKey_prod));
                 } else {
                     retMap.put("status",500);
                     retMap.put("msg",orderMsg.getMess());
@@ -280,7 +280,11 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             if ("1000".equals(payMsg.getCode())) {
                 Map<String,Object> data = new HashMap<>();
                 data.put("thirdRefundOrderId",serialNum);
-                retMap.put("data",JSONObject.toJSONString(data));
+                try {
+                    retMap.put("data",EncryptUtil.aesEncrypt(JSONObject.toJSONString(data),MeituanConstants.aesKey_prod));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 retMap.put("status",0);
                 retMap.put("msg","成功");
             } else {

@@ -179,10 +179,10 @@ public class TestService {
         }
 
 
-        String ret = "w58HyqIUYyB3uwk1CQjC4nzsekgNKpkz6cYobilMOba63r5dsojj_QlArRO55NiPCgvNQ7yXZ3k2zh-Xxw8H6ItTCMGJ4CTW5n8gfNG-d1TYOeWe21EXfnxT-ETfrDvpPQpSvkOPTpV9e4eO1vLjCfsNig8z3gbkcSpTqFXDwtJOQGuUVXdhtANKrODSyKkLzHxvTeZfYYJUASus5juyszH1aU0a1CrpwQIZcJt6-AADfwjFglJTfF3skZdvDEbvfMQYFTHUhXS4ufovpnCoKwxTqNpZEvNDiGvKhJhMg_R7UXlwMwuPIzM0PeJrPhNQJin-JRNPanYcvfFfJUWBpDF59pbnV7QfnaAMZy-Cd8Mda42SCZqr5yB-ecJF6O9raoZ7D9Dx8M2ugx2RpyzHyojOE7E_3nI0_esgnaUMG5BY3eMt4BexHVYC1HF5NCfLBNJgNqTfld7uq1KCffic7zKTFUUTHifzmdsOygLD4ir1IvnspSRJ46J_pYIZKgVd2XVgx0T_tc4H6eJsfbQl88irnQZYSGEGYu4hb7nl1p6-T4tPFCzmrEmLFpb9JTZ5GPKjs2tikIkZjNhzlRIFoDIXn2GiXxTASArZKJo6r18FCzl4d1-Zs_llhpa9NW4UCTKK9eQ_XUN-_q7jXZRhhqM7pYXA4XVB-RgPYppiUXA";
+        String ret = "AoNtlH3V1kkRa8vQyc9Tm10kvkYjrPs8Z3j4YgLtn1MiYHUbg2tSdoP173MKGq_CBdCpadp0hrF6PIj132W2cYOKs3TYsKBz186fcHqNOmWpK9NVFKGQyLZwsL6b5zC4FhPsmWiUxSs8Sd-d-8d-pX-6xnZcPwWBguyh0Ktf6LrhXXk7FgUQ94Zx2zxPiGAlA5enS6ybdyVsnWvMmjWehBvCeV3Hqn1MfC89Q0U9Ybv1pMKnokKqxilxBIJ2VxWGFxnrCsvD_K3nh9vqm6XxKBXpiPy5gWf8vCet6Ptlgqqo2tJRtUj4-NLo-Rz9c6Iq8xkfBIqSyoeLbWWXDD152A";
         String s = "";
         try {
-            s = EncryptUtil.aesDecrypt(ret,"30Barz8IDtwtBekmhV5AvA==");
+            s = EncryptUtil.aesDecrypt(ret,MeituanConstants.aesKey_prod);
         } catch (Exception e) {
             e.printStackTrace();
         }

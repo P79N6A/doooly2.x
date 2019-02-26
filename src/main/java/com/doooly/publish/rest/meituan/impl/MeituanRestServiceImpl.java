@@ -195,10 +195,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         JSONObject jsonObject = new JSONObject();
         try {
             String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
-            Gson gson = new GsonBuilder()
-                    .setLongSerializationPolicy(LongSerializationPolicy.STRING)
-                    .create();
-            jsonObject = gson.fromJson(contentStr,JSONObject.class);
+            jsonObject = JSONObject.parseObject(contentStr,JSONObject.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -234,7 +231,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                     Map<String,Object> data =  new HashMap<>();
                     data.put("thirdPayOrderId",orderMsg.getData().get("orderNum"));
                     data.put("thirdPayUrl",redirectUrl);
-                    retMap.put("data",GsonUtils.toString(data));
+                    retMap.put("data",JSONObject.toJSONString(data));
                 } else {
                     retMap.put("status",500);
                     retMap.put("msg",orderMsg.getMess());

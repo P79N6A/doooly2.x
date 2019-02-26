@@ -187,7 +187,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/x-www-form-urlencoded;charset=utf-8")
-    public Map<String,Object> pay(@FormParam("token") Long token,@FormParam("version") Long version,
+    public Map<String,Object> pay(@FormParam("token") String token,@FormParam("version") String version,
                                   @FormParam("content") String content,
                                   @Context HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();

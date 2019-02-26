@@ -31,7 +31,7 @@ public class Order {
     private int payMode;
 
     //订单状态
-    private OrderStatusEnum orderStatus;
+    private int orderStatus;
 
     //商品名称
     private String goodsName;
@@ -125,11 +125,11 @@ public class Order {
         this.payMode = payMode;
     }
 
-    public OrderStatusEnum getOrderStatus() {
+    public int getOrderStatus() {
         return orderStatus;
     }
 
-    public void setOrderStatus(OrderStatusEnum orderStatus) {
+    public void setOrderStatus(int orderStatus) {
         this.orderStatus = orderStatus;
     }
 

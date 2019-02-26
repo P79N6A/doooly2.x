@@ -1,5 +1,7 @@
 package com.doooly.business.meituan.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.meituan.MeituanOrderService;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanRequest;
@@ -32,8 +34,8 @@ public class MeituanOrderServiceImpl implements MeituanOrderService {
         meituanRequest.setContent(content);
         String ret = meituanRequest.doPost(MeituanConstants.URL_QUERY_ORDER);
         Map<String,Object> retMap = GsonUtils.son.fromJson(ret,Map.class);
-        String data = String.valueOf(retMap.get("data"));
-        Order order = GsonUtils.son.fromJson(data,Order.class);
+        Map<String,Object> dataMap = (Map<String,Object>)retMap.get("data");
+        Order order = JSONObject.parseObject(JSONObject.toJSONString(dataMap),Order.class);
         return order;
     }
 
@@ -49,7 +51,8 @@ public class MeituanOrderServiceImpl implements MeituanOrderService {
         meituanRequest.setContent(content);
         String ret = meituanRequest.doPost(MeituanConstants.URL_QUERY_ORDER_BY_TIME_RANGE);
         Map<String,Object> retMap = GsonUtils.son.fromJson(ret,Map.class);
-        String data = String.valueOf(retMap.get("data"));
+        List<Map<String,Object>> dataMap = (List<Map<String,Object>>)retMap.get("data");
+        String data = JSONArray.toJSONString(dataMap);
         List<Order> listOrder = GsonUtils.son.fromJson(data,new TypeToken<List<Order>>(){}.getType());
         return listOrder;
     }
@@ -64,7 +67,8 @@ public class MeituanOrderServiceImpl implements MeituanOrderService {
         meituanRequest.setContent(content);
         String ret = meituanRequest.doPost(MeituanConstants.URL_QUERY_ORDER_BY_CHANNEL_ORDER_ID);
         Map<String,Object> retMap = GsonUtils.son.fromJson(ret,Map.class);
-        String data = String.valueOf(retMap.get("data"));
+        Map<String,Object> dataMap = (Map<String,Object>)retMap.get("data");
+        String data = JSONObject.toJSONString(dataMap);
         Order order = GsonUtils.son.fromJson(data,Order.class);
         return order;
     }

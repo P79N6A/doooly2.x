@@ -7,9 +7,11 @@ import com.doooly.business.meituan.MeituanOrderService;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.pay.processor.refundprocessor.RefundSyncOrderProcessor;
+import com.doooly.business.utils.DateUtils;
 import com.doooly.common.meituan.EncryptUtil;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
+import com.doooly.common.meituan.OrderStatusEnum;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.meituan.Order;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
@@ -25,9 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 //package com.redis;
 
@@ -172,8 +172,17 @@ public class TestService {
     @Test
     public void test5() {
         try {
-            Order order = meituanOrderService.queryOrderByOrderSN("40LFS2QY08");
-            System.out.println(GsonUtils.son.toJson(order));
+            //Order order = meituanOrderService.queryOrderByOrderSN("40LFS2QY08");
+            //System.out.println(GsonUtils.son.toJson(order));
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_MONTH,-1);
+            /*String s = DateUtils.formatDate(calendar.getTime(),"yyyy-MM-dd HH:mm:ss");
+            System.out.println(s);*/
+            long fromTime = calendar.getTimeInMillis();
+            long toTime = new Date().getTime();
+            List<Order> orderList = meituanOrderService.queryOrderByTimeRange(fromTime,toTime, OrderStatusEnum.FULLY_REFUNDED);
+            System.out.println(new Gson().toJson(orderList));
         } catch (Exception e) {
             e.printStackTrace();
         }

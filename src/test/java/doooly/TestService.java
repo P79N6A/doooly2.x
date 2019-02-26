@@ -172,11 +172,21 @@ public class TestService {
     @Test
     public void test5() {
         try {
-            Order order = meituanOrderService.queryOrderByOrderSN("40GNTXIL5Y");
+            Order order = meituanOrderService.queryOrderByOrderSN("40K8Q13WJ3");
             System.out.println(GsonUtils.son.toJson(order));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        String ret = "w58HyqIUYyB3uwk1CQjC4nzsekgNKpkz6cYobilMOba63r5dsojj_QlArRO55NiPCgvNQ7yXZ3k2zh-Xxw8H6ItTCMGJ4CTW5n8gfNG-d1TYOeWe21EXfnxT-ETfrDvpPQpSvkOPTpV9e4eO1vLjCfsNig8z3gbkcSpTqFXDwtJOQGuUVXdhtANKrODSyKkLzHxvTeZfYYJUASus5juyszH1aU0a1CrpwQIZcJt6-AADfwjFglJTfF3skZdvDEbvfMQYFTHUhXS4ufovpnCoKwxTqNpZEvNDiGvKhJhMg_R7UXlwMwuPIzM0PeJrPhNQJin-JRNPanYcvfFfJUWBpDF59pbnV7QfnaAMZy-Cd8Mda42SCZqr5yB-ecJF6O9raoZ7D9Dx8M2ugx2RpyzHyojOE7E_3nI0_esgnaUMG5BY3eMt4BexHVYC1HF5NCfLBNJgNqTfld7uq1KCffic7zKTFUUTHifzmdsOygLD4ir1IvnspSRJ46J_pYIZKgVd2XVgx0T_tc4H6eJsfbQl88irnQZYSGEGYu4hb7nl1p6-T4tPFCzmrEmLFpb9JTZ5GPKjs2tikIkZjNhzlRIFoDIXn2GiXxTASArZKJo6r18FCzl4d1-Zs_llhpa9NW4UCTKK9eQ_XUN-_q7jXZRhhqM7pYXA4XVB-RgPYppiUXA";
+        String s = "";
+        try {
+            s = EncryptUtil.aesDecrypt(ret,"30Barz8IDtwtBekmhV5AvA==");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(s);
     }
 
 }

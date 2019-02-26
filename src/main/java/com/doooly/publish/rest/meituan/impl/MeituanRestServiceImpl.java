@@ -12,6 +12,7 @@ import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.common.IPUtils;
+import com.doooly.common.meituan.EncryptUtil;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.StaffTypeEnum;
@@ -186,32 +187,17 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
     @Consumes("application/x-www-form-urlencoded;charset=utf-8")
-    public Map<String,Object> pay(@FormParam("tradeNo") Long tradeNo,@FormParam("sqtOrderId") Long sqtOrderId,
-                                  @FormParam("serialNum") String serialNum,@FormParam("tradeAmount") String tradeAmount,
-                                  @FormParam("goodsName") String goodsName,@FormParam("tradeTime") String tradeTime,
-                                  @FormParam("notifyUrl") String notifyUrl,@FormParam("returnUrl") String returnUrl,
-                                  @FormParam("entId") Long entId,@FormParam("mobile") String mobile,
-                                  @FormParam("businessType") Integer businessType,@FormParam("appKey") String appKey,
-                                  @FormParam("clientType") Integer clientType,@FormParam("encoding") String encoding,
+    public Map<String,Object> pay(@FormParam("token") Long token,@FormParam("version") Long version,
                                   @FormParam("content") String content,
                                   @Context HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("tradeNo",tradeNo);
-        jsonObject.put("sqtOrderId",sqtOrderId);
-        jsonObject.put("serialNum",serialNum);
-        jsonObject.put("tradeAmount",tradeAmount);
-        jsonObject.put("goodsName",goodsName);
-        jsonObject.put("tradeTime",tradeTime);
-        jsonObject.put("notifyUrl",notifyUrl);
-        jsonObject.put("returnUrl",returnUrl);
-        jsonObject.put("entId",entId);
-        jsonObject.put("mobile",mobile);
-        jsonObject.put("businessType",businessType);
-        jsonObject.put("appKey",appKey);
-        jsonObject.put("clientType",clientType);
-        jsonObject.put("encoding",encoding);
-        jsonObject.put("content",content);
-        logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
+        try {
+            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey);
+            jsonObject = GsonUtils.son.fromJson(contentStr,JSONObject.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.info("美团调用pay：{},{}",content,GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
         OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);

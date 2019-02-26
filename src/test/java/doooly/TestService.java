@@ -172,14 +172,14 @@ public class TestService {
     @Test
     public void test5() {
         try {
-            Order order = meituanOrderService.queryOrderByOrderSN("407899492369063");
+            Order order = meituanOrderService.queryOrderByOrderSN("40LFS2QY08");
             System.out.println(GsonUtils.son.toJson(order));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
-       /* String ret = "AoNtlH3V1kkRa8vQyc9Tm10kvkYjrPs8Z3j4YgLtn1MiYHUbg2tSdoP173MKGq_CBdCpadp0hrF6PIj132W2cYOKs3TYsKBz186fcHqNOmWpK9NVFKGQyLZwsL6b5zC4FhPsmWiUxSs8Sd-d-8d-pX-6xnZcPwWBguyh0Ktf6LrhXXk7FgUQ94Zx2zxPiGAlA5enS6ybdyVsnWvMmjWehBvCeV3Hqn1MfC89Q0U9Ybv1pMKnokKqxilxBIJ2VxWGFxnrCsvD_K3nh9vqm6XxKBXpiPy5gWf8vCet6Ptlgqqo2tJRtUj4-NLo-Rz9c6Iq8xkfBIqSyoeLbWWXDD152A";
+       /* String ret = "F6UgQeqTCo2RAYqT3Cyr3kf_GJkvSuRb-DsnuztXa4KWX6avJyRH2Dq8Y8q05AxH0Nj5DYGrMzjAqYfy3LElX5kOd7BrceAzByxNgoeorkiNMsdLDittSRdvlZp7wMGNcaSm0lEQjD73MK4wkRW7p7ndpPFCCGuooAS0_39MZHlFKkYqNqGhWtgxvY44AaIRyNFHC1HMKHrrGonMosH-CHLhLttACqP2imbH2dhX0pbQ9PpiHaNHWl0LGMlQKhMdS0X2RFcgvXJOTHJuNHSBoUvBOb2I_yk6z--fCEJ7PeASbTuhfyeGjdi1lrPdoltWXotBxQSxOFwhk1n7FovzBQ";
         String s = "";
         try {
             s = EncryptUtil.aesDecrypt(ret,MeituanConstants.aesKey_prod);

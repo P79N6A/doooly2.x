@@ -113,4 +113,12 @@ public class TestMain {
         return "";
     }
 
+
+    @Test
+    public void test5() {
+        String s = "40LDXMG0HX_407915805307626";
+        String[] a = s.split("_");
+        System.out.println(a[1]);
+    }
+
 }

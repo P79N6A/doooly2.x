@@ -266,15 +266,19 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         boolean signValid = true;//validSign2(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
         String serialNum = "";
+        String sqtOrderId = "";
+        String orderNum = "";
         if (signValid) {
             //商企通订单号
-            serialNum = jsonObject.getString("sqtOrderId");
+            serialNum = jsonObject.getString("serialNum");
+            sqtOrderId = jsonObject.getString("sqtOrderId");
             if (StringUtils.isBlank(serialNum)) {
                 retMap.put("status",500);
                 retMap.put("msg","参数错误");
             }
             //退款
-            OrderVo orderVo = orderService.getByOrderNum(serialNum);
+            orderNum = serialNum + "_" + sqtOrderId;
+            OrderVo orderVo = orderService.getByOrderNum(orderNum);
             PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
             if ("1000".equals(payMsg.getCode())) {

@@ -1,5 +1,6 @@
 package com.doooly.business.meituan.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.doooly.business.meituan.StaffService;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanRequest;
@@ -50,7 +51,7 @@ public class MeituanStaffServiceImpl implements StaffService {
         meituanRequest.setContent(GsonUtils.son.toJson(staffQuery));
         String ret = meituanRequest.doPost(MeituanConstants.URL_QUERY_STAFF);
         Map<String,Object> retMap = GsonUtils.son.fromJson(ret,Map.class);
-        String data = String.valueOf(retMap.get("data"));
+        String data = JSONArray.toJSONString(retMap.get("data"));
         List<StaffInfoVO> staffInfoVOS = GsonUtils.son.fromJson(data,new TypeToken<List<StaffInfoVO>>(){}.getType());
         return staffInfoVOS;
     }

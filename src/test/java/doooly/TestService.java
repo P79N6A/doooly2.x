@@ -172,17 +172,17 @@ public class TestService {
     @Test
     public void test5() {
         try {
-            //Order order = meituanOrderService.queryOrderByOrderSN("40LFS2QY08");
-            //System.out.println(GsonUtils.son.toJson(order));
+            Order order = meituanOrderService.queryOrderByOrderSN("40LFS2QY08");
+            System.out.println(GsonUtils.son.toJson(order));
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_MONTH,-1);
-            /*String s = DateUtils.formatDate(calendar.getTime(),"yyyy-MM-dd HH:mm:ss");
-            System.out.println(s);*/
+           /* Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_MONTH,-2);
+            *//*String s = DateUtils.formatDate(calendar.getTime(),"yyyy-MM-dd HH:mm:ss");
+            System.out.println(s);*//*
             long fromTime = calendar.getTimeInMillis();
             long toTime = new Date().getTime();
             List<Order> orderList = meituanOrderService.queryOrderByTimeRange(fromTime,toTime, OrderStatusEnum.FULLY_REFUNDED);
-            System.out.println(new Gson().toJson(orderList));
+            System.out.println(new Gson().toJson(orderList));*/
         } catch (Exception e) {
             e.printStackTrace();
         }

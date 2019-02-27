@@ -277,7 +277,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 retMap.put("msg","参数错误");
             }
             //退款
-            orderNum = serialNum + "_" + sqtOrderId;
+            orderNum = serialNum;
             OrderVo orderVo = orderService.getByOrderNum(orderNum);
             PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));

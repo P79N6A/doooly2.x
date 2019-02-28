@@ -86,13 +86,13 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Produces("application/json;charset=UTF-8")
     @Consumes("application/json;charset=UTF-8")
     public String getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-        String token = "";//request.getHeader("token");
-        String userId = "";//request.getHeader("userId");
+        String token = request.getParameter("token");//request.getHeader("token");
+        String userId = request.getParameter("userId");//request.getHeader("userId");
         if (StringUtils.isBlank(token)) {
-            token = request.getParameter("token");
+            token = request.getHeader("token");
         }
         if (StringUtils.isBlank(userId)) {
-            userId = request.getParameter("userId");
+            userId = request.getHeader("userId");
         }
         String productType = request.getParameter("productType");
         if (StringUtils.isBlank(productType)) {

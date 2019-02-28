@@ -262,6 +262,7 @@
 			p.id AS "id",
 			p.name AS "name",
 			p.detail AS "detail",
+			p.product_attr AS "productAttr",
 			p.introduction as "introduction",
 			b.id AS "businessId",
 			b.company AS "company",  

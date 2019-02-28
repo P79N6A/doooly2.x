@@ -26,7 +26,6 @@ import com.doooly.common.constants.Constants;
 import com.doooly.common.util.Generator;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
-import com.doooly.common.util.SnowflakeIdWorker;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
@@ -45,20 +44,29 @@ import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
+import com.easy.mq.client.RocketClient;
+import com.easy.mq.result.RocketProducerMessage;
+import com.easy.mq.result.RocketSendResult;
+import com.reach.constrant.Group;
+import com.reach.constrant.Topic;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 统一下单接口
@@ -103,6 +111,8 @@ public class OrderServiceImpl implements OrderService {
     private AdCouponCodeServiceI adCouponCodeServiceI;
     @Autowired
     private MyThreadPoolServiceImpl myThreadPoolService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -120,6 +130,7 @@ public class OrderServiceImpl implements OrderService {
 		long userId = orderVo.getUserId();
 		String orderNum = IdGeneratorUtil.getOrderNumber(orderVo.getIsSource());
 		String actType = ActivityType.COMMON_ORDER.getActType();
+        StringBuilder productSkuIds = new StringBuilder();
 		for (MerchantProdcutVo merchantProduct : merchants) {
 			int merchantId = merchantProduct.getMerchantId();
 			String remarks = merchantProduct.getRemarks();
@@ -132,7 +143,7 @@ public class OrderServiceImpl implements OrderService {
 				int productId = productSkuVo.getProductId();
 				int skuId = productSkuVo.getSkuId();
 				int buyQuantity = productSkuVo.getBuyNum();
-
+                productSkuIds.append(skuId).append(",");
 				//AdSelfProduct product = productService.getProductSku(merchantId, productId, skuId);
                 //20181226改成缓存获取
                 Map<String,Object> paramMap = new HashMap<>();
@@ -235,6 +246,18 @@ public class OrderServiceImpl implements OrderService {
 			int rows = saveOrder(order, orderExt, orderItems);
 			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows, System.currentTimeMillis() - s);
 		}
+		if( "1".equals(orderVo.getOrderType())){
+            // 组装订单相关参数放入MQ
+            JSONObject giftOrder = new JSONObject();
+            giftOrder.put("productSkuIds",productSkuIds);
+            giftOrder.put("giftBagId",orderVo.getGiftBagId());
+            giftOrder.put("orderNum",orderNum);
+            giftOrder.put("userId",orderVo.getUserId());
+            String mqMessageJson = giftOrder.toJSONString();
+            //表示是礼包订单，将skuId 和礼包id放入redis
+            stringRedisTemplate.opsForValue().set("gift_order_message",mqMessageJson,30 * 60 * 1000,
+                    TimeUnit.MILLISECONDS);
+        }
 		//下单成功返回信息
 		OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
 		msg.getData().put("orderNum", orderNum);

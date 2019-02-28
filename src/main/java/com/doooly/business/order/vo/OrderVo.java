@@ -100,6 +100,9 @@ public class OrderVo {
 	//大订单编号
 	private Long bigOrderNumber;
 
+    //订单类型 1 礼包订单
+    private String orderType;
+    private String giftBagId;		// 礼包表主键,礼品所属那个礼包, orderType为1时传递
 
 	public OrderVo() {
 		super();
@@ -469,6 +472,22 @@ public class OrderVo {
 
     public void setBigOrderNumber(Long bigOrderNumber) {
         this.bigOrderNumber = bigOrderNumber;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
+    public String getGiftBagId() {
+        return giftBagId;
+    }
+
+    public void setGiftBagId(String giftBagId) {
+        this.giftBagId = giftBagId;
     }
 
     @Override

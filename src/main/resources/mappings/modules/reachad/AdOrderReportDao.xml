@@ -92,6 +92,9 @@
 		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
 	 		<result column="storeName" property="storeName" jdbcType="VARCHAR" />
 	 			<result column="company" property="company" jdbcType="VARCHAR" />
+		<result column="consigneeName" property="consigneeName" jdbcType="VARCHAR" />
+	 		<result column="consigneeMobile" property="consigneeMobile" jdbcType="VARCHAR" />
+	 			<result column="consigneeAddr" property="consigneeAddr" jdbcType="VARCHAR" />
 
 	</resultMap>
 
@@ -1001,9 +1004,15 @@
         ORDER BY r.create_date DESC limit 1;
     </select>
     
-    <select id="getOrderReportIdByOrderNum" resultType="com.doooly.entity.reachad.AdOrderReport">
+    <select id="getOrderReportIdByOrderNum" resultMap="orderListMap">
         SELECT
-        a.id
+             a.id AS "id",
+            a.user_id AS "userId",
+            a.order_number AS "orderNumber",
+            a.consignee_name AS "consigneeName",
+            a.order_date AS "orderDate",
+            a.consignee_mobile AS "consigneeMobile",
+            a.consignee_addr AS "consigneeAddr"
         FROM ad_order_report a
         WHERE a.order_number = #{orderNumber}
     </select>
@@ -1283,9 +1292,12 @@
 
       <select id="getOrderDetail"  parameterType="com.doooly.business.myorder.po.OrderDetailPoReq"  resultType="com.doooly.business.myorder.po.OrderDetailReport">
         SELECT
-        <include refid="getOrderDetailColumns"/>
+        <include refid="getOrderDetailColumns"/>,
+          aod.expressCompanyName expressCompanyName,
+          aod.courierNumber courierNumber
         FROM ad_order_report a
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
+        LEFT JOIN _orderDelivery aod ON a.order_number = aod.orderNumber
         <include refid="OrderDetailInfoJoins"/>
         WHERE  a.id = #{orderId} and a.user_id=#{userId}
     </select>
@@ -1430,4 +1442,5 @@
             </if>
         </where>
     </select>
+
 </mapper>

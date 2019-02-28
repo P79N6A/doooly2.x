@@ -1,6 +1,8 @@
 package com.doooly.business.myorder.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.myorder.dto.OrderResult;
+import com.doooly.dto.common.MessageDataBean;
 
 /**
  * @Description:
@@ -16,4 +18,6 @@ public interface MyOrderServiceI {
     long getOrderReportIdByOrderNum(String orderNum);
 
     int orderBelongOneActivity(String activityName,String orderNum);
+
+    MessageDataBean getLiftOrder(JSONObject s);
 }

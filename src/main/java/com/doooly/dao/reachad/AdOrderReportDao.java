@@ -70,7 +70,7 @@ public interface AdOrderReportDao {
      * @param adOrderReport
      * @return
      */
-    AdOrderReport getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
+    OrderPoResp getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
     /**
      *
      * @param adOrderReport
@@ -145,4 +145,6 @@ public interface AdOrderReportDao {
     List<OrderVo> getOrders(@Param("bigOrderNumber")String bigOrderNumber);
 
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
+
+    OrderVo getLiftOrder(String orderNum);
 }

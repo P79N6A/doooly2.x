@@ -40,6 +40,10 @@ public class OrderDetailReport {
     private String remarks;
     private String cashDeskSource;
 	private  String productId;
+    /** 物流公司 */
+    private String expressCompanyName;
+    /** 快递单号 */
+    private String courierNumber;
 
 	public void setProductId(String productId) {
 		this.productId = productId;
@@ -218,5 +222,19 @@ public class OrderDetailReport {
 		this.cashDeskSource = cashDeskSource;
 	}
 
- 
+    public String getExpressCompanyName() {
+        return expressCompanyName;
+    }
+
+    public void setExpressCompanyName(String expressCompanyName) {
+        this.expressCompanyName = expressCompanyName;
+    }
+
+    public String getCourierNumber() {
+        return courierNumber;
+    }
+
+    public void setCourierNumber(String courierNumber) {
+        this.courierNumber = courierNumber;
+    }
 }

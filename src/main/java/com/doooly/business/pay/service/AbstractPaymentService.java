@@ -12,19 +12,26 @@ import com.doooly.business.pay.processor.productprocessor.ProductProcessor;
 import com.doooly.business.pay.processor.productprocessor.ProductProcessorFactory;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdRechargeConfDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdUser;
+import com.easy.mq.client.RocketClient;
+import com.easy.mq.result.RocketProducerMessage;
+import com.easy.mq.result.RocketSendResult;
+import com.reach.constrant.Group;
+import com.reach.constrant.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 支付抽象类,完成主要支付工作<br>
@@ -55,8 +63,11 @@ public abstract class AbstractPaymentService implements PaymentService {
     protected AdGroupDao adGroupDao;
     @Autowired
     protected AdRechargeRecordDao adRechargeRecordDao;
+
+    @Resource(name = "rocketClient")
+    private RocketClient rocketClient;
     @Autowired
-    private AdRechargeConfDao adRechargeConfDao;
+    private StringRedisTemplate stringRedisTemplate;
 
     protected abstract PayMsg buildPayParams(List<OrderVo> orders, PayFlow flow, JSONObject json);
 
@@ -119,45 +130,26 @@ public abstract class AbstractPaymentService implements PaymentService {
         try {
             if (resultMap != null) {
                 logger.info("handlePayResult() 支付结果验证通过.payType = {}", payType);
-                //String payFlowId = (String) resultMap.get("payFlowId");
                 String orderNum = (String) resultMap.get("orderNum");
                 String realPayType = (String) resultMap.get("realPayType");
-                List<OrderVo> orders = (List<OrderVo>) resultMap.get("orders");
-                //PayFlow payFlow = payFlowService.getById(payFlowId);
-                long s = System.currentTimeMillis();
-                //logger.info("handlePayResult() s = {},payFlow = {}", s, payFlow);
-                // 这里需要加分布式锁控制和事务处理
-                // 校验是否已经处理过通知结果
-                /*if (!PayFlowService.PAYMENT_SUCCESS.equals(payFlow.getPayStatus())) {
-                    logger.info("handlePayResult() 开始修改状态. payFlowId = {},orderNum={}", payFlowId, orderNum);
-                    //修改支付状态
-                    long s1 = System.currentTimeMillis();
-                    logger.info("updatePaySuccess ===>start = {}", s1);
-                    int payStatus = payFlowService.updatePaySuccess(payFlowId, transNo);
-                    if (payStatus == 0) {
-                        return new PayMsg(PayMsg.failure_code, "修改支付记录失败.");
+                String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message");
+                if(!StringUtils.isEmpty(mqMessageJson)){
+                    try{
+                        RocketProducerMessage rpm = new RocketProducerMessage();
+                        try {
+                            rpm.setBody(mqMessageJson.getBytes("utf-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            logger.error("礼包订单支付完成mq消息转换为byte失败=" + e.getMessage(), e);
+                        }
+                        rpm.setTopic("gift_order_topic");
+                        rpm.setGroup("gift_order_group");
+                        RocketSendResult sendResult = rocketClient.send(rpm);
+                        logger.info("礼包订单支付完成mq消息发送结果={}, orderNum={}", sendResult.getSendStatus(), orderNum);
+                    }catch(Exception e){
+                        logger.error("礼包订单支付完成mq消息发送结果出错,异常原因",e);
                     }
-                    logger.info("updatePaySuccess end.cost = {},payStatus = {}", System.currentTimeMillis() - s1, payStatus);
-                    // 修改订单状态
-                    long s2 = System.currentTimeMillis();
-                    logger.info("updateOrderSuccess ===>start = {}", s2);
-                    int orderStaus = orderService.updateOrderSuccess(orders, payType);
-                    if (orderStaus == 0) {
-                        logger.info("handlePayResult() orderStaus = {}", orderStaus);
-                        return new PayMsg(PayMsg.failure_code, "修改订单状态失败.");
-                    }
-                    logger.info("updateOrderSuccess end.cost = {},orderStaus = {}", System.currentTimeMillis() - s2, orderStaus);
-                    //这里要重新获取修改后的数据
-                    long s3 = System.currentTimeMillis();
-                    logger.info("doProcessor ===>start = {}", s3);
-                    PayFlow flow = payFlowService.getById(payFlowId);
-                    List<OrderVo> ods = orderService.getByOrdersNum(orderNum);
-                    logger.info("doProcessor ods = {}", ods.get(0));
-                    doProcessor(ods, flow, realPayType);
-                    logger.info("doProcessor end.cost = {}", System.currentTimeMillis() - s3);
-
                 }
-                logger.info("handlePayResult() cost = {},payFlow = {}", System.currentTimeMillis() - s, payFlow);*/
+                List<OrderVo> orders = (List<OrderVo>) resultMap.get("orders");
                 //兜礼收银台调用新的同步 废弃ad_pay_flow表 ==========zhangq20181108
                 OrderVo orderVo = orders.get(0);
                 if (OrderService.PayState.PAID.getCode()!=orderVo.getState()){

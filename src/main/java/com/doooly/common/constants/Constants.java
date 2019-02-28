@@ -427,4 +427,6 @@ public class Constants {
 		}
 	}
 
+    public static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
+
 }

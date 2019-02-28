@@ -1,29 +1,17 @@
 package com.doooly.publish.rest.life.impl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import com.doooly.business.myorder.constant.OrderType;
-import com.doooly.business.myorder.dto.*;
-import com.doooly.entity.reachad.AdOrderDetail;
-import com.doooly.entity.reachad.AdReturnFlow;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
+import com.doooly.business.myorder.dto.OrderDetailReq;
+import com.doooly.business.myorder.dto.OrderDetailResp;
+import com.doooly.business.myorder.dto.OrderHintReq;
+import com.doooly.business.myorder.dto.OrderReq;
+import com.doooly.business.myorder.dto.OrderResp;
+import com.doooly.business.myorder.dto.OrderResult;
 import com.doooly.business.myorder.po.OrderPoReq;
 import com.doooly.business.myorder.po.OrderPoResp;
 import com.doooly.business.myorder.service.MyOrderServiceI;
@@ -33,10 +21,26 @@ import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.dto.BaseRes;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdOrderDetail;
+import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.publish.rest.life.MyOrderRestServiceI;
 import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import cn.jiguang.common.utils.StringUtils;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 我的订单
@@ -72,6 +76,22 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			orderResult.error(orderResult);
 		}
 		return orderResult.toJsonString();
+	}
+
+	@POST
+	@Path("/getLiftOrder")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String getLiftOrder(JSONObject json) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+		try {
+            messageDataBean = myOrderServiceI.getLiftOrder(json);
+			logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
+		} catch (Exception e) {
+			logger.error("获得礼包领取成功页出错", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+        }
+        return messageDataBean.toJsonString();
 	}
 
 	@POST

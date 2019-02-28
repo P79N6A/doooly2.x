@@ -1,15 +1,21 @@
 package com.doooly.business.myorder.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.myorder.dto.OrderResp;
 import com.doooly.business.myorder.dto.OrderResult;
+import com.doooly.business.myorder.po.OrderPoResp;
 import com.doooly.business.myorder.service.MyOrderServiceI;
 import com.doooly.business.pay.bean.AdOrderFlow;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.Pagelab;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdOrderDetailDao;
 import com.doooly.dao.reachad.AdOrderFlowDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdOrderDetail;
 import com.doooly.entity.reachad.AdOrderReport;
@@ -299,8 +305,8 @@ public class MyOrderService implements MyOrderServiceI {
 	public long getOrderReportIdByOrderNum(String orderNum) {
 		AdOrderReport adOrderReport = new AdOrderReport();
 		adOrderReport.setOrderNumber(orderNum);
-		adOrderReport = adOrderReportDao.getOrderReportIdByOrderNum(adOrderReport);
-		return adOrderReport.getId();
+        OrderPoResp orderPoResp = adOrderReportDao.getOrderReportIdByOrderNum(adOrderReport);
+		return orderPoResp.getId();
 	}
 
     @Override
@@ -309,5 +315,39 @@ public class MyOrderService implements MyOrderServiceI {
         param.put("activityName",activityName);
         param.put("orderNum",orderNum);
         return adOrderReportDao.orderBelongOneActivity(param);
+    }
+
+    @Override
+    public MessageDataBean getLiftOrder(JSONObject json) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        String orderNum = json.getString("orderNum");
+        AdOrderReport adOrderReport = new AdOrderReport();
+        adOrderReport.setOrderNumber(orderNum);
+        OrderPoResp orderPoResp = adOrderReportDao.getOrderReportIdByOrderNum(adOrderReport);
+        OrderResp resp = new OrderResp();
+        resp.setOrderDate(DateUtils.formatDate(orderPoResp.getOrderDate(), "yyyy-MM-dd HH:mm:ss"));
+        resp.setOrderId(orderPoResp.getId());
+        resp.setOrderNumber(orderPoResp.getOrderNumber());
+        resp.setConsigneeMobile(orderPoResp.getConsigneeMobile());
+        resp.setConsigneeName(orderPoResp.getConsigneeName());
+        resp.setConsigneeAddr(orderPoResp.getConsigneeAddr());
+        map.put("orderResp",resp);
+
+        JSONObject jsonParam = new JSONObject();
+        jsonParam.put("userId",orderPoResp.getUserId());
+        JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/giftBagList", json);
+        if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()== resultJson.getInteger("code")){
+            logger.info("获取礼包信息：" + resultJson.toJSONString());
+            //表示有
+            map.put("hasGift","1");
+        }else {
+            //表示没有
+            map.put("hasGift","0");
+        }
+        messageDataBean.setCode(MessageDataBean.success_code);
+        messageDataBean.setMess(MessageDataBean.success_mess);
+        messageDataBean.setData(map);
+        return messageDataBean;
     }
 }

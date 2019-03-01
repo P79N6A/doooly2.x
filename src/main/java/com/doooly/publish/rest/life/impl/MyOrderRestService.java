@@ -83,14 +83,16 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String getLiftOrder(JSONObject json) {
+        long startTimes = System.currentTimeMillis();
         MessageDataBean messageDataBean = new MessageDataBean();
-		try {
+        try {
             messageDataBean = myOrderServiceI.getLiftOrder(json);
-			logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
-		} catch (Exception e) {
-			logger.error("获得礼包领取成功页出错", e);
+            logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
+        } catch (Exception e) {
+            logger.error("获得礼包领取成功页出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);
         }
+        logger.info("获得礼包领取成功页接口数据耗时==========" + (System.currentTimeMillis()-startTimes));
         return messageDataBean.toJsonString();
 	}
 

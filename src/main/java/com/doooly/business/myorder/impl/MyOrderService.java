@@ -336,7 +336,7 @@ public class MyOrderService implements MyOrderServiceI {
 
         JSONObject jsonParam = new JSONObject();
         jsonParam.put("userId",orderPoResp.getUserId());
-        JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/giftBagList", json);
+        JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/giftBagList", jsonParam);
         if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()== resultJson.getInteger("code")){
             logger.info("获取礼包信息：" + resultJson.toJSONString());
             //表示有

@@ -912,6 +912,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map = messageDataBean.getData();
                     map.put("orderType","1");
                 }else {
+                    map.put("orderType","0");
                     map.put("orderNum", order1.getOrderNumber());
                     map.put("orderId", order.getOrderId());
                     map.put("oid", order.getId());

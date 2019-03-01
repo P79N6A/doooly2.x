@@ -188,14 +188,14 @@ public class TestService {
         }
 
 
-       /* String ret = "F6UgQeqTCo2RAYqT3Cyr3kf_GJkvSuRb-DsnuztXa4KWX6avJyRH2Dq8Y8q05AxH0Nj5DYGrMzjAqYfy3LElX5kOd7BrceAzByxNgoeorkiNMsdLDittSRdvlZp7wMGNcaSm0lEQjD73MK4wkRW7p7ndpPFCCGuooAS0_39MZHlFKkYqNqGhWtgxvY44AaIRyNFHC1HMKHrrGonMosH-CHLhLttACqP2imbH2dhX0pbQ9PpiHaNHWl0LGMlQKhMdS0X2RFcgvXJOTHJuNHSBoUvBOb2I_yk6z--fCEJ7PeASbTuhfyeGjdi1lrPdoltWXotBxQSxOFwhk1n7FovzBQ";
+        String ret = "AoNtlH3V1kkRa8vQyc9Tm84ffYGpL1buPLfXWGyh7xsqkfOF7QHdH-WqhHANMBgH-CrVzc0Pd6-Pi2gjNEROK3_uxUPbjOdVJlU5RuRqWx97_ys0S5UtsNFrBqsTtH-MnZeV8ebBOwqM984uH6m_oKKlKyEWsYkjaiDUwKw72PnQIX75kYOcT2OR7gFe-40NmOs_7OdP02Dh_7lGR90n7ccf9vv7Datxk6iGgZuYNvFTnaqAR5ozhQYFg4tcGIIMw8bWkxXLQv0UkoMGBMCJb4My939lkemv-zU-3vQLjpQ";
         String s = "";
         try {
             s = EncryptUtil.aesDecrypt(ret,MeituanConstants.aesKey_prod);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(s);*/
+        System.out.println(s);
     }
 
 }

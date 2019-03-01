@@ -242,7 +242,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 retMap.put("msg","签名错误");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            retMap.put("status",500);
+            retMap.put("msg","下单异常");
+            logger.error("美团下单异常：",e);
         }
         logger.info("美团下单返回：{},{}",jsonObject.getString("sqtOrderId"),JSONObject.toJSONString(retMap));
         return retMap;

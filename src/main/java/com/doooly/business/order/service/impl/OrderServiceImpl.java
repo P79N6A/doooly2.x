@@ -236,6 +236,10 @@ public class OrderServiceImpl implements OrderService {
 			orderItems.get(0).setAmount(totalMount);
 			//保存订单
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
+            if( "1".equals(orderVo.getOrderType())){
+                // 组装订单相关参数放入MQ
+                orderVo.setRemarks("gift_order");
+            }
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
 			int rows = saveOrder(order, orderExt, orderItems);
 			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows, System.currentTimeMillis() - s);

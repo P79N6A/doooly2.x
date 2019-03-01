@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.AdBusinessServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
+import com.doooly.business.myorder.service.MyOrderServiceI;
 import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.AdOrderBig;
@@ -52,7 +53,6 @@ import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.httpclient.util.DateUtil;
@@ -61,16 +61,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.OrderUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
-import static com.doooly.common.webservice.WebService.WEBURL;
 
 /**
  * @Description:
@@ -122,6 +127,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdRechargeConfServiceI adRechargeConfServiceI;
     @Autowired
     private AdBusinessServiceI adBusinessServiceI;
+    @Autowired
+    private MyOrderServiceI myOrderServiceI;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -893,22 +900,35 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (!CollectionUtils.isEmpty(orders)) {
                 OrderVo order1 = orders.get(0);
                 Map<String, Object> map = new HashMap<>();
-                map.put("orderNum", order1.getOrderNumber());
-                map.put("orderId", order.getOrderId());
-                map.put("oid", order.getId());
-                map.put("totalAmount", order.getTotalMount());
-                //最终支付结果code
-                map.put("code", payMsg.getCode());
-                //手续费
-                if (order.getServiceCharge() != null) {
-                    map.put("serviceCharge", order.getServiceCharge());
+                if("gift_order".equals(order1.getRemarks())){
+                    MessageDataBean messageDataBean = new MessageDataBean();
+                    try {
+                        messageDataBean = myOrderServiceI.getLiftOrder(json);
+                        logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
+                    } catch (Exception e) {
+                        logger.error("获得礼包领取成功页出错", e);
+                        messageDataBean.setCode(MessageDataBean.failure_code);
+                    }
+                    map = messageDataBean.getData();
+                    map.put("orderType","1");
+                }else {
+                    map.put("orderNum", order1.getOrderNumber());
+                    map.put("orderId", order.getOrderId());
+                    map.put("oid", order.getId());
+                    map.put("totalAmount", order.getTotalMount());
+                    //最终支付结果code
+                    map.put("code", payMsg.getCode());
+                    //手续费
+                    if (order.getServiceCharge() != null) {
+                        map.put("serviceCharge", order.getServiceCharge());
 
-                }
-                //话费优惠活动- 分享需要的参数
-                if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
-                    AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
-                    map.put("openId", record.getOpenId());
-                    map.put("activityParam", record.getActivityParam());
+                    }
+                    //话费优惠活动- 分享需要的参数
+                    if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
+                        AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+                        map.put("openId", record.getOpenId());
+                        map.put("activityParam", record.getActivityParam());
+                    }
                 }
                 payMsg.setData(map);
             }

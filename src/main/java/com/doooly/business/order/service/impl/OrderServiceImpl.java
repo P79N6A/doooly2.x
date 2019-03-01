@@ -15,6 +15,7 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.order.vo.ProductSkuVo;
 import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.business.pay.service.RefundService;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductImage;
@@ -44,11 +45,6 @@ import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
-import com.easy.mq.client.RocketClient;
-import com.easy.mq.result.RocketProducerMessage;
-import com.easy.mq.result.RocketSendResult;
-import com.reach.constrant.Group;
-import com.reach.constrant.Topic;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +54,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -645,6 +639,7 @@ public class OrderServiceImpl implements OrderService {
 		if(CollectionUtils.isEmpty(merchants)){
 			return new OrderMsg(OrderMsg.failure_code, "merchantProduct is empty.");
 		}
+        StringBuilder productSkuIds = new StringBuilder();
 		for (MerchantProdcutVo merchantProduct : merchants) {
 			List<ProductSkuVo> prodcutSkus = merchantProduct.getProductSku();
 			if(CollectionUtils.isEmpty(prodcutSkus)){
@@ -655,19 +650,32 @@ public class OrderServiceImpl implements OrderService {
 			}
 			for (ProductSkuVo productSkuVo : prodcutSkus) {
 				int productId = productSkuVo.getProductId();
-				if(productId <= 0){
-					return new OrderMsg(OrderMsg.failure_code, "invalid productId.");
-				}
-				int skuId = productSkuVo.getSkuId();
-				if(skuId <= 0){
-					return new OrderMsg(OrderMsg.failure_code, "invalid skuId.");
-				}
-				int buyNum = productSkuVo.getBuyNum();
+                if(productId <= 0){
+                    return new OrderMsg(OrderMsg.failure_code, "invalid productId.");
+                }
+                int skuId = productSkuVo.getSkuId();
+                if(skuId <= 0){
+                    return new OrderMsg(OrderMsg.failure_code, "invalid skuId.");
+                }
+                productSkuIds.append(skuId).append(",");
+                int buyNum = productSkuVo.getBuyNum();
 				if(buyNum <= 0){
 					return new OrderMsg(OrderMsg.failure_code, "invalid buyNum.");
 				}
 			}
 		}
+        if( "1".equals(orderVo.getOrderType())){
+            // 礼包商品判断能否领取
+            JSONObject giftOrder = new JSONObject();
+            giftOrder.put("productSkuIds",productSkuIds);
+            giftOrder.put("giftBagId",orderVo.getGiftBagId());
+            giftOrder.put("userId",orderVo.getUserId());
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "isReceive", giftOrder);
+            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
+                return new OrderMsg(OrderMsg.failure_code, resultJson.getString("info"));
+            }
+        }
 		return null;
 	}
 

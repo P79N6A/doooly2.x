@@ -2,6 +2,7 @@ package com.doooly.business.meituan.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
@@ -145,6 +146,9 @@ public class MeituanServiceImpl implements MeituanService{
     @Autowired
     private NewPaymentServiceI newPaymentServiceI;
 
+    @Autowired
+    private ConfigDictServiceI configDictServiceI;
+
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
         String phone = json.getString("mobile");
@@ -223,6 +227,14 @@ public class MeituanServiceImpl implements MeituanService{
         object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
         object.put("sign", sign);
+        String mobile = json.getString("mobile");
+        String meituanTestMobile = configDictServiceI.getValueByTypeAndKeyNoCache("meituan_test_mobile","meituan_test_mobile");
+        if (StringUtils.isNotBlank(meituanTestMobile) && !meituanTestMobile.contains(mobile)) {
+            //下单成功返回信息
+            msg.getData().put("orderNum", orderNum);
+            msg.getData().put("userId",adUser.getId());
+            return msg;
+        }
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
         logger.info("美团下单返回：{}",result);

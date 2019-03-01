@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.HttpClientUtil;
 import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.business.meituan.MeituanOrderService;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.meituan.StaffService;
 import com.doooly.business.order.service.OrderService;
@@ -19,6 +20,7 @@ import com.doooly.common.meituan.StaffTypeEnum;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.meituan.Order;
 import com.doooly.entity.meituan.StaffInfoVO;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
@@ -80,6 +82,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Autowired
     private StaffService staffService;
 
+    @Autowired
+    private MeituanOrderService meituanOrderService;
+
 
     @GET
     @Path("/getMeituanEasyLoginUrl")
@@ -114,6 +119,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                         staffInfoVO.setName(adUser.getName());
                         staffInfoVO.setPhone(adUser.getTelephone());
                         staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                        staffInfoVO.setEmail(adUser.getMailbox());
                         List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
                         logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
                         if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
@@ -361,17 +367,36 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/queryOrderByOrderNum")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String,Object> queryOrderByOrderSN(JSONObject jsonObject) {
+    public ResultModel queryOrderByOrderSN(JSONObject jsonObject) {
         String orderNum = jsonObject.getString("orderNum");
-        Map<String,Object> retMap = new HashMap<>();
+        ResultModel resultModel = ResultModel.ok();
         if (StringUtils.isNotEmpty(orderNum)) {
-            Map<String,Object> params = new HashMap<>();
-            params.put("orderSN",orderNum);
-            String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
-            String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/queryOrderByOrderSN",GsonUtils.toString(params));
-            retMap = GsonUtils.son.fromJson(ret,Map.class);
+            try {
+                Order order = meituanOrderService.queryOrderByOrderSN(orderNum);
+                resultModel.setData(order);
+            } catch (Exception e) {
+                logger.error("queryOrderByOrderNum异常：",e);
+            }
         }
-        return retMap;
+        return resultModel;
+    }
+
+    @POST
+    @Path("/queryStaffByPhone")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel queryStaffByMobile(StaffInfoVO staffInfoVO) {
+        String phone = staffInfoVO.getPhone();
+        ResultModel resultModel = ResultModel.ok();
+        if (StringUtils.isNotEmpty(phone)) {
+            try {
+                List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(phone),StaffTypeEnum.StaffTypeEnum50);
+                resultModel.setData(staffInfoVOS);
+            } catch (Exception e) {
+                logger.error("queryStaffByMobile异常：",e);
+            }
+        }
+        return resultModel;
     }
 
 

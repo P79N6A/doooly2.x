@@ -247,7 +247,7 @@ public class OrderServiceImpl implements OrderService {
 		if( "1".equals(orderVo.getOrderType())){
             // 组装订单相关参数放入MQ
             JSONObject giftOrder = new JSONObject();
-            giftOrder.put("productSkuIds",productSkuIds);
+            giftOrder.put("productSkuIds",productSkuIds.substring(0,productSkuIds.length()-1));
             giftOrder.put("giftBagId",orderVo.getGiftBagId());
             giftOrder.put("orderNum",orderNum);
             giftOrder.put("userId",orderVo.getUserId());

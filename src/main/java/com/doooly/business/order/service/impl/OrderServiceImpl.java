@@ -674,7 +674,7 @@ public class OrderServiceImpl implements OrderService {
             giftOrder.put("productSkuIds",productSkuIds);
             giftOrder.put("giftBagId",orderVo.getGiftBagId());
             giftOrder.put("userId",orderVo.getUserId());
-            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "isReceive", giftOrder);
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", giftOrder);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
                 logger.info("判断能否领取礼包：" + resultJson.toJSONString());
                 return new OrderMsg(OrderMsg.failure_code, resultJson.getString("info"));

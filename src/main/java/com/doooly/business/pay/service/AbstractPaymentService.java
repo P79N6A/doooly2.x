@@ -10,7 +10,10 @@ import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessor;
 import com.doooly.business.pay.processor.afterpayprocessor.AfterPayProcessorFactory;
 import com.doooly.business.pay.processor.productprocessor.ProductProcessor;
 import com.doooly.business.pay.processor.productprocessor.ProductProcessorFactory;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdGroupDao;
 import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdUserDao;
@@ -21,8 +24,6 @@ import com.doooly.entity.reachad.AdUser;
 import com.easy.mq.client.RocketClient;
 import com.easy.mq.result.RocketProducerMessage;
 import com.easy.mq.result.RocketSendResult;
-import com.reach.constrant.Group;
-import com.reach.constrant.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 支付抽象类,完成主要支付工作<br>
@@ -147,6 +147,12 @@ public abstract class AbstractPaymentService implements PaymentService {
                         logger.info("礼包订单支付完成mq消息发送结果={}, orderNum={}", sendResult.getSendStatus(), orderNum);
                     }catch(Exception e){
                         logger.error("礼包订单支付完成mq消息发送结果出错,异常原因",e);
+                        //通过接口去领取
+                        JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
+                        JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/receive", jsonParam);
+                        if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()== resultJson.getInteger("code")){
+                            logger.info("礼包订单支付完成调用领取接口返回结果：" + resultJson.toJSONString());
+                        }
                     }
                 }
                 List<OrderVo> orders = (List<OrderVo>) resultMap.get("orders");

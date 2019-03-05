@@ -169,9 +169,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
         }
-        if(orderSummary.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= orderSummary.getInteger("code")){
-            return new ResultModel(Integer.parseInt(OrderMsg.failure_code), orderSummary.getString("info"));
-        }
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
         JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
@@ -556,16 +553,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         if (o == null) {
             return null;
-        }
-        if( "gift_order".equals(o.getRemarks())){
-            // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message"+orderNum);
-            JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
-            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
-            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
-                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
-                return resultJson;
-            }
         }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";
@@ -1078,6 +1065,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
             return new PayMsg(PayMsg.failure_code, "订单已经取消，请重新下单。");
+        }
+        if( "gift_order".equals(order.getRemarks())){
+            // 礼包商品判断能否领取
+            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message"+orderNum);
+            JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
+            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
+                return new PayMsg(OrderMsg.failure_code, resultJson.getString("info"));
+            }
         }
         //校验是否可以支付
         return canPay(order, param);

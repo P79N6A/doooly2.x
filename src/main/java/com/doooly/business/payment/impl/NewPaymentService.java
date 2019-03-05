@@ -559,7 +559,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         if( "gift_order".equals(o.getRemarks())){
             // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message");
+            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message"+orderNum);
             JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){

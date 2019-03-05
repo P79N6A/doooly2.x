@@ -245,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
 			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows, System.currentTimeMillis() - s);
 		}
 		if( "1".equals(orderVo.getOrderType())){
-            // 组装订单相关参数放入MQ
+            // 组装订单相关参数放入redis
             JSONObject giftOrder = new JSONObject();
             giftOrder.put("productSkuIds",productSkuIds.substring(0,productSkuIds.length()-1));
             giftOrder.put("giftBagId",orderVo.getGiftBagId());
@@ -253,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
             giftOrder.put("userId",orderVo.getUserId());
             String mqMessageJson = giftOrder.toJSONString();
             //表示是礼包订单，将skuId 和礼包id放入redis
-            stringRedisTemplate.opsForValue().set("gift_order_message",mqMessageJson,30 * 60 * 1000,
+            stringRedisTemplate.opsForValue().set("gift_order_message"+ orderVo.getOrderNumber(),mqMessageJson,30 * 60 * 1000,
                     TimeUnit.MILLISECONDS);
         }
 		//下单成功返回信息

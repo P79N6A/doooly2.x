@@ -117,15 +117,15 @@ public class TestMain {
 
     @Test
     public void test5() {
-       /* String s = "40LDXMG0HX_407915805307626";
-        String[] a = s.split("_");
-        System.out.println(a[1]);*/
-        double total = Math.pow(9,34);
+        String s = "40LDXMG0HX|407915805307626";
+        String[] a = s.split("\\|");
+        System.out.println(a[1]);
+       /* double total = Math.pow(9,34);
         System.out.println(total);
         double a = 200000000;
         double b = 365;
         double x = 200000000*365;
-        System.out.println(total/x);
+        System.out.println(total/x);*/
         //System.out.println();
         //System.out.println(JSONArray.toJSONString(null));
     }

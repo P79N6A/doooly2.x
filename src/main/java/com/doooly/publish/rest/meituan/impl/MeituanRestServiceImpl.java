@@ -109,7 +109,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             if (adUser != null) {
                 try {
                     //判断是否已经同步
-                    List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getTelephone()),StaffTypeEnum.StaffTypeEnum50);
+                    List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getCardNumber()),StaffTypeEnum.StaffTypeEnum30);
                     logger.info("美团免登录查询员工结果：{}",GsonUtils.son.toJson(staffInfoVOS));
                     if (staffInfoVOS != null && staffInfoVOS.size() > 0) {
                         loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
@@ -395,6 +395,21 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             } catch (Exception e) {
                 logger.error("queryStaffByMobile异常：",e);
             }
+        }
+        return resultModel;
+    }
+
+    @POST
+    @Path("/updateStaff")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel updateStaff(List<StaffInfoVO> staffInfoVOS) {
+        ResultModel resultModel = ResultModel.ok();
+        try {
+            List<StaffInfoVO> staffInfoVOSList = staffService.batchUpdateStaff(staffInfoVOS,StaffTypeEnum.StaffTypeEnum30);
+            resultModel.setData(staffInfoVOSList);
+        } catch (Exception e) {
+            logger.error("updateStaff出错：",e);
         }
         return resultModel;
     }

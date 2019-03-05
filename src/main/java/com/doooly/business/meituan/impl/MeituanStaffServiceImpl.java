@@ -80,7 +80,7 @@ public class MeituanStaffServiceImpl implements StaffService {
         meituanRequest.setContent(content);
         String ret = meituanRequest.doPost(MeituanConstants.URL_UPDATE_STAFF);
         Map<String,Object> retMap = GsonUtils.son.fromJson(ret,Map.class);
-        String data = String.valueOf(retMap.get("data"));
+        String data = JSONArray.toJSONString(retMap.get("data"));
         List<StaffInfoVO> list = GsonUtils.son.fromJson(data,new TypeToken<List<StaffInfoVO>>(){}.getType());
         return list;
     }

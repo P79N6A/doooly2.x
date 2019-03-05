@@ -253,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
             giftOrder.put("userId",orderVo.getUserId());
             String mqMessageJson = giftOrder.toJSONString();
             //表示是礼包订单，将skuId 和礼包id放入redis
-            stringRedisTemplate.opsForValue().set("gift_order_message"+ orderVo.getOrderNumber(),mqMessageJson,30 * 60 * 1000,
+            stringRedisTemplate.opsForValue().set("gift_order_message_"+ orderNum,mqMessageJson,30 * 60 * 1000,
                     TimeUnit.MILLISECONDS);
         }
 		//下单成功返回信息

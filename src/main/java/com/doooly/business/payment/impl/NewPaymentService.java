@@ -1061,10 +1061,10 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         // 订单状态
         if (order.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
+            return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已支付，请勿重新支付。");
         }
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已经取消，请重新下单。");
+            return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已经取消，请重新下单。");
         }
         if( "gift_order".equals(order.getRemarks())){
             // 礼包商品判断能否领取
@@ -1073,7 +1073,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
                 logger.info("判断能否领取礼包：" + resultJson.toJSONString());
-                return new PayMsg(OrderMsg.failure_code, resultJson.getString("info"));
+                return new PayMsg(OrderMsg.coupon_stock_zero_code, resultJson.getString("info"));
             }
         }
         //校验是否可以支付

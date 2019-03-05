@@ -649,6 +649,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id
+        if("gift_order".equals(o.getRemarks())){
+            result.put("orderType","1");
+        }
         return result;
     }
 

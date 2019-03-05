@@ -30,8 +30,10 @@ import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.RedisLock;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.common.webservice.WebService;
 import com.doooly.dao.reachad.AdBusinessDao;
@@ -118,7 +120,7 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Autowired
     private RedisLock redisLock;
     @Autowired
-    private AdUserIntegralDao userIntegralDao;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private AdOrderReportServiceI adOrderReportServiceI;
     @Autowired
@@ -166,6 +168,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject orderSummary = getOrderSummary(jsonObject);
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
+        }
+        if(GlobalResultStatusEnum.SUCCESS.getCode()!= orderSummary.getInteger("code")){
+            return new ResultModel(Integer.parseInt(OrderMsg.failure_code), orderSummary.getString("info"));
         }
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
@@ -551,6 +556,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         if (o == null) {
             return null;
+        }
+        if( "gift_order".equals(o.getRemarks())){
+            // 礼包商品判断能否领取
+            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message");
+            JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
+            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
+                return resultJson;
+            }
         }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";

@@ -112,7 +112,20 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                     List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getCardNumber()),StaffTypeEnum.StaffTypeEnum30);
                     logger.info("美团免登录查询员工结果：{}",GsonUtils.son.toJson(staffInfoVOS));
                     if (staffInfoVOS != null && staffInfoVOS.size() > 0) {
-                        loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        //判断手机号是否被修改
+                        if (adUser.getTelephone().equals(staffInfoVOS.get(0).getPhone())) {
+                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        } else {
+                            StaffInfoVO staffInfoVO = new StaffInfoVO();
+                            staffInfoVO.setName(adUser.getName());
+                            staffInfoVO.setPhone(adUser.getTelephone());
+                            staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                            staffInfoVO.setEmail(adUser.getMailbox());
+                            List<StaffInfoVO> staffInfoVOList = staffService.batchUpdateStaff(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
+                            if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                            }
+                        }
                     } else {
                         //先同步用户
                         StaffInfoVO staffInfoVO = new StaffInfoVO();

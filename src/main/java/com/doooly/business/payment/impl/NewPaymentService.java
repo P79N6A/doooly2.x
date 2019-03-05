@@ -169,7 +169,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
         }
-        if(GlobalResultStatusEnum.SUCCESS.getCode()!= orderSummary.getInteger("code")){
+        if(orderSummary.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= orderSummary.getInteger("code")){
             return new ResultModel(Integer.parseInt(OrderMsg.failure_code), orderSummary.getString("info"));
         }
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());

@@ -52,6 +52,8 @@ public class OrderDetailResp {
     private String expressCompanyName;
     /** 快递单号 */
     private String courierNumber;
+    /** 礼包订单标识 1 */
+    private String orderType;
 
 	public void setProductId(String productId) {
 		this.productId = productId;
@@ -325,5 +327,13 @@ public class OrderDetailResp {
 
     public void setCourierNumber(String courierNumber) {
         this.courierNumber = courierNumber;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
     }
 }

@@ -429,4 +429,8 @@ public class Constants {
 
     public static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
 
+    public static final String GIFT_ORDER_TYPE = "gift_order";
+
+    public static final String GIFT_ORDER_REDIS_MESS = "gift_order_message_";
+
 }

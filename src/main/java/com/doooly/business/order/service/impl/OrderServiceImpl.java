@@ -238,7 +238,7 @@ public class OrderServiceImpl implements OrderService {
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
             if( "1".equals(orderVo.getOrderType())){
                 // 组装订单相关参数放入MQ
-                orderVo.setRemarks("gift_order");
+                orderVo.setRemarks(Constants.GIFT_ORDER_TYPE);
             }
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
 			int rows = saveOrder(order, orderExt, orderItems);
@@ -253,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
             giftOrder.put("userId",orderVo.getUserId());
             String mqMessageJson = giftOrder.toJSONString();
             //表示是礼包订单，将skuId 和礼包id放入redis
-            stringRedisTemplate.opsForValue().set("gift_order_message_"+ orderNum,mqMessageJson,30 * 60 * 1000,
+            stringRedisTemplate.opsForValue().set(Constants.GIFT_ORDER_REDIS_MESS+ orderNum,mqMessageJson,30 * 60 * 1000,
                     TimeUnit.MILLISECONDS);
         }
 		//下单成功返回信息

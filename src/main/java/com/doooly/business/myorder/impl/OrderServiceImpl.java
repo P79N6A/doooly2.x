@@ -1,12 +1,37 @@
 package com.doooly.business.myorder.impl;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-import com.doooly.business.myorder.dto.*;
+import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.business.myorder.constant.OrderType;
+import com.doooly.business.myorder.constant.ProductType;
+import com.doooly.business.myorder.dto.HintReq;
+import com.doooly.business.myorder.dto.HintResp;
+import com.doooly.business.myorder.dto.OrderDeleteReq;
+import com.doooly.business.myorder.dto.OrderDetailReq;
+import com.doooly.business.myorder.dto.OrderDetailResp;
+import com.doooly.business.myorder.dto.OrderHintReq;
+import com.doooly.business.myorder.dto.OrderReq;
 import com.doooly.business.myorder.po.OrderDetailPoReq;
-import com.doooly.dao.reachad.*;
-import com.doooly.entity.reachad.*;
+import com.doooly.business.myorder.po.OrderDetailReport;
+import com.doooly.business.myorder.po.OrderPoReq;
+import com.doooly.business.myorder.po.OrderPoResp;
+import com.doooly.business.myorder.service.OrderService;
+import com.doooly.business.pay.bean.AdOrderFlow;
+import com.doooly.business.pay.utils.AESTool;
+import com.doooly.business.utils.DateUtils;
+import com.doooly.common.constants.Constants;
+import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.dao.reachad.AdGroupDao;
+import com.doooly.dao.reachad.AdOrderDetailDao;
+import com.doooly.dao.reachad.AdOrderFlowDao;
+import com.doooly.dao.reachad.AdOrderReportDao;
+import com.doooly.dao.reachad.AdReturnFlowDao;
+import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdOrderDetail;
+import com.doooly.entity.reachad.AdOrderReport;
+import com.doooly.entity.reachad.AdReturnFlow;
+import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserBusinessExpansion;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,17 +41,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
-import com.doooly.business.dict.ConfigDictServiceI;
-import com.doooly.business.myorder.constant.OrderType;
-import com.doooly.business.myorder.constant.ProductType;
-import com.doooly.business.myorder.po.OrderDetailReport;
-import com.doooly.business.myorder.po.OrderPoReq;
-import com.doooly.business.myorder.po.OrderPoResp;
-import com.doooly.business.myorder.service.OrderService;
-import com.doooly.business.pay.bean.AdOrderFlow;
-import com.doooly.business.pay.utils.AESTool;
-import com.doooly.business.utils.DateUtils;
-import com.doooly.common.constants.PropertiesConstants;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 我的订单
@@ -114,6 +134,9 @@ public class OrderServiceImpl implements OrderService{
 			orderDetailPoReq.setUserId(req.getUserId());
 			//查询订单信息
 			OrderDetailReport report =  adOrderReportDao.getOrderDetail(orderDetailPoReq);
+            if(Constants.GIFT_ORDER_TYPE.equals(report.getRemarks())){
+                resp.setOrderType("1");
+            }
 			AdOrderReport adOrderReport = new AdOrderReport();
 			adOrderReport.setId(Long.parseLong(req.getOrderId()));
 			resp.setId(report.getId());

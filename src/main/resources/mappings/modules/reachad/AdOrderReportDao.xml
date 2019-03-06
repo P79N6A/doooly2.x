@@ -970,6 +970,7 @@
         a.product_type AS "productType",
         a.consignee_mobile AS "consigneeMobile",
         a.service_charge AS "serviceCharge",
+        a.remarks AS "remarks",
         a.voucher AS "voucher"
     </sql>
 

@@ -132,7 +132,7 @@ public abstract class AbstractPaymentService implements PaymentService {
                 logger.info("handlePayResult() 支付结果验证通过.payType = {}", payType);
                 String orderNum = (String) resultMap.get("orderNum");
                 String realPayType = (String) resultMap.get("realPayType");
-                String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message_"+orderNum);
+                String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+orderNum);
                 if(!StringUtils.isEmpty(mqMessageJson)){
                     try{
                         RocketProducerMessage rpm = new RocketProducerMessage();

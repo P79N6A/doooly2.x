@@ -645,7 +645,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("company", business.getCompany());
         retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
-        if("gift_order".equals(o.getRemarks())){
+        if(Constants.GIFT_ORDER_TYPE.equals(o.getRemarks())){
             retJson.put("orderType","1");
         }
         logger.info("retJson = {}", retJson);
@@ -1068,9 +1068,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
             return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已经取消，请重新下单。");
         }
-        if( "gift_order".equals(order.getRemarks())){
+        if( Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())){
             // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get("gift_order_message_"+orderNum);
+            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+orderNum);
             JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){

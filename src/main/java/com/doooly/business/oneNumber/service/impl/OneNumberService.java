@@ -314,7 +314,7 @@ public class OneNumberService implements OneNumberServiceI {
         String consumerSecret = json.get("shopKey").toString();
         UserSynRecord userSynRecord = userSynRecordDao.findByUserIdAndBusinessId(userId, businessId);
 
-        if (userSynRecord != null && "用户同步成功".equals(userSynRecord.getRemarks())) {
+		if (userSynRecord != null && userSynRecord.getRemarks().contains("用户同步成功")) {
             resutlJson.put("code", "1000");
             resutlJson.put("message", "用户已同步");
         } else {

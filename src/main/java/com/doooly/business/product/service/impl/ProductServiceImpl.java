@@ -123,12 +123,12 @@ public class ProductServiceImpl implements ProductService {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 1.查询自营商品总数(已上架)
-			int totalNum = adSelfProductDao.getSelfProductTotalNum();
-			if (totalNum > 0) {
-				Pagelab pagelab = new Pagelab(currentPage, pageSize);
-				pagelab.setTotalNum(totalNum);
-				// 2.获取分页的自营商品(排除sku全部被屏蔽的商品)
-				AdGroup group = adGroupDao.findGroupByUserId(userId);// 查询用户所属企业
+            AdGroup group = adGroupDao.findGroupByUserId(userId);// 查询用户所属企业
+            int totalNum = adSelfProductDao.getSelfProductTotalNum(group.getId());
+            if (totalNum > 0) {
+                Pagelab pagelab = new Pagelab(currentPage, pageSize);
+                pagelab.setTotalNum(totalNum);
+                // 2.获取分页的自营商品(排除sku全部被屏蔽的商品)
 				List<AdSelfProduct> selfProductList = adSelfProductDao.getSelfProductList(pagelab.getStartIndex(),
 						pagelab.getPageSize(), group.getId());
 				if (CollectionUtils.isNotEmpty(selfProductList)) {

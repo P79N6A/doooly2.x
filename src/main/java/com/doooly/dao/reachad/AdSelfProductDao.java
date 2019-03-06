@@ -29,7 +29,7 @@ public interface AdSelfProductDao{
 	
 
 	/** 查询总数(已上架的自营商品) */
-	int getSelfProductTotalNum();
+	int getSelfProductTotalNum(@Param("groupId") Long groupId);
 
 	/** 获取分页的自营商品 */
 	List<AdSelfProduct> getSelfProductList(@Param("startIndex") int startIndex, @Param("pageSize") int pageSize, @Param("groupId") Long groupId);

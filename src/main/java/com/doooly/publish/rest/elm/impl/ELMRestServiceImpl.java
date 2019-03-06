@@ -48,6 +48,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        logger.info("饿了么订单金额推送接口 orderAmountPush：{}", GsonUtils.toString(obj));
         ResultModel resultModel = elmServiceI.orderAmountPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }
@@ -58,6 +59,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        logger.info("饿了么订单状态推送接口 orderAmountPush：{}", GsonUtils.toString(obj));
         ResultModel resultModel = elmServiceI.orderStatusPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }

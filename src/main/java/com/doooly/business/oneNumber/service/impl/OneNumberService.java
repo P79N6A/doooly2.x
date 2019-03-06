@@ -2,6 +2,7 @@ package com.doooly.business.oneNumber.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.EncryptDecryptUtil;
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
 import com.doooly.business.utils.MD5Util;
 import com.doooly.business.utils.RSAEncryptUtil;
@@ -43,6 +44,8 @@ public class OneNumberService implements OneNumberServiceI {
 	private AdUserDao adUserDao;
     @Autowired
     private UserSynRecordDao userSynRecordDao;
+	@Autowired
+	private ConfigDictServiceI configDictServiceI;
 
 	@Override
 	public MessageDataBean getTargetUrl(String userId, String businessId, String targetUrl)
@@ -101,6 +104,10 @@ public class OneNumberService implements OneNumberServiceI {
 	 * @return
 	 */
 	private String getElmUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+
+		String valueByTypeAndKey = configDictServiceI.getValueByTypeAndKey(ELMConstants.ELM_DICT_TYPE,
+				ELMConstants.ELM_DICT_KEY);
+		JSONObject eleConfig = JSONObject.parseObject(valueByTypeAndKey);
         StringBuilder url = new StringBuilder();
 		long timeStamp = new Date().getTime();
 		String consumerNo = adBusinessExpandInfo.getShopId();
@@ -110,7 +117,7 @@ public class OneNumberService implements OneNumberServiceI {
         synJson.put("businessId", ELMConstants.ELM_BUSINESS_ID);
         synJson.put("shopId", adBusinessExpandInfo.getShopId());
         synJson.put("shopKey", adBusinessExpandInfo.getShopKey());
-        JSONObject jsonObject = addStaff(synJson);
+        JSONObject jsonObject = addStaff(synJson, eleConfig);
 
         JSONObject json = new JSONObject();
 		json.put("bNo", adUser.getTelephone());
@@ -118,8 +125,10 @@ public class OneNumberService implements OneNumberServiceI {
 		String jsonStr = org.apache.commons.codec.binary.Hex.encodeHexString(json.toJSONString().getBytes());
         int type = 3;
         String sign = MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp, "UTF-8");
-//        url.append("https://entu.ele.me?");
-		url.append("https://entu.alta.elenet.me?");
+		String elmUrl = eleConfig.getString("url");
+//      url.append("https://entu.ele.me?");
+//		url.append("https://entu.alta.elenet.me?");
+		url.append(elmUrl + "?");
 		url.append("org=" + jsonStr);
         url.append("&consumerNo=" + consumerNo);
         url.append("&timeStamp=" + timeStamp);
@@ -306,7 +315,7 @@ public class OneNumberService implements OneNumberServiceI {
 		return resultUrl;
 	}
 
-    public JSONObject addStaff(JSONObject json) {
+    public JSONObject addStaff(JSONObject json, JSONObject eleConfig) {
         JSONObject resutlJson = new JSONObject();
         String userId = json.get("userId").toString();
         String businessId = json.get("businessId").toString();
@@ -321,7 +330,8 @@ public class OneNumberService implements OneNumberServiceI {
             AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 
             if (adUser != null) {
-                JSONObject result = synStaff(adUser, consumerNo, consumerSecret);
+				String openApiUrl = eleConfig.getString("openApiUrl");
+                JSONObject result = synStaff(adUser, consumerNo, consumerSecret, openApiUrl);
 
 				if (("200".equals(result.get("code").toString())) || ("E3000027".equals(result.get("code").toString()))) {
 					UserSynRecord synRecord = new UserSynRecord();
@@ -351,11 +361,11 @@ public class OneNumberService implements OneNumberServiceI {
      * @param consumerSecret
      * @return
      */
-    private JSONObject synStaff(AdUser adUser, String consumerNo, String consumerSecret) {
+    private JSONObject synStaff(AdUser adUser, String consumerNo, String consumerSecret, String openApiUrl) {
         JSONObject resultJson = new JSONObject();
         Long timeStamp = new Date().getTime();
         // 整理参数
-        String url = ELMConstants.ELM_URL + ELMConstants.ELM_ADD_METHOD;
+        String url = openApiUrl + ELMConstants.ELM_ADD_METHOD;
         JSONObject userJson = new JSONObject();
         userJson.put("employeeNo", adUser.getCardNumber());
         userJson.put("name", adUser.getName());

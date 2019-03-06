@@ -48,6 +48,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        logger.info("饿了么订单金额推送接口 orderAmountPush：{}", GsonUtils.toString(obj));
         ResultModel resultModel = elmServiceI.orderAmountPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }
@@ -58,6 +59,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        logger.info("饿了么订单状态推送接口 orderAmountPush：{}", GsonUtils.toString(obj));
         ResultModel resultModel = elmServiceI.orderStatusPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }
@@ -247,6 +249,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = req.getString("sign");
             req.remove("sign");
+            req.remove("ele_order_id");
+            req.remove("uid");
             flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, req, sign); // PRD OPEN
             //flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, req, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {

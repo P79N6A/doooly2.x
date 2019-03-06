@@ -99,6 +99,8 @@ public class ELMServiceImpl implements ELMServiceI {
             //验证成功将订单信息放入缓存
             stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo),
                     obj.toJSONString());
+            logger.info("---------->> 验证成功将订单信息放入缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo),
+                    obj.toJSONString());
             return ResultModel.success_ok("获取订单信息成功");
         }
     }

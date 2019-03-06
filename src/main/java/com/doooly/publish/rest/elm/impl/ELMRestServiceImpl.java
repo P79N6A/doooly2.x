@@ -3,10 +3,8 @@ package com.doooly.publish.rest.elm.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.ele.ELMServiceI;
 import com.doooly.business.payment.bean.ResultModel;
-import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.common.IPUtils;
 import com.doooly.common.elm.ELMConstants;
-import com.doooly.common.elm.PayStatusEnum;
 import com.doooly.common.elm.ElmSignUtils;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.publish.rest.elm.ELMRestServiceI;
@@ -19,7 +17,11 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
@@ -46,6 +48,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        JSONObject jsonObject = getJsonObjectFromRequest(httpServletRequest);
+        logger.info("饿了么调用订单金额推送接口,obj{}, orderAmountPush：{}",obj, GsonUtils.toString(jsonObject));
         ResultModel resultModel = elmServiceI.orderAmountPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }
@@ -56,6 +60,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public String orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+        JSONObject jsonObject = getJsonObjectFromRequest(httpServletRequest);
+        logger.info("饿了么调用订单状态推送接口,obj{}, orderAmountPush：{}",obj, GsonUtils.toString(jsonObject));
         ResultModel resultModel = elmServiceI.orderStatusPush(obj, httpServletRequest);
         return resultModel.toELMString();
     }

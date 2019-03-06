@@ -44,7 +44,6 @@ import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdReturnDetailDao;
 import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;

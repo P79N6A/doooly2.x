@@ -645,12 +645,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("company", business.getCompany());
         retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
+        if("gift_order".equals(o.getRemarks())){
+            retJson.put("orderType","1");
+        }
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id
-        if("gift_order".equals(o.getRemarks())){
-            result.put("orderType","1");
-        }
         return result;
     }
 

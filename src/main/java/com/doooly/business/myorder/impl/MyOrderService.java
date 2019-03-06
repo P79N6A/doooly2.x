@@ -340,7 +340,7 @@ public class MyOrderService implements MyOrderServiceI {
         if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()== resultJson.getInteger("code")){
             logger.info("获取礼包信息：" + resultJson.toJSONString());
             //表示有
-            map.put("hasGift","1");
+            map.put("hasGift",resultJson.get("hasGift"));
         }else {
             //表示没有
             map.put("hasGift","0");

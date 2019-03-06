@@ -197,7 +197,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
      */
     public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
-        String sign = request.getHeader("sign");
+        // String sign = request.getHeader("sign");
         Enumeration enu = request.getParameterNames();
         while (enu.hasMoreElements()) {
             String key = (String) enu.nextElement();
@@ -209,7 +209,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             }
             jsonObject.put(key, value);
         }
-        jsonObject.put("sign", sign);
+        // jsonObject.put("sign", sign);
         return jsonObject;
     }
 

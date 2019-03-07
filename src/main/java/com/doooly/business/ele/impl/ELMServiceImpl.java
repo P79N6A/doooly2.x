@@ -165,28 +165,23 @@ public class ELMServiceImpl implements ELMServiceI {
         try {
             String transactionId = json.getString("transactionId");
             BigDecimal payAmount = json.getBigDecimal("payAmount");
-
-            String ele_order_id = json.getString("ele_order_id");
-            String key = String.format(ELMConstants.ELM_ORDER_PREFIX, ele_order_id);
+            String eleOrderId = json.getString("ele_order_id");
+            String key = String.format(ELMConstants.ELM_ORDER_PREFIX, eleOrderId);
             String redisStr = stringRedisTemplate.opsForValue().get(key);
-            logger.info("---------->>  ele_order_id：{}" + ele_order_id);
-            logger.info("---------->> 验证成功订单缓存, key：{}"+ key);
-            logger.info("---------->> 验证成功订单缓存, value：{}"+ redisStr);
+            logger.info("---------->>  ele_order_id:" + eleOrderId);
+            logger.info("---------->> 验证成功订单缓存, key:"+ key);
+            logger.info("---------->> 验证成功订单缓存, value:"+ redisStr);
 
             JSONObject redisData = JSONObject.parseObject(redisStr);
-            String redisTel = redisData.getString("bNo");
-            logger.info("---------->> 验证成功订单缓存, redisTel：{}"+ redisTel);
+            String telephone = redisData.getString("bNo");
+            logger.info("---------->> 验证成功订单缓存, telephone：{}"+ telephone);
 
-         /*   String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX,
-                    json.getString("ele_order_id")));*/
-            if (StringUtils.isBlank(redisTel)) {
+            if (StringUtils.isBlank(telephone)) {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_MERCHANT_MOB_ERROR
                         , PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
                 resultModel.setData(res);
                 return resultModel;
             }
-            JSONObject redisObj = (JSONObject) JSONObject.parse(redisTel);
-            String telephone = redisObj.getString("bNo");
 
             //appId 是 client_secret, merchantNo 是ad_business 表的 business_id
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessAndExpandInfo(

@@ -100,8 +100,8 @@ public class ELMServiceImpl implements ELMServiceI {
             //验证成功将订单信息放入缓存
             stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
                     obj.toJSONString());
-            logger.info("---------->> 验证成功将订单信息放入缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
-                    obj.toJSONString());
+            logger.info("---------->> 验证成功订单缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98));
+            logger.info("---------->> 验证成功订单缓存, value：{}", obj.toJSONString());
             return ResultModel.success_ok("获取订单信息成功");
         }
     }
@@ -166,8 +166,19 @@ public class ELMServiceImpl implements ELMServiceI {
             String transactionId = json.getString("transactionId");
             BigDecimal payAmount = json.getBigDecimal("payAmount");
 
-            String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX,
-                    json.getString("ele_order_id")));
+            String ele_order_id = json.getString("ele_order_id");
+            String key = String.format(ELMConstants.ELM_ORDER_PREFIX, ele_order_id);
+            String redisStr = stringRedisTemplate.opsForValue().get(key);
+            logger.info("---------->>  ele_order_id：{}" + ele_order_id);
+            logger.info("---------->> 验证成功订单缓存, key：{}"+ key);
+            logger.info("---------->> 验证成功订单缓存, value：{}"+ redisStr);
+
+            JSONObject redisData = JSONObject.parseObject(redisStr);
+            String redisTel = redisData.getString("bNo");
+            logger.info("---------->> 验证成功订单缓存, redisTel：{}"+ redisTel);
+
+         /*   String redisTel = stringRedisTemplate.opsForValue().get(String.format(ELMConstants.ELM_ORDER_PREFIX,
+                    json.getString("ele_order_id")));*/
             if (StringUtils.isBlank(redisTel)) {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_MERCHANT_MOB_ERROR
                         , PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());

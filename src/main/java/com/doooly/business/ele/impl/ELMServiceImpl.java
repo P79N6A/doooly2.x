@@ -87,6 +87,7 @@ public class ELMServiceImpl implements ELMServiceI {
     public ResultModel orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
         String consumerNo = httpServletRequest.getHeader("consumerNo");
         String orderNo = obj.getString("orderNo");
+        String orderNo98 = obj.getString("orderNo98");
         String timeStamp = httpServletRequest.getHeader("timeStamp");
         String sign = httpServletRequest.getHeader("sign");
         String valueByTypeAndKey = configDictServiceI.getValueByTypeAndKey(ELMConstants.ELM_DICT_TYPE,
@@ -97,7 +98,7 @@ public class ELMServiceImpl implements ELMServiceI {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         } else {
             //验证成功将订单信息放入缓存
-            stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo),
+            stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
                     obj.toJSONString());
             logger.info("---------->> 验证成功将订单信息放入缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo),
                     obj.toJSONString());

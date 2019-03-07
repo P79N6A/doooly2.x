@@ -263,14 +263,14 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     /**
      * 入参验签
      *
-     * @param req
+     * @param vaileReq
      * @return
      */
-    private boolean validateSign(JSONObject req) {
+    private boolean validateSign(JSONObject vaileReq) {
         boolean flag = false;
         try {
-            JSONObject vaileReq = req;
             String sign = vaileReq.getString("sign");
+            String eleOrderId = vaileReq.get("ele_order_id").toString();
             vaileReq.remove("sign");
             vaileReq.remove("ele_order_id");
             vaileReq.remove("uid");
@@ -281,6 +281,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
                 //String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
                 //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
+            vaileReq.put("ele_order_id", eleOrderId);
         } catch (Exception e) {
             e.printStackTrace();
         }

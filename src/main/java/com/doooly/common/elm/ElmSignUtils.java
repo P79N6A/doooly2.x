@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.MD5Util;
+import com.doooly.common.util.RandomUtil;
+import com.github.pagehelper.StringUtil;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,12 +22,10 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
-
-import com.doooly.common.util.RandomUtil;
-import com.github.pagehelper.StringUtil;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @Description: 饿了么加密验证工具类
@@ -47,7 +49,7 @@ public class ElmSignUtils {
     //饿了么生产公钥
     public static final String ELM_PRD_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsmKRj1ij2FuxuJPCzVMpeJo4H/ZHGuW+xSKia+95o6vmipMsJSH//cDQ9PE+NBeV+lV7pBOGVoaCfsCtJ/D288cME408MJ+V4Rt6+HtVlIsTQcv8q+KOiLD91OSdOmtLQGNzHCnnzyMxrjzQh4XsZ5euc0sVifJPuElgeue1nvCc/OS+yw53ZdyX4NPbG655IzIF5/7vnpc/gUCIDXyzchM53hBAIFH9SNlUuHQfEn5ICIdyvlcmV2CxKPVKDlaZbux0+FY5t+4A1TF6F2RVsVrDVufGidpAlQ4otIQ5qAwqyB/3VDO4A+XkGwP4PRlEL/vxAh8JuSeix/GkWrAPMQIDAQAB";
 
-    public static Boolean validParam(String consumerNo, String timeStamp, String sign, JSONObject obj, JSONObject eleConfig) {
+    public static Boolean validParam(String consumerNo, String timeStamp, String sign, String s, JSONObject eleConfig) {
         String elmConsumerNO = eleConfig.getString("consumerNo");
         String elmConsumerSecret = eleConfig.getString("consumerSecret");
         //1,客户编码校验
@@ -61,7 +63,7 @@ public class ElmSignUtils {
             return false;
         }
         //3,加密sign
-        String sign1 = MD5Util.MD5Encode(obj + elmConsumerSecret + timeStamp, ELMConstants.CHARSET);
+        String sign1 = MD5Util.MD5Encode(s + elmConsumerSecret + timeStamp, ELMConstants.CHARSET);
         if (!sign.equals(sign1)) {
             return false;
         }
@@ -224,4 +226,3 @@ public class ElmSignUtils {
         }
     }
 }
-

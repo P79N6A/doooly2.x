@@ -84,7 +84,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * }
      */
     @Override
-    public ResultModel orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+    public ResultModel orderAmountPush(String s, JSONObject obj, HttpServletRequest httpServletRequest) {
         String consumerNo = httpServletRequest.getHeader("consumerNo");
         String orderNo = obj.getString("orderNo");
         String orderNo98 = obj.getString("orderNo98");
@@ -93,7 +93,7 @@ public class ELMServiceImpl implements ELMServiceI {
         String valueByTypeAndKey = configDictServiceI.getValueByTypeAndKey(ELMConstants.ELM_DICT_TYPE,
                 ELMConstants.ELM_DICT_KEY);
         JSONObject eleConfig = JSONObject.parseObject(valueByTypeAndKey);
-        Boolean flag = ElmSignUtils.validParam(consumerNo, timeStamp, sign, obj, eleConfig);
+        Boolean flag = ElmSignUtils.validParam(consumerNo, timeStamp, sign, s, eleConfig);
         if (!flag) {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         } else {
@@ -114,7 +114,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     @Override
-    public ResultModel orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
+    public ResultModel orderStatusPush(String s,JSONObject obj, HttpServletRequest httpServletRequest) {
         String consumerNo = httpServletRequest.getHeader("consumerNo");
         String timeStamp = httpServletRequest.getHeader("timeStamp");
         String sign = httpServletRequest.getHeader("sign");
@@ -122,7 +122,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 ELMConstants.ELM_DICT_KEY);
         JSONObject eleConfig = JSONObject.parseObject(valueByTypeAndKey);
         String elmConsumerSecret = eleConfig.getString("consumerSecret");
-        Boolean flag = ElmSignUtils.validParam(consumerNo, timeStamp, sign, obj, eleConfig);
+        Boolean flag = ElmSignUtils.validParam(consumerNo, timeStamp, sign, s, eleConfig);
         if (!flag) {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
@@ -413,7 +413,7 @@ public class ELMServiceImpl implements ELMServiceI {
     }
 
     private JSONObject getQueryPayResult(int returnCode, String returnsg, String transactionId, int paAount,
-                                    String outTradeNo, String paStatus, String thirdUserId, String thirdPaAccount) {
+                                         String outTradeNo, String paStatus, String thirdUserId, String thirdPaAccount) {
         JSONObject res = new JSONObject();
         try {
             res.put("appId", ELMConstants.ELM_APP_ID);
@@ -573,7 +573,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private JSONObject crtRefundQueryRes(int returnCode, String returnMsg, String transactionId, String outTradeNo,
-                          String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
+                                         String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
         JSONObject res = new JSONObject();
         try {
             res.put("returnCode", returnCode);
@@ -631,7 +631,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private JSONObject getElmRefundResult(int returnCode, String returnMsg, String transactionId, String outTradeNo,
-                          String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
+                                          String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
         JSONObject res = new JSONObject();
         try {
             res.put("appId", ELMConstants.ELM_APP_ID);

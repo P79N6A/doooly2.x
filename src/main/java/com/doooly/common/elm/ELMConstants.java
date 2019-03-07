@@ -38,4 +38,6 @@ public class ELMConstants {
     //兜里收款账户
     public final static String DOOOLY_FINANCIAL_ACCOUNT = "9624121301145727303249";
 
+    //生产兜里收银台页面
+    public final static String DOOOLY_FINANCIAL_PAY_URL = "https://admin.doooly.com/reachtest/cashier/#/cardBuyPay/";
 }

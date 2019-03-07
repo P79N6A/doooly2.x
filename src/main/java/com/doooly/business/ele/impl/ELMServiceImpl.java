@@ -168,20 +168,14 @@ public class ELMServiceImpl implements ELMServiceI {
             String eleOrderId = json.getString("ele_order_id");
             String key = String.format(ELMConstants.ELM_ORDER_PREFIX, eleOrderId);
             String redisStr = stringRedisTemplate.opsForValue().get(key);
-            logger.info("---------->>  ele_order_id:" + eleOrderId);
-            logger.info("---------->> 验证成功订单缓存, key:"+ key);
-            logger.info("---------->> 验证成功订单缓存, value:"+ redisStr);
-
-            JSONObject redisData = JSONObject.parseObject(redisStr);
-            String telephone = redisData.getString("bNo");
-            logger.info("---------->> 验证成功订单缓存, telephone：{}"+ telephone);
-
-            if (StringUtils.isBlank(telephone)) {
+            if (StringUtils.isBlank(redisStr)) {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_MERCHANT_MOB_ERROR
                         , PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
                 resultModel.setData(res);
                 return resultModel;
             }
+            JSONObject redisData = JSONObject.parseObject(redisStr);
+            String telephone = redisData.getString("bNo");
 
             //appId 是 client_secret, merchantNo 是ad_business 表的 business_id
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessAndExpandInfo(
@@ -218,7 +212,6 @@ public class ELMServiceImpl implements ELMServiceI {
             jsonDetail.put("tax", 0);
             jsonArray.add(jsonDetail);
             param.put("orderDetail", jsonArray.toJSONString());
-            //logger.info("饿了么下单参数===== param ================================>>" + param);
 
             String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY
                     , adBusinessExpandInfo.getClientId()));

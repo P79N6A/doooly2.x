@@ -27,11 +27,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.doooly.common.elm.ELMConstants.DOOOLY_FINANCIAL_PAY_URL;
 
 /**
  * @Description: 饿了么
@@ -99,16 +102,26 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             JSONObject res = createOrderResult(GlobalResultStatusEnum.PARAM_VALID_ERROR.getInfo());
             return res.toJSONString();
         }
+        String eleOrderId = jsonObject.get("ele_order_id").toString();
+        jsonObject.remove("ele_order_id");
+        jsonObject.remove("uid");
         boolean signResult = validateSign(jsonObject);
         if (!signResult) {
             JSONObject res = createOrderResult(ELMConstants.ELM_CHECK_PARAM_SIGN_ERROR);
             return res.toJSONString();
         }
+        jsonObject.put("ele_order_id", eleOrderId);
         jsonObject.put("clientIp", IPUtils.getIpAddr(request));
         ResultModel resultModel = elmServiceI.createElmOrderAndPay(jsonObject);
         if (null == resultModel.getData()) {
             JSONObject res = createOrderResult(ELMConstants.ELE_CREATE_ORDER_FAIL);
             return res.toJSONString();
+        }
+        try {
+            String transactionId = jsonObject.getString("transactionId");
+            response.sendRedirect(DOOOLY_FINANCIAL_PAY_URL + transactionId);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return resultModel.getData().toString();
     }
@@ -221,7 +234,6 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
      */
     public static JSONObject getJsonObjectFromRequest(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
-        // String sign = request.getHeader("sign");
         Enumeration enu = request.getParameterNames();
         while (enu.hasMoreElements()) {
             String key = (String) enu.nextElement();
@@ -233,7 +245,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             }
             jsonObject.put(key, value);
         }
-        // jsonObject.put("sign", sign);
+       /* String sign = request.getHeader("sign");
+        jsonObject.put("sign", sign);*/
         return jsonObject;
     }
 
@@ -270,10 +283,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         boolean flag = false;
         try {
             String sign = vaileReq.getString("sign");
-            String eleOrderId = vaileReq.get("ele_order_id").toString();
             vaileReq.remove("sign");
-            vaileReq.remove("ele_order_id");
-            vaileReq.remove("uid");
             flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
             //flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, req, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
@@ -281,7 +291,6 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
                 //String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
                 //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
-            vaileReq.put("ele_order_id", eleOrderId);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -222,7 +222,7 @@ public class ELMServiceImpl implements ELMServiceI {
 
             String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY
                     , adBusinessExpandInfo.getClientId()));
-            logger.info("饿了么下预付单参数===== accessToken ================================>>" + accessToken);
+            logger.info("饿了么下预付单参数===== accessToken ================================>>:{}", accessToken);
             if (accessToken == null) {
                 ResultModel authorize = newPaymentServiceI.authorize(String.valueOf(
                         adBusinessExpandInfo.getBusinessId()));
@@ -251,9 +251,9 @@ public class ELMServiceImpl implements ELMServiceI {
             object.put("access_token", accessToken);
             object.put("param", param.toJSONString());
             object.put("sign", sign);
-            logger.info("饿了么下单发送http请求参数===== object ================================>>" + object.toJSONString());
+            logger.info("饿了么下单发送http请求参数===== object ================================>>:{}", object.toJSONString());
             String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
-            logger.info("饿了么下单发送http响应参数：===== result ================================>>", result);
+            logger.info("饿了么下单发送http响应参数：===== result ================================>>:{}", result);
             if (null == result) {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_CREATE_ORDER_FAIL,
                         "", "", "", "");

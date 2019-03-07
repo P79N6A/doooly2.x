@@ -10,6 +10,8 @@ import com.doooly.common.elm.ElmSignUtils;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.publish.rest.elm.ELMRestServiceI;
 import com.reach.redis.utils.GsonUtils;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +53,17 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public String orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest) {
-        JSONObject jsonObject = getJsonObjectFromRequest(httpServletRequest);
-        logger.info("饿了么调用订单金额推送接口,obj{}, orderAmountPush：{}",obj, GsonUtils.toString(jsonObject));
-        ResultModel resultModel = elmServiceI.orderAmountPush(obj, httpServletRequest);
+    public String orderAmountPush(String s,@Context HttpServletRequest httpServletRequest) {
+        String str = null;
+        try {
+            byte[] bytes = Hex.decodeHex(s.toCharArray());
+            str = new String(bytes);
+        } catch (DecoderException e) {
+            logger.info("饿了么调用订单金额推送接口参数解密异常,异常原因",e);
+        }
+        JSONObject obj = JSONObject.parseObject(str);
+        logger.info("饿了么调用订单金额推送接口, 参数s：{},转成json:{}",s,str);
+        ResultModel resultModel = elmServiceI.orderAmountPush(s,obj, httpServletRequest);
         return resultModel.toELMString();
     }
 
@@ -63,10 +72,17 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public String orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest) {
-        JSONObject jsonObject = getJsonObjectFromRequest(httpServletRequest);
-        logger.info("饿了么调用订单状态推送接口,obj{}, orderAmountPush：{}",obj, GsonUtils.toString(jsonObject));
-        ResultModel resultModel = elmServiceI.orderStatusPush(obj, httpServletRequest);
+    public String orderStatusPush(String s,@Context  HttpServletRequest httpServletRequest) {
+        String str = null;
+        try {
+            byte[] bytes = Hex.decodeHex(s.toCharArray());
+            str = new String(bytes);
+        } catch (DecoderException e) {
+            logger.info("饿了么调用订单金额推送接口参数解密异常,异常原因",e);
+        }
+        JSONObject obj = JSONObject.parseObject(str);
+        logger.info("饿了么调用订单金额推送接口, 参数s：{},转成json:{}",s,str);
+        ResultModel resultModel = elmServiceI.orderStatusPush(s,obj, httpServletRequest);
         return resultModel.toELMString();
     }
 

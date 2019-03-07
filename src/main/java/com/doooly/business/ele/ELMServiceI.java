@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface ELMServiceI {
 
-    ResultModel orderAmountPush(JSONObject obj, HttpServletRequest httpServletRequest);
+    ResultModel orderAmountPush(String s, JSONObject obj, HttpServletRequest httpServletRequest);
 
-    ResultModel orderStatusPush(JSONObject obj, HttpServletRequest httpServletRequest);
+    ResultModel orderStatusPush(String s, JSONObject obj, HttpServletRequest httpServletRequest);
 
     ResultModel createElmOrderAndPay(JSONObject obj);
 

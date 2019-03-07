@@ -269,15 +269,16 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     private boolean validateSign(JSONObject req) {
         boolean flag = false;
         try {
-            String sign = req.getString("sign");
-            req.remove("sign");
-            req.remove("ele_order_id");
-            req.remove("uid");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, req, sign); // PRD OPEN
+            JSONObject vaileReq = req;
+            String sign = vaileReq.getString("sign");
+            vaileReq.remove("sign");
+            vaileReq.remove("ele_order_id");
+            vaileReq.remove("uid");
+            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
             //flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, req, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
-                logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(req), sign);
-                //String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, req);   //LOCAL DEV OPEN, PRD DELETE
+                logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(vaileReq), sign);
+                //String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
                 //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
         } catch (Exception e) {

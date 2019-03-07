@@ -146,8 +146,9 @@ public abstract class AbstractPaymentService implements PaymentService {
                         RocketSendResult sendResult = rocketClient.send(rpm);
                         logger.info("礼包订单支付完成mq消息发送结果={}, orderNum={}", sendResult.getSendStatus(), orderNum);
                     }catch(Exception e){
-                    }*/
                     logger.error("礼包订单支付完成mq消息发送结果出错,异常原因",e);
+                    }*/
+
                     //通过接口去领取
                     JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
                     JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/receive", jsonParam);

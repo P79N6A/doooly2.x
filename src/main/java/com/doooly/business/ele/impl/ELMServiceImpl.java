@@ -218,7 +218,7 @@ public class ELMServiceImpl implements ELMServiceI {
             jsonDetail.put("tax", 0);
             jsonArray.add(jsonDetail);
             param.put("orderDetail", jsonArray.toJSONString());
-            logger.info("饿了么下单参数===== param ================================>>" + param);
+            //logger.info("饿了么下单参数===== param ================================>>" + param);
 
             String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY
                     , adBusinessExpandInfo.getClientId()));
@@ -251,16 +251,16 @@ public class ELMServiceImpl implements ELMServiceI {
             object.put("access_token", accessToken);
             object.put("param", param.toJSONString());
             object.put("sign", sign);
+            logger.info("饿了么下单发送http请求参数===== object ================================>>" + object.toJSONString());
             String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
-            logger.info("饿了么下单返回：===== result ================================>>", result);
-            JSONObject jsonResult = JSONObject.parseObject(result);
-            if (null == jsonResult) {
+            logger.info("饿了么下单发送http响应参数：===== result ================================>>", result);
+            if (null == result) {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_CREATE_ORDER_FAIL,
                         "", "", "", "");
                 resultModel.setData(res);
                 return resultModel;
             }
-
+            JSONObject jsonResult = JSONObject.parseObject(result);
             if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
                 //下单成功返回信息
                 Map<Object, Object> data = (Map<Object, Object>) jsonResult.get("data");

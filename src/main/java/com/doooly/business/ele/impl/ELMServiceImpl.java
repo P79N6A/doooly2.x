@@ -165,6 +165,7 @@ public class ELMServiceImpl implements ELMServiceI {
         try {
             String transactionId = json.getString("transactionId");
             BigDecimal payAmount = json.getBigDecimal("payAmount");
+            payAmount = payAmount.multiply(new BigDecimal("0.01")); // 分转换为元
             String eleOrderId = json.getString("ele_order_id");
             String key = String.format(ELMConstants.ELM_ORDER_PREFIX, eleOrderId);
             String redisStr = stringRedisTemplate.opsForValue().get(key);

@@ -212,6 +212,18 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                                   @FormParam("content") String content,
                                   @Context HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
+        Enumeration<String> enumeration = request.getHeaderNames();
+        while (enumeration.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            String value = request.getHeader(key);
+            logger.info(key + "---" + value);
+        }
+        Enumeration<String> enumeration1 = request.getParameterNames();
+        while (enumeration1.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            String value = request.getParameter(key);
+            logger.info(key + "---" + value);
+        }
         try {
             String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
             jsonObject = JSONObject.parseObject(contentStr,JSONObject.class);

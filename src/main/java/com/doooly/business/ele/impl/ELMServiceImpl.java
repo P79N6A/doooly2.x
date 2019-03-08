@@ -317,7 +317,7 @@ public class ELMServiceImpl implements ELMServiceI {
         ResultModel resultModel = new ResultModel();
         JSONObject reqParam = new JSONObject();
         String transactionId = param.getString("transactionId");
-        int paAount = 0;
+        BigDecimal paAount = new BigDecimal("0");
         String outTradeNo = "";
         String paStatus = "";
         String thirdUserId = "";
@@ -346,7 +346,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 accessToken = (String) data.get("access_token");
             } else {
                 JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL,
-                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount, "", paStatus,
+                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount.intValue(), "", paStatus,
                         thirdUserId, thirdPaAccount);
                 resultModel.setData(ress);
                 return resultModel;
@@ -373,7 +373,7 @@ public class ELMServiceImpl implements ELMServiceI {
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (null == jsonObject) {
             JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_QUERY_PAY_FAIL,
-                    transactionId, paAount, "", paStatus, thirdUserId, thirdPaAccount);
+                    transactionId, paAount.intValue(), "", paStatus, thirdUserId, thirdPaAccount);
             resultModel.setData(ress);
             return resultModel;
         }
@@ -383,7 +383,7 @@ public class ELMServiceImpl implements ELMServiceI {
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             String payStatus = String.valueOf(data.get("payStatus"));   //支付状态 0 未支付 1支付成功 2支付失败
             outTradeNo = data.get("outTradeNo").toString();        //兜礼平台订单号
-            paAount = Integer.valueOf(data.get("orderAmount").toString());
+            paAount = new BigDecimal(data.get("orderAmount").toString());
             if (PayConstants.PAY_STATUS_1.equals(payStatus)) {
                 //说明支付成功处理结果
                 paStatus = PayStatusEnum.PayTypeSuccess.getCode();
@@ -407,7 +407,7 @@ public class ELMServiceImpl implements ELMServiceI {
             paStatus = PayStatusEnum.PayTypeNotPay.getCode();
         }
         JSONObject res = getQueryPayResult(ELMConstants.ELM_RESULT_SUCCESS, jsonObject.getString("info"),
-                transactionId, paAount, outTradeNo, paStatus, thirdUserId, thirdPaAccount);
+                transactionId, paAount.intValue(), outTradeNo, paStatus, thirdUserId, thirdPaAccount);
         resultModel.setData(res);
         return resultModel;
     }

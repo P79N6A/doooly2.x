@@ -267,6 +267,16 @@ public class ELMServiceImpl implements ELMServiceI {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_SUCCESS,
                         jsonResult.getString("info"), PayStatusEnum.PayTypeNotPay.getCode(), payId,
                         transactionId, payAmount.toString());
+                //下单成功将饿了么企业订单号放入订单详情表
+                OrderVo order = new OrderVo();
+                order.setOrderNumber(transactionId);
+                OrderVo o = adOrderReportServiceI.getOrderLimt(order);
+                OrderItemVo newItem = new OrderItemVo();
+                newItem.setOrderReportId(o.getId());
+                newItem.setCardOid(eleOrderId);
+                newItem.setUpdateBy("elm");
+                newItem.setUpdateDate(new Date());
+                orderService.updateOrderItem(newItem);
                 resultModel.setData(res);
             } else {
                 JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, jsonResult.getString("info"),

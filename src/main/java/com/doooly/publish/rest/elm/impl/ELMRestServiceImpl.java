@@ -62,7 +62,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             byte[] bytes = Hex.decodeHex(s.toCharArray());
             str = new String(bytes);
         } catch (DecoderException e) {
-            logger.info("饿了么调用订单金额推送接口参数解密异常,异常原因",e);
+            logger.error("饿了么调用订单金额推送接口参数解密异常,异常原因",e);
         }
         JSONObject obj = JSONObject.parseObject(str);
         logger.info("饿了么调用订单金额推送接口, 参数s：{},转成json:{}",s,str);
@@ -81,10 +81,10 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             byte[] bytes = Hex.decodeHex(s.toCharArray());
             str = new String(bytes);
         } catch (DecoderException e) {
-            logger.info("饿了么调用订单金额推送接口参数解密异常,异常原因",e);
+            logger.error("饿了么调用订单状态推送接口参数解密异常,异常原因",e);
         }
         JSONObject obj = JSONObject.parseObject(str);
-        logger.info("饿了么调用订单金额推送接口, 参数s：{},转成json:{}",s,str);
+        logger.info("饿了么调用订单状态推送接口, 参数s：{},转成json:{}",s,str);
         ResultModel resultModel = elmServiceI.orderStatusPush(s,obj, httpServletRequest);
         return resultModel.toELMString();
     }
@@ -284,7 +284,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = vaileReq.getString("sign");
             vaileReq.remove("sign");
-            flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
+            flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
             //flag = ElmSignUtils.rsaCheck(ElmSignUtils.ELM_PUBLIC_KEY, req, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(vaileReq), sign);
@@ -313,7 +313,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("outTradeNo", "");
             res.put("payStatus", "");
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res); //采用RSA2签名
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res); //采用RSA2签名
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -342,7 +342,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("thirdUserId", "");            //S三方UserID，风控使用，支付成功后必传。
             res.put("thirdPaAccount", "");          //S三方收款账户，风控使用，支付成功后必传。
             res.put("nonceStr", RandomUtil.getRandomStr(32)); //随机串（长度32）
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -426,7 +426,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("payAmount", "");
             res.put("refundAmount", "");
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -471,7 +471,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("refundAmount", "");
             res.put("refundStatus", "");
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();

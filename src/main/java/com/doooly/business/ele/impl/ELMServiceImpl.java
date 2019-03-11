@@ -137,12 +137,10 @@ public class ELMServiceImpl implements ELMServiceI {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
         //修改doooly订单状态
-/*        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
+        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
             //订单取消
             orderService.cancleOrder(o.getUserId(), orderNo);
-        }else {
-            //更新
-        }*/
+        }
         OrderItemVo newItem = new OrderItemVo();
         newItem.setOrderReportId(order.getId());
         newItem.setRetCode(String.valueOf(status));
@@ -304,7 +302,7 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("outTradeNo", payId);                  //三方交易号
             res.put("payStatus", payStatus);               //支付状态
             res.put("nonceStr", RandomUtil.getRandomStr(32)); //随机串（长度32）
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);                   //采用RSA2签名
         } catch (Exception e) {
             e.printStackTrace();
@@ -427,7 +425,7 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("thirdUserId", thirdUserId);          //S三方UserID，风控使用，支付成功后必传。
             res.put("thirdPaAccount", thirdPaAccount);   //S三方收款账户，风控使用，支付成功后必传。
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -588,7 +586,7 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("refundAmount", refundAmount);
             res.put("refundStatus", refundStatus);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -646,7 +644,7 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("refundAmount", refundAmount);
             res.put("refundStatus", refundStatus);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
-            String signStr = ElmSignUtils.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, res);
+            String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
         } catch (Exception e) {
             e.printStackTrace();

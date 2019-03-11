@@ -1,19 +1,24 @@
 package com.doooly.common.elm;
 
+import java.util.ResourceBundle;
+
 /**
  * @Description: 饿了吗常量类
  * @author: qing.zhang
  * @date: 2019-01-03
  */
 public class ELMConstants {
+
+    private static ResourceBundle elmBundle = ResourceBundle.getBundle("prop/elm");
+
     //配置表饿了吗type和key
     public final static String ELM_DICT_TYPE = "MERCHANT_PARAM";
     public final static String ELM_DICT_KEY = "ELM";
     public static final int REQUEST_EXPIRY_TIME = 600;//饿了么时间戳超时时间单位秒
     public static final String CHARSET = "UTF-8";//饿了么时间戳超时时间单位秒
-    public static final String ELM_BUSINESS_ID = "Test_wwnsdfsteierlema";
+    public static final String ELM_BUSINESS_ID = elmBundle.getString("elm_business_id");
 
-    public static final String ELM_URL = "https://enterprise-open-api.alta.elenet.me";
+    public static final String ELM_URL = elmBundle.getString("elm_url");
     public static final String QUERY_ORDER = "/v1/openapi/order/get";
     public static final String ELM_ADD_METHOD = "/v1/openapi/employee/add";
 
@@ -33,11 +38,19 @@ public class ELMConstants {
     public static final String ELE_REFUND_ORDER_ERROR = "无效的订单号";
 
     //DEV
-    public final static String ELM_APP_ID = "b393552e850e4f8bbf1cfe209e09042c";
-    public final static String ELM_MERCHANT_NO = "Doooly_Elm";
-    //兜里收款账户
-    public final static String DOOOLY_FINANCIAL_ACCOUNT = "9624121301145727303249";
+    public final static String ELM_APP_ID = elmBundle.getString("elm_app_id");
+    public final static String ELM_MERCHANT_NO = elmBundle.getString("elm_merchant_no");
+    //兜礼收款账户
+    public final static String DOOOLY_FINANCIAL_ACCOUNT = elmBundle.getString("doooly_financial_account");
 
-    //生产兜里收银台页面
-    public final static String DOOOLY_FINANCIAL_PAY_URL = "https://admin.doooly.com/reachtest/cashier/#/cardBuyPay/";
+    //生产兜礼收银台页面
+    public final static String DOOOLY_FINANCIAL_PAY_URL = elmBundle.getString("doooly_financial_pay_url");
+
+    //兜礼私钥
+    public static final String ELM_PRIVATE_KEY = elmBundle.getString("elm_private_key");;
+    public static final String ELM_PUBLIC_KEY = elmBundle.getString("elm_public_key");;
+
+    //饿了么给的公钥
+    public static final String ELM_GIAVE_PUBLIC_KEY = elmBundle.getString("elm_giave_public_key");;
+
 }

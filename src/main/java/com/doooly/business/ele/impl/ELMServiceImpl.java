@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 饿了么实现
@@ -99,7 +100,7 @@ public class ELMServiceImpl implements ELMServiceI {
         } else {
             //验证成功将订单信息放入缓存
             stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
-                    obj.toJSONString());
+                    obj.toJSONString(),15, TimeUnit.MINUTES);
             logger.info("---------->> 验证成功订单缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98));
             logger.info("---------->> 验证成功订单缓存, value：{}", obj.toJSONString());
             return ResultModel.success_ok("获取订单信息成功");
@@ -175,6 +176,9 @@ public class ELMServiceImpl implements ELMServiceI {
             }
             JSONObject redisData = JSONObject.parseObject(redisStr);
             String telephone = redisData.getString("bNo");
+            String orderNo = redisData.getString("orderNo");
+            //获取完删掉redis 订单key
+            stringRedisTemplate.delete(key);
 
             //appId 是 client_secret, merchantNo 是ad_business 表的 business_id
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessAndExpandInfo(
@@ -273,7 +277,8 @@ public class ELMServiceImpl implements ELMServiceI {
                 OrderVo o = adOrderReportServiceI.getOrderLimt(order);
                 OrderItemVo newItem = new OrderItemVo();
                 newItem.setOrderReportId(o.getId());
-                newItem.setCardOid(eleOrderId);
+                newItem.setCardOid(orderNo);
+                newItem.setRemarks(eleOrderId);
                 newItem.setUpdateBy("elm");
                 newItem.setUpdateDate(new Date());
                 orderService.updateOrderItem(newItem);

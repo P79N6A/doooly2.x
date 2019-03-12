@@ -432,7 +432,8 @@ public class OrderServiceImpl implements OrderService {
         if(!MessageDataBean.success_code.equals(result.get("code"))){
             //购物车清空失败,直接抛出异常回滚数据
             logger.error("购物车清空失败,返回结果{}",result);
-            throw new RuntimeException("购物车清空失败");
+        }else {
+            logger.info("购物车清空成功,返回结果{}",result);
         }
         msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
         return msg;

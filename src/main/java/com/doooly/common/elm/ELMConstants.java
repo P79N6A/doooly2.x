@@ -36,6 +36,7 @@ public class ELMConstants {
     public static final String ELE_REFUND_AMOUNT_ERROR = "金额参数不是数字或退款金额为0";
     public static final String ELE_REFUND_OPERATION_FAIL = "退款操作失败，请稍后在试";
     public static final String ELE_REFUND_ORDER_ERROR = "无效的订单号";
+    public static final String ELE_REFUND_RECORD_ERROR = "退款记录不存在";
 
     //DEV
     public final static String ELM_APP_ID = elmBundle.getString("elm_app_id");

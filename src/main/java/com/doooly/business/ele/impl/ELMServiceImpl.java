@@ -21,8 +21,14 @@ import com.doooly.common.elm.*;
 import com.doooly.common.elm.ElmSignUtils;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.RandomUtil;
+import com.doooly.dao.payment.AdPayRecordDao;
+import com.doooly.dao.payment.AdPayRefundRecordDao;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.payment.AdPayRecord;
+import com.doooly.entity.payment.AdPayRecordExample;
+import com.doooly.entity.payment.AdPayRefundRecord;
+import com.doooly.entity.payment.AdPayRefundRecordExample;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdReturnFlow;
@@ -72,6 +78,10 @@ public class ELMServiceImpl implements ELMServiceI {
     private AdReturnFlowDao adReturnFlowDao;
     @Autowired
     private AdUserDao adUserDao;
+    @Autowired
+    private AdPayRecordDao adPayRecordDao;
+    @Autowired
+    private AdPayRefundRecordDao adPayRefundRecordDao;
 
     /**
      * 推送信息
@@ -101,8 +111,8 @@ public class ELMServiceImpl implements ELMServiceI {
             //验证成功将订单信息放入缓存
             stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
                     obj.toJSONString(),15, TimeUnit.MINUTES);
-            logger.info("---------->> 验证成功订单缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98));
-            logger.info("---------->> 验证成功订单缓存, value：{}", obj.toJSONString());
+            //logger.info("---------->> 验证成功订单缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98));
+            //logger.info("---------->> 验证成功订单缓存, value：{}", obj.toJSONString());
             return ResultModel.success_ok("获取订单信息成功");
         }
     }
@@ -359,8 +369,8 @@ public class ELMServiceImpl implements ELMServiceI {
                 accessToken = (String) data.get("access_token");
             } else {
                 JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL,
-                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount.intValue(), "", paStatus,
-                        thirdUserId, thirdPaAccount);
+                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount.intValue(), "",
+                        paStatus, thirdUserId, thirdPaAccount);
                 resultModel.setData(ress);
                 return resultModel;
             }
@@ -451,12 +461,13 @@ public class ELMServiceImpl implements ELMServiceI {
     @Override
     public ResultModel elmRefund(JSONObject req) {
         ResultModel resultModel = new ResultModel();
+        BigDecimal zero = new BigDecimal(0);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessAndExpandInfo(
                 req.getString("merchantNo"), req.getString("appId"));
         if (null == adBusinessExpandInfo) {
             JSONObject res = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL,
                     ELMConstants.ELE_MERCHANT_NO_ERROR, "", "",
-                    "", "", 0, 0, "");
+                    "", "", zero, zero, "");
             resultModel.setData(res);
             return resultModel;
         }
@@ -464,7 +475,7 @@ public class ELMServiceImpl implements ELMServiceI {
         if (null == orderList || orderList.size() == 0) {
             JSONObject res = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL,
                     ELMConstants.ELE_REFUND_ORDER_ERROR, "", "", "",
-                    "", 0, 0, "");
+                    "", zero, zero, "");
             resultModel.setData(res);
             return resultModel;
         }
@@ -472,34 +483,34 @@ public class ELMServiceImpl implements ELMServiceI {
         PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
         if (null == payMsg) {
             JSONObject res = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_REFUND_OPERATION_FAIL,
-                    "", "", "", "", 0,
-                    0, "");
+                    "", "", "", "", zero,
+                    zero, "");
             resultModel.setData(res);
             return resultModel;
         }
         if (PayMsg.success_code.equals(payMsg.getCode())) {
-            String outTradeNo = "";
             String outRefundNo = "";
+            String outTradeNo = "";
             // 支付流水
-            PayFlow payFlow = getPayFlow(req.getString("transactionId"));
-            if (null != payFlow) {
-                outTradeNo = String.valueOf(payFlow.getTransNo());
+            AdPayRecord adPayRecord = getAdPayRecord(req.getString("transactionId"));
+            if (null != adPayRecord) {
+                outTradeNo = adPayRecord.getOutTradeNo();
             }
             // 退款流水
-            AdReturnFlow adReturnFlow = getAdReturnFlow(orderVo.getOrderId());
-            if (null != adReturnFlow) {
-                outRefundNo = String.valueOf(adReturnFlow.getReturnFlowNumber());
+            AdPayRefundRecord adPayRefundRecord = getAdPayRefundRecord(req.getString("transactionId"));
+            if (null != adPayRefundRecord) {
+                outRefundNo = adPayRefundRecord.getOutRefundNo();
             }
             JSONObject result = getElmRefundResult(ELMConstants.ELM_RESULT_SUCCESS, PayMsg.success_mess,
                     req.getString("transactionId"), outTradeNo,
-                    req.getString("refundNo"), outRefundNo, req.getInteger("payAmount"),
-                    req.getInteger("refundAmount"), RefundStatusEnum.RefundTypeSuccess.getCode());
+                    req.getString("refundNo"), outRefundNo, adPayRecord.getOrderAmount(),
+                    adPayRefundRecord.getRefundAmount(), RefundStatusEnum.RefundTypeSuccess.getCode());
             resultModel.setData(result);
         } else {
             JSONObject result = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, PayMsg.success_mess,
                     req.getString("transactionId"), "",
-                    req.getString("refundNo"), "", 0,
-                    0, RefundStatusEnum.RefundTypeProcessing.getCode());
+                    req.getString("refundNo"), "", zero,
+                    zero, RefundStatusEnum.RefundTypeProcessing.getCode());
             resultModel.setData(result);
         }
         return resultModel;
@@ -509,61 +520,39 @@ public class ELMServiceImpl implements ELMServiceI {
     public ResultModel queryElmRefundInfo(JSONObject req) {
         ResultModel resultModel = new ResultModel();
         try {
-            String outTradeNo = "";
-            String outRefundNo = "";
-            int payAmount = 0;
-            int refundAmount = 0;
+            BigDecimal zero = new BigDecimal(0);
             String refundStatus = RefundStatusEnum.RefundTypeProcessing.getCode();
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessAndExpandInfo(
                     req.getString("merchantNo"), req.getString("appId"));
             if (null == adBusinessExpandInfo) {
                 JSONObject res = crtRefundQueryRes(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_MERCHANT_NO_ERROR,
-                        "", "", "", "", 0,
-                        0, "");
+                        "", "", "", "", zero, zero, "");
                 resultModel.setData(res);
                 return resultModel;
-            }
-            OrderVo order = new OrderVo();
-            order.setType(5);
-            order.setOrderNumber(req.getString("transactionId"));
-            List<OrderVo> orderList = adOrderReportDao.getOrder(order);
-            if (null == orderList || orderList.size() == 0) {
-                JSONObject res = crtRefundQueryRes(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_REFUND_ORDER_ERROR,
-                        "", "", "", "", 0,
-                        0, "");
-                resultModel.setData(res);
-                return resultModel;
-            }
-            OrderVo orderVo = orderList.get(0);
-
-            if (null != orderVo.getTotalMount()) {
-                payAmount = orderVo.getTotalMount().intValue();
             }
             // 支付流水
-            PayFlow payFlow = getPayFlow(orderVo.getOrderNumber());
-            if (null != payFlow) {
-                outTradeNo = String.valueOf(payFlow.getTransNo());
-                if (null != payFlow.getAmount()) {
-                    refundAmount = payFlow.getAmount().intValue();
-                }
-                // 交易状态（i、交易中，s、交易成功，f、交易失败， d、重复支付， r、已退款）
-                String payStatus = payFlow.getPayStatus();
-                if (StringUtils.equalsIgnoreCase("s", payStatus)) {
-                    refundStatus = RefundStatusEnum.RefundTypeSuccess.getCode();
-                } else if (StringUtils.equalsIgnoreCase("f", payStatus)) {
-                    refundStatus = RefundStatusEnum.RefundTypeFail.getCode();
-                }
-            }
-
+            AdPayRecord adPayRecord = getAdPayRecord(req.getString("transactionId"));
             // 退款流水
-            AdReturnFlow adReturnFlow = getAdReturnFlow(orderVo.getOrderId());
-            if (null != adReturnFlow) {
-                outRefundNo = String.valueOf(adReturnFlow.getReturnFlowNumber());
+            AdPayRefundRecord adPayRefundRecord = getAdPayRefundRecord(req.getString("transactionId"));
+            if (null == adPayRefundRecord || null == adPayRecord) {
+                JSONObject res = crtRefundQueryRes(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_REFUND_RECORD_ERROR,
+                        "", "", "", "", zero,
+                        zero, "");
+                resultModel.setData(res);
+                return resultModel;
             }
-
+            // 交易状态（i、交易中，s、交易成功，f、交易失败， d、重复支付， r、已退款）
+            String payStatus = adPayRefundRecord.getRefundStatus();
+            if (StringUtils.equalsIgnoreCase("s", payStatus) || StringUtils.equalsIgnoreCase("SUCCESS", payStatus)) {
+                refundStatus = RefundStatusEnum.RefundTypeSuccess.getCode();
+            } else if (StringUtils.equalsIgnoreCase("f", payStatus)) {
+                refundStatus = RefundStatusEnum.RefundTypeFail.getCode();
+            }
             JSONObject res = crtRefundQueryRes(ELMConstants.ELM_RESULT_SUCCESS,
-                    GlobalResultStatusEnum.SUCCESS_OK.getInfo(), req.getString("transactionId"), outTradeNo,
-                    req.getString("refundNo"), outRefundNo, payAmount, refundAmount, refundStatus);
+                    GlobalResultStatusEnum.SUCCESS_OK.getInfo(), req.getString("transactionId"),
+                    adPayRefundRecord.getOutTradeNo(), req.getString("refundNo"),
+                    adPayRefundRecord.getOutRefundNo(), adPayRecord.getOrderAmount(),
+                    adPayRefundRecord.getRefundAmount(), refundStatus);
             resultModel.setData(res);
         } catch (Exception e) {
             e.printStackTrace();
@@ -586,7 +575,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private JSONObject crtRefundQueryRes(int returnCode, String returnMsg, String transactionId, String outTradeNo,
-                                         String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
+                                         String refundNo, String outRefundNo, BigDecimal payAmount, BigDecimal refundAmount, String refundStatus) {
         JSONObject res = new JSONObject();
         try {
             res.put("returnCode", returnCode);
@@ -630,6 +619,31 @@ public class ELMServiceImpl implements ELMServiceI {
     }
 
     /**
+     *  查询支付订单记录
+     * @param merchantOrderNo
+     * @return
+     */
+    private AdPayRecord getAdPayRecord(String merchantOrderNo) {
+        AdPayRecordExample example = new AdPayRecordExample();
+        example.createCriteria().andMerchantOrderNoEqualTo(merchantOrderNo);
+        List<AdPayRecord> adPayRecordList = adPayRecordDao.selectByExample(example);
+        return adPayRecordList != null ? adPayRecordList.get(0) : null;
+    }
+
+    /**
+     * 查询退款订单记录
+     * @param merchantOrderNo
+     * @return
+     */
+    private AdPayRefundRecord getAdPayRefundRecord(String merchantOrderNo) {
+        AdPayRefundRecordExample example = new AdPayRefundRecordExample();
+        example.createCriteria().andMerchantOrderNoEqualTo(merchantOrderNo);
+        List<AdPayRefundRecord> adPayRefundRecordList = adPayRefundRecordDao.selectByExample(example);
+        return adPayRefundRecordList != null ? adPayRefundRecordList.get(0) : null;
+    }
+
+
+    /**
      * 退款接口返回参数
      *
      * @param returnCode
@@ -644,7 +658,8 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private JSONObject getElmRefundResult(int returnCode, String returnMsg, String transactionId, String outTradeNo,
-                                          String refundNo, String outRefundNo, int payAmount, int refundAmount, String refundStatus) {
+                                          String refundNo, String outRefundNo, BigDecimal payAmount,
+                                          BigDecimal refundAmount, String refundStatus) {
         JSONObject res = new JSONObject();
         try {
             res.put("appId", ELMConstants.ELM_APP_ID);

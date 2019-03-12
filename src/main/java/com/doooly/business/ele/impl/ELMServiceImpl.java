@@ -138,7 +138,7 @@ public class ELMServiceImpl implements ELMServiceI {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
         //修改doooly订单状态
-        if(OrderTypeEnum.OrderTypeEnum10.getCode()==status){
+        if(OrderTypeEnum.OrderTypeEnum16.getCode()==status){
             //订单取消
             orderService.cancleOrder(o.getUserId(), orderNo);
         }

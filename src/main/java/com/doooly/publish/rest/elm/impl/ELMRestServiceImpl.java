@@ -182,6 +182,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             JSONObject res = crtRefundResult(ELMConstants.ELE_REFUND_OPERATION_FAIL);
             return res.toJSONString();
         }
+        logger.info("饿了么调用退款接口返回 result：{}", resultModel.getData().toString());
         return resultModel.getData().toString();
     }
 

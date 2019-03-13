@@ -18,6 +18,9 @@ public class Order {
     //支付金额
     private BigDecimal payAmount;
 
+    //退款金额
+    private BigDecimal refundAmount;
+
     //业务类型
     private int bizType;
 
@@ -68,6 +71,8 @@ public class Order {
 
     //ZZYES外卖专用
     private String orderInfo;
+
+
 
     public int getEntId() {
         return entId;
@@ -227,5 +232,13 @@ public class Order {
 
     public void setOrderInfo(String orderInfo) {
         this.orderInfo = orderInfo;
+    }
+
+    public BigDecimal getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(BigDecimal refundAmount) {
+        this.refundAmount = refundAmount;
     }
 }

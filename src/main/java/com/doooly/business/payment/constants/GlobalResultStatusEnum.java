@@ -44,6 +44,13 @@ public enum GlobalResultStatusEnum {
     PAY_STATUS_SUCCESS(1000, "支付成功"),
     PAY_STATUS_FAIL(1001, "支付失败"),
     PAY_STATUS_NON(1002, "未支付"),
+    /*登录验证结果*/
+    ONE_NUMBER_LOGIN_SUCCESS(1000, "免登陆成功"),
+    ONE_NUMBER_LOGIN_FAIL(1001, "免登陆失败"),
+    ONE_NUMBER_SIGN_ERROR(1002, "签名验证失败"),
+    ONE_NUMBER_PARAM_EMPTY(1003, "参数为空"),
+    ONE_NUMBER_USER_EMPTY(1004, "会员不存在"),
+    ONE_NUMBER_LOGIN_TIMEOUT(1005, "登录超时"),
     /*退款结果*/
     REFUND_STATUS_SUCCESS(1000, "退款成功"),
     REFUND_STATUS_FAIL(1001, "退款失败"),

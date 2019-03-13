@@ -1,5 +1,6 @@
 package com.doooly.business.oneNumber.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.doooly.dto.common.MessageDataBean;
 
 import java.io.UnsupportedEncodingException;
@@ -11,4 +12,6 @@ import java.io.UnsupportedEncodingException;
  */
 public interface OneNumberServiceI {
     MessageDataBean getTargetUrl(String userId, String businessId,String targetUrl) throws UnsupportedEncodingException;
+
+    MessageDataBean authorization(JSONObject json);
 }

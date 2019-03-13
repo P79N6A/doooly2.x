@@ -2,6 +2,7 @@ package com.doooly.publish.rest.life.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
+import com.doooly.common.util.RequestUtils;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.OneNumberRestServiceI;
 import org.slf4j.Logger;
@@ -9,10 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -47,6 +52,23 @@ public class OneNumberRestService implements OneNumberRestServiceI{
         }
         return messageDataBean.toJsonString();
     }
+
+    @GET
+    @Path(value = "/login/authorization")
+    public String authorization(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        JSONObject json = RequestUtils.getJsonParam(request);
+        logger.info("请求参数为---->"+ json);
+        try {
+            messageDataBean = oneNumberServiceI.authorization(json);
+        } catch (Exception e) {
+            logger.error("第三方跳转doooly免登陆验证出错", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
+        }
+        return messageDataBean.toJsonString();
+    }
+
 
     // 上线福特项目导致跳转京东的链接不成功，url后面多了token 和userId,代码回滚， add by pual 2019/1/25
     /*@POST

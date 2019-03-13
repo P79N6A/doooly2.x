@@ -127,11 +127,6 @@ public class OneNumberService implements OneNumberServiceI {
         return messageDataBean;
     }
 
-    public static void main(String[] args) {
-        JSONObject json = new JSONObject();
-        json.put("clientId",);
-    }
-
 
     private Integer validatePayInfoParam(String clientId, String mobile, String successRedirectUrl,
                                          String failureRedirectUrl, String actionTime, String sign, long timestamp, AdUser loginUser, AdBusinessExpandInfo adBusinessExpandInfo, String jsonToStr) {

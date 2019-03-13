@@ -225,6 +225,7 @@ public abstract class AbstractRefundService implements RefundService {
         if (StringUtils.isNotBlank(totalAmount)) {
             //设置应退金额
             order.setTotalMount(new BigDecimal(totalAmount));
+            order.setTotalPrice(new BigDecimal(totalAmount));
         }
         return dooolyApplyRefund(order);
     }

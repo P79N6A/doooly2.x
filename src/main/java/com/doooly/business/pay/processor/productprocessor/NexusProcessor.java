@@ -71,7 +71,7 @@ public class NexusProcessor implements ProductProcessor{
             //是否需要退款
             logger.info("consume() msg = {}", msg);
             if (msg != null && NexusSerivceImpl.NEED_REFUND.equals(msg.getCode())) {
-                PayMsg refMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber());
+                PayMsg refMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber(),null);
                 // 如果退款失败发送以下短信
                 //【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
                 if (!PayMsg.success_code.equals(refMsg.getCode())) {

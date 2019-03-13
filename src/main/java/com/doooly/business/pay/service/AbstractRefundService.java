@@ -65,7 +65,7 @@ public abstract class AbstractRefundService implements RefundService {
 
     public abstract ResultModel dooolyPayRefund(OrderVo order, String merchantRefundNo, String refundType);
 
-    public PayMsg autoRefund(long userId, String orderNum) {
+    public PayMsg autoRefund(long userId, String orderNum,String refundAmount) {
         try {
             PayFlow payFlow = payFlowService.getByOrderNum(orderNum, null, PayFlowService.PAYMENT_SUCCESS);
             //兜礼自动退款并自动审核退货单
@@ -91,7 +91,7 @@ public abstract class AbstractRefundService implements RefundService {
                 }
             } else if (payFlow == null || PayFlowService.PAYTYPE_CASHIER_DESK.equals(payFlow.getPayType())) {
                 //兜礼收银台退款
-                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum, orderNum, null);
+                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum, orderNum, null,refundAmount);
                 if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                     //退款成功
                     AdReturnFlow adReturnFlow = new AdReturnFlow();
@@ -108,7 +108,7 @@ public abstract class AbstractRefundService implements RefundService {
     }
 
 
-    public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType) {
+    public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType,String refundAmount) {
         try {
             //防止重复审核
             if (redisTemplate.opsForValue().setIfAbsent(
@@ -132,7 +132,7 @@ public abstract class AbstractRefundService implements RefundService {
                         resultModel = dooolyPayRefund(order, merchantRefundNo, payType);
                     } else {
                         //说明未申请退
-                        resultModel = applyRefund(userId, orderNum, null);
+                        resultModel = applyRefund(userId, orderNum, refundAmount);
                         if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                             //说明申请成功
                             Map<String, Object> map = (Map<String, Object>) resultModel.getData();

@@ -301,10 +301,12 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         String serialNum = "";
         String sqtOrderId = "";
         String orderNum = "";
+        String refundAmount = "";
         if (signValid) {
             //商企通订单号
             serialNum = jsonObject.getString("serialNum");
             sqtOrderId = jsonObject.getString("sqtOrderId");
+            refundAmount = jsonObject.getString("refundAmount");
             if (StringUtils.isBlank(serialNum)) {
                 retMap.put("status",500);
                 retMap.put("msg","参数错误");
@@ -312,7 +314,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             //退款
             orderNum = serialNum;
             OrderVo orderVo = orderService.getByOrderNum(orderNum);
-            PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
+            PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber(),refundAmount);
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
             if ("1000".equals(payMsg.getCode())) {
                 Map<String,Object> data = new HashMap<>();

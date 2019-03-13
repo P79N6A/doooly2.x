@@ -21,6 +21,7 @@ import com.doooly.entity.reachad.AdReturnDetail;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,7 +222,7 @@ public abstract class AbstractRefundService implements RefundService {
             //表示订单未完成支付，直接返回
             return new ResultModel(GlobalResultStatusEnum.FAIL, "订单未完成支付，申请退款失败");
         }
-        if (totalAmount != null) {
+        if (StringUtils.isNotBlank(totalAmount)) {
             //设置应退金额
             order.setTotalMount(new BigDecimal(totalAmount));
         }

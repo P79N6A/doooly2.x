@@ -164,6 +164,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         String message = "调用失败";
         if (StringUtils.isNotEmpty(entToken)) {
             String userId = stringRedisTemplate.opsForValue().get(entToken);
+            logger.info("美团调用easyLogin userId:{}",userId);
             AdUser adUser = null;
             try {
                 adUser = adUserDao.getById(Integer.parseInt(userId));

@@ -76,6 +76,29 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
+
+	@POST
+	@Path(value = "/user/profile/v3")
+	@Produces(MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@Consumes(MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@Override
+	public Response getUserProfileV3(JSONObject json) {
+		Long startTime = System.currentTimeMillis();
+		log.info("getUserProfileV3() json = {}, startTime = {}", json, startTime);
+		GetHomePageDataV2Response response = new GetHomePageDataV2Response();
+		try {
+			GetHomePageDataV2Request request = new GetHomePageDataV2Request(json);
+			response = homePageDataServcie.getHomePageDataV3(request, response);
+		} catch (Exception e) {
+			log.error("获取兜礼个人中心会员信息概要时，程序异常。", e);
+			response.setStatus(DooolyResponseStatus.SYSTEM_ERROR);
+		} finally {
+			log.info("getUserProfileV3() response = " + JSONObject.toJSONString(response));
+			Long endTime = System.currentTimeMillis();
+			log.info("getUserProfileV3() endTime = {}, 调用接口总耗时：{}", endTime, (endTime - startTime) + "ms");
+		}
+		return Response.ok(response).build();
+	}
 	
 
 

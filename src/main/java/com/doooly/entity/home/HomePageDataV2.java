@@ -1,8 +1,10 @@
 package com.doooly.entity.home;
 
 import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdGroupEquityLevel;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @className: HomePageDataV2
@@ -45,6 +47,11 @@ public class HomePageDataV2 {
     private String returnPoints;
 
     private AdGroup adGroup;
+
+	private List<AdGroupEquityLevel> groupEquitys;	// 企业权益
+	private boolean hasMoreEquity;		// 是否还有更多权益
+	private String groupLevel;			// 企业等级
+	private Integer giftBagCount;		// 未领取企业礼包数量
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -221,4 +228,37 @@ public class HomePageDataV2 {
 //	public void setAppIndexPrivilege(JSONObject appIndexPrivilege) {
 //		this.appIndexPrivilege = appIndexPrivilege;
 //	}
+
+
+	public List<AdGroupEquityLevel> getGroupEquitys() {
+		return groupEquitys;
+	}
+
+	public void setGroupEquitys(List<AdGroupEquityLevel> groupEquitys) {
+		this.groupEquitys = groupEquitys;
+	}
+
+	public boolean isHasMoreEquity() {
+		return hasMoreEquity;
+	}
+
+	public void setHasMoreEquity(boolean hasMoreEquity) {
+		this.hasMoreEquity = hasMoreEquity;
+	}
+
+	public String getGroupLevel() {
+		return groupLevel;
+	}
+
+	public void setGroupLevel(String groupLevel) {
+		this.groupLevel = groupLevel;
+	}
+
+	public Integer getGiftBagCount() {
+		return giftBagCount;
+	}
+
+	public void setGiftBagCount(Integer giftBagCount) {
+		this.giftBagCount = giftBagCount;
+	}
 }

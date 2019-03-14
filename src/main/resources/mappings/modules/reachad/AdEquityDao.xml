@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdEquityDao">
+    
+	<sql id="adEquityColumns">
+		a.id AS "id",
+		a.equity_id AS "equityId",
+		a.equity_name AS "equityName",
+		a.equity_logo AS "equityLogo",
+		a.equity_type AS "equityType",
+		a.limit_type AS "limitType",
+		a.display_order AS "displayOrder",
+		a.equity_level AS "equityLevel",
+		a.equity_desc AS "equityDesc",
+		a.user_service AS "userService",
+		a.instructions AS "instructions",
+		a.interface_url AS "interfaceUrl",
+		a.equity_status AS "equityStatus",
+		a.display_type AS "displayType",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id"
+	</sql>
+	
+	<sql id="adEquityJoins">
+	</sql>
+    
+	<select id="get" resultType="com.doooly.entity.reachad.AdEquity">
+		SELECT 
+			<include refid="adEquityColumns"/>
+		FROM ad_equity a
+		<include refid="adEquityJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.doooly.entity.reachad.AdEquity">
+		SELECT 
+			<include refid="adEquityColumns"/>
+		FROM ad_equity a
+		<include refid="adEquityJoins"/>
+		<where>
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="equityId != null and equityId != ''">
+				AND a.equity_id = #{equityId}
+			</if>
+			<if test="equityName != null and equityName != ''">
+				AND a.equity_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{equityName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{equityName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{equityName},'%')</if>
+			</if>
+			<if test="equityType != null">
+				AND a.equity_type = #{equityType}
+			</if>
+			<if test="equityLevel != null">
+				AND a.equity_level <![CDATA[ <= ]]> #{equityLevel}
+			</if>
+			<if test="equityStatus != null">
+				AND a.equity_status = #{equityStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.equity_id DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.doooly.entity.reachad.AdEquity">
+		SELECT 
+			<include refid="adEquityColumns"/>
+		FROM ad_equity a
+		<include refid="adEquityJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.equity_id DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO ad_equity(
+			equity_id,
+			equity_name,
+			equity_logo,
+			equity_type,
+			limit_type,
+			display_order,
+			equity_level,
+			equity_desc,
+			user_service,
+			instructions,
+			interface_url,
+			equity_status,
+			display_type,
+			create_date,
+			update_date,
+			create_by,
+			update_by
+		) VALUES (
+			#{equityId},
+			#{equityName},
+			#{equityLogo},
+			#{equityType},
+			#{limitType},
+			#{displayOrder},
+			#{equityLevel},
+			#{equityDesc},
+			#{userService},
+			#{instructions},
+			#{interfaceUrl},
+			#{equityStatus},
+			#{displayType},
+			#{createDate},
+			#{updateDate},
+			#{createBy.id},
+			#{updateBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ad_equity SET 	
+			equity_id = #{equityId},
+			equity_name = #{equityName},
+			equity_logo = #{equityLogo},
+			limit_type = #{limitType},
+			display_order = #{displayOrder},
+			equity_level = #{equityLevel},
+			equity_desc = #{equityDesc},
+			user_service = #{userService},
+			instructions = #{instructions},
+			interface_url = #{interfaceUrl},
+			equity_status = #{equityStatus},
+			display_type = #{displayType}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ad_equity
+		WHERE id = #{id}
+	</update>
+
+	<select id="findMaxEquityId" resultType="Integer">
+		select IFNULL(max(ad.id)+1,1)  as id from ad_equity ad
+	</select>
+
+	<update id="updateEquityStatusById" parameterType="java.util.Map">
+		UPDATE ad_equity SET
+		equity_status = #{equityStatus}
+		WHERE id = #{id}
+		and equity_Id = #{equityId}
+	</update>
+
+	<select id="findEquityIdList" resultType="String">
+		SELECT
+		a.equity_id
+		FROM ad_equity a
+		WHERE a.equity_level <![CDATA[ <= ]]> #{equityLevel}
+		and a.equity_status = #{equityStatus}
+	</select>
+
+</mapper>

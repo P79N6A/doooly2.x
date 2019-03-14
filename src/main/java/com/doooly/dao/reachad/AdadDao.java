@@ -15,4 +15,6 @@ public interface AdadDao extends BaseDaoI<AdAd> {
 	AdAd findByTypeAndGroup(@Param("groupId") int groupId,@Param("title") String title);
 
 	AdAd getActivityByTypeAndGroup(@Param("type") Integer type, @Param("groupId") Integer groupId);
+
+	List<AdAd> getByTypeAndGroup(@Param("type") int type, @Param("groupId") String groupId);
 }

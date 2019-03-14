@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdGroupEquityRelationDao">
+    
+	<sql id="adGroupEquityRelationColumns">
+		a.id AS "id",
+		a.ad_group_id AS "adGroupId",
+		a.ad_equity_id AS "adEquityId",
+		a.ad_relation_status AS "ad_relation_status",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id"
+	</sql>
+	
+	<sql id="adGroupEquityRelationJoins">
+	</sql>
+    
+	<select id="get" resultType="com.doooly.entity.reachad.AdGroupEquityRelation">
+		SELECT 
+			<include refid="adGroupEquityRelationColumns"/>
+		FROM ad_group_equity_relation a
+		<include refid="adGroupEquityRelationJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="com.doooly.entity.reachad.AdGroupEquityRelation">
+		SELECT 
+			<include refid="adGroupEquityRelationColumns"/>
+		FROM ad_group_equity_relation a
+		<include refid="adGroupEquityRelationJoins"/>
+		<where>
+			
+			<if test="id != null and id != ''">
+				AND a.id = #{id}
+			</if>
+			<if test="adGroupId != null and adGroupId != ''">
+				AND a.ad_group_id = #{adGroupId}
+			</if>
+			<if test="adEquityId != null and adEquityId != ''">
+				AND a.ad_equity_id = #{adEquityId}
+			</if>
+			<if test="adRelationStatus != null and adRelationStatus != ''">
+				AND a.ad_relation_status = #{adRelationStatus}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="com.doooly.entity.reachad.AdGroupEquityRelation">
+		SELECT 
+			<include refid="adGroupEquityRelationColumns"/>
+		FROM ad_group_equity_relation a
+		<include refid="adGroupEquityRelationJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ad_group_equity_relation(
+			id,
+			ad_group_id,
+			ad_equity_id,
+			ad_relation_status,
+			create_date,
+			update_date,
+			create_by,
+			update_by
+		) VALUES (
+			#{id},
+			#{adGroupId},
+			#{adEquityId},
+			#{adRelationStatus},
+			#{createDate},
+			#{updateDate},
+			#{createBy.id},
+			#{updateBy.id}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE ad_group_equity_relation SET 	
+			ad_group_id = #{adGroupId},
+			ad_equity_id = #{adEquityId},
+			ad_relation_status = #{adRelationStatus}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ad_group_equity_relation
+		WHERE id = #{id}
+	</update>
+
+	<insert id="saveList" parameterType="java.util.List">
+		insert into
+		ad_group_equity_relation(
+		ad_group_id,
+		ad_equity_id,
+		ad_relation_status,
+		create_by,
+		update_by) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.adGroupId},
+			#{item.adEquityId},
+			#{item.adRelationStatus},
+			#{item.createBy.id},
+			#{item.updateBy.id})
+		</foreach>
+	</insert>
+
+	<select id="findGroupEquityRelationIdList" resultType="String">
+		SELECT
+		a.ad_equity_id
+		FROM ad_group_equity_relation a
+		WHERE a.ad_group_id = #{groupId}
+		and a.ad_relation_status = #{relationStatus}
+	</select>
+
+	<update id="updateGroupEquityRelation">
+		UPDATE ad_group_equity_relation a SET
+			a.ad_relation_status = #{relationStatus}
+		WHERE a.ad_group_id = #{groupId}
+	</update>
+
+</mapper>

@@ -50,7 +50,7 @@ public class HomePageDataV2 {
 
 	private List<AdGroupEquityLevel> groupEquitys;	// 企业权益
 	private boolean hasMoreEquity;		// 是否还有更多权益
-	private String groupLevel;			// 企业等级
+	private Integer groupLevel;			// 企业等级
 	private Integer giftBagCount;		// 未领取企业礼包数量
 
 
@@ -246,11 +246,11 @@ public class HomePageDataV2 {
 		this.hasMoreEquity = hasMoreEquity;
 	}
 
-	public String getGroupLevel() {
+	public Integer getGroupLevel() {
 		return groupLevel;
 	}
 
-	public void setGroupLevel(String groupLevel) {
+	public void setGroupLevel(Integer groupLevel) {
 		this.groupLevel = groupLevel;
 	}
 

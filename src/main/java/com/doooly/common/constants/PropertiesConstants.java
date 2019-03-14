@@ -8,6 +8,7 @@ public class PropertiesConstants {
 	public static ResourceBundle dooolyBundle = ResourceBundle.getBundle("doooly");
 	public static ResourceBundle sctcdBundle = ResourceBundle.getBundle("prop/sctcd");
 	public static ResourceBundle wechatPushBundle = ResourceBundle.getBundle("prop/wechatPush");
+	public static ResourceBundle commonBundle = ResourceBundle.getBundle("prop/common");
 
 	 /**
 	  * 处理中文乱码

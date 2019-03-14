@@ -3,7 +3,7 @@ package com.doooly.service.doooly.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.common.constants.CstInfoConstants;
-import com.doooly.common.constants.PropertiesHolder;
+import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.VersionConstants;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.doooly.DlTemplateFloorItemDao;
@@ -43,7 +43,7 @@ import java.util.Map;
 @Service
 @EnableCaching
 public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
-    private String BASE_URL = PropertiesHolder.getProperty("BASE_URL") + "/businessinfo/";
+    private String BASE_URL = PropertiesConstants.commonBundle.getString("BASE_URL") + "/businessinfo/";
     private static Logger log = LoggerFactory.getLogger(DlTemplateInfoServiceImpl.class);
     private static int DEAL_TYPE_ONLINE = 0;
     private static int DEAL_TYPE_OFFLINE = 1;
@@ -148,8 +148,13 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
 
                         if (!CollectionUtils.isEmpty(merchants)) {
                             items = new ArrayList<>();
+                            int row = 0;
 
                             for (AdBusiness merchant : merchants) {
+                                if (row >= 10) {
+                                    break;
+                                }
+                                row++;
                                 DlTemplateFloorItem item = new DlTemplateFloorItem();
                                 item.setTitle(merchant.getCompany());
                                 item.setServerEndTime(merchant.getServerEndTime());

@@ -458,6 +458,7 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 
 			if (equityList != null && equityList.size() > 0) {
 				response.getData().setGroupLevel("L" + equityList.get(0).getAdGroupLevel());
+
 				if (equityList.size() > 4) {
 					// 有更多
 					response.getData().setGroupEquitys(equityList.subList(0, 4));
@@ -467,6 +468,8 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 					response.getData().setGroupEquitys(equityList);
 					response.getData().setHasMoreEquity(false);
 				}
+			} else {
+				response.getData().setGroupLevel("L0");
 			}
 
 			// 未领取礼包数量

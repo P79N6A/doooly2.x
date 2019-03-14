@@ -103,6 +103,7 @@ public class OneNumberService implements OneNumberServiceI {
         String failureRedirectUrl = json.getString("failureRedirectUrl");
         String actionTime = json.getString("actionTime");
         String sign = json.getString("sign");
+        json.remove("sign");
         MessageDataBean messageDataBean = new MessageDataBean();
         Map<String, Object> map = new HashMap<>();
         AdUser userParam = new AdUser();
@@ -114,12 +115,14 @@ public class OneNumberService implements OneNumberServiceI {
         queryObj.setClientId(clientId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryObj);
         String jsonToStr = MD5Util.getSortSignContent(json);
+        //String availableSign = MD5Util.MD5Psw(jsonToStr);
+        //logger.info(" -------------->> availableSign:" + availableSign);
         Integer code = validatePayInfoParam(clientId, mobile, successRedirectUrl, failureRedirectUrl, actionTime, sign, timestamp, loginUser, adBusinessExpandInfo, jsonToStr);
         if(code == GlobalResultStatusEnum.ONE_NUMBER_LOGIN_SUCCESS.getCode()){
             map.put("url",successRedirectUrl);
             messageDataBean.setCode(MessageDataBean.success_code);
             messageDataBean.setCode(MessageDataBean.success_mess);
-        }else {
+        } else {
             map.put("url",failureRedirectUrl+"?code="+code);
             messageDataBean.setCode(String.valueOf(code));
         }

@@ -119,6 +119,12 @@ public class OrderServiceImpl implements OrderService{
 			return adOrderReportDao.findLatestOrderAmountList(orderPoReq);
 		}else if(OrderType.NOT_REBATE == orderReq.getType()) {//无返利
 			return	adOrderReportDao.findNotRebateOrderList(orderPoReq);
+		} else if (OrderType.WAIT_PAY == orderReq.getType()) {
+			orderPoReq.setType(10);
+			return adOrderReportDao.findALLOrderList(orderPoReq);
+		} else if (OrderType.AREADY_PAY == orderReq.getType()) {
+			orderPoReq.setType(1);
+			return adOrderReportDao.findALLOrderList(orderPoReq);
 		}
 		return null;
 	}

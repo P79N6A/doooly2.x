@@ -16,4 +16,6 @@ public interface DlTemplateFloorDao extends BaseDaoI<DlTemplateFloor> {
 
     List<DlTemplateFloor> getByTemplateId(@Param("templateId") String templateId);
 
+    List<DlTemplateFloor> getTemplateFloorByGroup(@Param("groupId") String groupId,@Param("templateType") String templateType);
+
 }

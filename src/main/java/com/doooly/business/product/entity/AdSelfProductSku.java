@@ -31,6 +31,10 @@ public class AdSelfProductSku  {
 	private Integer buyNumberLimit;// 购买数量限制
 	private boolean overBuyLimit;// 是否超过限购条件(默认为false 可以购买)
 
+	// ====== 关联字段
+	private String introduction;	// 商品简述
+	private String image;			// 商品主图
+
 	
 	
 	public AdSelfProductSku() {
@@ -187,5 +191,21 @@ public class AdSelfProductSku  {
 
 	public void setOverBuyLimit(boolean overBuyLimit) {
 		this.overBuyLimit = overBuyLimit;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
 	}
 }

@@ -4,15 +4,13 @@
 package com.doooly.dao.reachad;
 
 import com.doooly.business.product.entity.AdSelfProductSku;
-import com.doooly.common.persistence.CrudDao;
-import com.doooly.common.persistence.annotation.MyBatisDao;
+import com.doooly.common.dao.BaseDaoI;
 
 /**
  * 商品sku管理DAO接口
  * @author wenwei.yang
  * @version 2017-09-20
  */
-@MyBatisDao
-public interface AdSelfProductSkuDao extends CrudDao<AdSelfProductSku> {
+public interface AdSelfProductSkuDao extends BaseDaoI<AdSelfProductSku> {
 	
 }

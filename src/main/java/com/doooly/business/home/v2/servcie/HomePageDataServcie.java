@@ -28,6 +28,17 @@ public interface HomePageDataServcie {
 	* @return
 	 */
 	GetHomePageDataV2Response getHomePageDataV2_2(GetHomePageDataV2Request request, GetHomePageDataV2Response response);
+	/**
+	 * 获取个人中心数据
+	 *
+	 * @author  hutao
+	 * @date 创建时间：2018年11月9日 下午2:08:37
+	 * @version 1.0
+	 * @parameter
+	 * @since
+	 * @return
+	 */
+	GetHomePageDataV2Response getHomePageDataV3(GetHomePageDataV2Request request, GetHomePageDataV2Response response);
 
 	/**
 	 * 查询用户的新手引导完成进度

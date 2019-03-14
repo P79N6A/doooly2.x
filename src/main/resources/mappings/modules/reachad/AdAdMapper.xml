@@ -97,5 +97,20 @@
 			ORDER BY a.create_date DESC
 			LIMIT 1
 	</select>
+
+	<select id="getByTypeAndGroup" resultType="com.doooly.entity.reachad.AdAd">
+		SELECT
+		<include refid="adColumns" />
+		FROM
+		     ad_ad a
+		  INNER JOIN ad_ad_group_conn g
+		    ON a.id = g.ad_id
+		WHERE
+		      g.group_id = #{groupId}
+		  AND a.type = #{type}
+		  AND a.state = 1
+		  AND NOW() BETWEEN a.begin_date AND a.end_date
+		ORDER BY a.sort ASC;
+	</select>
 	
 </mapper>

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdSelfProductSkuDao">
+    
+	<sql id="adSelfProductSkuColumns">
+		a.id AS "id",
+		a.specification AS "specification",
+		a.number AS "number",
+		a.title AS "title",
+		a.market_price AS "marketPrice",
+		a.supply_price AS "supplyPrice",
+		a.sell_price AS "sellPrice",
+		a.freight AS "freight",
+		a.delivery_type AS "deliveryType",
+		a.audit_description AS "auditDescription",
+		a.self_product_id AS "selfProductId",
+		a.update_date AS "updateDate",
+		a.update_user AS "updateUser",
+		a.external_number AS "externalNumber",
+		a.inventory AS "inventory"
+	</sql>
+	
+	<sql id="adSelfProductSkuJoins">
+        LEFT JOIN ad_self_product b ON a.self_product_id = b.id
+	</sql>
+    
+	<select id="get" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT 
+			<include refid="adSelfProductSkuColumns"/>,
+			b.introduction AS "introduction",
+		   	i.image AS "image"
+		FROM ad_self_product_sku a
+		<include refid="adSelfProductSkuJoins"/>
+		LEFT JOIN ad_self_product_image i ON b.id = i.self_product_id
+		WHERE a.id = #{id} AND a.del_flag =0
+	</select>
+
+	<select id="findByExternalNumber" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT
+			<include refid="adSelfProductSkuColumns"/>
+		FROM ad_self_product_sku a
+		<include refid="adSelfProductSkuJoins"/>
+		WHERE a.external_number = #{externalNumber} AND a.del_flag =0 AND a.self_product_id !=#{selfProductId}
+        AND ((a.state =4 and NOW() &gt;= b.buy_start_date and NOW() &lt;= b.buy_end_date) OR (a.state=6 AND NOW() &lt;= b.buy_end_date)) limit 1
+	</select>
+
+	<select id="findList" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT 
+			<include refid="adSelfProductSkuColumns"/>
+		FROM ad_self_product_sku a
+		<include refid="adSelfProductSkuJoins"/>
+		<where>
+            a.del_flag =0
+			<if test="selfProductId != null ">
+                AND a.self_product_id = #{selfProductId}
+            </if>
+			<if test="selfProductId == null ">
+                AND a.self_product_id is NULL
+            </if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE 
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="fidNeedAuditList" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT
+			<include refid="adSelfProductSkuColumns"/>
+		FROM ad_self_product_sku a
+		<include refid="adSelfProductSkuJoins"/>
+		<where>
+            a.del_flag =0 AND a.state =2
+			<if test="selfProductId != null ">
+                AND a.self_product_id = #{selfProductId}
+            </if>
+			<if test="selfProductId == null ">
+                AND a.self_product_id is NULL
+            </if>
+			<if test="title != null and title != ''">
+				AND a.title LIKE
+					<if test="dbName == 'oracle'">'%'||#{title}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{title}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{title},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT 
+			<include refid="adSelfProductSkuColumns"/>
+		FROM ad_self_product_sku a
+		<include refid="adSelfProductSkuJoins"/>
+		<where>
+            a.del_flag =0
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findByProductId" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT 
+			<include refid="adSelfProductSkuColumns"/>
+		FROM ad_self_product_sku a
+        <include refid="adSelfProductSkuJoins"/>
+		where a.self_product_id = #{id} AND a.del_flag =0
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO ad_self_product_sku(
+			specification,
+			number,
+			title,
+			state,
+			market_price,
+			supply_price,
+			sell_price,
+			freight,
+			delivery_type,
+			audit_description,
+			self_product_id,
+			update_date,
+			update_user,
+			external_number,
+			inventory,
+			del_flag
+		) VALUES (
+			#{specification},
+			#{number},
+			#{title},
+			#{state},
+			#{marketPrice},
+			#{supplyPrice},
+			#{sellPrice},
+			#{freight},
+			#{deliveryType},
+			#{auditDescription},
+			#{selfProductId},
+			now(),
+			#{updateUser},
+			#{externalNumber},
+			#{inventory},
+			0
+		)
+	</insert>
+	<insert id="batchInsert">
+		insert into ad_self_product_sku
+		(
+			specification,
+			number,
+			title,
+			state,
+			market_price,
+			supply_price,
+			sell_price,
+			freight,
+			delivery_type,
+			audit_description,
+			self_product_id,
+			update_date,
+			update_user,
+            external_number,
+            inventory,
+            del_flag
+		)
+		values
+		<foreach collection="list" item="item" separator=",">
+		 (	
+			#{item.specification},
+			#{item.number},
+			#{item.title},
+			#{item.state},
+			#{item.marketPrice},
+			#{item.supplyPrice},
+			#{item.sellPrice},
+			#{item.freight},
+			#{item.deliveryType},
+			#{item.auditDescription},
+			#{item.selfProductId},
+			NOW(),
+			#{item.updateUser},
+            #{item.externalNumber},
+            #{item.inventory},
+            0
+		)
+		</foreach> 
+	</insert>
+	<update id="update">
+		UPDATE ad_self_product_sku SET 	
+			specification = #{specification},
+			number = #{number},
+			title = #{title},
+			state = #{state},
+			market_price = #{marketPrice},
+			supply_price = #{supplyPrice},
+			sell_price = #{sellPrice},
+			freight = #{freight},
+			delivery_type = #{deliveryType},
+			self_product_id = #{selfProductId},
+			update_date = now(),
+			update_user = #{updateUser},
+			inventory = #{inventory},
+			external_number = #{externalNumber}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateDelFlag">
+		UPDATE ad_self_product_sku SET
+			del_flag = 1,
+			update_date = now(),
+			update_user = #{updateUser}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateAudit">
+		UPDATE ad_self_product_sku
+		<set>
+            <if test="state != null">state=#{state},</if>
+            <if test="auditDescription != null">audit_description=#{auditDescription},</if>
+        </set>
+		WHERE id = #{id} AND state =2
+	</update>
+	
+	<update id="delete">
+		DELETE FROM ad_self_product_sku
+		WHERE id = #{id}
+	</update>
+	<delete id="deleteByProductId">
+	delete from ad_self_product_sku where self_product_id=#{id}
+	</delete>
+
+	<delete id="batchDelete" parameterType="java.util.List">
+	    delete from ad_self_product_sku where id in
+        (
+        <foreach collection="list" item="id" separator=",">
+          #{id}
+        </foreach>
+        )
+    </delete>
+
+	<delete id="batchUpdateDelFlag" parameterType="java.util.List">
+        UPDATE ad_self_product_sku SET
+            del_flag = 1,
+            update_date = now(),
+            update_user = #{name}
+        WHERE  id in
+        (
+        <foreach collection="list" item="id" separator=",">
+          #{id}
+        </foreach>
+        )
+    </delete>
+
+    <select id="findMaxNum" resultType="java.lang.Integer">
+        SELECT IFNULL(MAX(SUBSTR(number,3)),0)+1 FROM ad_self_product_sku
+    </select>
+
+	<update id="upDateInventory">
+		UPDATE ad_self_product_sku SET
+			inventory = ifnull(inventory, 0) + #{inventory},
+			update_user = #{updateUser},
+			update_date = now()
+		WHERE id = #{id}
+	</update>
+
+	<select id="selectGiftRelevanceSku" resultType="com.doooly.business.product.entity.AdSelfProductSku">
+		SELECT
+			<include refid="adSelfProductSkuColumns"/>
+			,GROUP_CONCAT(t.name) AS "typeName"
+		FROM ad_self_product_sku a
+			<include refid="adSelfProductSkuJoins"/>
+		INNER JOIN ad_self_product_type_conn tc on b.id  = tc.self_product_id
+		LEFT JOIN ad_self_product_type t on tc.self_product_type_id = t.id
+		WHERE a.id IN
+		<foreach collection="gifts" item="gift" open="(" close=")" separator=",">
+			#{gift.productSkuId}
+		</foreach>
+		GROUP BY a.id, b.id
+	</select>
+</mapper>

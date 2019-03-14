@@ -995,31 +995,11 @@ public class OrderServiceImpl implements OrderService {
             return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
         }
         //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
-        PayMsg payMsg = refundService.autoRefund(userId, orderNum);
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum,null);
 		if (StringUtils.isEmpty(orderNum) || userId <= 0) {
 			return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
 		}
-		OrderVo orderParam = new OrderVo();
-		orderParam.setOrderNumber(orderNum);
-		orderParam.setUserId(userId);
-		//检查订单状态,交易完成的订单不能取消
-		List<OrderVo> orders = this.getOrder(orderParam);
-		OrderVo order = null;
-		if (!CollectionUtils.isEmpty(orders) && (order = orders.get(0)) != null) {
-			if (order.getType() == OrderStatus.CANCELLED_ORDER.getCode() || order.getType() == OrderStatus.HAD_FINISHED_ORDER.getCode() || order.getType() == OrderStatus.NEED_TO_DELIVER.getCode()) {
-				logger.error("订单不能取消. orderNum = {},type = {}", order.getOrderNumber(), order.getType());
-				return new OrderMsg(MessageDataBean.failure_code, "订单不能取消");
-			}
-		} else {
-			logger.info("cancleOrder() orders = {},order = {}", orders, order);
-			return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
-		}
-		//2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
-        PayMsg payMsg = refundService.autoRefund(userId, orderNum,null);
-        if(!payMsg.getCode().equals(PayMsg.success_code)){
-            //退款失败
-            return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());
-        }
+
         //修改为取消状态
         orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
         orderParam.setState(PayState.CANCELLED.getCode());

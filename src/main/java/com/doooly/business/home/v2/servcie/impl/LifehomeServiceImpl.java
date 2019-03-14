@@ -6,8 +6,10 @@ import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessSceneMapper;
 import com.doooly.entity.doooly.DlTemplateFloor;
+import com.doooly.entity.home.AdBusinessScene;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +34,14 @@ public class LifehomeServiceImpl implements LifehomeService{
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
             //生活场景
             if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
-
-                //adBusinessSceneMapper.getListByCondition()
+                AdBusinessScene adBusinessScene = new AdBusinessScene();
+                adBusinessScene.setState(1);
+                List<AdBusinessScene> adBusinessSceneList = adBusinessSceneMapper.getListByCondition(adBusinessScene);
+                for (int j = 0; j < adBusinessSceneList.size(); j++) {
+                    Map<String,Object> adBusinessSceneMap = new HashMap<>();
+                    //adBusinessSceneMap.put()
+                    //adBusinessSceneList.get(i)
+                }
             }
         }
         return null;

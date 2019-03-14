@@ -13,7 +13,7 @@ public class AdBusinessScene {
 
     private Integer sort;
 
-    private Boolean state;
+    private int state;
 
     private Date updateDate;
 
@@ -63,11 +63,11 @@ public class AdBusinessScene {
         this.sort = sort;
     }
 
-    public Boolean getState() {
+    public int getState() {
         return state;
     }
 
-    public void setState(Boolean state) {
+    public void setState(int state) {
         this.state = state;
     }
 

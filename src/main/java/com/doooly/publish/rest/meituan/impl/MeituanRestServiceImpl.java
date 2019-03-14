@@ -163,7 +163,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         int status = 0;
         String message = "调用失败";
         if (StringUtils.isNotEmpty(entToken)) {
-            String userId = String.valueOf(stringRedisTemplate.boundValueOps(entToken).get());
+            String userId = stringRedisTemplate.opsForValue().get(entToken);
             AdUser adUser = null;
             try {
                 adUser = adUserDao.getById(Integer.parseInt(userId));

@@ -17,7 +17,8 @@
 		a.end_date AS "endDate",
 		a.content AS "content",
 		a.media_type AS "mediaType",
-		a.link_type as "linkType"
+		a.link_type as "linkType",
+		a.channel AS "channel"
 		
 	</sql>
 	<select id="findAll" resultType="com.doooly.entity.reachad.AdAd">
@@ -109,6 +110,7 @@
 		      g.group_id = #{groupId}
 		  AND a.type = #{type}
 		  AND a.state = 1
+		  AND a.channel = #{channel}
 		  AND NOW() BETWEEN a.begin_date AND a.end_date
 		ORDER BY a.sort ASC;
 	</select>

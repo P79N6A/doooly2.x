@@ -16,5 +16,5 @@ public interface AdadDao extends BaseDaoI<AdAd> {
 
 	AdAd getActivityByTypeAndGroup(@Param("type") Integer type, @Param("groupId") Integer groupId);
 
-	List<AdAd> getByTypeAndGroup(@Param("type") int type, @Param("groupId") String groupId);
+	List<AdAd> getByTypeAndGroup(@Param("type") int type, @Param("groupId") String groupId, @Param("channel") Integer version);
 }

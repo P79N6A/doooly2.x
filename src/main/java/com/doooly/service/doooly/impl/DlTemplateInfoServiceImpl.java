@@ -82,7 +82,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                     if (getHomeFloorByTempTypeOne(template, groupId, userId, address)) {
                         JSONObject floors = new JSONObject();
                         floors.put("floors", template.getFloors());
-                        result.put("date", floors);
+                        result.put("data", floors);
                         result.put("code", MessageDataBean.success_code);
                         result.put("msg", MessageDataBean.success_mess);
                     }
@@ -126,7 +126,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_THREE:
                         // 广告位
-                        List<AdAd> ads = adadDao.getByTypeAndGroup(12, groupId);
+                        List<AdAd> ads = adadDao.getByTypeAndGroup(12, groupId, 3);
 
                         if (!CollectionUtils.isEmpty(ads)) {
                             items = new ArrayList<>();

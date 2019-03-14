@@ -24,6 +24,7 @@ public class AdAd {
 
 	private int createUser;
 	private String linkType;
+	private Integer channel;	// 展示版本
 	public int getId() {
 		return id;
 	}
@@ -136,4 +137,11 @@ public class AdAd {
 		this.linkType = linkType;
 	}
 
+	public Integer getChannel() {
+		return channel;
+	}
+
+	public void setChannel(Integer channel) {
+		this.channel = channel;
+	}
 }

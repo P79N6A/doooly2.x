@@ -91,6 +91,54 @@ public class OneNumberService implements OneNumberServiceI {
         messageDataBean.setData(map);
         return messageDataBean;
     }
+	@Override
+	public MessageDataBean getTargetUrl(String userId, String businessId, String targetUrl,String token)
+			throws UnsupportedEncodingException {
+		MessageDataBean messageDataBean = new MessageDataBean();
+		HashMap<String, Object> map = new HashMap<>();
+		AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
+		AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
+		long timestamp = new Date().getTime() / 1000;
+		String resultUrl;
+		switch (adBusinessExpandInfo.getType()) {
+		// 兜礼提供对接方式
+		case 0:
+			resultUrl = getDooolyUrl(targetUrl, adUser, adBusinessExpandInfo, timestamp);
+			break;
+		// 内购网专属
+		case 1:
+			resultUrl = getNeiGouUrl(targetUrl, adUser, adBusinessExpandInfo, timestamp);
+			break;
+		// 酷邀贷专属
+		case 2:
+			resultUrl = getKuYaoDaiUrl(targetUrl, adUser, adBusinessExpandInfo);
+			break;
+		// 酷屏专属
+		case 3:
+			resultUrl = getKuPingUrl(targetUrl, adUser, adBusinessExpandInfo, timestamp);
+			break;
+		// 微医专属
+		case 4:
+			resultUrl = getWeiYiUrl(targetUrl, adUser, adBusinessExpandInfo);
+			break;
+		// 一嗨租车专属
+		case 5:
+			resultUrl = getYiHaiUrl(targetUrl, adUser, adBusinessExpandInfo);
+			break;
+		case 7:
+			resultUrl = getMeituanUrl(adUser,token,adBusinessExpandInfo);
+			break;
+		default:
+			resultUrl = "";
+			break;
+		}
+
+		logger.info("1号通生成的结果链接:" + resultUrl);
+		map.put("resultUrl", resultUrl);
+		messageDataBean.setCode(MessageDataBean.success_code);
+		messageDataBean.setData(map);
+		return messageDataBean;
+	}
 
 	/**
 	 * 饿了么专属连接
@@ -353,5 +401,24 @@ public class OneNumberService implements OneNumberServiceI {
 			resultJson = JSONObject.parseObject(resultStr);
 			return resultJson;
 		}
+
+
+	/**
+	 *
+	 * @param adUser
+	 * @param token
+	 * @param adBusinessExpandInfo
+	 * @return
+	 */
+	private String getMeituanUrl(AdUser adUser,String token,AdBusinessExpandInfo adBusinessExpandInfo) {
+		String resultUrl = "";
+		String str = "userId=" + adUser.getId() + "&token=" + token;
+		if (adBusinessExpandInfo.getBusinessUrl().contains("?")) {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "&" + str;
+		} else {
+			resultUrl = adBusinessExpandInfo.getBusinessUrl() + "?" + str;
+		}
+		return resultUrl;
+	}
 }
 

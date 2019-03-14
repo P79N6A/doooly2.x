@@ -17,7 +17,7 @@ public interface RefundService {
 	public final static short PAY_TYPE_WECHAT_APP = (short)3;
 	public final static short PAY_TYPE_WECHAT_JSAPI = (short)10;
 	
-	public PayMsg autoRefund(long userId,String orderNum);//就支付自动退款
+	public PayMsg autoRefund(long userId,String orderNum,String refundAmount);//就支付自动退款
 	
 	public PayMsg refund(long userId,String orderNum);
 	
@@ -25,6 +25,6 @@ public interface RefundService {
 
 	public ResultModel applyRefund(long userId, String orderNum, String totalAmount);
 
-	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType);//兜礼收银台退款
+	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType,String refundAmount);//兜礼收银台退款
 
 }

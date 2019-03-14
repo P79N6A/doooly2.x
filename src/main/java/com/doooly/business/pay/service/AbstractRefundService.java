@@ -21,6 +21,7 @@ import com.doooly.entity.reachad.AdReturnDetail;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public abstract class AbstractRefundService implements RefundService {
 
     public abstract ResultModel dooolyPayRefund(OrderVo order, String merchantRefundNo, String refundType);
 
-    public PayMsg autoRefund(long userId, String orderNum) {
+    public PayMsg autoRefund(long userId, String orderNum,String refundAmount) {
         try {
             PayFlow payFlow = payFlowService.getByOrderNum(orderNum, null, PayFlowService.PAYMENT_SUCCESS);
             //兜礼自动退款并自动审核退货单
@@ -91,7 +92,7 @@ public abstract class AbstractRefundService implements RefundService {
                 }
             } else if (payFlow == null || PayFlowService.PAYTYPE_CASHIER_DESK.equals(payFlow.getPayType())) {
                 //兜礼收银台退款
-                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum, orderNum, null);
+                ResultModel resultModel = dooolyCashDeskRefund(userId, orderNum, orderNum, null,refundAmount);
                 if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                     //退款成功
                     AdReturnFlow adReturnFlow = new AdReturnFlow();
@@ -108,7 +109,7 @@ public abstract class AbstractRefundService implements RefundService {
     }
 
 
-    public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType) {
+    public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType,String refundAmount) {
         try {
             //防止重复审核
             if (redisTemplate.opsForValue().setIfAbsent(
@@ -132,7 +133,7 @@ public abstract class AbstractRefundService implements RefundService {
                         resultModel = dooolyPayRefund(order, merchantRefundNo, payType);
                     } else {
                         //说明未申请退
-                        resultModel = applyRefund(userId, orderNum, null);
+                        resultModel = applyRefund(userId, orderNum, refundAmount);
                         if (resultModel.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
                             //说明申请成功
                             Map<String, Object> map = (Map<String, Object>) resultModel.getData();
@@ -221,9 +222,10 @@ public abstract class AbstractRefundService implements RefundService {
             //表示订单未完成支付，直接返回
             return new ResultModel(GlobalResultStatusEnum.FAIL, "订单未完成支付，申请退款失败");
         }
-        if (totalAmount != null) {
+        if (StringUtils.isNotBlank(totalAmount)) {
             //设置应退金额
             order.setTotalMount(new BigDecimal(totalAmount));
+            order.setTotalPrice(new BigDecimal(totalAmount));
         }
         return dooolyApplyRefund(order);
     }

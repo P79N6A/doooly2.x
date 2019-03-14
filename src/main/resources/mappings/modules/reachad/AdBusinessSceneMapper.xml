@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.reachad.AdBusinessSceneMapper" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.home.AdBusinessScene" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="wx_icon" property="wxIcon" jdbcType="VARCHAR" />
+    <result column="app_icon" property="appIcon" jdbcType="VARCHAR" />
+    <result column="sort" property="sort" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="BIT" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, wx_icon, app_icon, sort, state, update_date, create_date, create_by, update_by
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ad_business_scene
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+    <select id="getListByCondition" resultMap="BaseResultMap" parameterType="com.doooly.entity.home.AdBusinessScene">
+        select
+        <include refid="Base_Column_List" />
+        from ad_business_scene
+        <where>
+            <if test="state != null">
+                and state = #{state}
+            </if>
+        </where>
+    </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ad_business_scene
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.doooly.entity.home.AdBusinessScene" >
+    insert into ad_business_scene (id, name, wx_icon, 
+      app_icon, sort, state, update_date, 
+      create_date, create_by, update_by
+      )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{wxIcon,jdbcType=VARCHAR}, 
+      #{appIcon,jdbcType=VARCHAR}, #{sort,jdbcType=INTEGER}, #{state,jdbcType=BIT}, #{updateDate,jdbcType=TIMESTAMP}, 
+      #{createDate,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, #{updateBy,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.home.AdBusinessScene" >
+    insert into ad_business_scene
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="wxIcon != null" >
+        wx_icon,
+      </if>
+      <if test="appIcon != null" >
+        app_icon,
+      </if>
+      <if test="sort != null" >
+        sort,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="wxIcon != null" >
+        #{wxIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="appIcon != null" >
+        #{appIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=BIT},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.home.AdBusinessScene" >
+    update ad_business_scene
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="wxIcon != null" >
+        wx_icon = #{wxIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="appIcon != null" >
+        app_icon = #{appIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="sort != null" >
+        sort = #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=BIT},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.home.AdBusinessScene" >
+    update ad_business_scene
+    set name = #{name,jdbcType=VARCHAR},
+      wx_icon = #{wxIcon,jdbcType=VARCHAR},
+      app_icon = #{appIcon,jdbcType=VARCHAR},
+      sort = #{sort,jdbcType=INTEGER},
+      state = #{state,jdbcType=BIT},
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      update_by = #{updateBy,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -25,6 +25,12 @@ public class CstInfoConstants {
     // 模版楼层Item关联的数据类型
     public static final int TEMP_ITEM_RELATION_TYPE_ONE = 1;    // 关联自营商品
 
+
+    //生活模板楼层类型
+    public static final int TEMP_LIFE_TYPE_ONE = 1; //生活广告
+    public static final int TEMP_LIFE_TYPE_TWO = 2;  //生活场景
+    public static final int TEMP_LIFE_TYPE_THREE = 3; //导购
+
     // 首页模版隐藏管理的楼层集合
     public static final List<Integer> HOME_HIDE_FLOOR_TYPE_LIST = new ArrayList<>(Arrays
             .asList(TEMP_HOME_TYPE_TWO, TEMP_HOME_TYPE_THREE,TEMP_HOME_TYPE_FOUR));

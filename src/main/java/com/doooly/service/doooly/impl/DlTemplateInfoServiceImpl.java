@@ -136,8 +136,6 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                 item.setTitle(ad.getTitle());
                                 items.add(item);
                             }
-                        } else {
-                            continue;
                         }
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_FOUR:
@@ -201,14 +199,15 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                             for (DlTemplateFloorItem item : itemList) {
                                 // 如果关联类型为自营商品name去查找自营商品相关信息
                                 AdSelfProductSku sku = adSelfProductSkuDao.get(item.getRelationId());
-                                item.setPrice(sku.getSellPrice());
-                                item.setOriginalPrice(sku.getMarketPrice());
-                                item.setTitle(sku.getTitle());
-                                item.setSubTitle(sku.getIntroduction());
-                                item.setIconUrl(sku.getImage());
-                                item.setId(sku.getSelfProductId());
-                                item.setLinkUrl(BASE_CARDBUYDETAIL_URL + sku.getSelfProductId());
-                                item.setSubUrl(BASE_CARDBUYDETAIL_URL.substring(BASE_CARDBUYDETAIL_URL.indexOf("#") + 1, BASE_CARDBUYDETAIL_URL.length())
+                                DlTemplateFloorItem itemEntry = new DlTemplateFloorItem();
+                                itemEntry.setPrice(sku.getSellPrice());
+                                itemEntry.setOriginalPrice(sku.getMarketPrice());
+                                itemEntry.setTitle(sku.getTitle());
+                                itemEntry.setSubTitle(sku.getIntroduction());
+                                itemEntry.setIconUrl(sku.getImage());
+                                itemEntry.setId(sku.getSelfProductId());
+                                itemEntry.setLinkUrl(BASE_CARDBUYDETAIL_URL + sku.getSelfProductId());
+                                itemEntry.setSubUrl(BASE_CARDBUYDETAIL_URL.substring(BASE_CARDBUYDETAIL_URL.indexOf("#") + 1, BASE_CARDBUYDETAIL_URL.length())
                                         + sku.getSelfProductId());
                                 items.add(item);
                             }
@@ -227,7 +226,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                     itemEntry.setSubUrl(item.getLinkUrl().substring(item.getLinkUrl().indexOf("#") + 1, item.getLinkUrl().length()));
                                 }
                                 itemEntry.setLinkUrl(item.getLinkUrl());
-                                itemEntry.setImageUrl(item.getImageUrl());
+                                itemEntry.setIconUrl(item.getIconUrl());
                                 itemEntry.setId(item.getId());
                                 items.add(itemEntry);
                             }

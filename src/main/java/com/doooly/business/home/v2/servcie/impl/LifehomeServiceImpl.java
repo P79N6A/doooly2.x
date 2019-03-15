@@ -3,14 +3,15 @@ package com.doooly.business.home.v2.servcie.impl;
 import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdBusinessGroupDao;
-import com.doooly.dao.reachad.AdBusinessSceneMapper;
+import com.doooly.dao.reachad.*;
 import com.doooly.entity.doooly.DlTemplateFloor;
 import com.doooly.entity.home.AdBusinessScene;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessGroup;
+import com.doooly.entity.reachad.AdGuideCategory;
+import com.doooly.entity.reachad.AdProduct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @Copyright:reach-life
  * @Description:
  */
+@Service
 public class LifehomeServiceImpl implements LifehomeService{
 
     @Autowired
@@ -36,6 +38,12 @@ public class LifehomeServiceImpl implements LifehomeService{
 
     @Autowired
     private AdBusinessDao adBusinessDao;
+
+    @Autowired
+    private AdGuideCategoryDao adGuideCategoryDao;
+
+    @Autowired
+    private AdProductDao adProductDao;
 
 
     @Override
@@ -82,6 +90,37 @@ public class LifehomeServiceImpl implements LifehomeService{
 
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_THREE) {
                 //导购管理
+                Map<String,Object> adGuideCategoryData = new HashMap<>();
+                adGuideCategoryData.put("mainTitle","导购管理");
+                adGuideCategoryData.put("type",dlTemplateFloorList.get(i).getType());
+                List<AdGuideCategory> adGuideCategoryList = adGuideCategoryDao.findList();
+                List<Map<String,Object>> adGuideCategoryListMap = new ArrayList<>();
+                for (int j = 0; j < adGuideCategoryList.size(); j++) {
+                    Map<String,Object> adGuideCategoryMap = new HashMap<>();
+                    AdGuideCategory adGuideCategory = adGuideCategoryList.get(j);
+                    adGuideCategoryMap.put("subTitle",adGuideCategory.getCategoryName());
+                    adGuideCategoryMap.put("iconUrl",adGuideCategory.getIconUrl());
+                    AdProduct adProduct = new AdProduct();
+                    adProduct.setGuideCategoryId(Integer.parseInt(adGuideCategory.getId()));
+                    adProduct.setRecommendLife(1);//是否推荐到生活 0 不推荐，1 推荐
+                    List<AdProduct> adProductList = adProductDao.getListByCondition(adProduct);
+                    List<Map<String,Object>> adProductListMap = new ArrayList<>();
+                    for (int k = 0; k < adProductList.size(); k++) {
+                        AdProduct adProduct1 = adProductList.get(k);
+                        Map<String,Object> adProductMap = new HashMap<>();
+                        adProductMap.put("image",adProduct1.getImageWechat());
+                        adProductMap.put("guideTag",adProduct1.getGuideTag());
+                        adProductMap.put("marketPrice",adProduct1.getMarketPrice());
+                        adProductMap.put("name",adProduct1.getName());
+                        adProductMap.put("userRebate",adProduct1.getUserRebate());
+                        adProductMap.put("id",adProduct1.getId());
+                        adProductMap.put("businessName",adProduct1.getBusinessName());
+                        adProductListMap.add(adProductMap);
+                    }
+                    adGuideCategoryMap.put("subList",adProductListMap);
+                    adGuideCategoryListMap.add(adGuideCategoryMap);
+                }
+                adGuideCategoryData.put("list",adGuideCategoryListMap);
             }
         }
         return null;

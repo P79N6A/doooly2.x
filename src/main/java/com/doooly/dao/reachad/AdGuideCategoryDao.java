@@ -11,6 +11,6 @@ public interface AdGuideCategoryDao {
 
     List<AdGuideCategory> findList();
 
-    
+
 
 }

@@ -1,9 +1,11 @@
 package com.doooly.service.doooly.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.common.constants.PropertiesConstants;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.doooly.DlTemplateFloorItemDao;
 import com.doooly.dao.doooly.DlTemplateGroupDao;
@@ -44,6 +46,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
     private String BASE_URL = PropertiesConstants.commonBundle.getString("BASE_URL");
     private String BASE_BUSINESSINFO_URL = BASE_URL + "/businessinfo/";
     private String BASE_CARDBUYDETAIL_URL = BASE_URL + "/cardBuyDetail/";
+    private static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
     private static Logger log = LoggerFactory.getLogger(DlTemplateInfoServiceImpl.class);
     private static int DEAL_TYPE_ONLINE = 0;
     private static int DEAL_TYPE_OFFLINE = 1;
@@ -121,6 +124,32 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                 switch (floor.getType()) {
                     case CstInfoConstants.TEMP_HOME_TYPE_TWO:
                         // 兜礼礼包
+                        // 未领取礼包数量
+                        JSONObject json = new JSONObject();
+                        json.put("groupId", groupId);
+                        json.put("pageNo", 1);
+                        json.put("pageSize", 6);
+                        JSONObject resultJson = HttpClientUtil.httpPost(PROJECT_ACTIVITY_URL + "gift/bag/getDooolyGiftBagListByGroup", json);
+                        log.info("获得企业兜礼礼包：" + resultJson.toJSONString());
+
+                        if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
+                            JSONObject date = (JSONObject) JSONObject.parse(resultJson.getString("data"));
+                            floorEntry.setHasMore(date.getBoolean("hasMore"));
+                            JSONArray list = date.getJSONArray("list");
+
+                            if (list.size() > 0) {
+                                items = new ArrayList<>();
+
+                                for (int i = 0; i < list.size(); i++) {
+                                    JSONObject entry = (JSONObject) list.get(0);
+                                    DlTemplateFloorItem item = new DlTemplateFloorItem();
+                                    item.setIconUrl(entry.getString("image"));
+                                    item.setId(entry.getString("id"));
+                                    item.setTitle(entry.getString("giftBagName"));
+                                    items.add(item);
+                                }
+                            }
+                        }
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_THREE:
                         // 广告位
@@ -134,6 +163,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                 item.setLinkUrl(ad.getImageLinkUrl());
                                 item.setImageUrl(ad.getImagePath());
                                 item.setTitle(ad.getTitle());
+                                item.setLinkType(ad.getLinkType());
                                 items.add(item);
                             }
                         }
@@ -215,6 +245,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         break;
                     default:
                         List<DlTemplateFloorItem> list = dlTemplateFloorItemDao.getAllByFloorId(floor.getId());
+
                         if (!CollectionUtils.isEmpty(list)) {
                             items = new ArrayList<>();
 

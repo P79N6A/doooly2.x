@@ -23,6 +23,7 @@ import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.meituan.EasyLogin;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
 import com.google.common.collect.Maps;
@@ -69,6 +70,12 @@ public class MeituanServiceImpl implements MeituanService{
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
+
+    @Autowired
+    private NewPaymentServiceI newPaymentServiceI;
+
+    @Autowired
+    private ConfigDictServiceI configDictServiceI;
 
 
 
@@ -143,11 +150,6 @@ public class MeituanServiceImpl implements MeituanService{
         return sb.toString();
     }
 
-    @Autowired
-    private NewPaymentServiceI newPaymentServiceI;
-
-    @Autowired
-    private ConfigDictServiceI configDictServiceI;
 
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
@@ -239,6 +241,13 @@ public class MeituanServiceImpl implements MeituanService{
         JSONObject jsonResult = JSONObject.parseObject(result);
         logger.info("美团下单返回：{}",result);
         if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+
+            OrderVo orderVo = new OrderVo();
+            orderVo.setOrderNumber(orderNum);
+            orderVo.setUpdateDate(new Date());
+            orderVo.setRemarks(json.getString("sqtOrderId"));
+            adOrderReportDao.updateByNum(orderVo);
+
             //下单成功返回信息
             msg.getData().put("orderNum", orderNum);
             msg.getData().put("userId",adUser.getId());

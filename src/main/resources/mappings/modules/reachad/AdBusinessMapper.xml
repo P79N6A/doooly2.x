@@ -523,4 +523,20 @@
             </if>
         </where>
 	</select>
+
+	<select id="getListByBusinessIds" resultType="com.doooly.entity.reachad.AdBusiness">
+		select
+			company,
+			logo,
+			url,
+			server_end_time as serverEndTime
+		from
+			ad_business
+		WHERE
+			id in
+		<foreach collection="businessIds" item="businessId" separator="," open="(" close=")">
+			#{businessId}
+		</foreach>
+
+	</select>
 </mapper>

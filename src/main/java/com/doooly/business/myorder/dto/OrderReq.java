@@ -11,6 +11,7 @@ public class OrderReq extends BaseReq<OrderReq> {
 	private Integer pageSize;
 	private Long businessId;
 	private String  hintState;
+	private String userFlag;
 	
 	public Integer getType() {
 		return type;
@@ -62,6 +63,12 @@ public class OrderReq extends BaseReq<OrderReq> {
 	public void setHintState(String hintState) {
 		this.hintState = hintState;
 	}
-	
 
+	public String getUserFlag() {
+		return userFlag;
+	}
+
+	public void setUserFlag(String userFlag) {
+		this.userFlag = userFlag;
+	}
 }

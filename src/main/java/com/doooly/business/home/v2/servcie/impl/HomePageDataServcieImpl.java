@@ -455,7 +455,8 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			HintResp resp = orderservice.getHintV3(req);
 			homePageData.setRecentlyPlacedOrderFlag(resp.isRecentlyPlacedOrderFlag());
 			homePageData.setPendingPaymentFlag(resp.isPendingPaymentFlag());
-
+			homePageData.setRecentArrivalFlag(resp.isRecentArrivalFlag());
+			homePageData.setImminentArrivalFlag(resp.isImminentArrivalFlag());
 			// 查询企业权益
 			List<AdGroupEquityLevel> equityList = adGroupEquityLevelDao
 					.getAllByGroupId(response.getData().getAdGroup().getId().toString(), 5);

@@ -335,8 +335,29 @@ public class OrderServiceImpl implements OrderService{
 			}catch(Exception e) {
 				logger.error(e.getMessage());
 			}
-			
+
 		}
+
+	/**
+	 * 取消用户提醒
+	 */
+	@Override
+	public void cannelUserFlag(String userId, String flags) {
+		try {
+			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+			String[] list = flags.split(",");
+			for (String state : list) {
+				Long checkDate = Long.valueOf(opsForValue.get("userFlag:" + userId + ":" + state));
+				Long now = System.currentTimeMillis();
+				if (checkDate != now) {
+					opsForValue.set("userFlag:" + userId + ":" + state, now.toString());
+				}
+			}
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+
+	}
 
 	/**
 	 * 获取订单总数
@@ -418,7 +439,7 @@ public class OrderServiceImpl implements OrderService{
 	 * @return
 	 */
 	@Override
-	public HintResp getHintV3(HintReq req) {
+	public HintResp getUserFlag(HintReq req) {
 		HintResp hintResp = new HintResp();
 		try {
 			OrderPoReq orderPoReq = new OrderPoReq();
@@ -442,7 +463,8 @@ public class OrderServiceImpl implements OrderService{
 
 			Date recentlyPlacedOrderDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), null);
 			Date pendingPaymentDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "10");
-
+			Date recentArrivalDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "1");
+			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId());
 			adOrderReportDao.findLatestOrderAmountList(orderPoReq);
 
 
@@ -458,6 +480,17 @@ public class OrderServiceImpl implements OrderService{
 				hintResp.setPendingPaymentFlag(false);
 			}
 
+			if (recentArrivalDate != null && recentArrivalDate.getTime() > recentArrivalFlag) {
+				hintResp.setRecentArrivalFlag(true);
+			} else {
+				hintResp.setRecentArrivalFlag(false);
+			}
+
+			if (imminentArrivalDate != null && imminentArrivalDate.getTime() > imminentArrivalFlag) {
+				hintResp.setImminentArrivalFlag(true);
+			} else {
+				hintResp.setImminentArrivalFlag(false);
+			}
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 		}

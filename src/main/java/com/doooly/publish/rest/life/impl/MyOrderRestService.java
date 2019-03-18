@@ -159,6 +159,13 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 				orderHintReq.setUserId(Long.parseLong(req.getUserId()));
 				orderservice.cannelHint(orderHintReq);
 			}
+
+			if(req.getUserFlag() != null) {
+				OrderHintReq orderHintReq = new OrderHintReq();
+				orderHintReq.setHintState(req.getHintState());
+				orderHintReq.setUserId(Long.parseLong(req.getUserId()));
+				orderservice.cannelUserFlag(req.getUserId(), req.getUserFlag());
+			}
 			logger.info("我的订单(/list)===> 接口耗时：{}", System.currentTimeMillis()-start);
 			return result;
 		}catch(Exception e) {

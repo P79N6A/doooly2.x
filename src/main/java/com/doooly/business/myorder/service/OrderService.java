@@ -45,6 +45,11 @@ public interface OrderService {
 	public void  cannelHint(OrderHintReq req);
 
 	/**
+	 * 取消用户提醒
+	 */
+	public void  cannelUserFlag(String userId, String flags);
+
+	/**
 	 * 获取订单提醒
 	 * @param req
 	 * @return
@@ -56,7 +61,7 @@ public interface OrderService {
 	 * @param req
 	 * @return
 	 */
-	public HintResp getHintV3(HintReq req);
+	public HintResp getUserFlag(HintReq req);
 
 	/**
 	 * 删除订单

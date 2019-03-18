@@ -24,6 +24,8 @@ import com.doooly.common.util.RandomUtil;
 import com.doooly.dao.payment.AdPayRecordDao;
 import com.doooly.dao.payment.AdPayRefundRecordDao;
 import com.doooly.dao.reachad.*;
+import com.doooly.dto.common.MessageDataBean;
+import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.payment.AdPayRecord;
 import com.doooly.entity.payment.AdPayRecordExample;
@@ -32,6 +34,7 @@ import com.doooly.entity.payment.AdPayRefundRecordExample;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdReturnFlow;
+import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,23 +145,29 @@ public class ELMServiceImpl implements ELMServiceI {
         String remark = obj.getString("remark");
         //查询doooly订单
         OrderVo order = new OrderVo();
-        order.setOrderNumber(orderNo);
+        order.setCardOid(orderNo);
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         if (o == null) {
             return ResultModel.error(GlobalResultStatusEnum.PARAM_VALID_ERROR);
         }
+        //饿了么商户交易id
+        String transactionId = o.getOrderNumber();
         //修改doooly订单状态
         if(OrderTypeEnum.OrderTypeEnum16.getCode()==status){
             //订单取消
-            orderService.cancleOrder(o.getUserId(), orderNo);
+            OrderMsg orderMsg = orderService.cancleOrder(o.getUserId(), transactionId);
+            if (StringUtils.equals(MessageDataBean.failure_code, orderMsg.getCode())) {
+                logger.error("elm order status syn error, cancle order fail. data = {}", GsonUtils.toString(orderMsg));
+            }
+            logger.info("饿了么订单状态同步取消订单 orderMsg：{}", GsonUtils.toString(orderMsg));
         }
         OrderItemVo newItem = new OrderItemVo();
         newItem.setOrderReportId(order.getId());
         newItem.setRetCode(String.valueOf(status));
         newItem.setRetMsg(remark);
         newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
-        logger.info("update elm order status, item = {}", newItem);
         orderService.updateOrderItem(newItem);
+        logger.info("update elm order detail status, item = {}", GsonUtils.toString(newItem));
         return ResultModel.success_ok("收到状态");
     }
 

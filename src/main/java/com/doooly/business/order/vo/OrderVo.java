@@ -96,6 +96,16 @@ public class OrderVo {
 	//话费充值运营商 cmcc cucc ctc
 	private String operator;
 
+	// 饿了么企业订单号
+	private String cardOid;
+
+	public String getCardOid() {
+		return cardOid;
+	}
+
+	public void setCardOid(String cardOid) {
+		this.cardOid = cardOid;
+	}
 
 	public OrderVo() {
 		super();

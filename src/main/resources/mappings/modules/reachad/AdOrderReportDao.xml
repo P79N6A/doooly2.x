@@ -393,6 +393,9 @@
 			<if test="consigneeAddr != null and consigneeAddr != ''" >
 				and o.consignee_addr = #{consigneeAddr,jdbcType=VARCHAR}
 			</if>
+			<if test="cardOid != null and cardOid != ''" >
+				and d.card_oid = #{cardOid,jdbcType=VARCHAR}
+			</if>
 		</where>
         limit 1
 	</select>

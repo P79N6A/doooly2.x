@@ -41,6 +41,7 @@ public class DlTemplateFloorItem {
 	private Date ServerEndTime;	// 服务结束时间
 	private String subUrl;		// 短链接
 	private String isSupportIntegral;	// 是否支持积分
+	private String linkType;	// 链接类型(0,是内部;1,是外部)
 
 	public String getId() {
 		return id;
@@ -240,5 +241,13 @@ public class DlTemplateFloorItem {
 
 	public void setOriginalPrice(String originalPrice) {
 		this.originalPrice = originalPrice;
+	}
+
+	public String getLinkType() {
+		return linkType;
+	}
+
+	public void setLinkType(String linkType) {
+		this.linkType = linkType;
 	}
 }

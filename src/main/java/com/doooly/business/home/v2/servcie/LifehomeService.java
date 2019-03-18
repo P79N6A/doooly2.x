@@ -1,5 +1,6 @@
 package com.doooly.business.home.v2.servcie;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,6 +11,6 @@ import java.util.Map;
  */
 public interface LifehomeService {
 
-    public Map<String,Object> getLifeFloors(String groupId,int pageNum,int pageSize);
+    public List<Map<String, Object>> getLifeFloors(String groupId, int pageNum, int pageSize);
 
 }

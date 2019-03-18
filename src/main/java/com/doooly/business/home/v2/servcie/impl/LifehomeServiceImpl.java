@@ -5,13 +5,13 @@ import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.doooly.DlTemplateFloor;
+import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.home.AdBusinessScene;
-import com.doooly.entity.reachad.AdBusiness;
-import com.doooly.entity.reachad.AdBusinessGroup;
-import com.doooly.entity.reachad.AdGuideCategory;
-import com.doooly.entity.reachad.AdProduct;
+import com.doooly.entity.reachad.*;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,14 +45,31 @@ public class LifehomeServiceImpl implements LifehomeService{
     @Autowired
     private AdProductDao adProductDao;
 
+    @Autowired
+    private AdadDao adadDao;
+
 
     @Override
-    public Map<String, Object> getLifeFloors(String groupId,int pageNum,int pageSize) {
+    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize) {
+        List<Map<String,Object>> floorsItemMap = new ArrayList<>();
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
             if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_ONE){
-                //广告位置
-
+                // 广告位
+                Map<String,Object> adMap = new HashMap<>();
+                adMap.put("mainTitle","生活广告");
+                adMap.put("type",dlTemplateFloorList.get(i).getType());
+                List<Map<String,Object>> adMapItemList = new ArrayList<>();
+                List<AdAd> ads = adadDao.getByTypeAndGroup(13, groupId, 3);
+                if (!CollectionUtils.isEmpty(ads)) {
+                    for (AdAd ad : ads) {
+                        Map<String,Object> adMapItem = new HashMap<>();
+                        adMapItem.put("linkUrl",ad.getImageLinkUrl());
+                        adMapItem.put("iconUrl",ad.getImagePath());
+                        adMapItemList.add(adMapItem);
+                    }
+                }
+                floorsItemMap.add(adMap);
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
                 //生活场景
                 Map<String,Object> lifeSceneMap = new HashMap<>();
@@ -90,7 +107,7 @@ public class LifehomeServiceImpl implements LifehomeService{
                     adBusinessSceneListMap.add(adBusinessSceneMap);
                 }
                 lifeSceneMap.put("list",adBusinessSceneListMap);
-
+                floorsItemMap.add(lifeSceneMap);
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_THREE) {
                 //导购管理
                 Map<String,Object> adGuideCategoryData = new HashMap<>();
@@ -124,8 +141,9 @@ public class LifehomeServiceImpl implements LifehomeService{
                     adGuideCategoryListMap.add(adGuideCategoryMap);
                 }
                 adGuideCategoryData.put("list",adGuideCategoryListMap);
+                floorsItemMap.add(adGuideCategoryData);
             }
         }
-        return null;
+        return floorsItemMap;
     }
 }

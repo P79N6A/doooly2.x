@@ -323,34 +323,29 @@ public class OneNumberService implements OneNumberServiceI {
         String consumerSecret = json.get("shopKey").toString();
         UserSynRecord userSynRecord = userSynRecordDao.findByUserIdAndBusinessId(userId, businessId);
 
-		if (userSynRecord != null && userSynRecord.getRemarks().contains("用户同步成功")) {
-            resutlJson.put("code", "1000");
-            resutlJson.put("message", "用户已同步");
-        } else {
-            AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
+		AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 
-            if (adUser != null) {
-				String openApiUrl = eleConfig.getString("openApiUrl");
-                JSONObject result = synStaff(adUser, consumerNo, consumerSecret, openApiUrl);
+		if (adUser != null) {
+			String openApiUrl = eleConfig.getString("openApiUrl");
+			JSONObject result = synStaff(adUser, consumerNo, consumerSecret, openApiUrl);
 
-				if (("200".equals(result.get("code").toString())) || ("E3000027".equals(result.get("code").toString()))) {
-					UserSynRecord synRecord = new UserSynRecord();
-					synRecord.setBussinessId(businessId);
-					synRecord.setUserId(Integer.valueOf(userId));
-					synRecord.setRemarks("用户同步成功->返回值:" + result);
-					synRecord.setCreateDate(new Date());
-					userSynRecordDao.insert(synRecord);
-					resutlJson.put("code", "1000");
-					resutlJson.put("message", "用户同步成功");
-					logger.info("饿了么用户同步成功->返回值:" + result);
-				} else {
-					logger.info("饿了么用户同步失败->返回值:" + result);
-				}
-            } else {
-                resutlJson.put("code", "1001");
-                resutlJson.put("message", "用户未找到");
-            }
-        }
+			if (("200".equals(result.get("code").toString())) || ("E3000027".equals(result.get("code").toString()))) {
+				UserSynRecord synRecord = new UserSynRecord();
+				synRecord.setBussinessId(businessId);
+				synRecord.setUserId(Integer.valueOf(userId));
+				synRecord.setRemarks("用户同步成功->返回值:" + result);
+				synRecord.setCreateDate(new Date());
+				userSynRecordDao.insert(synRecord);
+				resutlJson.put("code", "1000");
+				resutlJson.put("message", "用户同步成功");
+				logger.info("饿了么用户同步成功->返回值:" + result);
+			} else {
+				logger.info("饿了么用户同步失败->返回值:" + result);
+			}
+		} else {
+			resutlJson.put("code", "1001");
+			resutlJson.put("message", "用户未找到");
+		}
         return resutlJson;
     }
 

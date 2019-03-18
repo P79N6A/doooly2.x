@@ -8,4 +8,6 @@ import com.doooly.entity.reachad.AdBusinessGroup;
 public interface AdBusinessGroupDao extends BaseDaoI<AdBusinessGroup> {
 	
 	List<AdBusinessGroup> selectByGid(String gid);
+
+	List<AdBusinessGroup> getListByCondition(AdBusinessGroup adBusinessGroup);
 }

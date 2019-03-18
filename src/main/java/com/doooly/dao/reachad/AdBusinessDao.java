@@ -67,4 +67,6 @@ public interface AdBusinessDao extends BaseDaoI<AdBusiness> {
 	public List<AdBusiness> findHotMerchantsByDealType(@Param("userId") Integer userId, @Param("type") String type, @Param("address") String address, @Param("dealTypes") List<Integer> dealTypes);
 
     AdBusiness getBusiness(AdBusiness adBusiness);
+
+    List<AdBusiness> getListByBusinessIds(@Param("businessIds") List<String> businessIds);
 }

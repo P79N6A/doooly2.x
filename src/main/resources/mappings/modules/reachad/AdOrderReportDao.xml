@@ -1090,8 +1090,10 @@
              <if test="businessId != null and businessId != ''">
                 AND 
                 a.bussiness_id =#{businessId}
-                
             </if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
         </where>
          and a.del_flag = 0
          ORDER BY a.order_date DESC

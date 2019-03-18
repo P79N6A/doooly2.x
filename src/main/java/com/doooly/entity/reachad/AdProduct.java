@@ -70,6 +70,8 @@ public class AdProduct {
 
 	private String attribute0;
 
+	private String guideTag;
+
 	private String categoryId;
 	private String tagName;
 	private String recommendReason;// 推荐理由
@@ -92,6 +94,8 @@ public class AdProduct {
     private String imgUrl;//分享图标
     private String maxUserRebate;//最高返利
 	private String shippingMethod;      // 发货方式
+	private Integer guideCategoryId;//导购类别
+	private Integer recommendLife;//推荐到生活
 
 	public int getId() {
 		return id;
@@ -111,6 +115,14 @@ public class AdProduct {
 
 	public String getNameSpell() {
 		return nameSpell;
+	}
+
+	public String getGuideTag() {
+		return guideTag;
+	}
+
+	public void setGuideTag(String guideTag) {
+		this.guideTag = guideTag;
 	}
 
 	public void setNameSpell(String nameSpell) {
@@ -155,6 +167,22 @@ public class AdProduct {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public Integer getGuideCategoryId() {
+		return guideCategoryId;
+	}
+
+	public void setGuideCategoryId(Integer guideCategoryId) {
+		this.guideCategoryId = guideCategoryId;
+	}
+
+	public Integer getRecommendLife() {
+		return recommendLife;
+	}
+
+	public void setRecommendLife(Integer recommendLife) {
+		this.recommendLife = recommendLife;
 	}
 
 	public boolean isAvailableCoupon() {

@@ -452,7 +452,7 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			// 小红点显示
 			HintReq req = new HintReq();
 			req.setUserId(String.valueOf(request.getUserId()));
-			HintResp resp = orderservice.getHintV3(req);
+			HintResp resp = orderservice.getUserFlag(req);
 			homePageData.setRecentlyPlacedOrderFlag(resp.isRecentlyPlacedOrderFlag());
 			homePageData.setPendingPaymentFlag(resp.isPendingPaymentFlag());
 			homePageData.setRecentArrivalFlag(resp.isRecentArrivalFlag());

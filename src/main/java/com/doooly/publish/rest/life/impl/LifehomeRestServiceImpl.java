@@ -75,7 +75,7 @@ public class LifehomeRestServiceImpl {
         param.put("pageNo",1);
         param.put("pageSize",3);
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");
-        JSONObject ret = HttpClientUtil.httpPost(actionUrl,param);
+        JSONObject ret = HttpClientUtil.httpPost(actionUrl + "query/v1/",param);
         data.put("list",ret);
         resultModel.setData(data);
         return resultModel;

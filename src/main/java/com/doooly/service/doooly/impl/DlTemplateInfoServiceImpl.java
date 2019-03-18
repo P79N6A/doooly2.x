@@ -2,6 +2,7 @@ package com.doooly.service.doooly.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.freeCoupon.service.MyCouponsBusinessServiceI;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.common.constants.PropertiesConstants;
@@ -30,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 模版服务接口实现
@@ -65,6 +63,8 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
     private AdadDao adadDao;
     @Autowired
     private AdSelfProductSkuDao adSelfProductSkuDao;
+    @Autowired
+    private MyCouponsBusinessServiceI myCouponsBusinessServiceI;
 
 
     @Override
@@ -224,7 +224,8 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
 
                         if (!CollectionUtils.isEmpty(itemList)) {
                             items = new ArrayList<>();
-                            floorEntry.setCouponCount("9");
+                            HashMap<String, Object> map = myCouponsBusinessServiceI.getCouponListByType(userId, "unuse", "0");
+                            floorEntry.setCouponCount(((ArrayList)map.get("actConnList")).size() + "");
 
                             for (DlTemplateFloorItem item : itemList) {
                                 // 如果关联类型为自营商品name去查找自营商品相关信息

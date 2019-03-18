@@ -52,6 +52,7 @@ public class HomePageDataV2 {
 	private boolean hasMoreEquity;		// 是否还有更多权益
 	private Integer groupLevel;			// 企业等级
 	private Integer giftBagCount;		// 未领取企业礼包数量
+	private String couponCount;			// 卡券数量
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -260,5 +261,13 @@ public class HomePageDataV2 {
 
 	public void setGiftBagCount(Integer giftBagCount) {
 		this.giftBagCount = giftBagCount;
+	}
+
+	public String getCouponCount() {
+		return couponCount;
+	}
+
+	public void setCouponCount(String couponCount) {
+		this.couponCount = couponCount;
 	}
 }

@@ -10,6 +10,6 @@ import java.util.Map;
  */
 public interface LifehomeService {
 
-    public Map<String,Object> getLifeFloors(String groupId);
+    public Map<String,Object> getLifeFloors(String groupId,int pageNum,int pageSize);
 
 }

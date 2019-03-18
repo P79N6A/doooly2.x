@@ -47,11 +47,14 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Override
-    public Map<String, Object> getLifeFloors(String groupId) {
+    public Map<String, Object> getLifeFloors(String groupId,int pageNum,int pageSize) {
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
-            //生活场景
-            if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
+            if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_ONE){
+                //广告位置
+
+            } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
+                //生活场景
                 Map<String,Object> lifeSceneMap = new HashMap<>();
                 lifeSceneMap.put("mainTitle","生活场景");
                 lifeSceneMap.put("type",dlTemplateFloorList.get(i).getType());

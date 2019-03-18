@@ -41,6 +41,11 @@ public class HomePageDataV2 {
 	private boolean newFinishFlag;
 	private boolean newCancelFlag;
 
+	private boolean recentlyPlacedOrderFlag; // 最近下单
+	private boolean pendingPaymentFlag;		 // 待付款
+	private boolean recentArrivalFlag;			 // 最近到账积分
+	private boolean imminentArrivalFlag;	 // 即将到账
+
     private String isPayPassword;
     private String isSetPayPassword;
     //会员返利积分，精确2位小数
@@ -269,5 +274,37 @@ public class HomePageDataV2 {
 
 	public void setCouponCount(String couponCount) {
 		this.couponCount = couponCount;
+	}
+
+	public boolean isRecentlyPlacedOrderFlag() {
+		return recentlyPlacedOrderFlag;
+	}
+
+	public void setRecentlyPlacedOrderFlag(boolean recentlyPlacedOrderFlag) {
+		this.recentlyPlacedOrderFlag = recentlyPlacedOrderFlag;
+	}
+
+	public boolean isPendingPaymentFlag() {
+		return pendingPaymentFlag;
+	}
+
+	public void setPendingPaymentFlag(boolean pendingPaymentFlag) {
+		this.pendingPaymentFlag = pendingPaymentFlag;
+	}
+
+	public boolean isRecentArrivalFlag() {
+		return recentArrivalFlag;
+	}
+
+	public void setRecentArrivalFlag(boolean recentArrivalFlag) {
+		this.recentArrivalFlag = recentArrivalFlag;
+	}
+
+	public boolean isImminentArrivalFlag() {
+		return imminentArrivalFlag;
+	}
+
+	public void setImminentArrivalFlag(boolean imminentArrivalFlag) {
+		this.imminentArrivalFlag = imminentArrivalFlag;
 	}
 }

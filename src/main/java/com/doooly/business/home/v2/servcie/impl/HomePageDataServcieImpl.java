@@ -449,12 +449,13 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 		response = this.getHomePageDataV2(request, response);
 		HomePageDataV2 homePageData = response.getData();
 		if (homePageData != null) {
+			// 小红点显示
 			HintReq req = new HintReq();
 			req.setUserId(String.valueOf(request.getUserId()));
-			HintResp resp = orderservice.getHint(req);
-			homePageData.setNewOrderFlag(resp.isNewOrderFlag());
-			homePageData.setNewFinishFlag(resp.isNewFinishFlag());
-			homePageData.setNewCancelFlag(resp.isNewCancelFlag());
+			HintResp resp = orderservice.getHintV3(req);
+			homePageData.setRecentlyPlacedOrderFlag(resp.isRecentlyPlacedOrderFlag());
+			homePageData.setPendingPaymentFlag(resp.isPendingPaymentFlag());
+
 			// 查询企业权益
 			List<AdGroupEquityLevel> equityList = adGroupEquityLevelDao
 					.getAllByGroupId(response.getData().getAdGroup().getId().toString(), 5);

@@ -239,7 +239,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                 itemEntry.setLinkUrl(BASE_CARDBUYDETAIL_URL + sku.getSelfProductId());
                                 itemEntry.setSubUrl(BASE_CARDBUYDETAIL_URL.substring(BASE_CARDBUYDETAIL_URL.indexOf("#") + 1, BASE_CARDBUYDETAIL_URL.length())
                                         + sku.getSelfProductId());
-                                items.add(item);
+                                items.add(itemEntry);
                             }
                         }
                         break;

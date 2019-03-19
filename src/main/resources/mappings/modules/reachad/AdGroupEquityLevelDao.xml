@@ -39,4 +39,14 @@
 		</if>
 	</select>
 
+	<select id="getAdGroupEquityList" resultType="com.doooly.entity.reachad.AdGroupEquityLevel">
+		SELECT a.ad_group_id,a.ad_equity_id,a.equity_name,b.equity_logo,b.equity_desc,b.user_service,b.instructions
+		FROM ad_group_equity_level a,ad_equity b
+		WHERE a.ad_equity_id = b.equity_id
+		AND a.ad_group_id = #{groupId}
+		AND a.ad_group_equity_status = 1
+		AND a.enable_status = 1
+		ORDER BY a.display_order
+	</select>
+
 </mapper>

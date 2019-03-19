@@ -31,6 +31,9 @@ public class AdGroupEquityLevel {
 	// ======关联字段
 	private String equityLogo;	// 权益图标
 	private String interfaceUrl;// 权益访问链接
+	private String equityDesc;	//描述
+	private String userService;	//用户服务
+	private String instructions; 	//使用指南
 
 	public String getId() {
 		return id;
@@ -150,5 +153,29 @@ public class AdGroupEquityLevel {
 
 	public void setInterfaceUrl(String interfaceUrl) {
 		this.interfaceUrl = interfaceUrl;
+	}
+
+	public String getEquityDesc() {
+		return equityDesc;
+	}
+
+	public void setEquityDesc(String equityDesc) {
+		this.equityDesc = equityDesc;
+	}
+
+	public String getUserService() {
+		return userService;
+	}
+
+	public void setUserService(String userService) {
+		this.userService = userService;
+	}
+
+	public String getInstructions() {
+		return instructions;
+	}
+
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
 	}
 }

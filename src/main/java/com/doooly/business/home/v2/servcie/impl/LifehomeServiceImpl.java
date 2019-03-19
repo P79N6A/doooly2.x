@@ -107,8 +107,10 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adBusinessMap.put("serverEndTime",businessList.get(k).getServerEndTime());
                         businessListMap.add(adBusinessMap);
                     }
-                    adBusinessSceneMap.put("subList",businessListMap);
-                    adBusinessSceneListMap.add(adBusinessSceneMap);
+                    if (businessListMap.size() > 0) {
+                        adBusinessSceneMap.put("subList",businessListMap);
+                        adBusinessSceneListMap.add(adBusinessSceneMap);
+                    }
                 }
                 lifeSceneMap.put("list",adBusinessSceneListMap);
                 floorsItemMap.add(lifeSceneMap);
@@ -138,11 +140,14 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adProductMap.put("name",adProduct1.getName());
                         adProductMap.put("userRebate",adProduct1.getUserRebate());
                         adProductMap.put("id",adProduct1.getId());
+                        adProductMap.put("sellPrice",adProduct1.getPrice());
                         adProductMap.put("businessName",adProduct1.getBusinessName());
                         adProductListMap.add(adProductMap);
                     }
-                    adGuideCategoryMap.put("subList",adProductListMap);
-                    adGuideCategoryListMap.add(adGuideCategoryMap);
+                    if (adProductListMap.size() > 0) {
+                        adGuideCategoryMap.put("subList",adProductListMap);
+                        adGuideCategoryListMap.add(adGuideCategoryMap);
+                    }
                 }
                 adGuideCategoryData.put("list",adGuideCategoryListMap);
                 floorsItemMap.add(adGuideCategoryData);

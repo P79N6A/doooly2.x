@@ -69,6 +69,7 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adMapItemList.add(adMapItem);
                     }
                 }
+                adMap.put("list",adMapItemList);
                 floorsItemMap.add(adMap);
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
                 //生活场景

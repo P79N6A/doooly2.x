@@ -529,6 +529,7 @@
 			company,
 			logo,
 			url,
+			app_url as appUrl,
 			server_end_time as serverEndTime
 		from
 			ad_business

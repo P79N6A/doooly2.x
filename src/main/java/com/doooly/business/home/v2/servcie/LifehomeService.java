@@ -11,6 +11,6 @@ import java.util.Map;
  */
 public interface LifehomeService {
 
-    public List<Map<String, Object>> getLifeFloors(String groupId, int pageNum, int pageSize);
+    public List<Map<String, Object>> getLifeFloors(String groupId, int pageNum, int pageSize,String channel);
 
 }

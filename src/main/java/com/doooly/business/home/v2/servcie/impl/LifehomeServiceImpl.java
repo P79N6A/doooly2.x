@@ -1,6 +1,7 @@
 package com.doooly.business.home.v2.servcie.impl;
 
 import com.doooly.business.home.v2.servcie.LifehomeService;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.*;
@@ -50,7 +51,7 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Override
-    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize) {
+    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize,String channel) {
         List<Map<String,Object>> floorsItemMap = new ArrayList<>();
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
@@ -102,7 +103,11 @@ public class LifehomeServiceImpl implements LifehomeService{
                     for (int k = 0; k < businessList.size(); k++) {
                         Map<String,Object> adBusinessMap = new HashMap<>();
                         adBusinessMap.put("mainTitle",businessList.get(k).getCompany());
-                        adBusinessMap.put("linkUrl",businessList.get(k).getAppUrl());
+                        if (Constants.CHANNEL_H5.equals(channel) || Constants.CHANNEL_WECHAT.equals(channel)) {
+                            adBusinessMap.put("linkUrl",businessList.get(k).getUrl());
+                        } else {
+                            adBusinessMap.put("linkUrl",businessList.get(k).getAppUrl());
+                        }
                         adBusinessMap.put("iconUrl",businessList.get(k).getLogo());
                         adBusinessMap.put("serverEndTime",businessList.get(k).getServerEndTime());
                         businessListMap.add(adBusinessMap);

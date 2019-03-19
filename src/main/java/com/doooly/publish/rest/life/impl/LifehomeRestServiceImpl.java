@@ -6,6 +6,7 @@ import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.utils.DateUtils;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.entity.reachad.AdBusiness;
@@ -132,9 +133,10 @@ public class LifehomeRestServiceImpl {
         int pageNum = 1;
         int pageSize = 20;
         String groupId = request.getHeader("groupId");
+        String channel = request.getHeader(Constants.CHANNEL);
         String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
         JSONArray jsonArray = JSONArray.parseArray(floorStr);
-        data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize));
+        data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize,channel));
         resultModel.setData(data);
         return resultModel;
     }

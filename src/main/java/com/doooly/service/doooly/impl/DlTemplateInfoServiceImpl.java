@@ -225,7 +225,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         if (!CollectionUtils.isEmpty(itemList)) {
                             items = new ArrayList<>();
                             HashMap<String, Object> map = myCouponsBusinessServiceI.getCouponListByType(userId, "unuse", "0");
-                            floorEntry.setCouponCount(((ArrayList)map.get("actConnList")).size() + "");
+                            floorEntry.setCouponCount(((ArrayList)map.get("actConnList")).size());
 
                             for (DlTemplateFloorItem item : itemList) {
                                 // 如果关联类型为自营商品name去查找自营商品相关信息

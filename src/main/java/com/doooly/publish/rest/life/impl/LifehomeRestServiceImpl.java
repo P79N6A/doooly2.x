@@ -7,13 +7,18 @@ import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.util.HttpClientUtil;
+import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.entity.reachad.AdBusiness;
 import com.easy.mq.client.RocketClient;
 import com.easy.mq.result.RocketProducerMessage;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.reach.constrant.Group;
 import com.reach.constrant.Topic;
 import com.reach.dto.UserEventReq;
 import com.reach.enums.EventType;
+import com.reach.redis.utils.GsonUtils;
 import com.reach.redis.utils.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: wanghai
@@ -54,6 +57,9 @@ public class LifehomeRestServiceImpl {
     @Resource(name = "rocketClient")
     private RocketClient rocketClient;
 
+    @Autowired
+    private AdBusinessDao adBusinessDao;
+
     @POST
     @Path("/getUserRecentView")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -62,8 +68,8 @@ public class LifehomeRestServiceImpl {
         long userId = jsonObject.getLongValue("userId");
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
-        String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
-        JSONArray jsonArray = JSONArray.parseArray(listStr);
+        //String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
+        //JSONArray jsonArray = JSONArray.parseArray(listStr);
 
         Calendar calendar = Calendar.getInstance();
         Date currentDate = calendar.getTime();
@@ -74,9 +80,42 @@ public class LifehomeRestServiceImpl {
         param.put("endDate",DateUtils.dateFormatStr(currentDate,"yyyy-MM-dd"));
         param.put("pageNo",1);
         param.put("pageSize",3);
+        param.put("userId",userId);
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");
         JSONObject ret = HttpClientUtil.httpPost(actionUrl + "query/v1/",param);
-        data.put("list",ret);
+        logger.info("action返回：{},{}",userId,ret);
+        int code = ret.getInteger("code");
+        List<String> businessIds = new ArrayList<>();
+        List<Map<String,Object>> listData = new ArrayList<>();
+        if (1000 == code) {
+            String retData = ret.getString("data");
+            Map<String,Object> mapData = GsonUtils.son.fromJson(retData,Map.class);
+            String dataStr = JSONArray.toJSONString(mapData.get("data"));
+            List<Map<String,Object>> mapList = GsonUtils.son.fromJson(dataStr,new TypeToken<List<Map<String,Object>>>(){}.getType());
+            for (int i = 0; i < mapList.size(); i++) {
+                Map<String,Object> itemMap = mapList.get(i);
+                if (itemMap.get("businessId") != null) {
+                    businessIds.add(String.valueOf(itemMap.get("businessId")));
+                }
+            }
+            List<AdBusiness> adBusinessList = new ArrayList<>();
+            if (businessIds.size() > 0) {
+                adBusinessList = adBusinessDao.getListByBusinessIds(businessIds);
+            }
+            AdBusiness adBusinessItem = null;
+            for (int i = 0; i < adBusinessList.size(); i++) {
+                adBusinessItem = adBusinessList.get(i);
+                Map<String, Object> mapItem = new HashMap<>();
+                mapItem.put("iconUrl", adBusinessItem.getLogo());
+                mapItem.put("linkUrl",adBusinessItem.getUrl());
+                mapItem.put("mainTitle",adBusinessItem.getCompany());
+                mapItem.put("serverEndTime",adBusinessItem.getServerEndTime());
+                listData.add(mapItem);
+            }
+        } else {
+            resultModel.setCode(code);
+        }
+        data.put("list",listData);
         resultModel.setData(data);
         return resultModel;
     }

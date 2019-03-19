@@ -21,6 +21,7 @@ public class ELMConstants {
     public static final String ELM_URL = elmBundle.getString("elm_url");
     public static final String QUERY_ORDER = "/v1/openapi/order/get";
     public static final String ELM_ADD_METHOD = "/v1/openapi/employee/add";
+    public static final String ELM_UPDATE_METHOD = "/v1/openapi/employee/update";
 
     public static final String ELM_ORDER_PREFIX = "ELM_ORDER_PREFIX:%s";
 

@@ -329,7 +329,8 @@ public class OneNumberService implements OneNumberServiceI {
 			String openApiUrl = eleConfig.getString("openApiUrl");
 			JSONObject result = synStaff(adUser, consumerNo, consumerSecret, openApiUrl);
 
-			if (("200".equals(result.get("code").toString())) || ("E3000027".equals(result.get("code").toString()))) {
+			if (("200".equals(result.get("code").toString()))) {
+				// 用户同步成功
 				UserSynRecord synRecord = new UserSynRecord();
 				synRecord.setBussinessId(businessId);
 				synRecord.setUserId(Integer.valueOf(userId));
@@ -339,6 +340,23 @@ public class OneNumberService implements OneNumberServiceI {
 				resutlJson.put("code", "1000");
 				resutlJson.put("message", "用户同步成功");
 				logger.info("饿了么用户同步成功->返回值:" + result);
+			} else if(("E3000027".equals(result.get("code").toString()))) {
+				// 用户已同步，做更新操作
+				JSONObject updateResult = updateStaff(adUser, consumerNo, consumerSecret, openApiUrl);
+
+				if (("200".equals(updateResult.get("code").toString()))) {
+					UserSynRecord synRecord = new UserSynRecord();
+					synRecord.setBussinessId(businessId);
+					synRecord.setUserId(Integer.valueOf(userId));
+					synRecord.setRemarks("用户更新成功->返回值:" + updateResult);
+					synRecord.setCreateDate(new Date());
+					userSynRecordDao.insert(synRecord);
+					logger.info("饿了么用户更新成功->返回值:" + updateResult);
+				}
+
+				resutlJson.put("code", "1000");
+				resutlJson.put("message", "用户同步成功");
+				logger.info("饿了么用户已同步->返回值:" + result);
 			} else {
 				logger.info("饿了么用户同步失败->返回值:" + result);
 			}
@@ -376,4 +394,33 @@ public class OneNumberService implements OneNumberServiceI {
         resultJson = JSONObject.parseObject(resultStr);
         return resultJson;
     }
+
+	/**
+	 * 修改会员信息
+	 * @param adUser
+	 * @param consumerNo
+	 * @param consumerSecret
+	 * @return
+	 */
+	private JSONObject updateStaff(AdUser adUser, String consumerNo, String consumerSecret, String openApiUrl) {
+		JSONObject resultJson = new JSONObject();
+		Long timeStamp = new Date().getTime();
+		// 整理参数
+		String url = openApiUrl + ELMConstants.ELM_UPDATE_METHOD;
+		JSONObject userJson = new JSONObject();
+		userJson.put("employeeNo", adUser.getCardNumber());
+		userJson.put("name", adUser.getName());
+		userJson.put("phoneNumber", adUser.getTelephone());
+
+		String jsonStr = org.apache.commons.codec.binary.Hex.encodeHexString(userJson.toJSONString().getBytes());
+
+		HashMap<String, String> headerMap = new HashMap<>();
+		headerMap.put("consumerNo", consumerNo);
+		headerMap.put("timeStamp", timeStamp.toString());
+		headerMap.put("sign", MD5Util.MD5Encode(jsonStr + consumerSecret + timeStamp, "UTF-8"));
+
+		String resultStr = HttpClientUtil.doPost(url, headerMap, null,jsonStr);
+		resultJson = JSONObject.parseObject(resultStr);
+		return resultJson;
+	}
 }

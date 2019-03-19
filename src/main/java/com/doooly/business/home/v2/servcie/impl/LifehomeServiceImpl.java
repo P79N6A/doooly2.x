@@ -126,6 +126,8 @@ public class LifehomeServiceImpl implements LifehomeService{
                     AdGuideCategory adGuideCategory = adGuideCategoryList.get(j);
                     adGuideCategoryMap.put("subTitle",adGuideCategory.getCategoryName());
                     adGuideCategoryMap.put("iconUrl",adGuideCategory.getIconUrl());
+
+
                     AdProduct adProduct = new AdProduct();
                     adProduct.setGuideCategoryId(Integer.parseInt(adGuideCategory.getId()));
                     adProduct.setRecommendLife(1);//是否推荐到生活 0 不推荐，1 推荐
@@ -142,8 +144,11 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adProductMap.put("id",adProduct1.getId());
                         adProductMap.put("sellPrice",adProduct1.getPrice());
                         adProductMap.put("businessName",adProduct1.getBusinessName());
+                        adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
                         adProductListMap.add(adProductMap);
                     }
+
+
                     if (adProductListMap.size() > 0) {
                         adGuideCategoryMap.put("subList",adProductListMap);
                         adGuideCategoryListMap.add(adGuideCategoryMap);

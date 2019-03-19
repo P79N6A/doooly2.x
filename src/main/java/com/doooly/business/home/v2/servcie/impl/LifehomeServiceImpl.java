@@ -93,7 +93,10 @@ public class LifehomeServiceImpl implements LifehomeService{
                     for (int k = 0; k < adBusinessGroupList.size(); k++) {
                         businessIds.add(adBusinessGroupList.get(k).getBusinessId());
                     }
-                    List<AdBusiness> businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                    List<AdBusiness> businessList = new ArrayList<>();
+                    if (businessIds.size() > 0) {
+                        businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                    }
                     List<Map<String,Object>> businessListMap = new ArrayList<>();
                     for (int k = 0; k < businessList.size(); k++) {
                         Map<String,Object> adBusinessMap = new HashMap<>();

@@ -129,8 +129,8 @@ public class LifehomeRestServiceImpl {
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
         long userId = jsonObject.getLongValue("userId");
-        int pageNum = jsonObject.getInteger("pageNum");
-        int pageSize = jsonObject.getInteger("pageSize");
+        int pageNum = 1;
+        int pageSize = 20;
         String groupId = request.getHeader("groupId");
         String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
         JSONArray jsonArray = JSONArray.parseArray(floorStr);

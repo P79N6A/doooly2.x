@@ -28,7 +28,7 @@ public class DlTemplateFloor {
 	private Date updateDate;	// 更新日期
 	// ========== 关联字段 =======
 	private List<DlTemplateFloorItem> items = new ArrayList<>(); 	// 楼层item集合
-	private String couponCount;    // 卡券数量
+	private Integer couponCount;    // 卡券数量
 	private Boolean hasMore;	// 是否还有更多
 
 	public String getId() {
@@ -151,11 +151,11 @@ public class DlTemplateFloor {
 		this.items = items;
 	}
 
-	public String getCouponCount() {
+	public Integer getCouponCount() {
 		return couponCount;
 	}
 
-	public void setCouponCount(String couponCount) {
+	public void setCouponCount(Integer couponCount) {
 		this.couponCount = couponCount;
 	}
 

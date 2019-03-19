@@ -68,12 +68,12 @@ public class LifehomeRestServiceImpl {
         long userId = jsonObject.getLongValue("userId");
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
-        //String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
-        //JSONArray jsonArray = JSONArray.parseArray(listStr);
+        String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
+        JSONArray jsonArray = JSONArray.parseArray(listStr);
 
         Calendar calendar = Calendar.getInstance();
         Date currentDate = calendar.getTime();
-        calendar.add(Calendar.DAY_OF_MONTH,-7);
+        calendar.add(Calendar.DAY_OF_MONTH,-30);
         Date startDate = calendar.getTime();
         JSONObject param = new JSONObject();
         param.put("startDate", DateUtils.dateFormatStr(startDate,"yyyy-MM-dd"));
@@ -115,7 +115,7 @@ public class LifehomeRestServiceImpl {
         } else {
             resultModel.setCode(code);
         }
-        data.put("list",listData);
+        data.put("list",listData.size() > 0 ? listData : jsonArray);
         resultModel.setData(data);
         return resultModel;
     }

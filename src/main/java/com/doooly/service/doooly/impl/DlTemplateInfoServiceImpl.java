@@ -143,7 +143,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                 for (int i = 0; i < list.size(); i++) {
                                     JSONObject entry = (JSONObject) list.get(0);
                                     DlTemplateFloorItem item = new DlTemplateFloorItem();
-                                    item.setIconUrl(entry.getString("image"));
+                                    item.setIconUrl(entry.getString("subImage"));
                                     item.setId(entry.getString("id"));
                                     item.setTitle(entry.getString("giftBagName"));
                                     items.add(item);
@@ -226,6 +226,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                             items = new ArrayList<>();
                             HashMap<String, Object> map = myCouponsBusinessServiceI.getCouponListByType(userId, "unuse", "0");
                             floorEntry.setCouponCount(((ArrayList)map.get("actConnList")).size());
+                            log.info(String.format("用户：%s，可使用卡券数量为：%s", userId, ((ArrayList)map.get("actConnList")).size()));
 
                             for (DlTemplateFloorItem item : itemList) {
                                 // 如果关联类型为自营商品name去查找自营商品相关信息

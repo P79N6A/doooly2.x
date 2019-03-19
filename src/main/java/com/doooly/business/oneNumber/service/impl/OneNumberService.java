@@ -321,8 +321,6 @@ public class OneNumberService implements OneNumberServiceI {
         String businessId = json.get("businessId").toString();
         String consumerNo = json.get("shopId").toString();
         String consumerSecret = json.get("shopKey").toString();
-        UserSynRecord userSynRecord = userSynRecordDao.findByUserIdAndBusinessId(userId, businessId);
-
 		AdUser adUser = adUserDao.getById(Integer.valueOf(userId));
 
 		if (adUser != null) {

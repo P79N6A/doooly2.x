@@ -89,7 +89,14 @@ public class LifehomeServiceImpl implements LifehomeService{
                 for (int j = 0; j < adBusinessSceneList.size(); j++) {
                     Map<String,Object> adBusinessSceneMap = new HashMap<>();
                     adBusinessSceneMap.put("subTitle",adBusinessSceneList.get(j).getName());
-                    adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getWxIcon());
+                    if (Constants.CHANNEL_APP.equals(channel)) {
+                        adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getAppIcon());
+                        adBusinessSceneMap.put("iconUrlActive",adBusinessSceneList.get(j).getAppIconActive());
+                    } else {
+                        adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getWxIcon());
+                        adBusinessSceneMap.put("iconUrlActive",adBusinessSceneList.get(j).getWxIconActive());
+                    }
+
                     //对应的商户
                     AdBusinessGroup adBusinessGroup = new AdBusinessGroup();
                     adBusinessGroup.setGroupId(groupId);

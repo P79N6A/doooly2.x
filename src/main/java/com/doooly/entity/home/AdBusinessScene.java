@@ -11,6 +11,10 @@ public class AdBusinessScene {
 
     private String appIcon;
 
+    private String wxIconActive; //wx选中图标
+
+    private String appIconActive; //app选中图标
+
     private Integer sort;
 
     private int state;
@@ -22,6 +26,22 @@ public class AdBusinessScene {
     private String createBy;
 
     private String updateBy;
+
+    public String getWxIconActive() {
+        return wxIconActive;
+    }
+
+    public void setWxIconActive(String wxIconActive) {
+        this.wxIconActive = wxIconActive;
+    }
+
+    public String getAppIconActive() {
+        return appIconActive;
+    }
+
+    public void setAppIconActive(String appIconActive) {
+        this.appIconActive = appIconActive;
+    }
 
     public Long getId() {
         return id;

@@ -6,6 +6,8 @@
     <result column="name" property="name" jdbcType="VARCHAR" />
     <result column="wx_icon" property="wxIcon" jdbcType="VARCHAR" />
     <result column="app_icon" property="appIcon" jdbcType="VARCHAR" />
+    <result column="wx_icon_active" property="wxIconActive" jdbcType="VARCHAR" />
+    <result column="app_icon_active" property="appIconActive" jdbcType="VARCHAR" />
     <result column="sort" property="sort" jdbcType="INTEGER" />
     <result column="state" property="state" jdbcType="BIT" />
     <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
@@ -14,7 +16,7 @@
     <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, name, wx_icon, app_icon, sort, state, update_date, create_date, create_by, update_by
+    id, name, wx_icon, app_icon,app_icon_active,wx_icon_active, sort, state, update_date, create_date, create_by, update_by
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 

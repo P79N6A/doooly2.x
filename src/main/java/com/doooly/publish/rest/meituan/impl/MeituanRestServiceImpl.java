@@ -312,7 +312,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 retMap.put("msg","参数错误");
             }
             //退款
-            orderNum = serialNum;
+            orderNum = serialNum + "-" + sqtOrderId;
             OrderVo orderVo = orderService.getByOrderNum(orderNum);
             PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber(),refundAmount);
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));

@@ -170,7 +170,7 @@ public class MeituanServiceImpl implements MeituanService{
         }
 
         BigDecimal total = json.getBigDecimal("tradeAmount");
-        String orderNum = json.getString("serialNum");
+        String orderNum = json.getString("serialNum") + "-" + json.getString("sqtOrderId");
         JSONObject param = new JSONObject();
         param.put("businessId", MeituanConstants.meituan_bussinesss_serial);//商户编号
         param.put("cardNumber", adUser.getTelephone());

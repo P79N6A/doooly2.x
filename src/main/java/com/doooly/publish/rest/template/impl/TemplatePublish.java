@@ -70,7 +70,7 @@ public class TemplatePublish implements TemplatePublishI {
             Map<String, Object> map = new HashMap<>();
             map.put("groupId", groupId);
             map.put("type", tempType);
-            map.put("userId", "1162242");
+            map.put("userId", userId);
             map.put("address", address);
 
             result = dlTemplateInfoService.getTemplateInfoByType(map);

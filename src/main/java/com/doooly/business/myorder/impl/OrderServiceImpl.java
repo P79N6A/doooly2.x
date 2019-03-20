@@ -445,17 +445,17 @@ public class OrderServiceImpl implements OrderService{
 			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 			// 查询redis记录的上次点击时间
 			// 最近下单
-			Long recentlyPlacedOrderFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + "0") != null ?
-					opsForValue.get("userFlag:"+req.getUserId() + "0") : "0");
+			Long recentlyPlacedOrderFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + ":0") != null ?
+					opsForValue.get("userFlag:"+req.getUserId() + ":0") : "0");
 			//待付款
-			Long pendingPaymentFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + "1") != null ?
-					opsForValue.get("userFlag:" + req.getUserId() + "1") : "0");
+			Long pendingPaymentFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + ":1") != null ?
+					opsForValue.get("userFlag:" + req.getUserId() + ":1") : "0");
 			//最近到账积分
-			Long recentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + "2") != null ?
-					opsForValue.get("userFlag:"+req.getUserId() + "2") : "0");
+			Long recentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + ":2") != null ?
+					opsForValue.get("userFlag:"+req.getUserId() + ":2") : "0");
 			//即将到账
-			Long imminentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + "3") != null ?
-					opsForValue.get("userFlag:" + req.getUserId() + "3") : "0");
+			Long imminentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + ":3") != null ?
+					opsForValue.get("userFlag:" + req.getUserId() + ":3") : "0");
 			logger.info(String.format("用户 %s redis中最近下单点击时间：%s,待付款点击时间：%s，最近到账积分点击时间：%s，即将到账点击时间：%s",
 					req.getUserId(),recentlyPlacedOrderFlag,pendingPaymentFlag,recentArrivalFlag, imminentArrivalFlag));
 
@@ -463,8 +463,6 @@ public class OrderServiceImpl implements OrderService{
 			Date pendingPaymentDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "10");
 			Date recentArrivalDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "1");
 			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId());
-			adOrderReportDao.findLatestOrderAmountList(orderPoReq);
-
 
 			if (recentlyPlacedOrderDate != null && recentlyPlacedOrderDate.getTime() > recentlyPlacedOrderFlag) {
 				hintResp.setRecentlyPlacedOrderFlag(true);

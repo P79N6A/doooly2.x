@@ -20,7 +20,7 @@
             <include refid="adBusinessExpandInfoColumns"/>
         from ad_business_expand_info a
         INNER JOIN ad_business b ON a.business_id = b.id
-        where a.business_id=#{businessId}
+        where (a.business_id=#{businessId} OR b.business_id=#{businessId})
 	</select>
 
 	<select id="getBusinessExpandInfo" resultType="AdBusinessExpandInfo">

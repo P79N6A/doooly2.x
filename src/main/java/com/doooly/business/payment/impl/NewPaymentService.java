@@ -275,7 +275,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             logger.info("payment unifiedorder v2 result data={}", data);
             return ResultModel.ok(retJson);
         } else {
-            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
+            return new ResultModel(jsonResult.getInteger("code"),jsonResult.getString("info"));
         }
     }
 

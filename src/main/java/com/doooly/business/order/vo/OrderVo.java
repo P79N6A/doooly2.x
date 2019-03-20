@@ -98,7 +98,7 @@ public class OrderVo {
 	//话费充值运营商 cmcc cucc ctc
 	private String operator;
 	//大订单编号
-	private Long bigOrderNumber;
+	private String bigOrderNumber;
 
     //订单类型 1 礼包订单
     private String orderType;
@@ -466,11 +466,11 @@ public class OrderVo {
 		this.operator = operator;
 	}
 
-    public Long getBigOrderNumber() {
+    public String getBigOrderNumber() {
         return bigOrderNumber;
     }
 
-    public void setBigOrderNumber(Long bigOrderNumber) {
+    public void setBigOrderNumber(String bigOrderNumber) {
         this.bigOrderNumber = bigOrderNumber;
     }
 

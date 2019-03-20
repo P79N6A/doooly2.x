@@ -270,7 +270,6 @@ public class HttpClientUtil {
             String responseJson = EntityUtils.toString(response.getEntity(), "UTF-8");
             return JSON.parseObject(responseJson);
         } catch (Exception ex) {
-            ex.printStackTrace();
             log.error("httpPost() ex={}", ex);
         } finally {
             try {

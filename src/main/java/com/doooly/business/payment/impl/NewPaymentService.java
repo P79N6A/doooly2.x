@@ -69,6 +69,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -175,7 +176,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //改造缓存 === zhangqing 20181227
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -230,9 +231,36 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
         JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
+        String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
-        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL_V2);
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
         if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
@@ -240,6 +268,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
+            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
@@ -253,18 +282,29 @@ public class NewPaymentService implements NewPaymentServiceI {
     private JSONObject getOrderSummaryV2(JSONObject json) {
         logger.info("getOrderSummaryV2() json = {}", json);
         JSONObject result = new JSONObject();
-        String bigOrderNumber = json.getString("bigOrderNumber");
+        String orderNum = json.getString("orderNum");//订单号
+        String redirectUrl = json.getString("redirectUrl");//支付成功跳转链接
         long userId = json.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
+        }
         //查询大订单
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(Long.parseLong(bigOrderNumber));
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("userId",adOrderBig.getUserId());
-        List<String> skus = getSkus(orderVos);
-        paramMap.put("skus",skus);
+        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order);
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
@@ -278,11 +318,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         String amount = String.valueOf(adOrderBig.getTotalAmount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
         param.put("cardNumber", user.getTelephone());
-        param.put("businessId", WebService.BUSINESSID);
+        param.put("businessId", businessId);
         param.put("merchantOrderNo", adOrderBig.getId());
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("redirectUrl", redirectUrl);
+        param.put("expireTime", DateUtils.formatDateTime(DateUtils.add(adOrderBig.getOrderDate(), Calendar.MINUTE, 15)));
         param.put("body", "兜礼订单-"+adOrderBig.getId());
         param.put("isSource", adOrderBig.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));
@@ -298,6 +340,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
+        result.put("businessId", businessId);
         return result;
     }
 
@@ -425,7 +468,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
         //改造缓存 === zhangqing 20181227
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -669,7 +712,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         params.put("isPayPassword", isPayPassword);
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -833,9 +876,20 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("收银台支付回调通知结果V2:{}", resultJson);
         String param = resultJson.getString("param");
         JSONObject retJson = JSONObject.parseObject(param);
-        String bigOrderNumber = retJson.getString("bigOrderNumber");//大订单号
+        String orderNum = retJson.getString("orderNum");//大订单号
+        Long userId = retJson.getLong("userId");//大订单号
+        String bigOrderNumber = "";//大订单号
+        OrderVo order1 = new OrderVo();
+        order1.setOrderNumber(orderNum);
+        order1.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order1);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order1.setBigOrderNumber(bigOrderNumber);
+        }
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
+        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order1);
         for (OrderVo orderVo : orderVos) {
             JSONObject json = new JSONObject();
             String orderNumber = orderVo.getOrderNumber();
@@ -967,7 +1021,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //20181227 --收银台缓存改造
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(id);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(id));
+        paramAdBusinessExpandInfo.setBusinessId(id);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -1239,7 +1293,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String businessId = String.valueOf(orderVo.getBussinessId());
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();

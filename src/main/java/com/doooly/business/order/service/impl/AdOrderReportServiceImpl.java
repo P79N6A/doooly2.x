@@ -61,6 +61,11 @@ public class AdOrderReportServiceImpl implements AdOrderReportServiceI{
     }
 
     @Override
+    public List<OrderVo> getOrders(OrderVo order) {
+        return adOrderReportDao.getOrders(order);
+    }
+
+    @Override
     public AdOrderBig getAdOrderBig(AdOrderBig adOrderBig) {
         return adOrderReportDao.getAdOrderBig(adOrderBig);
     }

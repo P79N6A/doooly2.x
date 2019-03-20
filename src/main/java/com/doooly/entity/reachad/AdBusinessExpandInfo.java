@@ -8,7 +8,7 @@ package com.doooly.entity.reachad;
 public class AdBusinessExpandInfo {
 
     private Long id ;
-    private Long businessId;//商户主表编号
+    private String businessId;//商户主表编号
     private String shopId;//兜礼访问商家唯一标识
     private String shopKey;//兜礼访问商家密钥32位
     private String businessUrl;//商家接口地址
@@ -37,11 +37,11 @@ public class AdBusinessExpandInfo {
         this.id = id;
     }
 
-    public Long getBusinessId() {
+    public String getBusinessId() {
         return businessId;
     }
 
-    public void setBusinessId(Long businessId) {
+    public void setBusinessId(String businessId) {
         this.businessId = businessId;
     }
 

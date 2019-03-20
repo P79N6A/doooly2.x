@@ -421,7 +421,7 @@ public class OrderServiceImpl implements OrderService {
             OrderVo order = (OrderVo) jsonObject.get("order");
             OrderExtVo orderExt = (OrderExtVo) jsonObject.get("orderExt");
             List<OrderItemVo> orderItems = (List<OrderItemVo>) jsonObject.get("orderItems");
-            order.setBigOrderNumber(bigOrderNumber);
+            order.setBigOrderNumber(String.valueOf(bigOrderNumber));
             saveOrder(order, orderExt, orderItems);
         }
         //清空购物车
@@ -429,13 +429,13 @@ public class OrderServiceImpl implements OrderService {
         cart.put("userId",userId);
         cart.put("cartList",carts);
         JSONObject result = HttpClientUtil.httpPost(Constants.OrderApiConstants.ORDER_BASE_URL + Constants.OrderApiConstants.SHOP_CART_URL, cart);
-        if(!MessageDataBean.success_code.equals(result.get("code"))){
-            //购物车清空失败,直接抛出异常回滚数据
-            logger.error("购物车清空失败,返回结果{}",result);
-        }else {
+        if(result!=null && MessageDataBean.success_code.equals(result.get("code"))){
             logger.info("购物车清空成功,返回结果{}",result);
+        }else {
+            //购物车清空失败
+            logger.error("购物车清空失败,返回结果{}",result);
         }
-        msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
+        msg.getData().put("orderNum", String.valueOf(bigOrderNumber));
         return msg;
     }
 
@@ -965,9 +965,19 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	@Transactional
-	public OrderMsg cancleOrderV2(long userId, String bigOrderNumber) {
-		logger.info("cancleOrder() bigOrderNumber = {},userId = {}", bigOrderNumber, userId);
-        List<OrderVo> orders = adOrderReportServiceI.getOrders(bigOrderNumber);
+	public OrderMsg cancleOrderV2(long userId, String orderNum) {
+		logger.info("cancleOrder() orderNum = {},userId = {}", orderNum, userId);
+        String bigOrderNumber;//大订单号
+        OrderVo order1 = new OrderVo();
+        order1.setOrderNumber(orderNum);
+        order1.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order1);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order1.setBigOrderNumber(bigOrderNumber);
+        }
+        List<OrderVo> orders = adOrderReportServiceI.getOrders(order1);
         for (OrderVo order : orders) {
             OrderMsg payMsg1 = cancelOrderv1(userId, order.getOrderNumber());
             if (payMsg1 != null && payMsg1.getCode().equals(MessageDataBean.failure_code)) return payMsg1;

@@ -147,4 +147,6 @@ public interface AdOrderReportDao {
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
 
     OrderVo getLiftOrder(String orderNum);
+
+    List<OrderVo> getOrders(OrderVo order);
 }

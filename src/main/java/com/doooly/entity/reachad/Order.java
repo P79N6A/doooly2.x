@@ -69,7 +69,7 @@ public class Order {
 	
 	private String originOrderNumber;//订单时间字符串格式
 
-    private Long bigOrderNumber;//大订单编号
+    private String bigOrderNumber;//大订单编号
 
 	public Order() {
 
@@ -309,11 +309,11 @@ public class Order {
 		this.originOrderNumber = originOrderNumber;
 	}
 
-    public Long getBigOrderNumber() {
+    public String getBigOrderNumber() {
         return bigOrderNumber;
     }
 
-    public void setBigOrderNumber(Long bigOrderNumber) {
+    public void setBigOrderNumber(String bigOrderNumber) {
         this.bigOrderNumber = bigOrderNumber;
     }
 }

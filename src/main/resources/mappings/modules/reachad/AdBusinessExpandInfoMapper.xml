@@ -16,16 +16,21 @@
 	
 	
 	<select id="getByBusinessId" resultType="AdBusinessExpandInfo">
-		select <include refid="adBusinessExpandInfoColumns"/> from ad_business_expand_info a where a.business_id=#{businessId}
+		select
+            <include refid="adBusinessExpandInfoColumns"/>
+        from ad_business_expand_info a
+        INNER JOIN ad_business b ON a.business_id = b.id
+        where a.business_id=#{businessId}
 	</select>
 
 	<select id="getBusinessExpandInfo" resultType="AdBusinessExpandInfo">
 		select
           <include refid="adBusinessExpandInfoColumns"/>
         from ad_business_expand_info a
+        INNER JOIN ad_business b ON a.business_id = b.id
         <where>
             <if test="businessId != null and businessId != ''">
-                AND a.business_id=#{businessId}
+                AND (a.business_id=#{businessId} OR b.business_id=#{businessId})
             </if>
 			<if test="clientSecret != null and clientSecret != ''">
 				AND a.client_secret=#{clientSecret}

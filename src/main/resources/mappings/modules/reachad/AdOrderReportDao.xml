@@ -1408,7 +1408,7 @@
           )
     </insert>
 
-    <select id="getOrders" resultMap="orderMap" parameterType="java.lang.String">
+    <select id="getOrders" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">
         select
             <include refid="getAdOrderReportColumns" />,
             <include refid="adOrderDetailColumns" />,
@@ -1420,6 +1420,9 @@
         <where>
             <if test="bigOrderNumber != null and bigOrderNumber != ''">
                 and o.big_order_number = #{bigOrderNumber}
+            </if>
+            <if test="orderNumber != null and orderNumber != ''">
+                and ( o.order_number = #{orderNumber} OR o.big_order_number = #{orderNumber})
             </if>
         </where>
     </select>

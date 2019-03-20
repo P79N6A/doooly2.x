@@ -20,6 +20,7 @@
         a.integral_rebate_pay_amount AS "integralRebatePayAmount",
         a.pay_amount AS "payAmount",
         a.notify_url AS "notifyUrl",
+        a.redirect_url AS "redirectUrl",
         a.client_ip AS "clientIp",
         a.order_ip AS "orderIp",
         a.integral_pay_status AS "integralPayStatus",

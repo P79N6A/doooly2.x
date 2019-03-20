@@ -11,6 +11,7 @@ import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.home.AdBusinessScene;
 import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -151,7 +152,9 @@ public class LifehomeServiceImpl implements LifehomeService{
                         AdProduct adProduct1 = adProductList.get(k);
                         Map<String,Object> adProductMap = new HashMap<>();
                         adProductMap.put("image",adProduct1.getImageWechat());
-                        adProductMap.put("guideTag",adProduct1.getGuideTag());
+                        adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())
+                                && adProduct1.getGuideTag().charAt(adProduct1.getGuideTag().length() - 1) == ',' ?
+                                adProduct1.getGuideTag().substring(0,adProduct1.getGuideTag().length() - 1) : adProduct1.getGuideTag());
                         adProductMap.put("marketPrice",adProduct1.getMarketPrice());
                         adProductMap.put("name",adProduct1.getName());
                         adProductMap.put("userRebate",adProduct1.getUserRebate());

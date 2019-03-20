@@ -137,7 +137,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                             floorEntry.setHasMore(date.getBoolean("hasMore"));
                             JSONArray list = date.getJSONArray("list");
 
-                            if (list.size() > 0) {
+                            if (list != null && list.size() > 0) {
                                 items = new ArrayList<>();
 
                                 for (int i = 0; i < list.size(); i++) {

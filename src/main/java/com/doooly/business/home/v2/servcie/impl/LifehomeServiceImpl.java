@@ -1,7 +1,9 @@
 package com.doooly.business.home.v2.servcie.impl;
 
 import com.doooly.business.home.v2.servcie.LifehomeService;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.CstInfoConstants;
+import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.doooly.DlTemplateFloor;
@@ -9,6 +11,7 @@ import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.home.AdBusinessScene;
 import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +29,9 @@ import java.util.Map;
  */
 @Service
 public class LifehomeServiceImpl implements LifehomeService{
+
+
+    private String BASE_URL = PropertiesHolder.getProperty("BASE_URL") + "/businessinfo/";
 
     @Autowired
     private DlTemplateFloorDao templateFloorDao;
@@ -50,7 +56,7 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Override
-    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize) {
+    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize,String channel) {
         List<Map<String,Object>> floorsItemMap = new ArrayList<>();
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
@@ -69,6 +75,7 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adMapItemList.add(adMapItem);
                     }
                 }
+                adMap.put("list",adMapItemList);
                 floorsItemMap.add(adMap);
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
                 //生活场景
@@ -83,7 +90,14 @@ public class LifehomeServiceImpl implements LifehomeService{
                 for (int j = 0; j < adBusinessSceneList.size(); j++) {
                     Map<String,Object> adBusinessSceneMap = new HashMap<>();
                     adBusinessSceneMap.put("subTitle",adBusinessSceneList.get(j).getName());
-                    adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getWxIcon());
+                    if (Constants.CHANNEL_APP.equals(channel)) {
+                        adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getAppIcon());
+                        adBusinessSceneMap.put("iconUrlActive",adBusinessSceneList.get(j).getAppIconActive());
+                    } else {
+                        adBusinessSceneMap.put("iconUrl",adBusinessSceneList.get(j).getWxIcon());
+                        adBusinessSceneMap.put("iconUrlActive",adBusinessSceneList.get(j).getWxIconActive());
+                    }
+
                     //对应的商户
                     AdBusinessGroup adBusinessGroup = new AdBusinessGroup();
                     adBusinessGroup.setGroupId(groupId);
@@ -93,18 +107,25 @@ public class LifehomeServiceImpl implements LifehomeService{
                     for (int k = 0; k < adBusinessGroupList.size(); k++) {
                         businessIds.add(adBusinessGroupList.get(k).getBusinessId());
                     }
-                    List<AdBusiness> businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                    List<AdBusiness> businessList = new ArrayList<>();
+                    if (businessIds.size() > 0) {
+                        businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                    }
                     List<Map<String,Object>> businessListMap = new ArrayList<>();
                     for (int k = 0; k < businessList.size(); k++) {
                         Map<String,Object> adBusinessMap = new HashMap<>();
                         adBusinessMap.put("mainTitle",businessList.get(k).getCompany());
-                        adBusinessMap.put("linkUrl",businessList.get(k).getAppUrl());
+                        adBusinessMap.put("subUrl",BASE_URL.substring(BASE_URL.indexOf("#") + 1, BASE_URL.length()) + businessList.get(k).getDealType()
+                                + "/" + businessList.get(k).getId());
+                        adBusinessMap.put("linkUrl",BASE_URL + businessList.get(k).getDealType() + "/" + businessList.get(k).getId());
                         adBusinessMap.put("iconUrl",businessList.get(k).getLogo());
                         adBusinessMap.put("serverEndTime",businessList.get(k).getServerEndTime());
                         businessListMap.add(adBusinessMap);
                     }
-                    adBusinessSceneMap.put("subList",businessListMap);
-                    adBusinessSceneListMap.add(adBusinessSceneMap);
+                    if (businessListMap.size() > 0) {
+                        adBusinessSceneMap.put("subList",businessListMap);
+                        adBusinessSceneListMap.add(adBusinessSceneMap);
+                    }
                 }
                 lifeSceneMap.put("list",adBusinessSceneListMap);
                 floorsItemMap.add(lifeSceneMap);
@@ -120,6 +141,8 @@ public class LifehomeServiceImpl implements LifehomeService{
                     AdGuideCategory adGuideCategory = adGuideCategoryList.get(j);
                     adGuideCategoryMap.put("subTitle",adGuideCategory.getCategoryName());
                     adGuideCategoryMap.put("iconUrl",adGuideCategory.getIconUrl());
+
+
                     AdProduct adProduct = new AdProduct();
                     adProduct.setGuideCategoryId(Integer.parseInt(adGuideCategory.getId()));
                     adProduct.setRecommendLife(1);//是否推荐到生活 0 不推荐，1 推荐
@@ -129,16 +152,24 @@ public class LifehomeServiceImpl implements LifehomeService{
                         AdProduct adProduct1 = adProductList.get(k);
                         Map<String,Object> adProductMap = new HashMap<>();
                         adProductMap.put("image",adProduct1.getImageWechat());
-                        adProductMap.put("guideTag",adProduct1.getGuideTag());
+                        adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())
+                                && adProduct1.getGuideTag().charAt(adProduct1.getGuideTag().length() - 1) == ',' ?
+                                adProduct1.getGuideTag().substring(0,adProduct1.getGuideTag().length() - 1) : adProduct1.getGuideTag());
                         adProductMap.put("marketPrice",adProduct1.getMarketPrice());
                         adProductMap.put("name",adProduct1.getName());
                         adProductMap.put("userRebate",adProduct1.getUserRebate());
                         adProductMap.put("id",adProduct1.getId());
+                        adProductMap.put("sellPrice",adProduct1.getPrice());
                         adProductMap.put("businessName",adProduct1.getBusinessName());
+                        adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
                         adProductListMap.add(adProductMap);
                     }
-                    adGuideCategoryMap.put("subList",adProductListMap);
-                    adGuideCategoryListMap.add(adGuideCategoryMap);
+
+
+                    if (adProductListMap.size() > 0) {
+                        adGuideCategoryMap.put("subList",adProductListMap);
+                        adGuideCategoryListMap.add(adGuideCategoryMap);
+                    }
                 }
                 adGuideCategoryData.put("list",adGuideCategoryListMap);
                 floorsItemMap.add(adGuideCategoryData);

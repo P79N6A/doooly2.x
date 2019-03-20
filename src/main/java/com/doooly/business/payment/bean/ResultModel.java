@@ -97,6 +97,14 @@ public class ResultModel {
         this.data = data;
     }
 
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
     /**
      * 饿了么对接返回结果
      * @return

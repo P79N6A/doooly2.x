@@ -35,6 +35,9 @@
 			<if test="clientSecret != null and clientSecret != ''">
 				AND a.client_secret=#{clientSecret}
 			</if>
+			<if test="clientId != null and clientId != ''">
+				AND a.client_id=#{clientId}
+			</if>
         </where>
 	</select>
 </mapper>

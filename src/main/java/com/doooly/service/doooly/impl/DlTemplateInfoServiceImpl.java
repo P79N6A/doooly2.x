@@ -128,7 +128,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         JSONObject json = new JSONObject();
                         json.put("groupId", groupId);
                         json.put("pageNo", 1);
-                        json.put("pageSize", 7);
+                        json.put("pageSize", 6);
                         JSONObject resultJson = HttpClientUtil.httpPost(PROJECT_ACTIVITY_URL + "gift/bag/getDooolyGiftBagListByGroup", json);
                         log.info("获得企业兜礼礼包：" + resultJson.toJSONString());
 

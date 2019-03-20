@@ -1,11 +1,13 @@
 package com.doooly.business.home.v2.servcie.impl;
 
+import com.doooly.business.guide.service.AdArticleServiceI;
 import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.*;
+import com.doooly.dto.reachad.AdProductExtend;
 import com.doooly.entity.doooly.DlTemplateFloor;
 import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.home.AdBusinessScene;
@@ -53,6 +55,9 @@ public class LifehomeServiceImpl implements LifehomeService{
 
     @Autowired
     private AdadDao adadDao;
+
+    @Autowired
+    private AdArticleServiceI adArticleServiceI;
 
 
     @Override
@@ -142,14 +147,13 @@ public class LifehomeServiceImpl implements LifehomeService{
                     adGuideCategoryMap.put("subTitle",adGuideCategory.getCategoryName());
                     adGuideCategoryMap.put("iconUrl",adGuideCategory.getIconUrl());
 
-
-                    AdProduct adProduct = new AdProduct();
-                    adProduct.setGuideCategoryId(Integer.parseInt(adGuideCategory.getId()));
-                    adProduct.setRecommendLife(1);//是否推荐到生活 0 不推荐，1 推荐
-                    List<AdProduct> adProductList = adProductDao.getListByCondition(adProduct);
+                    List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(adGuideCategory.getId(),1,50,"1");
+                    for (AdProductExtend adProduct : productExtends) {
+                        adArticleServiceI.calculateExtend(adProduct);
+                    }
                     List<Map<String,Object>> adProductListMap = new ArrayList<>();
-                    for (int k = 0; k < adProductList.size(); k++) {
-                        AdProduct adProduct1 = adProductList.get(k);
+                    for (int k = 0; k < productExtends.size(); k++) {
+                        AdProduct adProduct1 = productExtends.get(k);
                         Map<String,Object> adProductMap = new HashMap<>();
                         adProductMap.put("image",adProduct1.getImageWechat());
                         adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())

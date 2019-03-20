@@ -39,6 +39,9 @@ public interface AdProductDao extends BaseDaoI<AdProduct> {
 												@Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize,
 												@Param("recommendHomepage") String recommendHomepage);
 
+	List<AdProductExtend> getGuideProductListv4(@Param("guideCategoryId") String guideCategoryId,
+												@Param("startIndex") Integer startIndex, @Param("pageSize") Integer pageSize,
+												@Param("recommendLife") String recommendLife);
 
 	List<AdProduct> getListByCondition(AdProduct adProduct);
 }

@@ -526,6 +526,8 @@
 
 	<select id="getListByBusinessIds" resultType="com.doooly.entity.reachad.AdBusiness">
 		select
+			id,
+		    deal_type as dealType,
 			company,
 			logo,
 			url,

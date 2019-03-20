@@ -240,6 +240,7 @@
             a.image_wechat AS "imageWechat",
             a.name AS "name",
             a.market_price AS "marketPrice",
+			a.price AS "price",
             a.sell_count AS "sellCount",
             a.user_rebate AS "userRebate",
             a.bussiness_rebate AS "bussinesRebate",

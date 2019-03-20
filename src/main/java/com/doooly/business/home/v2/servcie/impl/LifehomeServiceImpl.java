@@ -3,6 +3,7 @@ package com.doooly.business.home.v2.servcie.impl;
 import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.CstInfoConstants;
+import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.doooly.DlTemplateFloor;
@@ -27,6 +28,9 @@ import java.util.Map;
  */
 @Service
 public class LifehomeServiceImpl implements LifehomeService{
+
+
+    private String BASE_URL = PropertiesHolder.getProperty("BASE_URL") + "/businessinfo/";
 
     @Autowired
     private DlTemplateFloorDao templateFloorDao;
@@ -103,11 +107,9 @@ public class LifehomeServiceImpl implements LifehomeService{
                     for (int k = 0; k < businessList.size(); k++) {
                         Map<String,Object> adBusinessMap = new HashMap<>();
                         adBusinessMap.put("mainTitle",businessList.get(k).getCompany());
-                        if (Constants.CHANNEL_H5.equals(channel) || Constants.CHANNEL_WECHAT.equals(channel)) {
-                            adBusinessMap.put("linkUrl",businessList.get(k).getUrl());
-                        } else {
-                            adBusinessMap.put("linkUrl",businessList.get(k).getAppUrl());
-                        }
+                        adBusinessMap.put("subUrl",BASE_URL.substring(BASE_URL.indexOf("#") + 1, BASE_URL.length()) + businessList.get(k).getDealType()
+                                + "/" + businessList.get(k).getId());
+                        adBusinessMap.put("linkUrl",BASE_URL + businessList.get(k).getDealType() + "/" + businessList.get(k).getId());
                         adBusinessMap.put("iconUrl",businessList.get(k).getLogo());
                         adBusinessMap.put("serverEndTime",businessList.get(k).getServerEndTime());
                         businessListMap.add(adBusinessMap);

@@ -141,7 +141,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                                 items = new ArrayList<>();
 
                                 for (int i = 0; i < list.size(); i++) {
-                                    JSONObject entry = (JSONObject) list.get(0);
+                                    JSONObject entry = (JSONObject) list.get(i);
                                     DlTemplateFloorItem item = new DlTemplateFloorItem();
                                     item.setIconUrl(entry.getString("subImage"));
                                     item.setId(entry.getString("id"));

@@ -355,6 +355,7 @@ public class OrderServiceImpl implements OrderService{
 			}
 		}catch(Exception e) {
 			logger.error(e.getMessage());
+			e.printStackTrace();
 		}
 
 	}

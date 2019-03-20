@@ -48,18 +48,17 @@
 
 
     <select id="getPayRecordDomain" parameterType="com.doooly.entity.payment.PayRecordDomain" resultType="com.doooly.entity.payment.PayRecordDomain">
-        SELECT
-        <include refid="adPayRecordColumns"/>
+        SELECT        <include refid="adPayRecordColumns"/>
         FROM ad_pay_record a
         <where>
             <if test="merchantOrderNo != null and merchantOrderNo != ''">
-                a.merchant_order_no = #{merchantOrderNo}
+               AND a.merchant_order_no = #{merchantOrderNo}
             </if>
             <if test="bigOrderNumber != null and bigOrderNumber != ''">
-                a.big_order_number = #{bigOrderNumber}
+                AND a.big_order_number = #{bigOrderNumber}
             </if>
             <if test="businessId != null and businessId != ''">
-                a.business_id = #{businessId}
+                AND a.business_id = #{businessId}
             </if>
         </where>
         limit 1

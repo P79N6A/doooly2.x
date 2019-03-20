@@ -168,6 +168,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 			return result;
 		}catch(Exception e) {
 			logger.error(e.getMessage());
+			e.printStackTrace();
 		}
 		return "{}";
 	}

@@ -347,11 +347,8 @@ public class OrderServiceImpl implements OrderService{
 			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
 			String[] list = flags.split(",");
 			for (String state : list) {
-				Long checkDate = Long.valueOf(opsForValue.get("userFlag:" + userId + ":" + state));
 				Long now = System.currentTimeMillis();
-				if (checkDate != now) {
-					opsForValue.set("userFlag:" + userId + ":" + state, now.toString());
-				}
+				opsForValue.set("userFlag:" + userId + ":" + state, now.toString());
 			}
 		}catch(Exception e) {
 			logger.error(e.getMessage());

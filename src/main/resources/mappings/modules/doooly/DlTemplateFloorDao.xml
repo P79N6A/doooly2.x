@@ -57,6 +57,7 @@
         from dl_template_floor a
         LEFT JOIN dl_template_group tg on a.template_id = tg.template_id
         where tg.group_id = #{groupId}
+        and a.state = 0
         and tg.template_type = #{templateType}
         order by a.sort asc
     </select>

@@ -18,4 +18,6 @@ public interface DlTemplateFloorItemDao extends BaseDaoI<DlTemplateFloorItem> {
 
     List<DlTemplateFloorItem> getAllByFloorId(@Param("floorId") String floorId);
 
+    List<DlTemplateFloorItem> getAllByTempIdAndFloorId(@Param("templateId") String templateId,@Param("floorId") String floorId);
+
 }

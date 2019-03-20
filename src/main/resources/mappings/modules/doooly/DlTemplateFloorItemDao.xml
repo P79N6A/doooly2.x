@@ -39,6 +39,19 @@
 		ORDER BY a.sort
 	</select>
 
+	<select id="getAllByTempIdAndFloorId" resultType="DlTemplateFloorItem">
+		SELECT
+		<include refid="dlTemplateFloorItemColumns"/>
+		FROM
+		dl_template_floor_item a
+		WHERE
+		a.del_flag = 0
+		AND a.floor_id = #{floorId}
+		AND a.template_id = #{templateId}
+		AND a.state = 0
+		ORDER BY a.sort
+	</select>
+
 	<update id="deleteByTemplateId">
 		UPDATE dl_template_floor_item SET
 			del_flag = 1

@@ -6,6 +6,7 @@ import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
+import com.doooly.dao.doooly.DlTemplateFloorItemDao;
 import com.doooly.dao.reachad.*;
 import com.doooly.dto.reachad.AdProductExtend;
 import com.doooly.entity.doooly.DlTemplateFloor;
@@ -37,6 +38,9 @@ public class LifehomeServiceImpl implements LifehomeService{
 
     @Autowired
     private DlTemplateFloorDao templateFloorDao;
+
+    @Autowired
+    private DlTemplateFloorItemDao dlTemplateFloorItemDao;
 
     @Autowired
     private AdBusinessSceneMapper adBusinessSceneMapper;
@@ -139,15 +143,14 @@ public class LifehomeServiceImpl implements LifehomeService{
                 Map<String,Object> adGuideCategoryData = new HashMap<>();
                 adGuideCategoryData.put("mainTitle","导购管理");
                 adGuideCategoryData.put("type",dlTemplateFloorList.get(i).getType());
-                List<AdGuideCategory> adGuideCategoryList = adGuideCategoryDao.findList();
+                List<DlTemplateFloorItem> dlTemplateFloorItemList = dlTemplateFloorItemDao.getAllByTempIdAndFloorId(dlTemplateFloorList.get(i).getTemplateId(),dlTemplateFloorList.get(i).getId());
                 List<Map<String,Object>> adGuideCategoryListMap = new ArrayList<>();
-                for (int j = 0; j < adGuideCategoryList.size(); j++) {
+                for (int j = 0; j < dlTemplateFloorItemList.size(); j++) {
                     Map<String,Object> adGuideCategoryMap = new HashMap<>();
-                    AdGuideCategory adGuideCategory = adGuideCategoryList.get(j);
-                    adGuideCategoryMap.put("subTitle",adGuideCategory.getCategoryName());
-                    adGuideCategoryMap.put("iconUrl",adGuideCategory.getIconUrl());
-
-                    List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(adGuideCategory.getId(),1,50,"1");
+                    DlTemplateFloorItem dlTemplateFloorItem = dlTemplateFloorItemList.get(j);
+                    adGuideCategoryMap.put("subTitle",dlTemplateFloorItem.getTitle());
+                    adGuideCategoryMap.put("iconUrl",dlTemplateFloorItem.getIconUrl());
+                    List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(dlTemplateFloorItem.getRelationId(),1,50,"1");
                     for (AdProductExtend adProduct : productExtends) {
                         adArticleServiceI.calculateExtend(adProduct);
                     }
@@ -168,7 +171,6 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
                         adProductListMap.add(adProductMap);
                     }
-
 
                     if (adProductListMap.size() > 0) {
                         adGuideCategoryMap.put("subList",adProductListMap);

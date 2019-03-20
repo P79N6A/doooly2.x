@@ -34,6 +34,7 @@
                 and state = #{state}
             </if>
         </where>
+      order by sort desc
     </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >

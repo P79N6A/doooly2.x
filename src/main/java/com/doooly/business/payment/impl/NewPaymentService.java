@@ -1050,6 +1050,11 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel getPayResultV2(JSONObject json) {
+        String orderNum = json.getString("orderNum");//订单号
+        if(orderNum.contains("N")){
+            //说明是自营子订单 走v1接口
+            return getPayResult(json);
+        }
         String bigOrderNumber = json.getString("bigOrderNumber");
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(Long.parseLong(bigOrderNumber));

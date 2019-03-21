@@ -34,7 +34,7 @@ public class AdGroupEquityPub implements AdGroupEquityPubService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Override
-	public String getGroupEquityist(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+	public String getGroupEquityList(@Context HttpServletRequest request, @Context HttpServletResponse response) {
 		JSONObject result = new JSONObject();
 		try{
 			String groupId = request.getHeader("groupId");
@@ -44,6 +44,29 @@ public class AdGroupEquityPub implements AdGroupEquityPubService {
 			result.put("msg", MessageDataBean.success_mess);
 		}catch (Exception e){
 			logger.info("%%%getGroupEquityist error is " + e.getMessage());
+			result.put("code", MessageDataBean.failure_code);
+			result.put("msg", MessageDataBean.failure_mess);
+			result.put("data", "查询异常！");
+			return result.toString();
+		}
+		return result.toString();
+	}
+
+	@POST
+	@Path(value="/getEquityByEquityId")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Override
+	public String getEquityByEquityId(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+		JSONObject result = new JSONObject();
+		try{
+			String equityId = request.getHeader("equityId");
+			logger.info("<<<equityId："+equityId);
+			result.put("data", JSONObject.parseObject(adGroupEquityService.adEquityByEquityId(equityId)));
+			result.put("code", MessageDataBean.success_code);
+			result.put("msg", MessageDataBean.success_mess);
+		}catch (Exception e){
+			logger.info("%%%getEquityByEquityId error is " + e.getMessage());
 			result.put("code", MessageDataBean.failure_code);
 			result.put("msg", MessageDataBean.failure_mess);
 			result.put("data", "查询异常！");

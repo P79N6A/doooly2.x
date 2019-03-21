@@ -171,4 +171,17 @@
 		and a.equity_status = #{equityStatus}
 	</select>
 
+	<select id="findEquity" resultType="com.doooly.entity.reachad.AdEquity">
+	SELECT a.equity_id AS "equityId",
+		a.equity_name AS "equityName",
+		a.equity_logo AS "equityLogo",
+		a.equity_type AS "equityType",
+		a.equity_level AS "equityLevel",
+		a.equity_desc AS "equityDesc",
+		a.user_service AS "userService",
+		a.instructions AS "instructions"
+	FROM ad_equity a
+	WHERE a.equity_id = #{equityId}
+	</select>
+
 </mapper>

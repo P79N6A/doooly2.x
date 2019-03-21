@@ -25,4 +25,7 @@ public interface AdEquityDao extends BaseDaoI<AdEquity> {
 
     //查询正常类型的权益ID
     List<String> findEquityIdList(@Param("equityLevel") String equityLevel, @Param("equityStatus") String equityStatus);
+
+    //获取权益详情
+    AdEquity findEquity(String equityId);
 }

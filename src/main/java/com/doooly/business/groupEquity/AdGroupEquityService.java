@@ -10,4 +10,5 @@ import java.util.List;
  */
 public interface AdGroupEquityService {
     String adGroupEquityLevelList(String groupId);
+    String adEquityByEquityId(String equityId);
 }

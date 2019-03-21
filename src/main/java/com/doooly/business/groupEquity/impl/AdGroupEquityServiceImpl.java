@@ -3,8 +3,10 @@ package com.doooly.business.groupEquity.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.groupEquity.AdGroupEquityService;
+import com.doooly.dao.reachad.AdEquityDao;
 import com.doooly.dao.reachad.AdGroupEquityLevelDao;
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.entity.reachad.AdEquity;
 import com.doooly.entity.reachad.AdGroupEquityLevel;
 import com.doooly.publish.rest.reachad.AdGroupEquityPubService;
 import com.doooly.publish.rest.reachad.impl.AdGroupEquityPub;
@@ -27,6 +29,8 @@ public class AdGroupEquityServiceImpl implements AdGroupEquityService {
 
     @Autowired
     private AdGroupEquityLevelDao adGroupEquityLevelDao;
+    @Autowired
+    private AdEquityDao adEquityDao;
 
     @Override
     public String adGroupEquityLevelList(String groupId) {
@@ -46,9 +50,21 @@ public class AdGroupEquityServiceImpl implements AdGroupEquityService {
                 jArr.add(jo);
             }
         }catch (Exception e){
-            logger.error("%%%AdGroupEquityServiceImpl error is " + e.getMessage());
+            logger.error("%%%AdGroupEquityServiceImpl error is " + e.getMessage(),e);
             throw e;
         }
         return jArr.toString();
+    }
+
+    @Override
+    public String adEquityByEquityId(String equityId) {
+        String jsonStr = null;
+        try{
+            jsonStr = JSONObject.toJSONString(adEquityDao.findEquity(equityId));
+        }catch (Exception e){
+            logger.error("%%%adEquityByEquityId error is " + e.getMessage(),e);
+            throw e;
+        }
+        return jsonStr;
     }
 }

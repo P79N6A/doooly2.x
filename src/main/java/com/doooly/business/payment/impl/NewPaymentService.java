@@ -168,6 +168,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel unifiedorder(JSONObject jsonObject) {
+        String orderNum = jsonObject.getString("orderNum");
         JSONObject orderSummary = getOrderSummary(jsonObject);
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
@@ -217,6 +218,13 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
+            }
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(orderNum);
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if(payRecordDomain != null){
+                retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
             }
             logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);

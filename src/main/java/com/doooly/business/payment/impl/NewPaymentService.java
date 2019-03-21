@@ -667,6 +667,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("merchantOrderNo", o.getOrderNumber());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("expireTime", DateUtils.formatDateTime(DateUtils.add(adOrderBig.getOrderDate(), Calendar.MINUTE, 15)));
         param.put("body", orderDesc);
         param.put("isSource", o.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(o.getOrderDate()));

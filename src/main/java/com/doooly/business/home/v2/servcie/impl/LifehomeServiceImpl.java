@@ -167,7 +167,7 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adProductMap.put("userRebate",adProduct1.getUserRebate());
                         adProductMap.put("id",adProduct1.getId());
                         adProductMap.put("sellPrice",adProduct1.getPrice());
-                        adProductMap.put("businessName",adProduct1.getBusinessName());
+                        adProductMap.put("businessName",adProduct1.getShippingMethod());
                         adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
                         adProductListMap.add(adProductMap);
                     }

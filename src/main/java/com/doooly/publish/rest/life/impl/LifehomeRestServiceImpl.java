@@ -82,6 +82,7 @@ public class LifehomeRestServiceImpl {
         param.put("pageNo",1);
         param.put("pageSize",3);
         param.put("userId",userId);
+        param.put("event","VISIT_BUSI");
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");
         JSONObject ret = HttpClientUtil.httpPost(actionUrl + "query/v1/",param);
         logger.info("action返回：{},{}",userId,ret);

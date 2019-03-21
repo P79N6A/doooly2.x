@@ -10,10 +10,21 @@ import com.doooly.common.dto.BaseReq;
 import com.doooly.dto.common.ConstantsLogin;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.publish.rest.life.HotBusinessRestServiceI;
-import org.apache.log4j.Logger;
+import com.easy.mq.client.RocketClient;
+import com.easy.mq.result.RocketProducerMessage;
+import com.reach.constrant.Group;
+import com.reach.constrant.Topic;
+import com.reach.dto.UserEventReq;
+import com.reach.enums.EventType;
+import com.reach.redis.utils.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -36,11 +47,15 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	 * app首页和热门商户页面
 	 * 
 	 */
-	private static Logger logger = Logger.getLogger(HotBusinessRestService.class);
+	private static Logger logger = LoggerFactory.getLogger(HotBusinessRestService.class);
 	@Autowired
 	private HotBusinessServiceI hotBusinessServiceI;
 	@Autowired
 	private MyPointServiceI myPointServiceI;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	@Resource(name = "rocketClient")
+	private RocketClient rocketClient;
 
 	@POST
 	@Path(value = "/index")
@@ -129,9 +144,28 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	public String getBusinessInfo(JSONObject json, @Context HttpServletRequest request) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
-			Long adBusinessId = json.getLong("adBusinessId");
+			Long adBusinessId = json.getLong("id");
 			String token = json.getString(ConstantsLogin.TOKEN);
 			messageDataBean = hotBusinessServiceI.getBusinessInfo(adBusinessId, token);
+
+			String userId = String.valueOf(stringRedisTemplate.boundValueOps(token).get());
+			RocketProducerMessage message = new RocketProducerMessage();
+			message.setTopic(Topic.ACTION_TOPIC);
+			message.setGroup(Group.ACTION_GROUP);
+			UserEventReq req = new UserEventReq();
+			req.setEvent(EventType.VISIT_BUSI);
+			if(request.getHeader("deviceNo") != null) {
+				req.setDeviceId(request.getHeader("deviceNo"));
+			}else if(request.getHeader("deviceId") != null){
+				req.setDeviceId(request.getHeader("deviceId"));
+			}
+			req.setUserId(userId);
+			req.setBusinessId(adBusinessId + "");
+			req.setChannel(request.getHeader("appSource"));
+			message.setBody(SerializationUtils.serialize(req));
+			rocketClient.send(message, true);
+			logger.info("businessInfo action data:{}", JsonUtil.bean2Json(req));
+
 			// logger.info(messageDataBean.toJsonString());
 		} catch (Exception e) {
 			e.printStackTrace();

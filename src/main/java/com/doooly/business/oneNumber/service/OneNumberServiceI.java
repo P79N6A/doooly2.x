@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
  * @date: 2017-08-28
  */
 public interface OneNumberServiceI {
-    MessageDataBean getTargetUrl(String userId, String businessId,String targetUrl) throws UnsupportedEncodingException;
+    MessageDataBean getTargetUrl(String userId, String businessId,String targetUrl,String token) throws UnsupportedEncodingException;
 
     MessageDataBean authorization(JSONObject json);
 }

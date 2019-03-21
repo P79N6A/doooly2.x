@@ -38,14 +38,15 @@ public class OneNumberRestService implements OneNumberRestServiceI{
     @Path(value = "/getTargetUrl")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getTargetUrl(JSONObject json) {
+    public String getTargetUrl(JSONObject json,@Context HttpServletRequest request) {
         MessageDataBean messageDataBean = new MessageDataBean();
         logger.info("请求参数为---->"+ json);
         try {
             String userId = json.getString("userId");
             String businessId = json.getString("businessId");
             String targetUrl = json.getString("targetUrl");
-            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl);
+            String token = request.getHeader("token");
+            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl,token);
         } catch (Exception e) {
             logger.error("获取1号通跳转链接出错", e);
             messageDataBean.setCode(MessageDataBean.failure_code);
@@ -83,7 +84,7 @@ public class OneNumberRestService implements OneNumberRestServiceI{
             String businessId = json.getString("businessId");
             String targetUrl = json.getString("targetUrl");
             String token = request.getHeader("token");
-            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl);
+            messageDataBean = oneNumberServiceI.getTargetUrl(userId,businessId,targetUrl,token);
             Map<String,Object> map = messageDataBean.getData();
             String resultUrl = String.valueOf(map.get("resultUrl"));
             if (!resultUrl.contains("userId=")) {

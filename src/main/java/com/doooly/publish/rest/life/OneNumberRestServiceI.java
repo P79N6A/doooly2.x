@@ -14,7 +14,7 @@ import javax.ws.rs.core.Context;
  */
 public interface OneNumberRestServiceI {
     // 获取跳转链接
-    String getTargetUrl(JSONObject obj);
+    String getTargetUrl(JSONObject obj,@Context HttpServletRequest request);
 
     // 第三方跳转doooly免登陆验证
     String authorization(@Context HttpServletRequest request, @Context HttpServletResponse response);

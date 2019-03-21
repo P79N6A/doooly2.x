@@ -347,4 +347,8 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 
 	AdUser getUserByPhoneAndGroup(AdUser adUser);
 
+
+
+	List<Map<String,Object>> selectUserToDelete(Map<String,Object> param);
+
 }

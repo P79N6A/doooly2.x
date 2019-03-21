@@ -2,6 +2,7 @@ package com.doooly.business.meituan.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.meituan.MeituanService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.*;
@@ -22,6 +23,7 @@ import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.entity.meituan.EasyLogin;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import com.doooly.entity.reachad.AdOrderReport;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.Order;
 import com.google.common.collect.Maps;
@@ -68,6 +70,12 @@ public class MeituanServiceImpl implements MeituanService{
 
     @Autowired
     private AdBusinessExpandInfoDao adBusinessExpandInfoDao;
+
+    @Autowired
+    private NewPaymentServiceI newPaymentServiceI;
+
+    @Autowired
+    private ConfigDictServiceI configDictServiceI;
 
 
 
@@ -142,12 +150,10 @@ public class MeituanServiceImpl implements MeituanService{
         return sb.toString();
     }
 
-    @Autowired
-    private NewPaymentServiceI newPaymentServiceI;
 
     @Override
     public OrderMsg createOrderMeituan(JSONObject json) {
-        String phone = json.getString("buyer_openid");
+        String phone = json.getString("mobile");
         OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
         if (StringUtils.isEmpty(phone)) {
             msg.setCode(OrderMsg.failure_code);
@@ -163,20 +169,16 @@ public class MeituanServiceImpl implements MeituanService{
             return msg;
         }
 
-        BigDecimal total = json.getBigDecimal("total");
-        String orderNum = json.getString("outer_trade_no");
-        if (orderNum.contains(MeituanConstants.app_id)) {
-            String[] a = orderNum.split(MeituanConstants.app_id);
-            orderNum = a[1];
-        }
-        Map<String,Object> tradeInfoMap = GsonUtils.son.fromJson(json.getString("tradeInfoMap"),Map.class);
+        BigDecimal total = json.getBigDecimal("tradeAmount");
+        String orderNum = json.getString("serialNum") + "-" + json.getString("sqtOrderId");
         JSONObject param = new JSONObject();
         param.put("businessId", MeituanConstants.meituan_bussinesss_serial);//商户编号
         param.put("cardNumber", adUser.getTelephone());
         param.put("merchantOrderNo", orderNum);
+        param.put("outTradeNo",json.getString("sqtOrderId"));
         param.put("tradeType", "DOOOLY_JS");
-        param.put("notifyUrl", json.getString("notify_url"));
-        param.put("body", json.getString("subject"));
+        param.put("notifyUrl", json.getString("notifyUrl"));
+        param.put("body", json.getString("goodsName"));
         param.put("isSource", 2);
         param.put("orderDate", DateUtils.formatDateTime(new Date()));
         param.put("storesId", "A001");
@@ -187,8 +189,8 @@ public class MeituanServiceImpl implements MeituanService{
         param.put("isPayPassword", adUser.getIsPayPassword());
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonDetail = new JSONObject();
-        jsonDetail.put("code", tradeInfoMap == null ? "" : tradeInfoMap.get("biz_code"));
-        jsonDetail.put("goods", json.getString("subject"));
+        jsonDetail.put("code", "");
+        jsonDetail.put("goods", json.getString("goodsName"));
         jsonDetail.put("number", 1);
         jsonDetail.put("price", total);
         jsonDetail.put("category", "0000");
@@ -227,10 +229,25 @@ public class MeituanServiceImpl implements MeituanService{
         object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
         object.put("sign", sign);
+        String mobile = json.getString("mobile");
+        String meituanTestMobile = configDictServiceI.getValueByTypeAndKeyNoCache("meituan_test_mobile","meituan_test_mobile");
+        if (StringUtils.isNotBlank(meituanTestMobile) && !meituanTestMobile.contains(mobile)) {
+            //下单成功返回信息
+            msg.getData().put("orderNum", orderNum);
+            msg.getData().put("userId",adUser.getId());
+            return msg;
+        }
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
         logger.info("美团下单返回：{}",result);
         if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+
+            OrderVo orderVo = new OrderVo();
+            orderVo.setOrderNumber(orderNum);
+            orderVo.setUpdateDate(new Date());
+            orderVo.setRemarks(json.getString("sqtOrderId"));
+            adOrderReportDao.updateByNum(orderVo);
+
             //下单成功返回信息
             msg.getData().put("orderNum", orderNum);
             msg.getData().put("userId",adUser.getId());

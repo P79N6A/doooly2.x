@@ -36,6 +36,7 @@ import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.common.webservice.WebService;
+import com.doooly.dao.payment.PayRecordMapper;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
@@ -48,6 +49,7 @@ import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.payment.PayRecordDomain;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
@@ -131,6 +133,8 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdBusinessServiceI adBusinessServiceI;
     @Autowired
     private MyOrderServiceI myOrderServiceI;
+    @Autowired
+    private PayRecordMapper payRecordMapper;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -1029,6 +1033,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                         map.put("openId", record.getOpenId());
                         map.put("activityParam", record.getActivityParam());
                     }
+                    //获取跳转链接
+                    PayRecordDomain payRecordDomain = new PayRecordDomain();
+                    payRecordDomain.setMerchantOrderNo(orderNum);
+                    payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+                    if(payRecordDomain != null){
+                        map.put("redirectUrl", payRecordDomain.getRedirectUrl());
+                    }
                 }
                 payMsg.setData(map);
             }
@@ -1643,7 +1654,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType);
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType,null);
         logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }
@@ -1661,7 +1672,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(MeituanOrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

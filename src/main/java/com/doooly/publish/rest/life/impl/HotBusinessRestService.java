@@ -162,7 +162,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 				req.setDeviceId(request.getHeader("deviceNo"));
 			}else if(request.getHeader("deviceId") != null){
 				req.setDeviceId(request.getHeader("deviceId"));
-			}
+			} else {
+			    req.setDeviceId(userId);
+            }
 			req.setUserId(userId);
 			req.setBusinessId(adBusinessId + "");
 			req.setChannel(request.getHeader("appSource"));

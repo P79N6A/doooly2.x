@@ -7,6 +7,7 @@ import com.doooly.business.home.v2.servcie.LifehomeService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
+import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.entity.reachad.AdBusiness;
@@ -46,6 +47,8 @@ import java.util.*;
 @Component
 @Path("lifehome")
 public class LifehomeRestServiceImpl {
+
+    private String BASE_URL = PropertiesHolder.getProperty("BASE_URL") + "/businessinfo/";
 
     private static Logger logger = LoggerFactory.getLogger(LifehomeRestServiceImpl.class);
 
@@ -108,8 +111,10 @@ public class LifehomeRestServiceImpl {
             for (int i = 0; i < adBusinessList.size(); i++) {
                 adBusinessItem = adBusinessList.get(i);
                 Map<String, Object> mapItem = new HashMap<>();
+                mapItem.put("subUrl",BASE_URL.substring(BASE_URL.indexOf("#") + 1, BASE_URL.length()) + adBusinessItem.getDealType()
+                        + "/" + adBusinessItem.getId());
+                mapItem.put("linkUrl",BASE_URL + adBusinessItem.getDealType() + "/" + adBusinessItem.getId());
                 mapItem.put("iconUrl", adBusinessItem.getLogo());
-                mapItem.put("linkUrl",adBusinessItem.getUrl());
                 mapItem.put("mainTitle",adBusinessItem.getCompany());
                 mapItem.put("serverEndTime",adBusinessItem.getServerEndTime());
                 listData.add(mapItem);

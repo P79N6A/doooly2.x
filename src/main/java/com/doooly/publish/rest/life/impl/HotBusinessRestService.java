@@ -17,6 +17,7 @@ import com.reach.constrant.Topic;
 import com.reach.dto.UserEventReq;
 import com.reach.enums.EventType;
 import com.reach.redis.utils.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +147,9 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 		try {
 			Long adBusinessId = json.getLong("id");
 			String token = json.getString(ConstantsLogin.TOKEN);
+			if (StringUtils.isBlank(token)) {
+			    token = request.getHeader(ConstantsLogin.TOKEN);
+            }
 			messageDataBean = hotBusinessServiceI.getBusinessInfo(adBusinessId, token);
 
 			String userId = String.valueOf(stringRedisTemplate.boundValueOps(token).get());

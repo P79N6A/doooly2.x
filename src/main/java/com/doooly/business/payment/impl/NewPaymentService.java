@@ -319,7 +319,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject param = new JSONObject();
         param.put("cardNumber", user.getTelephone());
         param.put("businessId", businessId);
-        param.put("merchantOrderNo", adOrderBig.getId());
+        param.put("merchantOrderNo", orderNum);
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
@@ -758,8 +758,35 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
             return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
         }
+        String businessId = params.getString("businessId");
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", params.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", params.toJSONString());
+        object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.GET_PAYFROM_URL_V2);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
@@ -772,24 +799,38 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     private PayMsg prePayNewV2(JSONObject params) {
-        // 校验订单
-        String bigOrderNumber = params.getString("bigOrderNumber");
-        //查询大订单
-        AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
-        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
-        if (adOrderBig == null) {
-            return new PayMsg(PayMsg.failure_code, "没有找到订单");
+        String orderNum = params.getString("orderNum");//订单号
+        long userId = params.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
         }
-        if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
+        //查询子订单
+        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order);
+        PayMsg payMsg = null;
+        for (OrderVo orderVo : orderVos) {
+            payMsg = canPay(orderVo, params);
+            //为空或者校验失败直接返回错误信息
+            if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
+                return payMsg;
+            }
         }
-        //构建收银台接口需要参数
-        AdUser paramUser = new AdUser();
-        paramUser.setId(adOrderBig.getUserId());
-        AdUser user = adUserServiceI.getUser(paramUser);
-        params.put("isPayPassword", "2".equals(user.getIsPayPassword()) ? "2" : 1);//除了密码模式都是验证码模式
-        PayMsg payMsg = new PayMsg(OrderMsg.valid_pass_code, OrderMsg.valid_pass__mess);
+        JSONObject jsonData = payMsg.getJsonData();
+        if(orderVos.size()==1){
+            //说明子订单支付并且只有一个订单
+            businessId = jsonData.getString("businessId");
+        }
+        String isPayPassword = jsonData.getString("isPayPassword");
+        params.put("isPayPassword", isPayPassword);
+        params.put("businessId", businessId);
         return payMsg;
     }
 
@@ -1115,6 +1156,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (order == null) {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
+        //校验是否可以支付
+        return canPay(order, param);
+    }
+
+    private PayMsg canPay(OrderVo order, JSONObject json) {
+        logger.info("productType={}", order.getProductType());
         // 订单状态
         if (order.getState() == OrderService.PayState.PAID.getCode()) {
             return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已支付，请勿重新支付。");
@@ -1124,7 +1171,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         if( Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())){
             // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+orderNum);
+            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+order.getOrderNumber());
             JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
@@ -1132,12 +1179,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 return new PayMsg(OrderMsg.coupon_stock_zero_code, resultJson.getString("info"));
             }
         }
-        //校验是否可以支付
-        return canPay(order, param);
-    }
-
-    private PayMsg canPay(OrderVo order, JSONObject json) {
-        logger.info("productType={}", order.getProductType());
         //用户缓存改造
         //AdUser user = adUserDao.getById(order.getUserId().intValue());
         AdUser paramUser = new AdUser();
@@ -1334,8 +1375,46 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel integralPayV2(JSONObject param) {
         String orderNum = param.getString("orderNum");
+        long userId = param.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
+        object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL_V2);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {

@@ -410,7 +410,7 @@ public class OrderServiceImpl implements OrderService {
         OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
         AdOrderBig adOrderBig = new AdOrderBig();
         long bigOrderNumber = Generator.nextValue();
-        adOrderBig.setId(bigOrderNumber);
+        adOrderBig.setId(String.valueOf(bigOrderNumber));
         adOrderBig.setTotalPrice(totalAllPrice);
         adOrderBig.setTotalAmount(totalAllMount);
         adOrderBig.setState(0);

@@ -145,7 +145,7 @@ public class HotBusinessRestService implements HotBusinessRestServiceI {
 	public String getBusinessInfo(JSONObject json, @Context HttpServletRequest request) {
 		MessageDataBean messageDataBean = new MessageDataBean();
 		try {
-			Long adBusinessId = json.getLong("id");
+			Long adBusinessId = json.getLong("adBusinessId");
 			String token = json.getString(ConstantsLogin.TOKEN);
 			if (StringUtils.isBlank(token)) {
 			    token = request.getHeader(ConstantsLogin.TOKEN);

@@ -57,10 +57,10 @@ public class AdGroupEquityPub implements AdGroupEquityPubService {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Override
-	public String getEquityByEquityId(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+	public String getEquityByEquityId(JSONObject paramJSON) {
 		JSONObject result = new JSONObject();
 		try{
-			String equityId = request.getHeader("equityId");
+			String equityId = paramJSON.getString("equityId").toString();
 			logger.info("<<<equityId："+equityId);
 			result.put("data", JSONObject.parseObject(adGroupEquityService.adEquityByEquityId(equityId)));
 			result.put("code", MessageDataBean.success_code);

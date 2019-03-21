@@ -187,6 +187,7 @@ public class MeituanServiceImpl implements MeituanService{
         param.put("clientIp", json.get("clientIp"));
         param.put("nonceStr", RandomUtil.getRandomStr(16));
         param.put("isPayPassword", adUser.getIsPayPassword());
+        param.put("redirectUrl",json.get("returnUrl"));
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonDetail = new JSONObject();
         jsonDetail.put("code", "");

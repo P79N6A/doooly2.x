@@ -305,7 +305,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         //查询大订单
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
         List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order);
@@ -630,7 +630,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
         List<OrderVo> orderVos = Arrays.asList(o);
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(o.getId());
+        adOrderBig.setId(String.valueOf(o.getId()));
         adOrderBig.setTotalAmount(o.getTotalMount());
         String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
         retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
@@ -1055,9 +1055,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             //说明是自营子订单 走v1接口
             return getPayResult(json);
         }
-        String bigOrderNumber = json.getString("bigOrderNumber");
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig.setId(orderNum);
         //查询大订单状态
         AdOrderBig adOrderBig1 = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         ResultModel payMsg;

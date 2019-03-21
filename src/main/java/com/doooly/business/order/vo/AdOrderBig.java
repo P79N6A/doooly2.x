@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public class AdOrderBig
 {
-    private long id;
+    private String id;
     // 会员ID
     private Long userId;
     // 实付总金额
@@ -30,11 +30,11 @@ public class AdOrderBig
     // 创建时间
     private Date createDate;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

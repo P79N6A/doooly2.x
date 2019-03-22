@@ -92,8 +92,7 @@
 
     <select id="getUserMonthArrivalIntegral" resultType="java.math.BigDecimal">
         SELECT
-            IFNULL(SUM( a.business_rebate_amount ),0),
-            DATE_FORMAT( a.create_date, '%Y-%m' )
+            IFNULL(SUM( a.business_rebate_amount ),0)
         FROM
             ad_available_points a
         WHERE

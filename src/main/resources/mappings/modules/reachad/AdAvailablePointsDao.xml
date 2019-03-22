@@ -51,7 +51,7 @@
             and a.status=1
         </where>
     </select>
-    
+
     <select id="getConsumerPoints" resultType="java.math.BigDecimal">
         SELECT
 		     IFNULL(SUM(ABS(a.business_rebate_amount)),0)
@@ -88,6 +88,20 @@
         ORDER BY
             a.create_date DESC
         LIMIT #{startIndex},#{pageSize}
+    </select>
+
+    <select id="getUserMonthArrivalIntegral" resultType="java.math.BigDecimal">
+        SELECT
+            IFNULL(SUM( a.business_rebate_amount ),0),
+            DATE_FORMAT( a.create_date, '%Y-%m' )
+        FROM
+            ad_available_points a
+        WHERE
+            a.del_flag = 0
+          AND a.user_id = #{userId}
+          AND ( a.type NOT IN ( 1, 9 ) AND a.business_rebate_amount > 0 )
+          AND a.STATUS = 1
+          AND DATE_FORMAT( a.create_date, '%Y-%m-00' ) = DATE_FORMAT( NOW( ), '%Y-%m-00' );
     </select>
 
     <select id="getAvailablePointDetail" resultType="AdAvailablePoints">

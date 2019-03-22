@@ -1,11 +1,10 @@
 package com.doooly.dao.reachad;
 
-import java.math.BigDecimal;
-import java.util.List;
-
+import com.doooly.entity.reachad.AdAvailablePoints;
 import org.apache.ibatis.annotations.Param;
 
-import com.doooly.entity.reachad.AdAvailablePoints;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @Description: 可用积分
@@ -24,4 +23,11 @@ public interface AdAvailablePointsDao {
     BigDecimal getConsumerPoints(String userId);
 
 	void insert(AdAvailablePoints adAvailablePoints);
+
+    /**
+     * 获得用户当前月的到账积分
+     * @param userid
+     * @return
+     */
+    BigDecimal getUserMonthArrivalIntegral(@Param("userId") String userid);
 }

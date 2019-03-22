@@ -87,6 +87,9 @@ public class OneNumberService implements OneNumberServiceI {
 		case 7:
 			resultUrl = getMeituanUrl(adUser,token,adBusinessExpandInfo);
 			break;
+		case 8:
+			resultUrl = getTuNiuUrl(adUser,adBusinessExpandInfo);
+			break;
 		default:
 			resultUrl = "";
 			break;
@@ -95,9 +98,12 @@ public class OneNumberService implements OneNumberServiceI {
 		logger.info("1号通生成的结果链接:" + resultUrl);
 		map.put("resultUrl", resultUrl);
 		messageDataBean.setCode(MessageDataBean.success_code);
-		messageDataBean.setData(map);
-		return messageDataBean;
+		messageDataBean.setData(map);	return messageDataBean;
 	}
+
+    private String getTuNiuUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+        return String.format("%s?urlRefer=%s&merchantCode=%s&params=%s", adBusinessExpandInfo.getBusinessUrl(), adBusinessExpandInfo.getShopId(), adBusinessExpandInfo.getShopKey(),adUser.getTelephone());
+    }
 
     @Override
     public MessageDataBean authorization(JSONObject json) {

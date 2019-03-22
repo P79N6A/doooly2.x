@@ -80,6 +80,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
+import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
 
 /**
  * @Description:
@@ -950,6 +951,56 @@ public class NewPaymentService implements NewPaymentServiceI {
             PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
             logger.info("收银台支付回调同步结果大订单号:{},子订单号:{},处理结果code:{},处理结果mess,{}",bigOrderNumber,orderNumber,payMsg.getCode(),payMsg.getMess());
         }
+        return ResultModel.ok();
+    }
+
+    //取消商家订单超时未支付的
+    @Override
+    public ResultModel cancelMerchantOrder() {
+        logger.info("cancelMerchantOrder start");
+        List<PayRecordDomain> payRecordDomains = payRecordMapper.getNeedCancaelMerchantOrder();
+        for (PayRecordDomain payRecordDomain : payRecordDomains) {
+            AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+            paramAdBusinessExpandInfo.setBusinessId(payRecordDomain.getBusinessId());
+            AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+            long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+            JSONObject param = new JSONObject();
+            param.put("businessId",payRecordDomain.getBusinessId());
+            param.put("merchantOrderNo",payRecordDomain.getMerchantOrderNo());
+            param.put("payId",payRecordDomain.getPayId());
+            SortedMap<Object, Object> parameters = new TreeMap<>();
+            String clientId = adBusinessExpandInfo.getClientId();
+            String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+            parameters.put("client_id", clientId);
+            parameters.put("timestamp", timestamp);
+            parameters.put("access_token", accessToken);
+            parameters.put("param", param.toJSONString());
+            String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+            logger.info("取消订单参数=======param========" + param);
+            if (accessToken == null) {
+                ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+                if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                    Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                    accessToken = (String) data.get("access_token");
+                } else {
+                    return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+                }
+            }
+            JSONObject object = new JSONObject();
+            object.put("client_id", clientId);
+            object.put("timestamp", timestamp);
+            object.put("access_token", accessToken);
+            object.put("param", param.toJSONString());
+            object.put("sign", sign);
+            String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_CANCEL_URL);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (jsonObject !=null && jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                logger.info("cancelMerchantOrder 成功,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+            } else {
+                logger.info("cancelMerchantOrder 失败,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+            }
+        }
+        logger.info("cancelMerchantOrder 完成");
         return ResultModel.ok();
     }
 

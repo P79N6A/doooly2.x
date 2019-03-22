@@ -161,6 +161,14 @@ public class OrderServicePublish {
 	}
 
 	@POST
+	@Path(value = "/cancelMerchantOrder")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String cancelMerchantOrder(JSONObject json){
+		return orderService.cancelMerchantOrder().toJsonString();
+	}
+
+	@POST
 	@Path(value = "/cancleOrder")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)

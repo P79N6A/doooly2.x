@@ -27,4 +27,5 @@ public interface AdOrderReportServiceI {
     List<OrderVo> getOrders(OrderVo order);
 
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
+
 }

@@ -48,4 +48,6 @@ public interface NewPaymentServiceI {
 
     ResultModel dooolyPayCallbackV2(JSONObject json);
 
+    ResultModel cancelMerchantOrder();
+
 }

@@ -46,6 +46,16 @@ public class PaymentRestService implements PaymentRestServiceI{
 
     @Override
     @POST
+    @Path(value = "/cancelMerchantOrder")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String cancelMerchantOrder(JSONObject obj) {
+        ResultModel resultModel = paymentService.cancelMerchantOrder();
+        return resultModel.toJsonString();
+    }
+
+    @Override
+    @POST
     @Path(value = "/getPayForm")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

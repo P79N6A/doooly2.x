@@ -27,6 +27,7 @@ import com.doooly.common.constants.Constants;
 import com.doooly.common.util.Generator;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
+import com.doooly.dao.payment.PayRecordMapper;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
@@ -40,6 +41,7 @@ import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.payment.PayRecordDomain;
 import com.doooly.entity.reachad.AdCoupon;
 import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdRechargeConf;
@@ -107,6 +109,8 @@ public class OrderServiceImpl implements OrderService {
     private MyThreadPoolServiceImpl myThreadPoolService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private PayRecordMapper payRecordMapper;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -983,6 +987,21 @@ public class OrderServiceImpl implements OrderService {
             if (payMsg1 != null && payMsg1.getCode().equals(MessageDataBean.failure_code)) return payMsg1;
         }
 		return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
+	}
+
+	/***
+	 * 取消订单
+	 */
+	@Override
+	@Transactional
+	public OrderMsg cancelMerchantOrder() {
+		logger.info("cancelMerchantOrder start");
+        List<PayRecordDomain> payRecordDomains = payRecordMapper.getNeedCancaelMerchantOrder();
+        for (PayRecordDomain payRecordDomain : payRecordDomains) {
+
+        }
+        logger.info("cancelMerchantOrder 完成");
+		return new OrderMsg(MessageDataBean.success_code, MessageDataBean.success_mess);
 	}
 
     private OrderMsg cancelOrderv1(long userId, String orderNum) {

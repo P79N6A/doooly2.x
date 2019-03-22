@@ -14,6 +14,9 @@ public interface PaymentRestServiceI {
     // 获取授权信息
     String authorize(JSONObject obj);
 
+    // 取消商家订单
+    String cancelMerchantOrder(JSONObject obj);
+
     // 下单
     String unifiedorder(JSONObject obj, HttpServletRequest httpServletRequest);
     // 下单 v2

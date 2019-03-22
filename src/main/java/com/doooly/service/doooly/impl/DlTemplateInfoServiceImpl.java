@@ -110,6 +110,7 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
 
                 Map<String, Object> paramMap = new HashMap<>();
                 paramMap.put("floorId", floor.getId());
+                paramMap.put("groupId", groupId);
 
                 List<DlTemplateFloorItem> items = null;
                 switch (floor.getType()) {
@@ -121,14 +122,12 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_THREE:
                         // 广告位
-                        paramMap.put("groupId", groupId);
                         paramMap.put("version", 3);
                         paramMap.put("type", 12);
                         items = templateCacheService.getAdAdItemsByTypeAndGroup(paramMap);
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_FOUR:
                         paramMap.put("address", address);
-                        paramMap.put("groupId", groupId);
                         paramMap.put("userId", userId);
                         items = templateCacheService.getHotBusinessFloor(paramMap);
                         break;

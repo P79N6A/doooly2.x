@@ -4,6 +4,8 @@
 package com.doooly.business.product.entity;
 
 
+import java.util.Date;
+
 /**
  * 商品sku管理Entity
  * @author wenwei.yang
@@ -34,6 +36,7 @@ public class AdSelfProductSku  {
 	// ====== 关联字段
 	private String introduction;	// 商品简述
 	private String image;			// 商品主图
+	private Date buyEndDate;		// 商品下架时间
 
 	
 	
@@ -207,5 +210,13 @@ public class AdSelfProductSku  {
 
 	public void setIntroduction(String introduction) {
 		this.introduction = introduction;
+	}
+
+	public Date getBuyEndDate() {
+		return buyEndDate;
+	}
+
+	public void setBuyEndDate(Date buyEndDate) {
+		this.buyEndDate = buyEndDate;
 	}
 }

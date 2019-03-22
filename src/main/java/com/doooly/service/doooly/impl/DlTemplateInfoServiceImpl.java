@@ -1,37 +1,32 @@
 package com.doooly.service.doooly.impl;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.MyCouponsBusinessServiceI;
 import com.doooly.business.product.entity.AdSelfProductSku;
 import com.doooly.common.constants.CstInfoConstants;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.doooly.DlTemplateFloorDao;
 import com.doooly.dao.doooly.DlTemplateFloorItemDao;
 import com.doooly.dao.doooly.DlTemplateGroupDao;
 import com.doooly.dao.doooly.DlTemplateInfoDao;
-import com.doooly.dao.reachad.AdBusinessDao;
-import com.doooly.dao.reachad.AdSelfProductSkuDao;
-import com.doooly.dao.reachad.AdadDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.doooly.DlTemplateFloor;
 import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.doooly.DlTemplateGroup;
 import com.doooly.entity.doooly.DlTemplateInfo;
-import com.doooly.entity.reachad.AdAd;
-import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.service.doooly.DlTemplateInfoServiceI;
+import com.doooly.service.doooly.TemplateCacheServiceI;
 import com.reach.redis.annotation.EnableCaching;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 模版服务接口实现
@@ -41,13 +36,10 @@ import java.util.*;
 @Service
 @EnableCaching
 public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
+   private static Logger log = LoggerFactory.getLogger(DlTemplateInfoServiceImpl.class);
     private String BASE_URL = PropertiesConstants.commonBundle.getString("BASE_URL");
-    private String BASE_BUSINESSINFO_URL = BASE_URL + "/businessinfo/";
+    private String BASE_BUSINESS_INFO_URL = BASE_URL + "/businessinfo/";
     private String BASE_CARDBUYDETAIL_URL = BASE_URL + "/cardBuyDetail/";
-    private static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
-    private static Logger log = LoggerFactory.getLogger(DlTemplateInfoServiceImpl.class);
-    private static int DEAL_TYPE_ONLINE = 0;
-    private static int DEAL_TYPE_OFFLINE = 1;
 
     @Autowired
     private DlTemplateInfoDao dlTemplateInfoDao;
@@ -56,15 +48,11 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
     @Autowired
     private DlTemplateFloorDao dlTemplateFloorDao;
     @Autowired
-    private AdBusinessDao adBusinessDao;
-    @Autowired
     private DlTemplateFloorItemDao dlTemplateFloorItemDao;
     @Autowired
-    private AdadDao adadDao;
-    @Autowired
-    private AdSelfProductSkuDao adSelfProductSkuDao;
-    @Autowired
     private MyCouponsBusinessServiceI myCouponsBusinessServiceI;
+    @Autowired
+    private TemplateCacheServiceI templateCacheService;
 
 
     @Override
@@ -120,102 +108,29 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                 floorEntry.setSubTitle(floor.getSubTitle());
                 floorEntry.setType(floor.getType());
 
+                Map<String, Object> paramMap = new HashMap<>();
+                paramMap.put("floorId", floor.getId());
+
                 List<DlTemplateFloorItem> items = null;
                 switch (floor.getType()) {
                     case CstInfoConstants.TEMP_HOME_TYPE_TWO:
                         // 兜礼礼包
-                        // 未领取礼包数量
-                        JSONObject json = new JSONObject();
-                        json.put("groupId", groupId);
-                        json.put("pageNo", 1);
-                        json.put("pageSize", 6);
-                        JSONObject resultJson = HttpClientUtil.httpPost(PROJECT_ACTIVITY_URL + "gift/bag/getDooolyGiftBagListByGroup", json);
-                        log.info("获得企业兜礼礼包：" + resultJson.toJSONString());
-
-                        if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
-                            JSONObject date = (JSONObject) JSONObject.parse(resultJson.getString("data"));
-                            floorEntry.setHasMore(date.getBoolean("hasMore"));
-                            JSONArray list = date.getJSONArray("list");
-
-                            if (list != null && list.size() > 0) {
-                                items = new ArrayList<>();
-
-                                for (int i = 0; i < list.size(); i++) {
-                                    JSONObject entry = (JSONObject) list.get(i);
-                                    DlTemplateFloorItem item = new DlTemplateFloorItem();
-                                    item.setIconUrl(entry.getString("subImage"));
-                                    item.setId(entry.getString("id"));
-                                    item.setTitle(entry.getString("giftBagName"));
-                                    items.add(item);
-                                }
-                            }
-                        }
+                        Map<String, Object> giftMap = templateCacheService.getDooolyGiftBagItemsByGroup(paramMap);
+                        floorEntry.setHasMore((Boolean) giftMap.get("hasMore"));
+                        items = (List<DlTemplateFloorItem>) giftMap.get("list");
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_THREE:
                         // 广告位
-                        List<AdAd> ads = adadDao.getByTypeAndGroup(12, groupId, 3);
-
-                        if (!CollectionUtils.isEmpty(ads)) {
-                            items = new ArrayList<>();
-
-                            for (AdAd ad : ads) {
-                                DlTemplateFloorItem item = new DlTemplateFloorItem();
-                                item.setLinkUrl(ad.getImageLinkUrl());
-                                item.setImageUrl(ad.getImagePath());
-                                item.setTitle(ad.getTitle());
-                                item.setLinkType(ad.getLinkType());
-                                items.add(item);
-                            }
-                        }
+                        paramMap.put("groupId", groupId);
+                        paramMap.put("version", 3);
+                        paramMap.put("type", 12);
+                        items = templateCacheService.getAdAdItemsByTypeAndGroup(paramMap);
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_FOUR:
-                        // 热门商户
-                        List<AdBusiness> merchants = adBusinessDao.findHotMerchantsByDealType(
-                                Integer.valueOf(userId), null, address,
-                                Arrays.asList(DEAL_TYPE_OFFLINE, DEAL_TYPE_ONLINE));
-
-                        if (!CollectionUtils.isEmpty(merchants)) {
-                            items = new ArrayList<>();
-                            int row = 0;
-
-                            for (AdBusiness merchant : merchants) {
-                                if (row >= 10) {
-                                    break;
-                                }
-                                row++;
-                                DlTemplateFloorItem item = new DlTemplateFloorItem();
-                                item.setTitle(merchant.getCompany());
-                                item.setServerEndTime(merchant.getServerEndTime());
-                                // 前折信息
-                                String promotionInfo = "";
-                                // 返利信息
-                                String rebateInfo = "";
-
-                                if (merchant.getDiscount() != null && merchant.getDiscount() > 0) {
-                                    promotionInfo = merchant.getDiscount() + "折 ";
-                                }
-
-                                if (!StringUtils.isEmpty(merchant.getMaxUserRebate())
-                                        && new BigDecimal(merchant.getMaxUserRebate()).compareTo(BigDecimal.ZERO) == 1) {
-                                    rebateInfo = "返" + merchant.getMaxUserRebate() + "%";
-                                }
-
-                                item.setCornerMarkText(rebateInfo);
-                                item.setTitle(merchant.getSubTitle());
-
-                                if(StringUtils.isNotBlank(promotionInfo)){
-                                    item.setSubTitle(promotionInfo.trim()+"起");
-                                }
-
-                                item.setIconUrl(merchant.getLogo());
-                                item.setLinkUrl(BASE_BUSINESSINFO_URL + merchant.getDealType() + "/" + merchant.getId());
-                                item.setSubUrl(BASE_BUSINESSINFO_URL.substring(BASE_BUSINESSINFO_URL.indexOf("#") + 1, BASE_BUSINESSINFO_URL.length()) + merchant.getDealType()
-                                        + "/" + merchant.getId());
-                                item.setIsSupportIntegral(merchant.getIsSupportIntegral());
-                                items.add(item);
-                            }
-
-                        }
+                        paramMap.put("address", address);
+                        paramMap.put("groupId", groupId);
+                        paramMap.put("userId", userId);
+                        items = templateCacheService.getHotBusinessFloor(paramMap);
                         break;
                     case CstInfoConstants.TEMP_HOME_TYPE_FIVE:
                         // 卡券列表
@@ -229,7 +144,13 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
 
                             for (DlTemplateFloorItem item : itemList) {
                                 // 如果关联类型为自营商品name去查找自营商品相关信息
-                                AdSelfProductSku sku = adSelfProductSkuDao.get(item.getRelationId());
+                                paramMap.put("skuId", item.getRelationId());
+                                AdSelfProductSku sku = templateCacheService.getSelfProductSku(paramMap);
+
+                                if (sku == null) {
+                                    continue;
+                                }
+
                                 DlTemplateFloorItem itemEntry = new DlTemplateFloorItem();
                                 itemEntry.setPrice(sku.getSellPrice());
                                 itemEntry.setOriginalPrice(sku.getMarketPrice());
@@ -245,24 +166,8 @@ public class DlTemplateInfoServiceImpl implements DlTemplateInfoServiceI {
                         }
                         break;
                     default:
-                        List<DlTemplateFloorItem> list = dlTemplateFloorItemDao.getAllByFloorId(floor.getId());
-
-                        if (!CollectionUtils.isEmpty(list)) {
-                            items = new ArrayList<>();
-
-                            for (DlTemplateFloorItem item : list) {
-                                DlTemplateFloorItem itemEntry = new DlTemplateFloorItem();
-                                itemEntry.setTitle(item.getTitle());
-                                itemEntry.setSubTitle(item.getSubTitle());
-                                if (StringUtils.isNotBlank(item.getLinkUrl()) && item.getLinkUrl().indexOf("#") > -1) {
-                                    itemEntry.setSubUrl(item.getLinkUrl().substring(item.getLinkUrl().indexOf("#") + 1, item.getLinkUrl().length()));
-                                }
-                                itemEntry.setLinkUrl(item.getLinkUrl());
-                                itemEntry.setIconUrl(item.getIconUrl());
-                                itemEntry.setId(item.getId());
-                                items.add(itemEntry);
-                            }
-                        }
+                        // 标准楼层item列表获取
+                        items = templateCacheService.getStandardFloorItem(paramMap);
                         break;
                 }
 

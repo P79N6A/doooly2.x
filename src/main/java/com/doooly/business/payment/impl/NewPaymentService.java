@@ -952,8 +952,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                     PayRecordDomain payRecordDomain = new PayRecordDomain();
                     payRecordDomain.setMerchantOrderNo(orderNum);
                     payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-                    if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
-                        map.put("redirectUrl", payRecordDomain.getRedirectUrl());
+                    if(payRecordDomain != null){
+                        String returnUrl = payRecordDomain.getRedirectUrl();
+                        if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
+                                returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                            returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
+                        }
+                        map.put("redirectUrl", returnUrl);
                     }else {
                         map.put("redirectUrl", "");
                     }

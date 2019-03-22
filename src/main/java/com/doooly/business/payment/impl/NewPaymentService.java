@@ -223,7 +223,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             PayRecordDomain payRecordDomain = new PayRecordDomain();
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-            if(payRecordDomain != null){
+            if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
                 retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
             }else {
                 retJson.put("redirectUrl", "");
@@ -952,7 +952,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                     PayRecordDomain payRecordDomain = new PayRecordDomain();
                     payRecordDomain.setMerchantOrderNo(orderNum);
                     payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-                    if(payRecordDomain != null){
+                    if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
                         map.put("redirectUrl", payRecordDomain.getRedirectUrl());
                     }else {
                         map.put("redirectUrl", "");

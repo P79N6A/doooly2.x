@@ -225,6 +225,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
             if(payRecordDomain != null){
                 retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
+            }else {
+                retJson.put("redirectUrl", "");
             }
             logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
@@ -952,6 +954,8 @@ public class NewPaymentService implements NewPaymentServiceI {
                     payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
                     if(payRecordDomain != null){
                         map.put("redirectUrl", payRecordDomain.getRedirectUrl());
+                    }else {
+                        map.put("redirectUrl", "");
                     }
                 }
                 payMsg.setData(map);

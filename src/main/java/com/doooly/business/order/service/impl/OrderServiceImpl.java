@@ -28,6 +28,7 @@ import com.doooly.common.util.CheckMobile;
 import com.doooly.common.util.Generator;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
+import com.doooly.common.webservice.WebService;
 import com.doooly.dao.payment.PayRecordMapper;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
@@ -1015,18 +1016,42 @@ public class OrderServiceImpl implements OrderService {
 	public OrderMsg cancleOrderV2(long userId, String orderNum) {
 		logger.info("cancleOrder() orderNum = {},userId = {}", orderNum, userId);
         String bigOrderNumber;//大订单号
-        OrderVo order1 = new OrderVo();
-        order1.setOrderNumber(orderNum);
-        order1.setUserId(userId);
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
         if(orderNum.contains("N")){
             //说明是自营子订单
-            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order1);
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
-            order1.setBigOrderNumber(bigOrderNumber);
+            order.setBigOrderNumber(bigOrderNumber);
+        }else {
+            bigOrderNumber = orderNum;
         }
-        List<OrderVo> orders = adOrderReportServiceI.getOrders(order1);
-        for (OrderVo order : orders) {
-            OrderMsg payMsg1 = cancelOrderv1(userId, order.getOrderNumber());
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(bigOrderNumber);
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
+        //查询子订单
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(bigOrderNumber);
+            adOrderBig.setIsSource("2");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
+        for (OrderVo order1 : orderVos) {
+            OrderMsg payMsg1 = cancelOrderv1(userId, order1.getOrderNumber());
             if (payMsg1 != null && payMsg1.getCode().equals(MessageDataBean.failure_code)) return payMsg1;
         }
 		return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);

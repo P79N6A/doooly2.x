@@ -81,6 +81,8 @@ import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
 import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
+import static com.sun.tools.doclint.Entity.nu;
+import static com.sun.tools.doclint.Entity.or;
 
 /**
  * @Description:
@@ -295,9 +297,10 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
         if(orderNum.contains("N")){
             //说明是自营子订单
-            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
@@ -309,7 +312,23 @@ public class NewPaymentService implements NewPaymentServiceI {
         adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order);
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(bigOrderNumber);
+            adOrderBig.setIsSource("2");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
@@ -812,15 +831,38 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
         if(orderNum.contains("N")){
             //说明是自营子订单
-            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
         }
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(bigOrderNumber);
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order);
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(bigOrderNumber);
+            adOrderBig.setIsSource("2");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
         PayMsg payMsg = null;
         for (OrderVo orderVo : orderVos) {
             payMsg = canPay(orderVo, params);
@@ -926,17 +968,42 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = retJson.getString("orderNum");//大订单号
         Long userId = retJson.getLong("userId");//大订单号
         String bigOrderNumber = "";//大订单号
-        OrderVo order1 = new OrderVo();
-        order1.setOrderNumber(orderNum);
-        order1.setUserId(userId);
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
         if(orderNum.contains("N")){
             //说明是自营子订单
-            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order1);
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
-            order1.setBigOrderNumber(bigOrderNumber);
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
         }
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(bigOrderNumber);
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(order1);
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(bigOrderNumber);
+            adOrderBig.setIsSource("2");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
         for (OrderVo orderVo : orderVos) {
             JSONObject json = new JSONObject();
             String orderNumber = orderVo.getOrderNumber();

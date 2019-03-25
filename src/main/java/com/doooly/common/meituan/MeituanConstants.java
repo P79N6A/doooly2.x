@@ -40,8 +40,6 @@ public class MeituanConstants {
 
     public static final String URL_QUERY_ORDER_BY_CHANNEL_ORDER_ID = "https://api-sqt.meituan.com/openapi/channelOrder/channelOrderQueryByChannelOrderId";
 
-    public static final String BUSINESS_ID_MEITUAN = "TEST_bb841e7227asehtmeituan";
-
     public static final int SYN_ORDER_PAGESIZE = 100;
 
     public static final String ORDER_SYN_URL = MERCHANT_INTERFACE_ROOT_URL + "checkTransactionCompletion";
@@ -81,10 +79,11 @@ public class MeituanConstants {
 
     public final static String url_meituan_pay_notify_doooly = "http://test2.doooly.com/Doooly/jersey/meituan/payNotify";
 
-    public final static String meituan_bussinesss_id = "9486";
+    public final static String meituan_bussinesss_id = "129";
 
-    public final static String meituan_bussinesss_serial = "TEST_bb841e7227asehtmeituan";
+    //public final static String meituan_bussinesss_serial = "TEST_bb841e7227asehtmeituan";
 
+    public final static String meituan_bussinesss_serial = "501813980001";
 
     public final static String aesKey_test = "30Barz8IDtwtBekmhV5AvA==";
 

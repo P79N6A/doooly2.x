@@ -273,7 +273,7 @@ public class OrderServiceImpl implements OrderService {
 	public OrderMsg createOrderv2(JSONObject json) {
 		long s = System.currentTimeMillis();
         handleParams(json);
-		logger.info("Start creating order. json = {}", json);
+		logger.info("Start creating orderV2. json = {}", json);
 		OrderVo orderVo = json.toJavaObject(OrderVo.class);
 		//检查订单参数
 		OrderMsg checkMsg = checkOrderParams(orderVo);
@@ -298,9 +298,11 @@ public class OrderServiceImpl implements OrderService {
 			BigDecimal totalPrice = new BigDecimal("0");//应付金额
 			List<ProductSkuVo> prodcutSkus = merchantProduct.getProductSku();
 			//商家对应的商品SKU
+            StringBuilder productSkuIds = new StringBuilder();
 			for (ProductSkuVo productSkuVo : prodcutSkus) {
 				int productId = productSkuVo.getProductId();
 				int skuId = productSkuVo.getSkuId();
+                productSkuIds.append(skuId).append(",");
 				int buyQuantity = productSkuVo.getBuyNum();
                 int productType = productSkuVo.getProductType();
                 Map<String,Object> paramMap = new HashMap<>();
@@ -327,8 +329,6 @@ public class OrderServiceImpl implements OrderService {
 					} else {
 						return msg;
 					}
-				} else if (orderVo.getProductType() == ProductType.TOURIST_CARD_RECHARGE.getCode()) {
-					// do nothing
 				} else {
 					//活动
 					OrderMsg msg = getActInfo(orderVo, productSkuVo);
@@ -395,6 +395,20 @@ public class OrderServiceImpl implements OrderService {
 			orderItems.get(0).setAmount(totalMount);
 			//保存订单
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
+            if( "1".equals(orderVo.getOrderType())){
+                // 组装订单相关参数放入MQ
+                orderVo.setRemarks(Constants.GIFT_ORDER_TYPE);
+                // 组装订单相关参数放入redis
+                JSONObject giftOrder = new JSONObject();
+                giftOrder.put("productSkuIds",productSkuIds.substring(0,productSkuIds.length()-1));
+                giftOrder.put("giftBagId",orderVo.getGiftBagId());
+                giftOrder.put("orderNum",orderNum);
+                giftOrder.put("userId",orderVo.getUserId());
+                String mqMessageJson = giftOrder.toJSONString();
+                //表示是礼包订单，将skuId 和礼包id放入redis
+                stringRedisTemplate.opsForValue().set(Constants.GIFT_ORDER_REDIS_MESS+ orderNum,mqMessageJson,30 * 60 * 1000,
+                        TimeUnit.MILLISECONDS);
+            }
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
             JSONObject addorder = new JSONObject();
             addorder.put("order",order);

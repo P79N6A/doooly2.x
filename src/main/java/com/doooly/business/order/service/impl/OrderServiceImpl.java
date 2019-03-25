@@ -24,6 +24,7 @@ import com.doooly.business.product.service.AdSelfProductImageServiceI;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.common.constants.Constants;
+import com.doooly.common.util.CheckMobile;
 import com.doooly.common.util.Generator;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
@@ -271,6 +272,7 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional(rollbackFor = Exception.class)
 	public OrderMsg createOrderv2(JSONObject json) {
 		long s = System.currentTimeMillis();
+        handleParams(json);
 		logger.info("Start creating order. json = {}", json);
 		OrderVo orderVo = json.toJavaObject(OrderVo.class);
 		//检查订单参数
@@ -408,7 +410,34 @@ public class OrderServiceImpl implements OrderService {
 		return msg;
 	}
 
-	//保存订单
+    /**
+     * 处理虚拟订单
+     * @param json
+     */
+    private void handleParams(JSONObject json) {
+        Integer productType = json.getInteger("productType");
+        String cardno = json.getString("cardno");
+        if(productType == ProductType.TOURIST_CARD_RECHARGE.getCode()){
+            json.put("remarks", cardno);
+        }
+        String consigneeMobile = json.getString("consigneeMobile");
+        String operator = null;
+        if (CheckMobile.isPhoneNum(consigneeMobile)) {
+            if (CheckMobile.isChinaMobilePhoneNum(consigneeMobile)) {
+                // 移动
+                operator = "cmcc";
+            } else if (CheckMobile.isChinaUnicomPhoneNum(consigneeMobile)) {
+                // 联通
+                operator = "cucc";
+            } else if (CheckMobile.isChinaTelecomPhoneNum(consigneeMobile)) {
+                // 电信
+                operator = "ctc";
+            }
+        }
+        json.put("operator",operator);
+    }
+
+    //保存订单
     private OrderMsg saveOrders(List<JSONObject> orders, BigDecimal totalAllMount, BigDecimal totalAllPrice, Long userId, List<JSONObject> carts) {
         //下单成功返回信息
         OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);

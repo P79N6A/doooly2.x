@@ -15,6 +15,10 @@ public class ProductSkuVo {
     private int productType;
     //话费充值运营商 cmcc cucc ctc
     private String operator;
+    //订单类型 1 礼包订单
+    private String orderType;
+    private String giftBagId;		// 礼包表主键,礼品所属那个礼包, orderType为1时传递
+
 	public int getProductId() {
 		return productId;
 	}
@@ -48,5 +52,21 @@ public class ProductSkuVo {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
+    public String getGiftBagId() {
+        return giftBagId;
+    }
+
+    public void setGiftBagId(String giftBagId) {
+        this.giftBagId = giftBagId;
     }
 }

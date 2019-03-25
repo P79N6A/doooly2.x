@@ -272,7 +272,7 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional(rollbackFor = Exception.class)
 	public OrderMsg createOrderv2(JSONObject json) {
 		long s = System.currentTimeMillis();
-        handleParams(json);
+        //handleParams(json);
 		logger.info("Start creating orderV2. json = {}", json);
 		OrderVo orderVo = json.toJavaObject(OrderVo.class);
 		//检查订单参数

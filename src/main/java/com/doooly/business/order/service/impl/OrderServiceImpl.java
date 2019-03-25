@@ -330,7 +330,10 @@ public class OrderServiceImpl implements OrderService {
 					} else {
 						return msg;
 					}
-				} else {
+				} if (productType == ProductType.TOURIST_CARD_RECHARGE.getCode()) {
+                    //旅游卡订单把卡号赋值为备注
+                   orderVo.setRemarks(productSkuVo.getCardno());
+                } else {
 					//活动
 					OrderMsg msg = getActInfo(orderVo, productSkuVo);
 					if (OrderMsg.success_code.equals(msg.getCode())) {
@@ -396,13 +399,13 @@ public class OrderServiceImpl implements OrderService {
 			orderItems.get(0).setAmount(totalMount);
 			//保存订单
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
-            if( "1".equals(orderVo.getOrderType())){
+            if( "1".equals(merchantProduct.getOrderType())){
                 // 组装订单相关参数放入MQ
                 orderVo.setRemarks(Constants.GIFT_ORDER_TYPE);
                 // 组装订单相关参数放入redis
                 JSONObject giftOrder = new JSONObject();
                 giftOrder.put("productSkuIds",productSkuIds.substring(0,productSkuIds.length()-1));
-                giftOrder.put("giftBagId",orderVo.getGiftBagId());
+                giftOrder.put("giftBagId",merchantProduct.getGiftBagId());
                 giftOrder.put("orderNum",orderNum);
                 giftOrder.put("userId",orderVo.getUserId());
                 String mqMessageJson = giftOrder.toJSONString();

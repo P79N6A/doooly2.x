@@ -1100,6 +1100,36 @@
         LIMIT #{startIndex},#{pageSize}
     </select>
 
+
+	<select id="findALLOrderSum" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Long">
+		SELECT
+		count(1)
+		FROM ad_order_report a
+		LEFT JOIN ad_business b ON b.id = a.bussiness_id
+		LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
+		LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
+		<where>
+			a.user_id = #{userId}
+			<if test="beginOrderDate != null and beginOrderDate != ''">
+				AND a.order_date &gt;= #{beginOrderDate}
+			</if>
+			<if test="endOrderDate != null and endOrderDate != ''">
+				AND a.order_date &lt;= #{endOrderDate}
+			</if>
+			<if test="isUserRebate !=null and  isUserRebate!=''">
+				AND  a.is_user_rebate = #{isUserRebate}
+			</if>
+			<if test="businessId != null and businessId != ''">
+				AND
+				a.bussiness_id =#{businessId}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+		</where>
+		and a.del_flag = 0
+	</select>
+
      <!--我的订单列表(最近到账)-->
     <select id="findLatestOrderAmountList" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultMap="orderListMap">
          SELECT

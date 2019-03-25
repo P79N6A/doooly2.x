@@ -83,6 +83,14 @@ public interface AdOrderReportDao {
      * @return
      */
     List<OrderPoResp> findALLOrderList(OrderPoReq orderReq);
+
+    /**
+     *
+     * @param orderReq
+     * @return
+     */
+    Long findALLOrderSum(OrderPoReq orderReq);
+
     /**
      * 最近到账订单
      * @param orderReq

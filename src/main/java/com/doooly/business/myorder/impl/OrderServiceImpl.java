@@ -328,6 +328,12 @@ public class OrderServiceImpl implements OrderService{
 				return adOrderReportDao.countLatestOrderAmount(orderPoReq);
 			}else if(OrderType.NOT_REBATE == orderReq.getType()) {//无返利
 				return	adOrderReportDao.countNotRebateOrder(orderPoReq);
+			} else if (OrderType.WAIT_PAY == orderReq.getType()) {
+				orderPoReq.setType(10);
+				return adOrderReportDao.findALLOrderSum(orderPoReq);
+			} else if (OrderType.AREADY_PAY == orderReq.getType()) {
+				orderPoReq.setType(1);
+				return adOrderReportDao.findALLOrderSum(orderPoReq);
 			}
 			return 0L;
 		}

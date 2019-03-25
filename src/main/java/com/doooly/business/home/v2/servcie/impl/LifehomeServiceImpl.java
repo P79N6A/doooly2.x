@@ -143,41 +143,6 @@ public class LifehomeServiceImpl implements LifehomeService{
                 Map<String,Object> adGuideCategoryData = new HashMap<>();
                 adGuideCategoryData.put("mainTitle","导购管理");
                 adGuideCategoryData.put("type",dlTemplateFloorList.get(i).getType());
-                List<DlTemplateFloorItem> dlTemplateFloorItemList = dlTemplateFloorItemDao.getAllByTempIdAndFloorId(dlTemplateFloorList.get(i).getTemplateId(),dlTemplateFloorList.get(i).getId());
-                List<Map<String,Object>> adGuideCategoryListMap = new ArrayList<>();
-                for (int j = 0; j < dlTemplateFloorItemList.size(); j++) {
-                    Map<String,Object> adGuideCategoryMap = new HashMap<>();
-                    DlTemplateFloorItem dlTemplateFloorItem = dlTemplateFloorItemList.get(j);
-                    adGuideCategoryMap.put("subTitle",dlTemplateFloorItem.getTitle());
-                    adGuideCategoryMap.put("iconUrl",dlTemplateFloorItem.getIconUrl());
-                    List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(dlTemplateFloorItem.getRelationId(),1,50,"1");
-                    for (AdProductExtend adProduct : productExtends) {
-                        adArticleServiceI.calculateExtend(adProduct);
-                    }
-                    List<Map<String,Object>> adProductListMap = new ArrayList<>();
-                    for (int k = 0; k < productExtends.size(); k++) {
-                        AdProduct adProduct1 = productExtends.get(k);
-                        Map<String,Object> adProductMap = new HashMap<>();
-                        adProductMap.put("image",adProduct1.getImageWechat());
-                        adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())
-                                && adProduct1.getGuideTag().charAt(adProduct1.getGuideTag().length() - 1) == ',' ?
-                                adProduct1.getGuideTag().substring(0,adProduct1.getGuideTag().length() - 1) : adProduct1.getGuideTag());
-                        adProductMap.put("marketPrice",adProduct1.getMarketPrice());
-                        adProductMap.put("name",adProduct1.getName());
-                        adProductMap.put("userRebate",adProduct1.getUserRebate());
-                        adProductMap.put("id",adProduct1.getId());
-                        adProductMap.put("sellPrice",adProduct1.getPrice());
-                        adProductMap.put("businessName",adProduct1.getShippingMethod());
-                        adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
-                        adProductListMap.add(adProductMap);
-                    }
-
-                    if (adProductListMap.size() > 0) {
-                        adGuideCategoryMap.put("subList",adProductListMap);
-                        adGuideCategoryListMap.add(adGuideCategoryMap);
-                    }
-                }
-                adGuideCategoryData.put("list",adGuideCategoryListMap);
                 floorsItemMap.add(adGuideCategoryData);
             }
         }

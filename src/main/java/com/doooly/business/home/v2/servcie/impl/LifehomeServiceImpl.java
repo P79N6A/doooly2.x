@@ -213,7 +213,7 @@ public class LifehomeServiceImpl implements LifehomeService{
         }
         List<Map<String,Object>> adProductListMap = new ArrayList<>();
         for (int k = 0; k < productExtends.size(); k++) {
-            AdProduct adProduct1 = productExtends.get(k);
+            AdProductExtend adProduct1 = productExtends.get(k);
             Map<String,Object> adProductMap = new HashMap<>();
             adProductMap.put("image",adProduct1.getImageWechat());
             adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())
@@ -223,6 +223,8 @@ public class LifehomeServiceImpl implements LifehomeService{
             adProductMap.put("name",adProduct1.getName());
             adProductMap.put("userRebate",adProduct1.getUserRebate());
             adProductMap.put("id",adProduct1.getId());
+            adProductMap.put("isStar",adProduct1.getIsStar());
+            adProductMap.put("dooolyPrice",adProduct1.getDooolyPrice());
             adProductMap.put("sellPrice",adProduct1.getPrice());
             adProductMap.put("businessName",adProduct1.getShippingMethod());
             adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());

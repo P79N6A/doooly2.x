@@ -11,6 +11,10 @@ import java.util.Map;
  */
 public interface LifehomeService {
 
-    public List<Map<String, Object>> getLifeFloors(String groupId, int pageNum, int pageSize,String channel);
+    List<Map<String, Object>> getLifeFloors(String groupId, int pageNum, int pageSize,String channel);
+
+    List<Map<String,Object>> getGuideCategory(String groupId);
+
+    List<Map<String,Object>> getGuideCategoryBusi(String guideCategoryId,int pageNum,int pageSize);
 
 }

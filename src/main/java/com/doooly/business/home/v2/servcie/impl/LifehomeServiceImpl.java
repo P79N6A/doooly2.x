@@ -183,4 +183,52 @@ public class LifehomeServiceImpl implements LifehomeService{
         }
         return floorsItemMap;
     }
+
+
+  public  List<Map<String,Object>> getGuideCategory(String groupId) {
+        List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
+        List<Map<String,Object>> guideCategoryList = new ArrayList<>();
+        for (int i = 0; i < dlTemplateFloorList.size(); i++) {
+            if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_THREE) {
+                List<DlTemplateFloorItem> dlTemplateFloorItemList = dlTemplateFloorItemDao.getAllByTempIdAndFloorId(dlTemplateFloorList.get(i).getTemplateId(),dlTemplateFloorList.get(i).getId());
+                for (int j = 0; j < dlTemplateFloorItemList.size(); j++) {
+                    DlTemplateFloorItem dlTemplateFloorItem = dlTemplateFloorItemList.get(j);
+                    Map<String,Object> adGuideCategoryMap = new HashMap<>();
+                    adGuideCategoryMap.put("id",dlTemplateFloorItem.getRelationId());
+                    adGuideCategoryMap.put("subTitle",dlTemplateFloorItem.getTitle());
+                    adGuideCategoryMap.put("iconUrl",dlTemplateFloorItem.getIconUrl());
+                    guideCategoryList.add(adGuideCategoryMap);
+                }
+            }
+        }
+        return guideCategoryList;
+    }
+
+
+    public List<Map<String,Object>> getGuideCategoryBusi(String guideCategoryId,int pageNum,int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(guideCategoryId,offset,pageSize,"1");
+        for (AdProductExtend adProduct : productExtends) {
+            adArticleServiceI.calculateExtend(adProduct);
+        }
+        List<Map<String,Object>> adProductListMap = new ArrayList<>();
+        for (int k = 0; k < productExtends.size(); k++) {
+            AdProduct adProduct1 = productExtends.get(k);
+            Map<String,Object> adProductMap = new HashMap<>();
+            adProductMap.put("image",adProduct1.getImageWechat());
+            adProductMap.put("guideTag", StringUtils.isNotBlank(adProduct1.getGuideTag())
+                    && adProduct1.getGuideTag().charAt(adProduct1.getGuideTag().length() - 1) == ',' ?
+                    adProduct1.getGuideTag().substring(0,adProduct1.getGuideTag().length() - 1) : adProduct1.getGuideTag());
+            adProductMap.put("marketPrice",adProduct1.getMarketPrice());
+            adProductMap.put("name",adProduct1.getName());
+            adProductMap.put("userRebate",adProduct1.getUserRebate());
+            adProductMap.put("id",adProduct1.getId());
+            adProductMap.put("sellPrice",adProduct1.getPrice());
+            adProductMap.put("businessName",adProduct1.getShippingMethod());
+            adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
+            adProductListMap.add(adProductMap);
+        }
+        return adProductListMap;
+    }
+
 }

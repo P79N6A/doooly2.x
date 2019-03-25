@@ -129,6 +129,33 @@ public class LifehomeRestServiceImpl {
 
 
     @POST
+    @Path("getGuideCategory")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel getGuideCategory(JSONObject jsonObject,@Context HttpServletRequest request) {
+        ResultModel resultModel = ResultModel.ok();
+        Map<String,Object> data = Maps.newHashMap();
+        String groupId = request.getHeader("groupId");
+        resultModel.setData(lifehomeService.getGuideCategory(groupId));
+        return resultModel;
+    }
+
+
+    @POST
+    @Path("getGuideCategoryBusi")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel getGuideCategoryBusi(JSONObject jsonObject,@Context HttpServletRequest request) {
+        ResultModel resultModel = ResultModel.ok();
+        String guideCategoryId = jsonObject.getString("guideCategoryId");
+        int pageNum = jsonObject.getInteger("pageNum");
+        int pageSize = jsonObject.getInteger("pageSize");
+        resultModel.setData(lifehomeService.getGuideCategoryBusi(guideCategoryId,pageNum,pageSize));
+        return resultModel;
+    }
+
+
+    @POST
     @Path("getLifeFloors")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -146,6 +173,9 @@ public class LifehomeRestServiceImpl {
         resultModel.setData(data);
         return resultModel;
     }
+
+
+
 
     @POST
     @Path("addUerRecentVisitBusiness")

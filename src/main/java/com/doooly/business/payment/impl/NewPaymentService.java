@@ -326,6 +326,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             orderVos.add(orderLimt);
         }else {
             //大订单
+            order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }
@@ -860,6 +861,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             orderVos.add(orderLimt);
         }else {
             //大订单
+            order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }
@@ -1001,6 +1003,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             orderVos.add(orderLimt);
         }else {
             //大订单
+            order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }

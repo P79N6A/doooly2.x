@@ -1039,8 +1039,8 @@ public class OrderServiceImpl implements OrderService {
         if(adOrderBig == null){
             //自营没有大订单下单
             adOrderBig = new AdOrderBig();
-            adOrderBig.setId(bigOrderNumber);
-            adOrderBig.setIsSource("2");
+            adOrderBig.setId(orderNum);
+            adOrderBig.setIsSource("3");
             adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
             adOrderBig.setTotalAmount(orderLimt.getTotalMount());
             adOrderBig.setOrderDate(orderLimt.getOrderDate());

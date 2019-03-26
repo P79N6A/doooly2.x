@@ -42,7 +42,7 @@ public enum MeituanProductTypeEnum {
 
     MAOYAN("mt_maoyan","猫眼"),
 
-    CAR("mt_car","猫眼");
+    CAR("mt_car","打车");
 
     private String code;
 

@@ -17,11 +17,13 @@ import com.doooly.common.meituan.EncryptUtil;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.StaffTypeEnum;
+import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
 import com.doooly.entity.meituan.Order;
 import com.doooly.entity.meituan.StaffInfoVO;
+import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
@@ -85,6 +87,9 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Autowired
     private MeituanOrderService meituanOrderService;
 
+    @Autowired
+    private AdBusinessDao adBusinessDao;
+
 
     @GET
     @Path("/getMeituanEasyLoginUrl")
@@ -127,16 +132,19 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                             }
                         }
                     } else {
-                        //先同步用户
-                        StaffInfoVO staffInfoVO = new StaffInfoVO();
-                        staffInfoVO.setName(adUser.getName());
-                        staffInfoVO.setPhone(adUser.getTelephone());
-                        staffInfoVO.setEntStaffNum(adUser.getCardNumber());
-                        staffInfoVO.setEmail(adUser.getMailbox());
-                        List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
-                        logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
-                        if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
-                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        AdBusiness adBusiness = adBusinessDao.getByBusinessId(MeituanConstants.meituan_bussinesss_serial);
+                        if (adBusiness != null && !"0".equals(adBusiness.getDataSynchronization())) {
+                            //先同步用户
+                            StaffInfoVO staffInfoVO = new StaffInfoVO();
+                            staffInfoVO.setName(adUser.getName());
+                            staffInfoVO.setPhone(adUser.getTelephone());
+                            staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                            staffInfoVO.setEmail(adUser.getMailbox());
+                            List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
+                            logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
+                            if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                            }
                         }
                     }
                     logger.info("用户:{}免登录url:{}",adUser.getTelephone(),loginUrl);

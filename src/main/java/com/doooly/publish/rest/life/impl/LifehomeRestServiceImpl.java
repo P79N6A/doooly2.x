@@ -163,13 +163,15 @@ public class LifehomeRestServiceImpl {
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
         long userId = jsonObject.getLongValue("userId");
+        String city = jsonObject.getString("city");
         int pageNum = 1;
         int pageSize = 20;
         String groupId = request.getHeader("groupId");
         String channel = request.getHeader(Constants.CHANNEL);
+        logger.info("getLifeFloors参数:{},{}",groupId,city);
         String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
         JSONArray jsonArray = JSONArray.parseArray(floorStr);
-        data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize,channel));
+        data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize,channel,city));
         resultModel.setData(data);
         return resultModel;
     }

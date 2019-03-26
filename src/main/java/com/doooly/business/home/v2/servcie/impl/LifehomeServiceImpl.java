@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: wanghai
@@ -65,7 +62,7 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Override
-    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize,String channel) {
+    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize,String channel,String city) {
         List<Map<String,Object>> floorsItemMap = new ArrayList<>();
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
@@ -118,7 +115,19 @@ public class LifehomeServiceImpl implements LifehomeService{
                     }
                     List<AdBusiness> businessList = new ArrayList<>();
                     if (businessIds.size() > 0) {
-                        businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                        if (StringUtils.isNotBlank(city) && !AdArea.ALLCITY.equals(city)) {
+                            List<String> businessIdsCity = adBusinessDao.getBusinessByCity(city);
+                            for (Iterator<String> it = businessIds.iterator();it.hasNext();) {
+                                String id = it.next();
+                                if(!businessIdsCity.contains(id)) {
+                                    it.remove();
+                                }
+                            }
+                        }
+
+                        if (businessIds.size() > 0) {
+                            businessList = adBusinessDao.getListByBusinessIds(businessIds);
+                        }
                     }
                     List<Map<String,Object>> businessListMap = new ArrayList<>();
                     for (int k = 0; k < businessList.size(); k++) {

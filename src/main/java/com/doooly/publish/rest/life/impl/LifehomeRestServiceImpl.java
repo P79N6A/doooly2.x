@@ -109,9 +109,17 @@ public class LifehomeRestServiceImpl {
             if (businessIds.size() > 0) {
                 adBusinessList = adBusinessDao.getListByBusinessIds(businessIds);
             }
-            AdBusiness adBusinessItem = null;
+            Map<String,AdBusiness> businessMap = new HashMap<>();
             for (int i = 0; i < adBusinessList.size(); i++) {
-                adBusinessItem = adBusinessList.get(i);
+                businessMap.put(adBusinessList.get(i).getId()+"",adBusinessList.get(i));
+            }
+            List<AdBusiness> adBusinessList1 = new ArrayList<>();
+            for (int i = 0; i < businessIds.size(); i++) {
+                adBusinessList1.add(businessMap.get(businessIds.get(i)));
+            }
+            AdBusiness adBusinessItem = null;
+            for (int i = 0; i < adBusinessList1.size(); i++) {
+                adBusinessItem = adBusinessList1.get(i);
                 Map<String, Object> mapItem = new HashMap<>();
                 mapItem.put("subUrl",BASE_URL.substring(BASE_URL.indexOf("#") + 1, BASE_URL.length()) + adBusinessItem.getDealType()
                         + "/" + adBusinessItem.getId());

@@ -188,12 +188,15 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     public List<Map<String,Object>> getGuideCategoryBusi(String guideCategoryId,int pageNum,int pageSize) {
+        List<Map<String,Object>> adProductListMap = new ArrayList<>();
+        if (StringUtils.isBlank(guideCategoryId)) {
+            return adProductListMap;
+        }
         int offset = (pageNum - 1) * pageSize;
         List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(guideCategoryId,offset,pageSize,"1");
         for (AdProductExtend adProduct : productExtends) {
             adArticleServiceI.calculateExtend(adProduct);
         }
-        List<Map<String,Object>> adProductListMap = new ArrayList<>();
         for (int k = 0; k < productExtends.size(); k++) {
             AdProductExtend adProduct1 = productExtends.get(k);
             Map<String,Object> adProductMap = new HashMap<>();

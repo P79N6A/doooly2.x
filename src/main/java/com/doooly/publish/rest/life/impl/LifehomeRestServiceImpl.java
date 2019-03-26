@@ -72,8 +72,8 @@ public class LifehomeRestServiceImpl {
         long userId = jsonObject.getLongValue("userId");
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
-        String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
-        JSONArray jsonArray = JSONArray.parseArray(listStr);
+        //String listStr = configDictServiceI.getValueByTypeAndKeyNoCache("getUserRecentView_data","getUserRecentView_data");
+        JSONArray jsonArray = new JSONArray();//JSONArray.parseArray(listStr);
 
         Calendar calendar = Calendar.getInstance();
         Date currentDate = calendar.getTime();
@@ -86,8 +86,9 @@ public class LifehomeRestServiceImpl {
         param.put("pageSize",4);
         param.put("userId",userId);
         param.put("event","VISIT_BUSI");
+        param.put("groupName","businessId");
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");
-        JSONObject ret = HttpClientUtil.httpPost(actionUrl + "query/v1/",param);
+        JSONObject ret = HttpClientUtil.httpPost(actionUrl + "queryGroup/v1/",param);
         logger.info("action返回：{},{}",userId,ret);
         int code = ret.getInteger("code");
         List<String> businessIds = new ArrayList<>();
@@ -96,12 +97,10 @@ public class LifehomeRestServiceImpl {
             String retData = ret.getString("data");
             Map<String,Object> mapData = GsonUtils.son.fromJson(retData,Map.class);
             String dataStr = JSONArray.toJSONString(mapData.get("data"));
-            List<Map<String,Object>> mapList = GsonUtils.son.fromJson(dataStr,new TypeToken<List<Map<String,Object>>>(){}.getType());
-            for (int i = 0; i < mapList.size(); i++) {
-                Map<String,Object> itemMap = mapList.get(i);
-                if (itemMap.get("businessId") != null) {
-                    businessIds.add(String.valueOf(itemMap.get("businessId")));
-                }
+            Map<String,Object> map = GsonUtils.son.fromJson(dataStr,Map.class);
+            for (Map.Entry<String,Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                businessIds.add(key);
             }
             List<AdBusiness> adBusinessList = new ArrayList<>();
             if (businessIds.size() > 0) {
@@ -122,6 +121,9 @@ public class LifehomeRestServiceImpl {
         } else {
             resultModel.setCode(code);
         }
+        if (listData.size() > 4) {
+            listData = listData.subList(0,4);
+        }
         data.put("list",listData.size() > 0 ? listData : jsonArray);
         resultModel.setData(data);
         return resultModel;
@@ -134,7 +136,6 @@ public class LifehomeRestServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ResultModel getGuideCategory(JSONObject jsonObject,@Context HttpServletRequest request) {
         ResultModel resultModel = ResultModel.ok();
-        Map<String,Object> data = Maps.newHashMap();
         String groupId = request.getHeader("groupId");
         resultModel.setData(lifehomeService.getGuideCategory(groupId));
         return resultModel;
@@ -162,15 +163,14 @@ public class LifehomeRestServiceImpl {
     public ResultModel getLifeFloors(JSONObject jsonObject,@Context HttpServletRequest request) {
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
-        long userId = jsonObject.getLongValue("userId");
         String city = jsonObject.getString("city");
         int pageNum = 1;
         int pageSize = 20;
         String groupId = request.getHeader("groupId");
         String channel = request.getHeader(Constants.CHANNEL);
         logger.info("getLifeFloors参数:{},{}",groupId,city);
-        String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
-        JSONArray jsonArray = JSONArray.parseArray(floorStr);
+        //String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
+        //JSONArray jsonArray = JSONArray.parseArray(floorStr);
         data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize,channel,city));
         resultModel.setData(data);
         return resultModel;

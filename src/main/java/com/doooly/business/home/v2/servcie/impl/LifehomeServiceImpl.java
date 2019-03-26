@@ -69,7 +69,7 @@ public class LifehomeServiceImpl implements LifehomeService{
             if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_ONE){
                 // 广告位
                 Map<String,Object> adMap = new HashMap<>();
-                adMap.put("mainTitle","生活广告");
+                adMap.put("mainTitle",dlTemplateFloorList.get(i).getTitle());
                 adMap.put("type",dlTemplateFloorList.get(i).getType());
                 List<Map<String,Object>> adMapItemList = new ArrayList<>();
                 List<AdAd> ads = adadDao.getByTypeAndGroup(13, groupId, 3);
@@ -86,7 +86,7 @@ public class LifehomeServiceImpl implements LifehomeService{
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
                 //生活场景
                 Map<String,Object> lifeSceneMap = new HashMap<>();
-                lifeSceneMap.put("mainTitle","生活场景");
+                lifeSceneMap.put("mainTitle",dlTemplateFloorList.get(i).getTitle());
                 lifeSceneMap.put("type",dlTemplateFloorList.get(i).getType());
 
                 List<Map<String,Object>> adBusinessSceneListMap = new ArrayList<>();
@@ -150,7 +150,7 @@ public class LifehomeServiceImpl implements LifehomeService{
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_THREE) {
                 //导购管理
                 Map<String,Object> adGuideCategoryData = new HashMap<>();
-                adGuideCategoryData.put("mainTitle","导购管理");
+                adGuideCategoryData.put("mainTitle",dlTemplateFloorList.get(i).getTitle());
                 adGuideCategoryData.put("type",dlTemplateFloorList.get(i).getType());
                 floorsItemMap.add(adGuideCategoryData);
             }
@@ -173,6 +173,14 @@ public class LifehomeServiceImpl implements LifehomeService{
                     adGuideCategoryMap.put("iconUrl",dlTemplateFloorItem.getIconUrl());
                     guideCategoryList.add(adGuideCategoryMap);
                 }
+            }
+        }
+        for (Iterator<Map<String,Object>> iterator = guideCategoryList.iterator();iterator.hasNext();) {
+            Map<String,Object> itemMap = iterator.next();
+            String id = String.valueOf(itemMap.get("id"));
+            int cnt = adProductDao.getGuideProductListCntv4(id,"1");
+            if (cnt == 0) {
+                iterator.remove();
             }
         }
         return guideCategoryList;

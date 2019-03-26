@@ -344,6 +344,23 @@
 		LIMIT #{startIndex},#{pageSize}
 	</select>
 
+
+	<select id="getGuideProductListCntv4" resultType="int">
+		SELECT
+		count(1)
+		FROM
+		ad_product a
+		LEFT JOIN ad_business ab ON a.business_id= ab.business_id
+		WHERE (a.buy_end_time &gt;=now() AND a.buy_start_time &lt;=now())
+		<if test="guideCategoryId != null">
+			and a.guide_category_id = #{guideCategoryId}
+		</if>
+		<!-- 这个判断条件必须在最后，因为有排序方式-->
+		<if test="recommendLife != null">
+			and a.recommend_life = #{recommendLife}
+		</if>
+	</select>
+
     <update id="updateSellCount" parameterType="com.doooly.entity.reachad.AdProduct">
         UPDATE ad_product a
         SET a.sell_count = a.sell_count +#{sellCount}

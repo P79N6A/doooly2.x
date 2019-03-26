@@ -83,7 +83,7 @@ public class LifehomeRestServiceImpl {
         param.put("startDate", DateUtils.dateFormatStr(startDate,"yyyy-MM-dd"));
         param.put("endDate",DateUtils.dateFormatStr(currentDate,"yyyy-MM-dd"));
         param.put("pageNo",1);
-        param.put("pageSize",3);
+        param.put("pageSize",4);
         param.put("userId",userId);
         param.put("event","VISIT_BUSI");
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");

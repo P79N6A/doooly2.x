@@ -40,7 +40,9 @@ public enum MeituanProductTypeEnum {
 
     TICKET("mt_ticket","门票"),
 
-    MAOYAN("mt_maoyan","猫眼");
+    MAOYAN("mt_maoyan","猫眼"),
+
+    CAR("mt_car","猫眼");
 
     private String code;
 

@@ -1389,7 +1389,8 @@ public class NewPaymentService implements NewPaymentServiceI {
                 consumptionAmount = new BigDecimal("0");
             }
             //已使用金额+订单实付金额+手续费-每月限制金额
-            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
+            BigDecimal serviceCharge = order.getServiceCharge()==null ? BigDecimal.ZERO : order.getServiceCharge();
+            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(serviceCharge).subtract(monthLimit);
             if (subtract.compareTo(BigDecimal.ZERO) > 0) {
                 //说明已经超出限额
                 return new PayMsg(OrderMsg.failure_code, "您已超出每月限额");

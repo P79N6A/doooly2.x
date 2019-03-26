@@ -216,10 +216,10 @@
 	</select>
 
 
-	<select id="getBusinessByCity" parameterType="java.lang.String" resultType="java.util.List">
+	<select id="getBusinessByCity" parameterType="java.lang.String" resultType="java.lang.String">
 		select b.business_id from  ad_business_area_conn b
 		LEFT JOIN ad_area a ON b.area_id = a.id
-		where a.`name` = #{city};
+		where a.`name` = #{city}
 	</select>
 
 	<select id="get" resultType="com.doooly.entity.reachad.AdBusiness">

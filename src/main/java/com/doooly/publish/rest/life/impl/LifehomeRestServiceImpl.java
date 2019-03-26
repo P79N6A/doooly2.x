@@ -90,6 +90,9 @@ public class LifehomeRestServiceImpl {
         String actionUrl = configDictServiceI.getValueByTypeAndKey("actionUrl","actionUrl");
         JSONObject ret = HttpClientUtil.httpPost(actionUrl + "queryGroup/v1/",param);
         logger.info("action返回：{},{}",userId,ret);
+        if (ret == null) {
+            return resultModel;
+        }
         int code = ret.getInteger("code");
         List<String> businessIds = new ArrayList<>();
         List<Map<String,Object>> listData = new ArrayList<>();

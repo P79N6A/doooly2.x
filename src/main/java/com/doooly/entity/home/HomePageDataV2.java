@@ -1,8 +1,10 @@
 package com.doooly.entity.home;
 
 import com.doooly.entity.reachad.AdGroup;
+import com.doooly.entity.reachad.AdGroupEquityLevel;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @className: HomePageDataV2
@@ -39,12 +41,23 @@ public class HomePageDataV2 {
 	private boolean newFinishFlag;
 	private boolean newCancelFlag;
 
+	private boolean recentlyPlacedOrderFlag; // 最近下单
+	private boolean pendingPaymentFlag;		 // 待付款
+	private boolean recentArrivalFlag;			 // 最近到账积分
+	private boolean imminentArrivalFlag;	 // 即将到账
+
     private String isPayPassword;
     private String isSetPayPassword;
     //会员返利积分，精确2位小数
     private String returnPoints;
 
     private AdGroup adGroup;
+
+	private List<AdGroupEquityLevel> groupEquitys;	// 企业权益
+	private boolean hasMoreEquity;		// 是否还有更多权益
+	private Integer groupLevel;			// 企业等级
+	private Integer giftBagCount;		// 未领取企业礼包数量
+	private String couponCount;			// 卡券数量
 
 
 //	/** 兜礼APP_v2.0.0，权益新手引导，是否完成，(null-未完成，0-未完成，1-已完成) **/
@@ -221,4 +234,77 @@ public class HomePageDataV2 {
 //	public void setAppIndexPrivilege(JSONObject appIndexPrivilege) {
 //		this.appIndexPrivilege = appIndexPrivilege;
 //	}
+
+
+	public List<AdGroupEquityLevel> getGroupEquitys() {
+		return groupEquitys;
+	}
+
+	public void setGroupEquitys(List<AdGroupEquityLevel> groupEquitys) {
+		this.groupEquitys = groupEquitys;
+	}
+
+	public boolean isHasMoreEquity() {
+		return hasMoreEquity;
+	}
+
+	public void setHasMoreEquity(boolean hasMoreEquity) {
+		this.hasMoreEquity = hasMoreEquity;
+	}
+
+	public Integer getGroupLevel() {
+		return groupLevel;
+	}
+
+	public void setGroupLevel(Integer groupLevel) {
+		this.groupLevel = groupLevel;
+	}
+
+	public Integer getGiftBagCount() {
+		return giftBagCount;
+	}
+
+	public void setGiftBagCount(Integer giftBagCount) {
+		this.giftBagCount = giftBagCount;
+	}
+
+	public String getCouponCount() {
+		return couponCount;
+	}
+
+	public void setCouponCount(String couponCount) {
+		this.couponCount = couponCount;
+	}
+
+	public boolean isRecentlyPlacedOrderFlag() {
+		return recentlyPlacedOrderFlag;
+	}
+
+	public void setRecentlyPlacedOrderFlag(boolean recentlyPlacedOrderFlag) {
+		this.recentlyPlacedOrderFlag = recentlyPlacedOrderFlag;
+	}
+
+	public boolean isPendingPaymentFlag() {
+		return pendingPaymentFlag;
+	}
+
+	public void setPendingPaymentFlag(boolean pendingPaymentFlag) {
+		this.pendingPaymentFlag = pendingPaymentFlag;
+	}
+
+	public boolean isRecentArrivalFlag() {
+		return recentArrivalFlag;
+	}
+
+	public void setRecentArrivalFlag(boolean recentArrivalFlag) {
+		this.recentArrivalFlag = recentArrivalFlag;
+	}
+
+	public boolean isImminentArrivalFlag() {
+		return imminentArrivalFlag;
+	}
+
+	public void setImminentArrivalFlag(boolean imminentArrivalFlag) {
+		this.imminentArrivalFlag = imminentArrivalFlag;
+	}
 }

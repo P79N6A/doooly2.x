@@ -640,7 +640,7 @@
 		<dependency>
 			<groupId>com.reach</groupId>
 			<artifactId>common-client</artifactId>
-			<version>1.0.18</version>
+			<version>1.0.30</version>
 		</dependency>
 		<dependency>
 		    <groupId>commons-lang</groupId>

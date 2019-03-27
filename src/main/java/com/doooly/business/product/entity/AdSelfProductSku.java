@@ -4,6 +4,8 @@
 package com.doooly.business.product.entity;
 
 
+import java.util.Date;
+
 /**
  * 商品sku管理Entity
  * @author wenwei.yang
@@ -30,6 +32,11 @@ public class AdSelfProductSku  {
 	private String specialPrice;// 特惠价
 	private Integer buyNumberLimit;// 购买数量限制
 	private boolean overBuyLimit;// 是否超过限购条件(默认为false 可以购买)
+
+	// ====== 关联字段
+	private String introduction;	// 商品简述
+	private String image;			// 商品主图
+	private Date buyEndDate;		// 商品下架时间
 
 	
 	
@@ -187,5 +194,29 @@ public class AdSelfProductSku  {
 
 	public void setOverBuyLimit(boolean overBuyLimit) {
 		this.overBuyLimit = overBuyLimit;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+	public Date getBuyEndDate() {
+		return buyEndDate;
+	}
+
+	public void setBuyEndDate(Date buyEndDate) {
+		this.buyEndDate = buyEndDate;
 	}
 }

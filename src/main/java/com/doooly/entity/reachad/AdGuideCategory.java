@@ -18,8 +18,17 @@ public class AdGuideCategory {
     private String categoryName;//类目名称
     private String state;//类目状态(0:关闭，1：开启)
     private String sort;//类目排序
+    private String iconUrl;//图标地址
     private Date createDate;
     private Date updateDate;
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
 
     public String getId() {
         return id;

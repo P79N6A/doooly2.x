@@ -1374,4 +1374,14 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
         AND del_flag = 0
     </select>
 
+
+    <select id="getReturnPointsMaxCreateDateByUser" resultType="java.util.Date">
+        SELECT
+          MAX(p.create_date)
+        FROM ad_return_points p
+                 INNER JOIN ad_user u
+                            ON u.id = p.user_id
+        WHERE u.id = #{userId}
+          AND p.type = 1 AND p.del_flag=0 AND p.status=2
+    </select>
 </mapper>

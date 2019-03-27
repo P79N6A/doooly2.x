@@ -3,13 +3,7 @@ package com.doooly.business.myorder.impl;
 import com.doooly.business.dict.ConfigDictServiceI;
 import com.doooly.business.myorder.constant.OrderType;
 import com.doooly.business.myorder.constant.ProductType;
-import com.doooly.business.myorder.dto.HintReq;
-import com.doooly.business.myorder.dto.HintResp;
-import com.doooly.business.myorder.dto.OrderDeleteReq;
-import com.doooly.business.myorder.dto.OrderDetailReq;
-import com.doooly.business.myorder.dto.OrderDetailResp;
-import com.doooly.business.myorder.dto.OrderHintReq;
-import com.doooly.business.myorder.dto.OrderReq;
+import com.doooly.business.myorder.dto.*;
 import com.doooly.business.myorder.po.OrderDetailPoReq;
 import com.doooly.business.myorder.po.OrderDetailReport;
 import com.doooly.business.myorder.po.OrderPoReq;
@@ -20,18 +14,8 @@ import com.doooly.business.pay.utils.AESTool;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.PropertiesConstants;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdOrderDetailDao;
-import com.doooly.dao.reachad.AdOrderFlowDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdReturnFlowDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.entity.reachad.AdGroup;
-import com.doooly.entity.reachad.AdOrderDetail;
-import com.doooly.entity.reachad.AdOrderReport;
-import com.doooly.entity.reachad.AdReturnFlow;
-import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserBusinessExpansion;
+import com.doooly.dao.reachad.*;
+import com.doooly.entity.reachad.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,11 +26,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: 我的订单
@@ -119,6 +99,12 @@ public class OrderServiceImpl implements OrderService{
 			return adOrderReportDao.findLatestOrderAmountList(orderPoReq);
 		}else if(OrderType.NOT_REBATE == orderReq.getType()) {//无返利
 			return	adOrderReportDao.findNotRebateOrderList(orderPoReq);
+		} else if (OrderType.WAIT_PAY == orderReq.getType()) {
+			orderPoReq.setType(10);
+			return adOrderReportDao.findALLOrderList(orderPoReq);
+		} else if (OrderType.AREADY_PAY == orderReq.getType()) {
+			orderPoReq.setType(1);
+			return adOrderReportDao.findALLOrderList(orderPoReq);
 		}
 		return null;
 	}
@@ -322,6 +308,12 @@ public class OrderServiceImpl implements OrderService{
 				return adOrderReportDao.countLatestOrderAmount(orderPoReq);
 			}else if(OrderType.NOT_REBATE == orderReq.getType()) {//无返利
 				return	adOrderReportDao.countNotRebateOrder(orderPoReq);
+			} else if (OrderType.WAIT_PAY == orderReq.getType()) {
+				orderPoReq.setType(10);
+				return adOrderReportDao.findALLOrderSum(orderPoReq);
+			} else if (OrderType.AREADY_PAY == orderReq.getType()) {
+				orderPoReq.setType(1);
+				return adOrderReportDao.findALLOrderSum(orderPoReq);
 			}
 			return 0L;
 		}
@@ -349,8 +341,27 @@ public class OrderServiceImpl implements OrderService{
 			}catch(Exception e) {
 				logger.error(e.getMessage());
 			}
-			
+
 		}
+
+	/**
+	 * 取消用户提醒
+	 */
+	@Override
+	public void cannelUserFlag(String userId, String flags) {
+		try {
+			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+			String[] list = flags.split(",");
+			for (String state : list) {
+				Long now = System.currentTimeMillis();
+				opsForValue.set("userFlag:" + userId + ":" + state, now.toString());
+			}
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+
+	}
 
 	/**
 	 * 获取订单总数
@@ -380,75 +391,136 @@ public class OrderServiceImpl implements OrderService{
 	 * @return
 	 */
 	@Override
-		public HintResp getHint(HintReq req) {
-			HintResp hintResp = new HintResp();
-			try {
-				OrderPoReq orderPoReq = new OrderPoReq();
-				orderPoReq.setUserId(Long.parseLong(req.getUserId()));
-				ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
-				String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
-				String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
-				String cancelTotal = opsForValue.get("ordertotal:"+req.getUserId()+":2");//已取消
-				logger.info(String.format("用户 %s redis中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotal,finishTotal,cancelTotal));
-				String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
-				orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
-				orderPoReq.setEndOrderDate(new Date());
-				int orderTotalMap = adOrderReportDao.getLatestOrderTotal(orderPoReq);
-				int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
-				int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
-				logger.info(String.format("用户 %s DB中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotalMap,finishTotalMap,cancelTotalMap));
-				
-				// 3.有新订单 设置flag
-				if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
-					hintResp.setNewOrderFlag(true);
-				}else{
-					resetRedis(orderTotalMap,orderTotal,opsForValue,req.getUserId(),0);
-					hintResp.setNewOrderFlag(false);
-				}
-				if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
-					hintResp.setNewFinishFlag(true);
-				}else{
-					resetRedis(finishTotalMap,finishTotal,opsForValue,req.getUserId(),1);
-					hintResp.setNewFinishFlag(false);
-				}
-				if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
-					hintResp.setNewCancelFlag(true);
-				}else{
-					resetRedis(cancelTotalMap,cancelTotal,opsForValue,req.getUserId(),2);
-					hintResp.setNewCancelFlag(false);
-				}
+	public HintResp getHint(HintReq req) {
+		HintResp hintResp = new HintResp();
+		try {
+			OrderPoReq orderPoReq = new OrderPoReq();
+			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
+			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+			String orderTotal = opsForValue.get("ordertotal:"+req.getUserId()+":0");//已下单
+			String finishTotal = opsForValue.get("ordertotal:"+req.getUserId()+":1");//已完成
+			String cancelTotal = opsForValue.get("ordertotal:"+req.getUserId()+":2");//已取消
+			logger.info(String.format("用户 %s redis中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotal,finishTotal,cancelTotal));
+			String orderDay = configDictServiceI.getValueByTypeAndKey("ORDER", "LATEST_ORDER_DAY");
+			orderPoReq.setBeginOrderDate(DateUtils.minusDays(new Date(), StringUtils.isNotEmpty(orderDay) ? Integer.parseInt(orderDay): LATEST_ORDER_DAY));
+			orderPoReq.setEndOrderDate(new Date());
+			int orderTotalMap = adOrderReportDao.getLatestOrderTotal(orderPoReq);
+			int finishTotalMap = adOrderReportDao.getLatestAmountTotal(orderPoReq);
+			int cancelTotalMap = adOrderReportDao.getNotRebateOrderTotal(orderPoReq);
+			logger.info(String.format("用户 %s DB中已下单数:%s,已完成数:%s,已取消数:%s", req.getUserId(),orderTotalMap,finishTotalMap,cancelTotalMap));
 
-
-
-			}catch(Exception e) {
-				logger.error(e.getMessage());
+			// 3.有新订单 设置flag
+			if(orderTotalMap>(StringUtils.isEmpty(orderTotal) ? 0 : Integer.parseInt(orderTotal))){
+				hintResp.setNewOrderFlag(true);
+			}else{
+				resetRedis(orderTotalMap,orderTotal,opsForValue,req.getUserId(),0);
+				hintResp.setNewOrderFlag(false);
 			}
-			return hintResp;
-		}
-
-		private void resetRedis(int value1,String value2,ValueOperations<String, String> opsForValue,String  userId,int state){
-			if(value1<(StringUtils.isEmpty(value2) ? 0 : Integer.parseInt(value2))){
-				opsForValue.set("ordertotal:"+userId+":"+state,String.valueOf(value1));
+			if(finishTotalMap>(StringUtils.isEmpty(finishTotal) ? 0 : Integer.parseInt(finishTotal))){
+				hintResp.setNewFinishFlag(true);
+			}else{
+				resetRedis(finishTotalMap,finishTotal,opsForValue,req.getUserId(),1);
+				hintResp.setNewFinishFlag(false);
 			}
+			if(cancelTotalMap>(StringUtils.isEmpty(cancelTotal) ? 0 : Integer.parseInt(cancelTotal))){
+				hintResp.setNewCancelFlag(true);
+			}else{
+				resetRedis(cancelTotalMap,cancelTotal,opsForValue,req.getUserId(),2);
+				hintResp.setNewCancelFlag(false);
+			}
+
+
+
+		}catch(Exception e) {
+			logger.error(e.getMessage());
 		}
+		return hintResp;
+	}
+
+	/**
+	 * 获取个人中心提醒
+	 * @param req
+	 * @return
+	 */
+	@Override
+	public HintResp getUserFlag(HintReq req) {
+		HintResp hintResp = new HintResp();
+		try {
+			OrderPoReq orderPoReq = new OrderPoReq();
+			orderPoReq.setUserId(Long.parseLong(req.getUserId()));
+			ValueOperations<String, String> opsForValue = redisTemplate.opsForValue();
+			// 查询redis记录的上次点击时间
+			// 最近下单
+			Long recentlyPlacedOrderFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + ":0") != null ?
+					opsForValue.get("userFlag:"+req.getUserId() + ":0") : "0");
+			//待付款
+			Long pendingPaymentFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + ":1") != null ?
+					opsForValue.get("userFlag:" + req.getUserId() + ":1") : "0");
+			//最近到账积分
+			Long recentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:"+req.getUserId() + ":2") != null ?
+					opsForValue.get("userFlag:"+req.getUserId() + ":2") : "0");
+			//即将到账
+			Long imminentArrivalFlag = Long.valueOf(opsForValue.get("userFlag:" + req.getUserId() + ":3") != null ?
+					opsForValue.get("userFlag:" + req.getUserId() + ":3") : "0");
+			logger.info(String.format("用户 %s redis中最近下单点击时间：%s,待付款点击时间：%s，最近到账积分点击时间：%s，即将到账点击时间：%s",
+					req.getUserId(),recentlyPlacedOrderFlag,pendingPaymentFlag,recentArrivalFlag, imminentArrivalFlag));
+
+			Date recentlyPlacedOrderDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), null);
+			Date pendingPaymentDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "10");
+			Date recentArrivalDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "1");
+			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId());
+
+			if (recentlyPlacedOrderDate != null && recentlyPlacedOrderDate.getTime() > recentlyPlacedOrderFlag) {
+				hintResp.setRecentlyPlacedOrderFlag(true);
+			} else {
+				hintResp.setRecentlyPlacedOrderFlag(false);
+			}
+
+			if (pendingPaymentDate != null && pendingPaymentDate.getTime() > pendingPaymentFlag) {
+				hintResp.setPendingPaymentFlag(true);
+			} else {
+				hintResp.setPendingPaymentFlag(false);
+			}
+
+			if (recentArrivalDate != null && recentArrivalDate.getTime() > recentArrivalFlag) {
+				hintResp.setRecentArrivalFlag(true);
+			} else {
+				hintResp.setRecentArrivalFlag(false);
+			}
+
+			if (imminentArrivalDate != null && imminentArrivalDate.getTime() > imminentArrivalFlag) {
+				hintResp.setImminentArrivalFlag(true);
+			} else {
+				hintResp.setImminentArrivalFlag(false);
+			}
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+		}
+		return hintResp;
+	}
+
+	private void resetRedis(int value1,String value2,ValueOperations<String, String> opsForValue,String  userId,int state){
+		if(value1<(StringUtils.isEmpty(value2) ? 0 : Integer.parseInt(value2))){
+			opsForValue.set("ordertotal:"+userId+":"+state,String.valueOf(value1));
+		}
+	}
 
 	/**
 	 * 删除订单
 	 * @param req
 	 * @return
 	 */
-
-		@Override
-		public boolean deleteOrder(OrderDeleteReq req) {
-			OrderDetailPoReq orderDetailPoReq = new OrderDetailPoReq();
-			orderDetailPoReq.setOrderId(req.getOrderId());
-			orderDetailPoReq.setUserId(req.getUserId());
-			Integer result = adOrderReportDao.deleteOrder(orderDetailPoReq);
-			if(result != null && result >= 1) {
-				return true;
-			}
-			return false;
+	@Override
+	public boolean deleteOrder(OrderDeleteReq req) {
+		OrderDetailPoReq orderDetailPoReq = new OrderDetailPoReq();
+		orderDetailPoReq.setOrderId(req.getOrderId());
+		orderDetailPoReq.setUserId(req.getUserId());
+		Integer result = adOrderReportDao.deleteOrder(orderDetailPoReq);
+		if(result != null && result >= 1) {
+			return true;
 		}
+		return false;
+	}
 
 	@Override
 	public List<AdReturnFlow> getOrderList(List<Long> orderList) {

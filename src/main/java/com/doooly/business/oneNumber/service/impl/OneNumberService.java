@@ -6,6 +6,7 @@ import com.doooly.business.oneNumber.service.OneNumberServiceI;
 import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.utils.MD5Util;
 import com.doooly.business.utils.RSAEncryptUtil;
+import com.doooly.common.constants.KeyConstants;
 import com.doooly.common.elm.ELMConstants;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
@@ -102,7 +103,11 @@ public class OneNumberService implements OneNumberServiceI {
 	}
 
     private String getTuNiuUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
-        return String.format("%s?urlRefer=%s&merchantCode=%s&params=%s", adBusinessExpandInfo.getBusinessUrl(), adBusinessExpandInfo.getShopId(), adBusinessExpandInfo.getShopKey(),adUser.getTelephone());
+        String mobileNumber = adUser.getTelephone();
+        String before_token = "mobileNumber="+mobileNumber+"&secret=doolyJointLoginSecret";
+        String sign = MD5Util.MD5Encode(before_token.toUpperCase(), KeyConstants.CHARSET);
+        String token = sign.substring(5, 20);
+        return String.format("%s?urlRefer=%s&merchantCode=%s&mobileNumber=%s&token=%s", adBusinessExpandInfo.getBusinessUrl(), adBusinessExpandInfo.getShopId(), adBusinessExpandInfo.getShopKey(),adUser.getTelephone(),token);
     }
 
     @Override

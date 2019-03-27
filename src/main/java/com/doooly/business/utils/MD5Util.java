@@ -1,6 +1,7 @@
 package com.doooly.business.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.doooly.common.constants.KeyConstants;
 import org.apache.commons.lang3.StringUtils;
 
 import java.security.MessageDigest;
@@ -39,6 +40,11 @@ public class MD5Util {
 		}
 		return ret;
 	}
+
+    public static void main(String[] args) {
+        String adbadJJJ = MD5Encode("adbadJJJ", KeyConstants.CHARSET);
+        System.out.println(adbadJJJ);
+    }
 
 	public static String MD5Encode(String origin, String charsetname) {
 		String resultString = null;

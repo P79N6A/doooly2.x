@@ -14,6 +14,7 @@ import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.OrderStatusEnum;
 import com.doooly.dao.reachad.*;
 import com.doooly.entity.meituan.Order;
+import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
 import com.github.pagehelper.PageHelper;
@@ -99,14 +100,24 @@ public class TestService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
+    private AdBusinessDao adBusinessDao;
+
+    @Autowired
     private AdUserDao adUserDao;
 
     @Test
     public void test3() {
 
-        PageHelper.startPage(2,6);
+        /*PageHelper.startPage(2,6);
         AdUser adUser = new AdUser();
-        long x = adUserDao.getIdByPhoneOrCard("");
+        long x = adUserDao.getIdByPhoneOrCard("");*/
+
+        AdBusiness adBusiness = adBusinessDao.getByBusinessId(MeituanConstants.meituan_bussinesss_serial);
+        if (adBusiness != null && !"0".equals(adBusiness.getDataSynchronization())) {
+            System.out.println(11);
+        } else {
+            System.out.println(22);
+        }
 
     }
 

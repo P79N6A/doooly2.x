@@ -108,6 +108,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         if (StringUtils.isBlank(productType)) {
             productType = MeituanProductTypeEnum.WAIMAI.getCode();
         }
+        logger.info("getMeituanEasyLoginUrl参数：{},{},{}",token,userId,productType);
         String loginUrl = "";
         if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
@@ -133,7 +134,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                         }
                     } else {
                         AdBusiness adBusiness = adBusinessDao.getByBusinessId(MeituanConstants.meituan_bussinesss_serial);
-                        if (adBusiness != null && !"0".equals(adBusiness.getDataSynchronization())) {
+                        if (adBusiness != null) {
                             //先同步用户
                             StaffInfoVO staffInfoVO = new StaffInfoVO();
                             staffInfoVO.setName(adUser.getName());

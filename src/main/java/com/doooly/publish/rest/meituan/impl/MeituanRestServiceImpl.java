@@ -133,7 +133,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                         }
                     } else {
                         AdBusiness adBusiness = adBusinessDao.getByBusinessId(MeituanConstants.meituan_bussinesss_serial);
-                        if (adBusiness != null && !"0".equals(adBusiness.getDataSynchronization())) {
+                        if (adBusiness != null) {
                             //先同步用户
                             StaffInfoVO staffInfoVO = new StaffInfoVO();
                             staffInfoVO.setName(adUser.getName());

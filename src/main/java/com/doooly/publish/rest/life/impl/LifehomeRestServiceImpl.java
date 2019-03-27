@@ -148,7 +148,9 @@ public class LifehomeRestServiceImpl {
     public ResultModel getGuideCategory(JSONObject jsonObject,@Context HttpServletRequest request) {
         ResultModel resultModel = ResultModel.ok();
         String groupId = request.getHeader("groupId");
-        resultModel.setData(lifehomeService.getGuideCategory(groupId));
+        Map<String,Object> map = new HashMap<>();
+        map.put("groupId",groupId);
+        resultModel.setData(lifehomeService.getGuideCategory(map));
         return resultModel;
     }
 
@@ -159,10 +161,7 @@ public class LifehomeRestServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ResultModel getGuideCategoryBusi(JSONObject jsonObject,@Context HttpServletRequest request) {
         ResultModel resultModel = ResultModel.ok();
-        String guideCategoryId = jsonObject.getString("guideCategoryId");
-        int pageNum = jsonObject.getInteger("pageNum");
-        int pageSize = jsonObject.getInteger("pageSize");
-        resultModel.setData(lifehomeService.getGuideCategoryBusi(guideCategoryId,pageNum,pageSize));
+        resultModel.setData(lifehomeService.getGuideCategoryBusi(jsonObject));
         return resultModel;
     }
 
@@ -175,14 +174,16 @@ public class LifehomeRestServiceImpl {
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
         String city = jsonObject.getString("city");
-        int pageNum = 1;
-        int pageSize = 20;
         String groupId = request.getHeader("groupId");
         String channel = request.getHeader(Constants.CHANNEL);
-        logger.info("getLifeFloors参数:{},{}",groupId,city);
+        logger.info("getLifeFloors参数:{},{},{}",groupId,city,channel);
         //String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
         //JSONArray jsonArray = JSONArray.parseArray(floorStr);
-        data.put("floors",lifehomeService.getLifeFloors(groupId,pageNum,pageSize,channel,city));
+        Map<String,Object> map = new HashMap<>();
+        map.put("city",city);
+        map.put("groupId",groupId);
+        map.put("channel",channel);
+        data.put("floors",lifehomeService.getLifeFloors(map));
         resultModel.setData(data);
         return resultModel;
     }

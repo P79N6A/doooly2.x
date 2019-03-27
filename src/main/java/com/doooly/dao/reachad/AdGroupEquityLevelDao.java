@@ -16,4 +16,7 @@ import java.util.List;
  */
 public interface AdGroupEquityLevelDao extends BaseDaoI<AdGroupEquityLevel> {
     List<AdGroupEquityLevel> getAllByGroupId(@Param("groupId") String groupId, @Param("limitCount") Integer limitCount);
+
+    //查询企业权益列表详细信息
+    List<AdGroupEquityLevel> getAdGroupEquityList(String groupId);
 }

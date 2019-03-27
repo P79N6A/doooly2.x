@@ -99,9 +99,6 @@ public class HomePageServiceImpl implements HomePageService {
 		}
 		return Response.ok(response).build();
 	}
-	
-
-
 
 	@POST
 	@Path(value = "/guide/flow")

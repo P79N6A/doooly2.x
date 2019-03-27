@@ -28,11 +28,13 @@
 		SELECT 
 			<include refid="adSelfProductSkuColumns"/>,
 			b.introduction AS "introduction",
-		   	i.image AS "image"
+		   	i.image AS "image",
+		   	b.buy_end_date AS "buyEndDate"
 		FROM ad_self_product_sku a
 		<include refid="adSelfProductSkuJoins"/>
 		LEFT JOIN ad_self_product_image i ON b.id = i.self_product_id
 		WHERE a.id = #{id} AND a.del_flag =0
+		AND b.buy_end_date >= NOW()
 	</select>
 
 	<select id="findByExternalNumber" resultType="com.doooly.business.product.entity.AdSelfProductSku">

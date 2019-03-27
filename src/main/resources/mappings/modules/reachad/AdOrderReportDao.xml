@@ -1476,4 +1476,11 @@
         </where>
     </select>
 
+	<select id="getMaxOrderDateByUserAndType" resultType="java.util.Date">
+		SELECT MAX(order_date) FROM ad_order_report WHERE  user_id = #{userId}
+		<if test="type != null and type != ''">
+			AND type = #{type}
+		</if>
+	</select>
+
 </mapper>

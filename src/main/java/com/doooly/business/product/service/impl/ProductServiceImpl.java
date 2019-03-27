@@ -1,11 +1,6 @@
 package com.doooly.business.product.service.impl;
 
-import com.doooly.business.product.entity.ActivityInfo;
-import com.doooly.business.product.entity.AdGroupSelfProductPrice;
-import com.doooly.business.product.entity.AdSelfProduct;
-import com.doooly.business.product.entity.AdSelfProductImage;
-import com.doooly.business.product.entity.AdSelfProductSku;
-import com.doooly.business.product.entity.AdSelfProductType;
+import com.doooly.business.product.entity.*;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.RedisConstants;
@@ -13,7 +8,7 @@ import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.UserIntegral;
+import com.doooly.entity.reachad.AdUserIntegral;
 import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,12 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -190,7 +180,7 @@ public class ProductServiceImpl implements ProductService {
 	private AdConfigDictDao adConfigDictDao;
 
 	@Autowired
-	private UserIntegralMapper userIntegralMapper;
+	private AdUserIntegralDao userIntegralMapper;
 
 	@Override
 	public HashMap<String, Object> getSelfProductDetail(String productId, String userId,String activityName) {
@@ -257,10 +247,8 @@ public class ProductServiceImpl implements ProductService {
 
 			// 6.获取可用积分
 			BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
-			UserIntegral userIntegral = new UserIntegral();
-			userIntegral.setAdUserId(Long.parseLong(userId));
-			BigDecimal dirIntegal = userIntegralMapper.getAvailIntegal(userIntegral);
-			availablePoint = availablePoint.add(dirIntegal);
+			AdUserIntegral dirIntegal = userIntegralMapper.getDirIntegralByUserId(Long.parseLong(userId));
+			availablePoint = availablePoint.add(dirIntegal.getAvailIntegral());
 
 			map.put("code", MessageDataBean.success_code);
 			map.put("selfProduct", adSelfProduct);

@@ -7,10 +7,7 @@ import com.doooly.entity.reachad.AdUserPersonalInfo;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface AdUserDao extends BaseDaoI<AdUser> {
 
@@ -347,4 +344,5 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 
 	AdUser getUserByPhoneAndGroup(AdUser adUser);
 
+	Date getReturnPointsMaxCreateDateByUser(@Param("userId") String userId);
 }

@@ -178,6 +178,7 @@ public class ELMServiceImpl implements ELMServiceI {
         newItem.setRetCode(String.valueOf(status));
         newItem.setRetMsg(remark);
         newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
+        newItem.setUpdateDate(new Date());
         int num = orderService.updateOrderItem(newItem);
         if (num != 1) {
             logger.error("-------------->> elm ad_order_detail update fail");

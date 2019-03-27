@@ -330,6 +330,9 @@ public class NewPaymentService implements NewPaymentServiceI {
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }
+        if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==0){
+            businessId = String.valueOf(orderVos.get(0).getBussinessId());
+        }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);

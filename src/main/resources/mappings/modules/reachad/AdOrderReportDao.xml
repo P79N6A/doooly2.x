@@ -1420,7 +1420,7 @@
             INNER JOIN ad_order_detail d ON o.id = d.order_report_id
             INNER JOIN ad_business b ON b.id = o.bussiness_id
         <where>
-            <if test="bigOrderNumber != null and bigOrderNumber != '' and bigOrderNumber != 'null' and isSource = 3">
+            <if test="bigOrderNumber != null and bigOrderNumber != '' and bigOrderNumber != 'null' and isSource == 3">
                 and o.big_order_number = #{bigOrderNumber}
             </if>
             <if test="bigOrderNumber != null and bigOrderNumber != '' and bigOrderNumber != 'null' and isSource != 3">

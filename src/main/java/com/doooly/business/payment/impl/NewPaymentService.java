@@ -341,7 +341,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             orderVos = adOrderReportServiceI.getOrders(order);
         }
         if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==1){
-            businessId = String.valueOf(orderVos.get(0).getBussinessId());
+            businessId = String.valueOf(orderVos.get(0).getBussinessBussinessId());
         }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);

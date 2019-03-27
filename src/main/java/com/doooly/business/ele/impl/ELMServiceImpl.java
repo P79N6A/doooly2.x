@@ -15,6 +15,8 @@ import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.payment.constants.PayConstants;
 import com.doooly.business.payment.service.NewPaymentServiceI;
 import com.doooly.business.payment.utils.SignUtil;
+import com.doooly.business.product.entity.ActivityInfo;
+import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.elm.*;
@@ -31,9 +33,7 @@ import com.doooly.entity.payment.AdPayRecord;
 import com.doooly.entity.payment.AdPayRecordExample;
 import com.doooly.entity.payment.AdPayRefundRecord;
 import com.doooly.entity.payment.AdPayRefundRecordExample;
-import com.doooly.entity.reachad.AdBusinessExpandInfo;
-import com.doooly.entity.reachad.AdOrderReport;
-import com.doooly.entity.reachad.AdReturnFlow;
+import com.doooly.entity.reachad.*;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,6 +41,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -53,6 +56,7 @@ import java.util.concurrent.TimeUnit;
  * @date: 2019-01-03
  */
 @Service
+@Transactional(readOnly = true)
 public class ELMServiceImpl implements ELMServiceI {
 
     private Logger logger = LoggerFactory.getLogger(ELMServiceImpl.class);
@@ -80,11 +84,20 @@ public class ELMServiceImpl implements ELMServiceI {
     @Autowired
     private AdReturnFlowDao adReturnFlowDao;
     @Autowired
-    private AdUserDao adUserDao;
-    @Autowired
     private AdPayRecordDao adPayRecordDao;
     @Autowired
     private AdPayRefundRecordDao adPayRefundRecordDao;
+    @Autowired
+    private OrderDao orderDao;
+    @Autowired
+    protected AdUserDao adUserDao;
+    @Autowired
+    private AdCouponCodeDao adCouponCodeDao;
+    @Autowired
+    AdRechargeRecordDao adRechargeRecordDao;
+    @Autowired
+    private ProductService productService;
+
 
     /**
      * 推送信息
@@ -114,8 +127,6 @@ public class ELMServiceImpl implements ELMServiceI {
             //验证成功将订单信息放入缓存
             stringRedisTemplate.opsForValue().set(String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98),
                     obj.toJSONString(),15, TimeUnit.MINUTES);
-            //logger.info("---------->> 验证成功订单缓存, key：{}", String.format(ELMConstants.ELM_ORDER_PREFIX, orderNo98));
-            //logger.info("---------->> 验证成功订单缓存, value：{}", obj.toJSONString());
             return ResultModel.success_ok("获取订单信息成功");
         }
     }
@@ -128,6 +139,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ResultModel orderStatusPush(String s,JSONObject obj, HttpServletRequest httpServletRequest) {
         String consumerNo = httpServletRequest.getHeader("consumerNo");
         String timeStamp = httpServletRequest.getHeader("timeStamp");
@@ -155,18 +167,21 @@ public class ELMServiceImpl implements ELMServiceI {
         //修改doooly订单状态
         if(OrderTypeEnum.OrderTypeEnum16.getCode()==status){
             //订单取消
-            OrderMsg orderMsg = orderService.cancleOrder(o.getUserId(), transactionId);
+            OrderMsg orderMsg = this.cancleOrder(o.getUserId(), transactionId);
             if (StringUtils.equals(MessageDataBean.failure_code, orderMsg.getCode())) {
                 logger.error("elm order status syn error, cancle order fail. data = {}", GsonUtils.toString(orderMsg));
             }
             logger.info("饿了么订单状态同步取消订单 orderMsg：{}", GsonUtils.toString(orderMsg));
         }
         OrderItemVo newItem = new OrderItemVo();
-        newItem.setOrderReportId(order.getId());
+        newItem.setOrderReportId(o.getId());
         newItem.setRetCode(String.valueOf(status));
         newItem.setRetMsg(remark);
         newItem.setRetState(OrderTypeEnum.getOrderTypeByCode(status));
-        orderService.updateOrderItem(newItem);
+        int num = orderService.updateOrderItem(newItem);
+        if (num != 1) {
+            logger.error("-------------->> elm ad_order_detail update fail");
+        }
         logger.info("update elm order detail status, item = {}", GsonUtils.toString(newItem));
         return ResultModel.success_ok("收到状态");
     }
@@ -178,6 +193,7 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ResultModel createElmOrderAndPay(JSONObject json) {
         ResultModel resultModel = new ResultModel();
         try {
@@ -468,6 +484,7 @@ public class ELMServiceImpl implements ELMServiceI {
     }
 
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ResultModel elmRefund(JSONObject req) {
         ResultModel resultModel = new ResultModel();
         BigDecimal zero = new BigDecimal(0);
@@ -689,5 +706,99 @@ public class ELMServiceImpl implements ELMServiceI {
             e.printStackTrace();
         }
         return res;
+    }
+
+
+    /***
+     * 饿了么取消订单
+     */
+    @Transactional
+    public OrderMsg cancleOrder(long userId, String orderNum) {
+        logger.info("cancleOrder() orderNum = {},userId = {}", orderNum, userId);
+        if (StringUtils.isEmpty(orderNum) || userId <= 0) {
+            return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
+        }
+        OrderVo orderParam = new OrderVo();
+        orderParam.setOrderNumber(orderNum);
+        orderParam.setUserId(userId);
+        //检查订单状态,交易完成的订单不能取消
+        List<OrderVo> orders = this.getOrder(orderParam);
+        OrderVo order = null;
+        if (!CollectionUtils.isEmpty(orders) && (order = orders.get(0)) != null) {
+            if (order.getType() == OrderService.OrderStatus.CANCELLED_ORDER.getCode() || order.getType() == OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode() || order.getType() == OrderService.OrderStatus.NEED_TO_DELIVER.getCode()) {
+                logger.error("订单不能取消. orderNum = {},type = {}", order.getOrderNumber(), order.getType());
+                return new OrderMsg(MessageDataBean.failure_code, "订单不能取消");
+            }
+        } else {
+            logger.info("cancleOrder() orders = {},order = {}", orders, order);
+            return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
+        }
+        //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum);
+        if(!payMsg.getCode().equals(PayMsg.success_code)){
+            //退款失败
+            return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());
+        }
+        //修改为取消状态
+        orderParam.setType(OrderService.OrderStatus.CANCELLED_ORDER.getCode());
+        orderParam.setState(OrderService.PayState.CANCELLED.getCode());
+        int updateStatus = adOrderReportDao.cancleOrder(orderParam);
+        //删除_order 删掉未null的
+        Order order1 = new Order();
+        order1.setId(order.getOrderId());
+        orderDao.delete(order1);
+
+        //恢复活动库存
+        OrderItemVo item = order.getItems().get(0);
+        if (StringUtils.isNotBlank(item.getProductSkuId())) {
+            String str[] = item.getProductSkuId().split("-");
+            int skuId = Integer.valueOf(str[1]);
+            if (!OrderService.ActivityType.COMMON_ORDER.getActType().equals(order.getActType())) {
+                AdUser user = adUserDao.getById(order.getUserId().intValue());
+                ActivityInfo actInfo = this.getActivityInfo(String.valueOf(user.getGroupNum()), Integer.valueOf(str[1]));
+                logger.info("actInfo = {}", actInfo);
+                int rows = productService.incStock(actInfo.getNumber(), skuId);
+                logger.info("cancleOrder() orderNum={},incStock.rows = {}", orderNum, rows);
+            }
+            //恢复商品库存
+            int incInventoryRows = productService.incInventory(skuId);
+            logger.info("cancleOrder() orderNum={},incInventoryRows = {}", orderNum, incInventoryRows);
+        }
+
+        //解锁券
+        String couponId = order.getCouponId();
+        int unlockCouponRows = adCouponCodeDao.unlockCoupon(userId, couponId);
+        logger.info("unlockCoupon userId = {},couponId = {},unlockCouponRows={}", userId, couponId, unlockCouponRows);
+        //如果是话费优惠订单参与修改记录
+        if(order.getProductType() == OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode()) {
+            int updateStateOrDelFlagRows = adRechargeRecordDao.updateStateOrDelFlag(order.getOrderNumber(), 1);
+            logger.info("updateStateOrDelFlag.rows = {}", updateStateOrDelFlagRows);
+        }
+        //返回取消结果
+        if (updateStatus > 0) {
+            logger.info("cancleOrder() orderNum={},cancleOrder.updateStatus = {}", orderNum, updateStatus);
+            OrderMsg msg = new OrderMsg(MessageDataBean.success_code, MessageDataBean.success_mess, new HashMap<String, Object>());
+            msg.data.put("order_status_code", OrderService.OrderStatus.CANCELLED_ORDER.getCode());
+            msg.data.put("order_status_msg", OrderService.OrderStatus.CANCELLED_ORDER.getStatus());
+            return msg;
+        }
+        return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
+    }
+
+    /**
+     * 查询订单
+     */
+    public List<OrderVo> getOrder(OrderVo order) {
+        return adOrderReportDao.getOrder(order);
+    }
+
+    /**
+     * 活动活动价格
+     * @param groupId
+     * @param skuId
+     * @return
+     */
+    public ActivityInfo getActivityInfo(String groupId, int skuId){
+        return productService.getActivityInfo(groupId, skuId);
     }
 }

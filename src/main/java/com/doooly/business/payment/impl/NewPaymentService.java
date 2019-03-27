@@ -172,6 +172,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel unifiedorder(JSONObject jsonObject) {
+        String orderNum = jsonObject.getString("orderNum");
         JSONObject orderSummary = getOrderSummary(jsonObject);
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
@@ -221,6 +222,15 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
+            }
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(orderNum);
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
+                retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
+            }else {
+                retJson.put("redirectUrl", "");
             }
             logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
@@ -330,7 +340,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }
-        if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==0){
+        if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==1){
             businessId = String.valueOf(orderVos.get(0).getBussinessId());
         }
         AdUser paramUser = new AdUser();
@@ -1162,7 +1172,14 @@ public class NewPaymentService implements NewPaymentServiceI {
                     payRecordDomain.setMerchantOrderNo(orderNum);
                     payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
                     if(payRecordDomain != null){
-                        map.put("redirectUrl", payRecordDomain.getRedirectUrl());
+                        String returnUrl = payRecordDomain.getRedirectUrl();
+                        if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
+                                returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                            returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
+                        }
+                        map.put("redirectUrl", returnUrl);
+                    }else {
+                        map.put("redirectUrl", "");
                     }
                 }
                 payMsg.setData(map);
@@ -1801,7 +1818,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            //o.setType(MeituanOrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

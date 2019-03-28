@@ -13,6 +13,7 @@ import com.doooly.entity.doooly.DlTemplateFloor;
 import com.doooly.entity.doooly.DlTemplateFloorItem;
 import com.doooly.entity.home.AdBusinessScene;
 import com.doooly.entity.reachad.*;
+import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,13 @@ public class LifehomeServiceImpl implements LifehomeService{
     private AdArticleServiceI adArticleServiceI;
 
 
+    @Cacheable(module = "TEMPLATE_LIFE", event = "getLifeFloors", key = "groupId,channel,city",
+            expiresKey = "expires", required = true)
     @Override
-    public List<Map<String, Object>> getLifeFloors(String groupId,int pageNum,int pageSize,String channel,String city) {
+    public List<Map<String, Object>> getLifeFloors(Map<String,Object> map) {
+        String groupId = String.valueOf(map.get("groupId"));
+        String channel = String.valueOf(map.get("channel"));
+        String city = String.valueOf(map.get("city"));
         List<Map<String,Object>> floorsItemMap = new ArrayList<>();
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
@@ -158,8 +164,10 @@ public class LifehomeServiceImpl implements LifehomeService{
         return floorsItemMap;
     }
 
-
-  public  List<Map<String,Object>> getGuideCategory(String groupId) {
+    @Cacheable(module = "TEMPLATE_LIFE", event = "getGuideCategory", key = "groupId",
+            expiresKey = "expires", required = true)
+    public List<Map<String,Object>> getGuideCategory(Map<String,Object> map) {
+        String groupId = String.valueOf(map.get("groupId"));
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
         List<Map<String,Object>> guideCategoryList = new ArrayList<>();
         for (int i = 0; i < dlTemplateFloorList.size(); i++) {
@@ -187,7 +195,12 @@ public class LifehomeServiceImpl implements LifehomeService{
     }
 
 
-    public List<Map<String,Object>> getGuideCategoryBusi(String guideCategoryId,int pageNum,int pageSize) {
+    @Cacheable(module = "TEMPLATE_LIFE", event = "getGuideCategoryBusi", key = "guideCategoryId,pageNum,pageSize",
+            expiresKey = "expires", required = true)
+    public List<Map<String,Object>> getGuideCategoryBusi(Map<String,Object> map) {
+        String guideCategoryId = String.valueOf(map.get("guideCategoryId"));
+        int pageNum = Integer.parseInt(String.valueOf(map.get("pageNum")));
+        int pageSize = Integer.parseInt(String.valueOf(map.get("pageSize")));
         List<Map<String,Object>> adProductListMap = new ArrayList<>();
         if (StringUtils.isBlank(guideCategoryId)) {
             return adProductListMap;

@@ -79,6 +79,7 @@ public class TemplateCacheServiceImpl implements TemplateCacheServiceI {
                 itemEntry.setLinkUrl(item.getLinkUrl());
                 itemEntry.setIconUrl(item.getIconUrl());
                 itemEntry.setId(item.getId());
+                itemEntry.setCornerMarkText(item.getCornerMarkText());
                 items.add(itemEntry);
             }
             map.put("expires", RedisConstants.REDIS_CACHE_EXPIRATION_DATE);

@@ -71,6 +71,7 @@ public class LifehomeRestServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ResultModel getUserRecentView(JSONObject jsonObject) {
+        logger.info("getUserRecentView参数：{}",jsonObject);
         long userId = jsonObject.getLongValue("userId");
         ResultModel resultModel = ResultModel.ok();
         Map<String,Object> data = Maps.newHashMap();
@@ -150,6 +151,7 @@ public class LifehomeRestServiceImpl {
     public ResultModel getGuideCategory(JSONObject jsonObject,@Context HttpServletRequest request) {
         ResultModel resultModel = ResultModel.ok();
         String groupId = request.getHeader("groupId");
+        logger.info("getGuideCategory参数：{},{}",jsonObject,groupId);
         Map<String,Object> map = new HashMap<>();
         map.put("groupId",groupId);
         resultModel.setData(lifehomeService.getGuideCategory(map));
@@ -162,6 +164,7 @@ public class LifehomeRestServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ResultModel getGuideCategoryBusi(JSONObject jsonObject,@Context HttpServletRequest request) {
+        logger.info("getGuideCategoryBusi参数：{}",jsonObject);
         ResultModel resultModel = ResultModel.ok();
         resultModel.setData(lifehomeService.getGuideCategoryBusi(jsonObject));
         return resultModel;

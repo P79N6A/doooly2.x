@@ -117,7 +117,10 @@ public class LifehomeServiceImpl implements LifehomeService{
                     List<AdBusinessGroup> adBusinessGroupList = adBusinessGroupDao.getListByCondition(adBusinessGroup);
                     List<String> businessIds = new ArrayList<>();
                     for (int k = 0; k < adBusinessGroupList.size(); k++) {
-                        businessIds.add(adBusinessGroupList.get(k).getBusinessId());
+                        int cnt = adBusinessDao.getCntByBusinessIdAndScene(adBusinessGroupList.get(k).getSceneId(),adBusinessGroupList.get(k).getBusinessId());
+                        if (cnt > 0) {
+                            businessIds.add(adBusinessGroupList.get(k).getBusinessId());
+                        }
                     }
                     List<AdBusiness> businessList = new ArrayList<>();
                     if (businessIds.size() > 0) {
@@ -205,6 +208,7 @@ public class LifehomeServiceImpl implements LifehomeService{
         if (StringUtils.isBlank(guideCategoryId)) {
             return adProductListMap;
         }
+        Long endTime = null;
         int offset = (pageNum - 1) * pageSize;
         List<AdProductExtend> productExtends = adProductDao.getGuideProductListv4(guideCategoryId,offset,pageSize,"1");
         for (AdProductExtend adProduct : productExtends) {
@@ -227,6 +231,14 @@ public class LifehomeServiceImpl implements LifehomeService{
             adProductMap.put("businessName",adProduct1.getShippingMethod());
             adProductMap.put("linkUrlWechat",adProduct1.getLinkUrlWechat());
             adProductListMap.add(adProductMap);
+            if (endTime == null || endTime > adProduct1.getBuyEndTime().getTime()) {
+                endTime = adProduct1.getBuyEndTime().getTime();
+            }
+        }
+        if (endTime != null) {
+            map.put("expires", (endTime - System.currentTimeMillis()) / 1000);
+        } else {
+            map.put("expires", -1);
         }
         return adProductListMap;
     }

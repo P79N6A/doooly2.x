@@ -20,6 +20,7 @@
 		id id,
 		business_id businessId,
 		group_id groupId,
+		scene_id sceneId,
 		create_date createDate
 		FROM
 		ad_business_group t

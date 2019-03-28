@@ -71,4 +71,6 @@ public interface AdBusinessDao extends BaseDaoI<AdBusiness> {
     List<AdBusiness> getListByBusinessIds(@Param("businessIds") List<String> businessIds);
 
     List<String> getBusinessByCity(@Param("city") String city);
+
+	int getCntByBusinessIdAndScene(@Param("sceneId") Long sceneId,@Param("businessId") String businessId);
 }

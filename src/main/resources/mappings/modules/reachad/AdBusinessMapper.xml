@@ -550,4 +550,8 @@
 		</foreach>
 
 	</select>
+
+	<select id="getCntByBusinessIdAndScene" resultType="int">
+		select count(1) from ad_business where FIND_IN_SET(#{sceneId},scene) and id = #{businessId};
+	</select>
 </mapper>

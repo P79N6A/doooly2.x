@@ -10,6 +10,7 @@ import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.PropertiesHolder;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessDao;
+import com.doooly.entity.reachad.AdArea;
 import com.doooly.entity.reachad.AdBusiness;
 import com.easy.mq.client.RocketClient;
 import com.easy.mq.result.RocketProducerMessage;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -176,6 +178,9 @@ public class LifehomeRestServiceImpl {
         String city = jsonObject.getString("city");
         String groupId = request.getHeader("groupId");
         String channel = request.getHeader(Constants.CHANNEL);
+        if (org.apache.commons.lang3.StringUtils.isBlank(city)) {
+            city = AdArea.ALLCITY;
+        }
         logger.info("getLifeFloors参数:{},{},{}",groupId,city,channel);
         //String floorStr = configDictServiceI.getValueByTypeAndKeyNoCache("getLifeFloors_data","getLifeFloors_data");
         //JSONArray jsonArray = JSONArray.parseArray(floorStr);

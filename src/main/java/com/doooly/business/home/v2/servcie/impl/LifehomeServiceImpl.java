@@ -63,7 +63,7 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Cacheable(module = "TEMPLATE_LIFE", event = "getLifeFloors", key = "groupId,channel,city",
-            expiresKey = "expires", required = true)
+            expiresKey = "expires", required = false)
     @Override
     public List<Map<String, Object>> getLifeFloors(Map<String,Object> map) {
         String groupId = String.valueOf(map.get("groupId"));
@@ -165,7 +165,7 @@ public class LifehomeServiceImpl implements LifehomeService{
     }
 
     @Cacheable(module = "TEMPLATE_LIFE", event = "getGuideCategory", key = "groupId",
-            expiresKey = "expires", required = true)
+            expiresKey = "expires", required = false)
     public List<Map<String,Object>> getGuideCategory(Map<String,Object> map) {
         String groupId = String.valueOf(map.get("groupId"));
         List<DlTemplateFloor> dlTemplateFloorList = templateFloorDao.getTemplateFloorByGroup(groupId,"2");//1、首页模板，2、生活模板
@@ -196,7 +196,7 @@ public class LifehomeServiceImpl implements LifehomeService{
 
 
     @Cacheable(module = "TEMPLATE_LIFE", event = "getGuideCategoryBusi", key = "guideCategoryId,pageNum,pageSize",
-            expiresKey = "expires", required = true)
+            expiresKey = "expires", required = false)
     public List<Map<String,Object>> getGuideCategoryBusi(Map<String,Object> map) {
         String guideCategoryId = String.valueOf(map.get("guideCategoryId"));
         int pageNum = Integer.parseInt(String.valueOf(map.get("pageNum")));

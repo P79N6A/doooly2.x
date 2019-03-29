@@ -88,7 +88,9 @@ public class LifehomeServiceImpl implements LifehomeService{
                     }
                 }
                 adMap.put("list",adMapItemList);
-                floorsItemMap.add(adMap);
+                if (adMapItemList.size() > 0) {
+                    floorsItemMap.add(adMap);
+                }
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_TWO) {
                 //生活场景
                 Map<String,Object> lifeSceneMap = new HashMap<>();
@@ -155,7 +157,9 @@ public class LifehomeServiceImpl implements LifehomeService{
                     }
                 }
                 lifeSceneMap.put("list",adBusinessSceneListMap);
-                floorsItemMap.add(lifeSceneMap);
+                if (adBusinessSceneListMap.size() > 0) {
+                    floorsItemMap.add(lifeSceneMap);
+                }
             } else if (dlTemplateFloorList.get(i).getType() == CstInfoConstants.TEMP_LIFE_TYPE_THREE) {
                 //导购管理
                 Map<String,Object> adGuideCategoryData = new HashMap<>();

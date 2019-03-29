@@ -151,8 +151,8 @@ public class LifehomeServiceImpl implements LifehomeService{
                         adBusinessMap.put("serverEndTime",businessList.get(k).getServerEndTime());
                         businessListMap.add(adBusinessMap);
                     }
+                    adBusinessSceneMap.put("subList",businessListMap);
                     if (businessListMap.size() > 0) {
-                        adBusinessSceneMap.put("subList",businessListMap);
                         adBusinessSceneListMap.add(adBusinessSceneMap);
                     }
                 }

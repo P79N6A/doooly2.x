@@ -464,9 +464,9 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			if (equityList != null && equityList.size() > 0) {
 				response.getData().setGroupLevel(equityList.get(0).getAdGroupLevel());
 
-				if (equityList.size() > 4) {
+				if (equityList.size() > 3) {
 					// 有更多
-					response.getData().setGroupEquitys(equityList.subList(0, 4));
+					response.getData().setGroupEquitys(equityList.subList(0, 3));
 					response.getData().setHasMoreEquity(true);
 				} else {
 					// 没有更多

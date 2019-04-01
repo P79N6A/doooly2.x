@@ -111,7 +111,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         if (StringUtils.isBlank(productType)) {
             productType = MeituanProductTypeEnum.WAIMAI.getCode();
         }
-        logger.info("getMeituanEasyLoginUrl参数：{},{},{}",token,userId,productType);
+        logger.info("getMeituanEasyLoginUrl参数：{},{},{},{}",token,userId,productType,deviceHash);
         String loginUrl = "";
         if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));

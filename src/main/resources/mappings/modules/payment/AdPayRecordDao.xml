@@ -45,7 +45,7 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="pay_end_time" jdbcType="TIMESTAMP" property="payEndTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="big_order_number" jdbcType="BIGINT" property="bigOrderNumber" />
+    <result column="big_order_number" jdbcType="VARCHAR" property="bigOrderNumber" />
     <result column="dir_integral_switch" jdbcType="TINYINT" property="dirIntegralSwitch" />
     <result column="redirect_url" jdbcType="VARCHAR" property="redirectUrl" />
   </resultMap>

@@ -404,7 +404,7 @@ public class AdPayRecord implements Serializable {
      * @mbg.generated
      */
     //@ApiModelProperty(value="大订单编号",name="bigOrderNumber")
-    private Long bigOrderNumber;
+    private String bigOrderNumber;
 
     /**
      *
@@ -1378,7 +1378,7 @@ public class AdPayRecord implements Serializable {
      *
      * @mbg.generated
      */
-    public Long getBigOrderNumber() {
+    public String getBigOrderNumber() {
         return bigOrderNumber;
     }
 
@@ -1390,7 +1390,7 @@ public class AdPayRecord implements Serializable {
      *
      * @mbg.generated
      */
-    public void setBigOrderNumber(Long bigOrderNumber) {
+    public void setBigOrderNumber(String bigOrderNumber) {
         this.bigOrderNumber = bigOrderNumber;
     }
 

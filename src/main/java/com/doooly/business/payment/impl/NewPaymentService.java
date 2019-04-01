@@ -1205,6 +1205,20 @@ public class NewPaymentService implements NewPaymentServiceI {
             payMsg = ResultModel.ok();
             Map<String, Object> map = new HashMap<>();
             map.put("totalAmount", adOrderBig1.getTotalAmount());
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(orderNum);
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if(payRecordDomain != null){
+                String returnUrl = payRecordDomain.getRedirectUrl();
+                if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
+                        returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                    returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
+                }
+                map.put("redirectUrl", returnUrl);
+            }else {
+                map.put("redirectUrl", "");
+            }
             payMsg.setData(map);
         } else {
             payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);

@@ -17,6 +17,8 @@ import com.doooly.common.meituan.EncryptUtil;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.StaffTypeEnum;
+import com.doooly.common.util.MD5Util;
+import com.doooly.common.util.RandomUtil;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
@@ -98,6 +100,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     public String getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
         String token = request.getParameter("token");//request.getHeader("token");
         String userId = request.getParameter("userId");//request.getHeader("userId");
+        String deviceHash = request.getParameter("deviceHash");
         if (StringUtils.isBlank(token)) {
             token = request.getHeader("token");
         }
@@ -113,6 +116,15 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
             if (adUser != null) {
+                if (StringUtils.isBlank(deviceHash)) {
+                    deviceHash = MD5Util.digest(adUser.getId() + "");
+                }
+                Map<String,Object> riskParam = new HashMap<>();
+                riskParam.put("deviceHash",deviceHash);
+                riskParam.put("thirdUserIdHash",adUser.getId());
+                if (StringUtils.isNotBlank(adUser.getIdentityCard())) {
+                    riskParam.put("idCardHash",adUser.getIdentityCard());
+                }
                 try {
                     //判断是否已经同步
                     List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getCardNumber()),StaffTypeEnum.StaffTypeEnum30);
@@ -120,7 +132,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                     if (staffInfoVOS != null && staffInfoVOS.size() > 0) {
                         //判断手机号是否被修改
                         if (adUser.getTelephone().equals(staffInfoVOS.get(0).getPhone())) {
-                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                         } else {
                             StaffInfoVO staffInfoVO = new StaffInfoVO();
                             staffInfoVO.setName(adUser.getName());
@@ -129,7 +141,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                             staffInfoVO.setEmail(adUser.getMailbox());
                             List<StaffInfoVO> staffInfoVOList = staffService.batchUpdateStaff(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
                             if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
-                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                             }
                         }
                     } else {
@@ -144,7 +156,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                             List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
                             logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
                             if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
-                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
                             }
                         }
                     }

@@ -35,6 +35,7 @@ import com.doooly.entity.payment.AdPayRefundRecord;
 import com.doooly.entity.payment.AdPayRefundRecordExample;
 import com.doooly.entity.reachad.*;
 import com.reach.redis.utils.GsonUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -239,6 +239,11 @@ public class ELMServiceImpl implements ELMServiceI {
             param.put("orderDate", DateUtils.formatDateTime(new Date()));
             param.put("clientIp", json.get("clientIp"));
             param.put("nonceStr", json.get("nonceStr"));
+
+            param.put("redirectUrl", json.get("redirectUrl"));
+            //订单失效时间
+            Date expireTime = DateUtils.parse(json.getString("timeExpire"), "yyyyMMddHHmmss");
+            param.put("expireTime", DateUtils.dateFormatStr(expireTime, "yyyy-MM-dd HH:mm:ss"));
 
             JSONArray jsonArray = new JSONArray();
             JSONObject jsonDetail = new JSONObject();
@@ -522,6 +527,9 @@ public class ELMServiceImpl implements ELMServiceI {
             AdPayRecord adPayRecord = getAdPayRecord(req.getString("transactionId"));
             if (null != adPayRecord) {
                 outTradeNo = adPayRecord.getOutTradeNo();
+                if (StringUtils.isBlank(adPayRecord.getNotifyUrl())) {
+                    updateNotifyUrl(adPayRecord.getId(), req.getString("notifyUrl"));
+                }
             }
             // 退款流水
             AdPayRefundRecord adPayRefundRecord = getAdPayRefundRecord(req.getString("transactionId"));
@@ -654,7 +662,7 @@ public class ELMServiceImpl implements ELMServiceI {
         AdPayRecordExample example = new AdPayRecordExample();
         example.createCriteria().andMerchantOrderNoEqualTo(merchantOrderNo);
         List<AdPayRecord> adPayRecordList = adPayRecordDao.selectByExample(example);
-        return adPayRecordList != null ? adPayRecordList.get(0) : null;
+        return CollectionUtils.isNotEmpty(adPayRecordList) ? adPayRecordList.get(0) : null;
     }
 
     /**
@@ -667,6 +675,20 @@ public class ELMServiceImpl implements ELMServiceI {
         example.createCriteria().andMerchantOrderNoEqualTo(merchantOrderNo);
         List<AdPayRefundRecord> adPayRefundRecordList = adPayRefundRecordDao.selectByExample(example);
         return adPayRefundRecordList != null ? adPayRefundRecordList.get(0) : null;
+    }
+
+    /**
+     *  退款更新回调地址
+     * @param id
+     * @param notifyUrl
+     * @return
+     */
+    private boolean updateNotifyUrl(Long id, String notifyUrl) {
+        AdPayRefundRecord record  = new AdPayRefundRecord();
+        record.setId(id);
+        record.setNotifyUrl(notifyUrl);
+        int num = adPayRefundRecordDao.updateByPrimaryKeySelective(record);
+        return  num > 0;
     }
 
 

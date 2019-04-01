@@ -684,10 +684,11 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private boolean updateNotifyUrl(Long id, String notifyUrl) {
-        AdPayRefundRecord record  = new AdPayRefundRecord();
+        AdPayRecord record  = new AdPayRecord();
         record.setId(id);
         record.setNotifyUrl(notifyUrl);
-        int num = adPayRefundRecordDao.updateByPrimaryKeySelective(record);
+        record.setUpdateTime(new Date());
+        int num = adPayRecordDao.updateByPrimaryKeySelective(record);
         return  num > 0;
     }
 

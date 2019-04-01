@@ -552,6 +552,10 @@
 	</select>
 
 	<select id="getCntByBusinessIdAndScene" resultType="int">
-		select count(1) from ad_business where FIND_IN_SET(#{sceneId},scene) and id = #{businessId} and is_active = 2;
+		select count(1) from ad_business
+		where FIND_IN_SET(#{sceneId},scene)
+		and id = #{businessId}
+		and is_active = 2
+		 and server_end_time > CURRENT_TIMESTAMP()
 	</select>
 </mapper>

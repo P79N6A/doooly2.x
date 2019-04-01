@@ -112,6 +112,12 @@ public class LifehomeRestServiceImpl {
             if (businessIds.size() > 0) {
                 adBusinessList = adBusinessDao.getListByBusinessIds(businessIds);
             }
+            for (Iterator<AdBusiness> iterator = adBusinessList.iterator();iterator.hasNext();) {
+                AdBusiness adBusiness = iterator.next();
+                if (adBusiness.getServerEndTime().getTime() < currentDate.getTime()) {
+                    iterator.remove();
+                }
+            }
             Map<String,AdBusiness> businessMap = new HashMap<>();
             for (int i = 0; i < adBusinessList.size(); i++) {
                 businessMap.put(adBusinessList.get(i).getId()+"",adBusinessList.get(i));

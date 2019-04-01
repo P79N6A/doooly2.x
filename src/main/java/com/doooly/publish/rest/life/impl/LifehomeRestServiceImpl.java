@@ -124,7 +124,11 @@ public class LifehomeRestServiceImpl {
             }
             List<AdBusiness> adBusinessList1 = new ArrayList<>();
             for (int i = 0; i < businessIds.size(); i++) {
-                adBusinessList1.add(businessMap.get(businessIds.get(i)));
+                for (int j = 0; j < adBusinessList.size(); j++) {
+                    if (businessIds.get(i).equals(adBusinessList.get(j).getId()+"")) {
+                        adBusinessList1.add(businessMap.get(businessIds.get(i)));
+                    }
+                }
             }
             AdBusiness adBusinessItem = null;
             for (int i = 0; i < adBusinessList1.size(); i++) {

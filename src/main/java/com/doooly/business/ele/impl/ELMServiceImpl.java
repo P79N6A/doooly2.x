@@ -165,7 +165,7 @@ public class ELMServiceImpl implements ELMServiceI {
         //饿了么商户交易id
         String transactionId = o.getOrderNumber();
         //修改doooly订单状态
-        if(OrderTypeEnum.OrderTypeEnum16.getCode()==status){
+        if(OrderTypeEnum.OrderTypeEnum16.getCode() ==status  || OrderTypeEnum.OrderTypeEnum10.getCode() == status){
             //订单取消
             OrderMsg orderMsg = this.cancleOrder(o.getUserId(), transactionId);
             if (StringUtils.equals(MessageDataBean.failure_code, orderMsg.getCode())) {

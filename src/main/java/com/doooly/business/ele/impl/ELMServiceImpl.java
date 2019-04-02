@@ -527,14 +527,13 @@ public class ELMServiceImpl implements ELMServiceI {
             AdPayRecord adPayRecord = getAdPayRecord(req.getString("transactionId"));
             if (null != adPayRecord) {
                 outTradeNo = adPayRecord.getOutTradeNo();
-                if (StringUtils.isBlank(adPayRecord.getNotifyUrl())) {
-                    updateNotifyUrl(adPayRecord.getId(), req.getString("notifyUrl"));
-                }
             }
             // 退款流水
             AdPayRefundRecord adPayRefundRecord = getAdPayRefundRecord(req.getString("transactionId"));
             if (null != adPayRefundRecord) {
                 outRefundNo = adPayRefundRecord.getOutRefundNo();
+                logger.info("------------------>>elm refund notifyUrl:" + req.getString("notifyUrl"));
+                updateNotifyUrl(adPayRefundRecord.getId(), req.getString("notifyUrl"));
             }
             JSONObject result = getElmRefundResult(ELMConstants.ELM_RESULT_SUCCESS, PayMsg.success_mess,
                     req.getString("transactionId"), outTradeNo,
@@ -684,11 +683,11 @@ public class ELMServiceImpl implements ELMServiceI {
      * @return
      */
     private boolean updateNotifyUrl(Long id, String notifyUrl) {
-        AdPayRecord record  = new AdPayRecord();
+        AdPayRefundRecord record  = new AdPayRefundRecord();
         record.setId(id);
         record.setNotifyUrl(notifyUrl);
         record.setUpdateTime(new Date());
-        int num = adPayRecordDao.updateByPrimaryKeySelective(record);
+        int num = adPayRefundRecordDao.updateByPrimaryKeySelective(record);
         return  num > 0;
     }
 

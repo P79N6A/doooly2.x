@@ -382,7 +382,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 param.getString("merchantNo"), param.getString("appId"));
         if (null == adBusinessExpandInfo) {
             JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_MERCHANT_NO_ERROR,
-                    "", 0, "", paStatus, thirdUserId, thirdPaAccount);
+                    "", paAount, "", paStatus, thirdUserId, thirdPaAccount);
             resultModel.setData(ress);
             return resultModel;
         }
@@ -400,7 +400,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 accessToken = (String) data.get("access_token");
             } else {
                 JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL,
-                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount.intValue(), "",
+                        ELMConstants.ELE_MERCHANT_AUTHORIZE_FAIL, transactionId, paAount, "",
                         paStatus, thirdUserId, thirdPaAccount);
                 resultModel.setData(ress);
                 return resultModel;
@@ -427,7 +427,7 @@ public class ELMServiceImpl implements ELMServiceI {
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (null == jsonObject) {
             JSONObject ress = getQueryPayResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_QUERY_PAY_FAIL,
-                    transactionId, paAount.intValue(), "", paStatus, thirdUserId, thirdPaAccount);
+                    transactionId, paAount, "", paStatus, thirdUserId, thirdPaAccount);
             resultModel.setData(ress);
             return resultModel;
         }
@@ -437,23 +437,16 @@ public class ELMServiceImpl implements ELMServiceI {
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
             String payStatus = String.valueOf(data.get("payStatus"));   //支付状态 0 未支付 1支付成功 2支付失败
             outTradeNo = data.get("outTradeNo").toString();        //兜礼平台订单号
-            paAount = new BigDecimal(data.get("orderAmount").toString());
+            paAount = new BigDecimal(data.get("payAmount").toString()).multiply(new BigDecimal(100));
             if (PayConstants.PAY_STATUS_1.equals(payStatus)) {
                 //说明支付成功处理结果
                 paStatus = PayStatusEnum.PayTypeSuccess.getCode();
                 // 根据订单号去第三方查询userId
                 AdOrderReport queryParam = new AdOrderReport();
-                queryParam.setOrderNumber(outTradeNo);
+                queryParam.setOrderNumber(transactionId);
                 Long userId = adOrderReportDao.getUserIdByOrderNum(queryParam);
-                if (null != userId) {
-                    thirdUserId = String.valueOf(userId);                   //S三方UserID，风控使用，支付成功后必传
-                    thirdPaAccount = ELMConstants.DOOOLY_FINANCIAL_ACCOUNT; //S三方收款账户，风控使用，支付成功后必传。
-                  /*  AdUser adUser = adUserDao.getById(userId.intValue());
-                    if (null != adUser) {
-                        thirdUserId = (null != adUser.getTelephone())  ? adUser.getTelephone() :adUser.getCardNumber();
-                        thirdPaAccount = ELMConstants.DOOOLY_FINANCIAL_ACCOUNT;
-                    }*/
-                }
+                thirdUserId = String.valueOf(userId);                   //S三方UserID，风控使用，支付成功后必传
+                thirdPaAccount = ELMConstants.DOOOLY_FINANCIAL_ACCOUNT; //S三方收款账户，风控使用，支付成功后必传。
             } else {
                 paStatus = PayStatusEnum.PayTypeNotPay.getCode();
             }
@@ -461,12 +454,12 @@ public class ELMServiceImpl implements ELMServiceI {
             paStatus = PayStatusEnum.PayTypeNotPay.getCode();
         }
         JSONObject res = getQueryPayResult(ELMConstants.ELM_RESULT_SUCCESS, jsonObject.getString("info"),
-                transactionId, paAount.intValue(), outTradeNo, paStatus, thirdUserId, thirdPaAccount);
+                transactionId, paAount, outTradeNo, paStatus, thirdUserId, thirdPaAccount);
         resultModel.setData(res);
         return resultModel;
     }
 
-    private JSONObject getQueryPayResult(int returnCode, String returnsg, String transactionId, int paAount,
+    private JSONObject getQueryPayResult(int returnCode, String returnsg, String transactionId, BigDecimal paAount,
                                          String outTradeNo, String paStatus, String thirdUserId, String thirdPaAccount) {
         JSONObject res = new JSONObject();
         try {

@@ -466,13 +466,13 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("appId", ELMConstants.ELM_APP_ID);
             res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
             res.put("returnCode", returnCode);
-            res.put("returnsg", returnsg);
+            res.put("returnMsg", returnsg);
             res.put("transactionId", transactionId);
-            res.put("paAount", paAount);
+            res.put("payAmount", paAount);
             res.put("outTradeNo", outTradeNo);
-            res.put("paStatus", paStatus);
+            res.put("payStatus", paStatus);
             res.put("thirdUserId", thirdUserId);          //S三方UserID，风控使用，支付成功后必传。
-            res.put("thirdPaAccount", thirdPaAccount);   //S三方收款账户，风控使用，支付成功后必传。
+            res.put("thirdPayAccount", thirdPaAccount);   //S三方收款账户，风控使用，支付成功后必传。
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);

@@ -332,16 +332,15 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         JSONObject res = new JSONObject();
         try {
             res.put("returnCode", ELMConstants.ELM_RESULT_FAIL);
-            res.put("returnsg", returnsg);
+            res.put("returnMsg", returnsg);
             res.put("appId", ELMConstants.ELM_APP_ID);
-            res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);
-            res.put("erchantNo", "");              //三方分配的商户号
+            res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);  //三方分配的商户号
             res.put("transactionId", "");          //支付网关的订单号
             res.put("outTradeNo", "");             //第三方交易号，支付成功后必传。
-            res.put("paAount", "");                //支付金额，单位：分
-            res.put("paStatus", "");               //支付状态
+            res.put("payAmount", "");                //支付金额，单位：分
+            res.put("payStatus", "");               //支付状态
             res.put("thirdUserId", "");            //S三方UserID，风控使用，支付成功后必传。
-            res.put("thirdPaAccount", "");          //S三方收款账户，风控使用，支付成功后必传。
+            res.put("thirdPayAccount", "");          //S三方收款账户，风控使用，支付成功后必传。
             res.put("nonceStr", RandomUtil.getRandomStr(32)); //随机串（长度32）
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);

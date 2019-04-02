@@ -306,7 +306,7 @@ public class OrderServiceImpl implements OrderService {
 				int skuId = productSkuVo.getSkuId();
                 productSkuIds.append(skuId).append(",");
 				int buyQuantity = productSkuVo.getBuyNum();
-                int productType = productSkuVo.getProductType();
+                int productType = orderVo.getProductType();
                 Map<String,Object> paramMap = new HashMap<>();
                 paramMap.put("merchantId",merchantId);
                 paramMap.put("productId",productId);

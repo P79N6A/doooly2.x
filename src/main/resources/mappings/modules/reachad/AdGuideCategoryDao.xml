@@ -16,7 +16,9 @@
 	<select id="findList" resultType="com.doooly.entity.reachad.AdGuideCategory">
 		SELECT 
 			<include refid="AdGuideCategoryColumns"/>
-		FROM ad_guide_category a WHERE a.state = 1
+		FROM ad_guide_category a
+		WHERE a.state = 1
+		and a.del_flag = 0
         ORDER BY a.sort
 	</select>
 

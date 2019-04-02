@@ -80,13 +80,14 @@ public class MeituanServiceImpl implements MeituanService{
 
 
     @Override
-    public String easyLogin(String entToken, String staffNo, String staffPhoneNo,MeituanProductTypeEnum productTypeEnum) throws Exception{
+    public String easyLogin(String entToken, String staffNo, String staffPhoneNo,Map<String,Object> riskParam,MeituanProductTypeEnum productTypeEnum) throws Exception{
         EasyLogin easyLogin = new EasyLogin();
         easyLogin.setEntToken(entToken);
         easyLogin.setStaffNo(staffNo);
         easyLogin.setStaffPhoneNo(staffPhoneNo);
         easyLogin.setProductType(productTypeEnum.getCode());
         Map<String,Object> paramMap = BeanMapUtil.transBean2Map(easyLogin);
+        paramMap.putAll(riskParam);
         paramMap.remove("signature");
         paramMap =  BeanMapUtil.sortMapByKey(paramMap);
         String signature = getSiginature(paramMap);

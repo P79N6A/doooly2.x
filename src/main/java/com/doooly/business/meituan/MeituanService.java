@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface MeituanService {
 
-    String easyLogin(String entToken, String staffNo, String staffPhoneNo, MeituanProductTypeEnum productTypeEnum) throws Exception;
+    String easyLogin(String entToken, String staffNo, String staffPhoneNo,Map<String,Object> riskParam,MeituanProductTypeEnum productTypeEnum) throws Exception;
 
     String getSiginature(Map<String,Object> map) throws Exception;
 

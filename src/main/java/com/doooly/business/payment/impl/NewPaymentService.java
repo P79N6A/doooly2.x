@@ -1153,7 +1153,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map.put("orderNum", order1.getOrderNumber());
                     map.put("orderId", order.getOrderId());
                     map.put("oid", order.getId());
-                    map.put("totalAmount", order.getTotalMount());
+                    map.put("totalAmount", order.getTotalMount().add(order.getServiceCharge()));
                     //最终支付结果code
                     map.put("code", payMsg.getCode());
                     //手续费
@@ -1204,12 +1204,12 @@ public class NewPaymentService implements NewPaymentServiceI {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
             Map<String, Object> map = new HashMap<>();
-            map.put("totalAmount", adOrderBig1.getTotalAmount());
             //获取跳转链接
             PayRecordDomain payRecordDomain = new PayRecordDomain();
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
             if(payRecordDomain != null){
+                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2,BigDecimal.ROUND_HALF_UP));
                 String returnUrl = payRecordDomain.getRedirectUrl();
                 if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
                         returnUrl.contains("doooly")||returnUrl.contains("reach"))){
@@ -1217,6 +1217,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 }
                 map.put("redirectUrl", returnUrl);
             }else {
+                map.put("totalAmount", adOrderBig.getTotalAmount());
                 map.put("redirectUrl", "");
             }
             payMsg.setData(map);

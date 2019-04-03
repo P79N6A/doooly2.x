@@ -1,7 +1,6 @@
 package com.doooly.business.myorder.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 public class OrderDetailResp {
 	
@@ -48,6 +47,13 @@ public class OrderDetailResp {
 	private String systemDate;
 	private String cashDeskSource;
 	private  String productId;
+
+    /** 物流公司 */
+    private String expressCompanyName;
+    /** 快递单号 */
+    private String courierNumber;
+    /** 礼包订单标识 1 */
+    private String orderType;
 
 	public void setProductId(String productId) {
 		this.productId = productId;
@@ -307,4 +313,27 @@ public class OrderDetailResp {
 		this.cashDeskSource = cashDeskSource;
 	}
 
+    public String getExpressCompanyName() {
+        return expressCompanyName;
+    }
+
+    public void setExpressCompanyName(String expressCompanyName) {
+        this.expressCompanyName = expressCompanyName;
+    }
+
+    public String getCourierNumber() {
+        return courierNumber;
+    }
+
+    public void setCourierNumber(String courierNumber) {
+        this.courierNumber = courierNumber;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
 }

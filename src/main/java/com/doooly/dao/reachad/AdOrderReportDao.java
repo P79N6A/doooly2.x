@@ -14,6 +14,7 @@ import com.doooly.entity.reachad.AdUserBusinessExpansion;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public interface AdOrderReportDao {
      * @param adOrderReport
      * @return
      */
-    AdOrderReport getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
+    OrderPoResp getOrderReportIdByOrderNum(AdOrderReport adOrderReport);
     /**
      *
      * @param adOrderReport
@@ -83,6 +84,14 @@ public interface AdOrderReportDao {
      * @return
      */
     List<OrderPoResp> findALLOrderList(OrderPoReq orderReq);
+
+    /**
+     *
+     * @param orderReq
+     * @return
+     */
+    Long findALLOrderSum(OrderPoReq orderReq);
+
     /**
      * 最近到账订单
      * @param orderReq
@@ -145,4 +154,13 @@ public interface AdOrderReportDao {
     List<OrderVo> getOrders(@Param("bigOrderNumber")String bigOrderNumber);
 
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
+
+    OrderVo getLiftOrder(String orderNum);
+
+    /**
+     * 按类型获得用户最新订单时间
+     *
+     * @return
+     */
+    Date getMaxOrderDateByUserAndType(@Param("userId") String userId, @Param("type") String type);
 }

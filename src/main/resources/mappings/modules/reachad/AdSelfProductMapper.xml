@@ -171,7 +171,7 @@
 			FROM ad_self_product p
 			LEFT JOIN ad_self_product_image i
 				ON p.id = i.self_product_id
-			WHERE p.is_marketable != 0 AND p.del_flag = 0
+			WHERE p.is_marketable != 0 AND p.del_flag = 0 AND p.product_attr =0
 		)b WHERE b.totalSkuCount > b.limitSkuCount
     </select>
 
@@ -199,7 +199,7 @@
 			FROM ad_self_product p
 			LEFT JOIN ad_self_product_image i
 				ON p.id = i.self_product_id
-			WHERE p.is_marketable != 0 AND p.del_flag = 0
+			WHERE p.is_marketable != 0 AND p.del_flag = 0 AND p.product_attr =0
 			ORDER BY p.sort ASC,p.create_date DESC
 		)b WHERE b.totalSkuCount > b.limitSkuCount
 		LIMIT #{startIndex},#{pageSize}
@@ -262,6 +262,7 @@
 			p.id AS "id",
 			p.name AS "name",
 			p.detail AS "detail",
+			p.product_attr AS "productAttr",
 			p.introduction as "introduction",
 			b.id AS "businessId",
 			b.company AS "company",  

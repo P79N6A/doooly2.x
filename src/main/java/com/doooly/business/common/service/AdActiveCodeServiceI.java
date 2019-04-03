@@ -32,6 +32,6 @@ public interface AdActiveCodeServiceI {
 	public int useActiveCode(String cardNumber) throws Exception;
 
 
-	JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId) throws Exception;
+	JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId,String verificationCode) throws Exception;
 	
 }

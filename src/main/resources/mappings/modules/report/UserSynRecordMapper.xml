@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.doooly.dao.report.UserSynRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.doooly.entity.report.UserSynRecord" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="bussiness_id" property="bussinessId" jdbcType="VARCHAR" />
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, bussiness_id, serial_num, remarks, create_date, update_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from user_syn_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from user_syn_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.doooly.entity.report.UserSynRecord" >
+    insert into user_syn_record (id, user_id, bussiness_id, 
+      serial_num, remarks, create_date, 
+      update_date)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{bussinessId,jdbcType=VARCHAR}, 
+      #{serialNum,jdbcType=VARCHAR}, #{remarks,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, 
+      #{updateDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.doooly.entity.report.UserSynRecord" >
+    insert into user_syn_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="bussinessId != null" >
+        bussiness_id,
+      </if>
+      <if test="serialNum != null" >
+        serial_num,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="bussinessId != null" >
+        #{bussinessId,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNum != null" >
+        #{serialNum,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.doooly.entity.report.UserSynRecord" >
+    update user_syn_record
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="bussinessId != null" >
+        bussiness_id = #{bussinessId,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNum != null" >
+        serial_num = #{serialNum,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.doooly.entity.report.UserSynRecord" >
+    update user_syn_record
+    set user_id = #{userId,jdbcType=INTEGER},
+      bussiness_id = #{bussinessId,jdbcType=VARCHAR},
+      serial_num = #{serialNum,jdbcType=VARCHAR},
+      remarks = #{remarks,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_date = #{updateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <insert id="batchInsertSynUserRecord" parameterType="java.util.List">
+        insert into user_syn_record(user_id,bussiness_id,serial_num,remarks)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.userId},
+                #{item.bussinessId},
+                #{item.serialNum},
+                #{item.remarks}
+            )
+        </foreach>
+    </insert>
+</mapper>

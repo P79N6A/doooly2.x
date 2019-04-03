@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.doooly.dao.payment.PayRecordMapper">
+
+    <sql id="adPayRecordColumns">
+        a.id AS "id",
+        a.pay_id AS "payId",
+        a.business_id AS "businessId",
+        a.mobile AS "mobile",
+        a.merchant_name AS "merchantName",
+        a.merchant_order_no AS "merchantOrderNo",
+        a.out_trade_no AS "outTradeNo",
+        a.order_price AS "orderPrice",
+        a.order_amount AS "orderAmount",
+        a.order_body AS "orderBody",
+        a.pay_type AS "payType",
+        a.integral_pay_amount AS "integralPayAmount",
+        a.integral_rebate_amount AS "integralRebateAmount",
+        a.integral_rebate_pay_amount AS "integralRebatePayAmount",
+        a.pay_amount AS "payAmount",
+        a.notify_url AS "notifyUrl",
+        a.redirect_url AS "redirectUrl",
+        a.client_ip AS "clientIp",
+        a.order_ip AS "orderIp",
+        a.integral_pay_status AS "integralPayStatus",
+        a.pay_status AS "payStatus",
+        a.trade_type AS "tradeType",
+        a.order_period AS "orderPeriod",
+        a.expire_time AS "expireTime",
+        a.remark AS "remark",
+        a.integral_refund_count AS "integralRefundCount",
+        a.integral_refund_amount AS "integralRefundAmount",
+        a.refund_count AS "refundCount",
+        a.refund_amount AS "refundAmount",
+        a.return_code AS "returnCode",
+        a.return_msg AS "returnMsg",
+        a.result_code AS "resultCode",
+        a.err_code AS "errCode",
+        a.err_code_des AS "errCodeDes",
+        a.appid AS "appid",
+        a.mch_id AS "mchId",
+        a.transaction_id AS "transactionId",
+        a.create_time AS "createTime",
+        a.pay_end_time AS "payEndTime",
+        a.update_time AS "updateTime",
+        a.big_order_number AS "bigOrderNumber"
+    </sql>
+
+
+    <select id="getPayRecordDomain" parameterType="com.doooly.entity.payment.PayRecordDomain" resultType="com.doooly.entity.payment.PayRecordDomain">
+        SELECT        <include refid="adPayRecordColumns"/>
+        FROM ad_pay_record a
+        <where>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+               AND a.merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="bigOrderNumber != null and bigOrderNumber != ''">
+                AND a.big_order_number = #{bigOrderNumber}
+            </if>
+            <if test="businessId != null and businessId != ''">
+                AND a.business_id = #{businessId}
+            </if>
+        </where>
+        limit 1
+    </select>
+</mapper>

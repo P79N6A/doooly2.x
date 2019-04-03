@@ -1,6 +1,7 @@
 package com.doooly.business.guide.service;
 
 import com.doooly.dto.common.MessageDataBean;
+import com.doooly.dto.reachad.AdProductExtend;
 
 import java.util.Map;
 
@@ -23,4 +24,7 @@ public interface AdArticleServiceI {
 
     MessageDataBean addSellCount(String productId);
 
+    MessageDataBean getGuideProductListv3(Map<String, String> map);
+
+    void calculateExtend(AdProductExtend adProduct);
 }

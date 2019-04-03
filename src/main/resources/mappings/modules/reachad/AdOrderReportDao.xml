@@ -92,6 +92,9 @@
 		<result column="remarks" property="remarks" jdbcType="VARCHAR" />
 	 		<result column="storeName" property="storeName" jdbcType="VARCHAR" />
 	 			<result column="company" property="company" jdbcType="VARCHAR" />
+		<result column="consigneeName" property="consigneeName" jdbcType="VARCHAR" />
+	 		<result column="consigneeMobile" property="consigneeMobile" jdbcType="VARCHAR" />
+	 			<result column="consigneeAddr" property="consigneeAddr" jdbcType="VARCHAR" />
 
 	</resultMap>
 
@@ -347,9 +350,12 @@
 	<select id="getOrderLimt" resultMap="orderMap" parameterType="com.doooly.business.order.vo.OrderVo">
 		select
         <include refid="getAdOrderReportColumns" />,
-        <include refid="adOrderDetailColumns" />
+        <include refid="adOrderDetailColumns" />,
+		b.business_id AS bussiness_bussiness_id
 		from
-		ad_order_report o,ad_order_detail d
+		ad_order_report o
+		INNER JOIN ad_order_detail d ON o.id = d.order_report_id
+		INNER JOIN ad_business b ON b.id = o.bussiness_id
 		<where>
 			and o.id = d.order_report_id
 			<if test="orderId != null and orderId != ''" >
@@ -964,6 +970,7 @@
         a.product_type AS "productType",
         a.consignee_mobile AS "consigneeMobile",
         a.service_charge AS "serviceCharge",
+        a.remarks AS "remarks",
         a.voucher AS "voucher"
     </sql>
 
@@ -998,9 +1005,15 @@
         ORDER BY r.create_date DESC limit 1;
     </select>
     
-    <select id="getOrderReportIdByOrderNum" resultType="com.doooly.entity.reachad.AdOrderReport">
+    <select id="getOrderReportIdByOrderNum" resultMap="orderListMap">
         SELECT
-        a.id
+             a.id AS "id",
+            a.user_id AS "userId",
+            a.order_number AS "orderNumber",
+            a.consignee_name AS "consigneeName",
+            a.order_date AS "orderDate",
+            a.consignee_mobile AS "consigneeMobile",
+            a.consignee_addr AS "consigneeAddr"
         FROM ad_order_report a
         WHERE a.order_number = #{orderNumber}
     </select>
@@ -1077,13 +1090,45 @@
              <if test="businessId != null and businessId != ''">
                 AND 
                 a.bussiness_id =#{businessId}
-                
             </if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
         </where>
          and a.del_flag = 0
          ORDER BY a.order_date DESC
         LIMIT #{startIndex},#{pageSize}
     </select>
+
+
+	<select id="findALLOrderSum" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.lang.Long">
+		SELECT
+		count(1)
+		FROM ad_order_report a
+		LEFT JOIN ad_business b ON b.id = a.bussiness_id
+		LEFT JOIN ad_business_store abs ON a.stores_id = abs.store_number  AND a.bussiness_id = abs.business_id
+		LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
+		<where>
+			a.user_id = #{userId}
+			<if test="beginOrderDate != null and beginOrderDate != ''">
+				AND a.order_date &gt;= #{beginOrderDate}
+			</if>
+			<if test="endOrderDate != null and endOrderDate != ''">
+				AND a.order_date &lt;= #{endOrderDate}
+			</if>
+			<if test="isUserRebate !=null and  isUserRebate!=''">
+				AND  a.is_user_rebate = #{isUserRebate}
+			</if>
+			<if test="businessId != null and businessId != ''">
+				AND
+				a.bussiness_id =#{businessId}
+			</if>
+			<if test="type != null and type != ''">
+				AND a.type = #{type}
+			</if>
+		</where>
+		and a.del_flag = 0
+	</select>
 
      <!--我的订单列表(最近到账)-->
     <select id="findLatestOrderAmountList" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultMap="orderListMap">
@@ -1280,9 +1325,12 @@
 
       <select id="getOrderDetail"  parameterType="com.doooly.business.myorder.po.OrderDetailPoReq"  resultType="com.doooly.business.myorder.po.OrderDetailReport">
         SELECT
-        <include refid="getOrderDetailColumns"/>
+        <include refid="getOrderDetailColumns"/>,
+          aod.expressCompanyName expressCompanyName,
+          aod.courierNumber courierNumber
         FROM ad_order_report a
         LEFT JOIN ad_order_source aos ON a.order_number = aos.order_number
+        LEFT JOIN _orderDelivery aod ON a.order_number = aod.orderNumber
         <include refid="OrderDetailInfoJoins"/>
         WHERE  a.id = #{orderId} and a.user_id=#{userId}
     </select>
@@ -1427,4 +1475,12 @@
             </if>
         </where>
     </select>
+
+	<select id="getMaxOrderDateByUserAndType" resultType="java.util.Date">
+		SELECT MAX(order_date) FROM ad_order_report WHERE  user_id = #{userId}
+		<if test="type != null and type != ''">
+			AND type = #{type}
+		</if>
+	</select>
+
 </mapper>

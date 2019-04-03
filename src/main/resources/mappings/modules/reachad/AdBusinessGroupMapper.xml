@@ -11,7 +11,30 @@
 	FROM
 		ad_business_group t 
 	WHERE 
-		t.group_id = #{groupId}	
+		t.group_id = #{groupId}
     </select>
+
+
+	<select id="getListByCondition" resultType="com.doooly.entity.reachad.AdBusinessGroup" parameterType="com.doooly.entity.reachad.AdBusinessGroup">
+		SELECT
+		id id,
+		business_id businessId,
+		group_id groupId,
+		scene_id sceneId,
+		create_date createDate
+		FROM
+		ad_business_group t
+		<where>
+			<if test="groupId != null">
+				and t.group_id = #{groupId}
+			</if>
+			<if test="sceneId != null">
+				and t.scene_id = #{sceneId}
+			</if>
+			<if test="type != null">
+				and t.type = #{type}
+			</if>
+		</where>
+	</select>
 	
 </mapper>

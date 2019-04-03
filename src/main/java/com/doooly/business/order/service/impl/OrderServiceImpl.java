@@ -15,6 +15,7 @@ import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.order.vo.ProductSkuVo;
 import com.doooly.business.pay.bean.AdOrderSource;
 import com.doooly.business.pay.service.RefundService;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.product.entity.AdSelfProduct;
 import com.doooly.business.product.entity.AdSelfProductImage;
@@ -26,7 +27,6 @@ import com.doooly.common.constants.Constants;
 import com.doooly.common.util.Generator;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.IdGeneratorUtil;
-import com.doooly.common.util.SnowflakeIdWorker;
 import com.doooly.dao.reachad.AdCouponCodeDao;
 import com.doooly.dao.reachad.AdOrderDeliveryDao;
 import com.doooly.dao.reachad.AdOrderDetailDao;
@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -59,6 +60,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 统一下单接口
@@ -103,6 +105,8 @@ public class OrderServiceImpl implements OrderService {
     private AdCouponCodeServiceI adCouponCodeServiceI;
     @Autowired
     private MyThreadPoolServiceImpl myThreadPoolService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -120,6 +124,7 @@ public class OrderServiceImpl implements OrderService {
 		long userId = orderVo.getUserId();
 		String orderNum = IdGeneratorUtil.getOrderNumber(orderVo.getIsSource());
 		String actType = ActivityType.COMMON_ORDER.getActType();
+        StringBuilder productSkuIds = new StringBuilder();
 		for (MerchantProdcutVo merchantProduct : merchants) {
 			int merchantId = merchantProduct.getMerchantId();
 			String remarks = merchantProduct.getRemarks();
@@ -132,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
 				int productId = productSkuVo.getProductId();
 				int skuId = productSkuVo.getSkuId();
 				int buyQuantity = productSkuVo.getBuyNum();
-
+                productSkuIds.append(skuId).append(",");
 				//AdSelfProduct product = productService.getProductSku(merchantId, productId, skuId);
                 //20181226改成缓存获取
                 Map<String,Object> paramMap = new HashMap<>();
@@ -231,10 +236,26 @@ public class OrderServiceImpl implements OrderService {
 			orderItems.get(0).setAmount(totalMount);
 			//保存订单
 			OrderExtVo orderExt = buildOrderExt(orderExtVo);
+            if( "1".equals(orderVo.getOrderType())){
+                // 组装订单相关参数放入MQ
+                orderVo.setRemarks(Constants.GIFT_ORDER_TYPE);
+            }
 			OrderVo order = buildOrder(orderVo, orderExt, orderNum, merchantId, totalMount, totalPrice, userId, actType, couponValue, couponId);
 			int rows = saveOrder(order, orderExt, orderItems);
 			logger.info("Create order successfully. orderNumber = {}, rows = {},execution time : {} milliseconds.", orderNum, rows, System.currentTimeMillis() - s);
 		}
+		if( "1".equals(orderVo.getOrderType())){
+            // 组装订单相关参数放入redis
+            JSONObject giftOrder = new JSONObject();
+            giftOrder.put("productSkuIds",productSkuIds.substring(0,productSkuIds.length()-1));
+            giftOrder.put("giftBagId",orderVo.getGiftBagId());
+            giftOrder.put("orderNum",orderNum);
+            giftOrder.put("userId",orderVo.getUserId());
+            String mqMessageJson = giftOrder.toJSONString();
+            //表示是礼包订单，将skuId 和礼包id放入redis
+            stringRedisTemplate.opsForValue().set(Constants.GIFT_ORDER_REDIS_MESS+ orderNum,mqMessageJson,30 * 60 * 1000,
+                    TimeUnit.MILLISECONDS);
+        }
 		//下单成功返回信息
 		OrderMsg msg = new OrderMsg(OrderMsg.success_code, OrderMsg.success_mess);
 		msg.getData().put("orderNum", orderNum);
@@ -411,7 +432,8 @@ public class OrderServiceImpl implements OrderService {
         if(!MessageDataBean.success_code.equals(result.get("code"))){
             //购物车清空失败,直接抛出异常回滚数据
             logger.error("购物车清空失败,返回结果{}",result);
-            throw new RuntimeException("购物车清空失败");
+        }else {
+            logger.info("购物车清空成功,返回结果{}",result);
         }
         msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
         return msg;
@@ -622,6 +644,7 @@ public class OrderServiceImpl implements OrderService {
 		if(CollectionUtils.isEmpty(merchants)){
 			return new OrderMsg(OrderMsg.failure_code, "merchantProduct is empty.");
 		}
+        StringBuilder productSkuIds = new StringBuilder();
 		for (MerchantProdcutVo merchantProduct : merchants) {
 			List<ProductSkuVo> prodcutSkus = merchantProduct.getProductSku();
 			if(CollectionUtils.isEmpty(prodcutSkus)){
@@ -632,19 +655,32 @@ public class OrderServiceImpl implements OrderService {
 			}
 			for (ProductSkuVo productSkuVo : prodcutSkus) {
 				int productId = productSkuVo.getProductId();
-				if(productId <= 0){
-					return new OrderMsg(OrderMsg.failure_code, "invalid productId.");
-				}
-				int skuId = productSkuVo.getSkuId();
-				if(skuId <= 0){
-					return new OrderMsg(OrderMsg.failure_code, "invalid skuId.");
-				}
-				int buyNum = productSkuVo.getBuyNum();
+                if(productId <= 0){
+                    return new OrderMsg(OrderMsg.failure_code, "invalid productId.");
+                }
+                int skuId = productSkuVo.getSkuId();
+                if(skuId <= 0){
+                    return new OrderMsg(OrderMsg.failure_code, "invalid skuId.");
+                }
+                productSkuIds.append(skuId).append(",");
+                int buyNum = productSkuVo.getBuyNum();
 				if(buyNum <= 0){
 					return new OrderMsg(OrderMsg.failure_code, "invalid buyNum.");
 				}
 			}
 		}
+        if( "1".equals(orderVo.getOrderType())){
+            // 礼包商品判断能否领取
+            JSONObject giftOrder = new JSONObject();
+            giftOrder.put("productSkuIds",productSkuIds);
+            giftOrder.put("giftBagId",orderVo.getGiftBagId());
+            giftOrder.put("userId",orderVo.getUserId());
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", giftOrder);
+            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
+                return new OrderMsg(OrderMsg.failure_code, resultJson.getString("info"));
+            }
+        }
 		return null;
 	}
 
@@ -959,11 +995,11 @@ public class OrderServiceImpl implements OrderService {
             return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
         }
         //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
-        PayMsg payMsg = refundService.autoRefund(userId, orderNum);
-        if(!payMsg.getCode().equals(PayMsg.success_code)){
-            //退款失败
-            return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());
-        }
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum,null);
+		if (StringUtils.isEmpty(orderNum) || userId <= 0) {
+			return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
+		}
+
         //修改为取消状态
         orderParam.setType(OrderStatus.CANCELLED_ORDER.getCode());
         orderParam.setState(PayState.CANCELLED.getCode());

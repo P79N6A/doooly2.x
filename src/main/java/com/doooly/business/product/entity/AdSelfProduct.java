@@ -3,11 +3,11 @@
  */
 package com.doooly.business.product.entity;
 
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * 自营商品管理Entity
@@ -55,6 +55,7 @@ public class AdSelfProduct  {
 	private Date activityEndDate;// 活动结束时间
 	private Long countdownTime;//倒计时
 	private Date currentTime;//当前时间
+    private Integer productAttr;//商品属性 0 普通商品，1，礼包商品
 	
 	public AdSelfProduct() {
 	}
@@ -384,4 +385,12 @@ public class AdSelfProduct  {
 	public void setCurrentTime(Date currentTime) {
 		this.currentTime = currentTime;
 	}
+
+    public Integer getProductAttr() {
+        return productAttr;
+    }
+
+    public void setProductAttr(Integer productAttr) {
+        this.productAttr = productAttr;
+    }
 }

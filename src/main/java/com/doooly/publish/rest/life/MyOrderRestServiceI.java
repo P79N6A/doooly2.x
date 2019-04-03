@@ -22,4 +22,7 @@ public interface MyOrderRestServiceI {
      * @return
      */
     String getOrderReportIdByOrderNum(JSONObject obj);
+
+    //礼包领取成功页
+    String getLiftOrder(JSONObject obj);
 }

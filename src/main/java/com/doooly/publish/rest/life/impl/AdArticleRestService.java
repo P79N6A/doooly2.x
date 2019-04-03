@@ -94,6 +94,33 @@ public class AdArticleRestService implements AdArticleRestServiceI {
 
 
     /**
+     * 获取导购列表v3
+     */
+    @POST
+    @Path(value = "/getGuideProductList/v3")
+    @Consumes({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getGuideProductListv3(JSONObject json, @Context HttpServletRequest request) {
+        MessageDataBean messageDataBean = new MessageDataBean();
+        try {
+            Map<String, String> map = new HashMap<>();
+            map.put("userId", json.getString("userId"));
+            map.put("guideCategoryId", json.getString("guideCategoryId"));
+            map.put("currentPage", json.getInteger("currentPage").toString());
+            map.put("pageSize", json.getInteger("pageSize").toString());
+            map.put("groupId", request.getHeader("groupId"));
+            map.put("recommendHomepage", request.getHeader("recommendHomepage"));
+            messageDataBean = adArticleServiceI.getGuideProductListv3(map);
+        } catch (Exception e) {
+            logger.error("获取导购信息出错", e);
+            messageDataBean.setCode(MessageDataBean.failure_code);
+            messageDataBean.setMess(MessageDataBean.failure_mess);
+        }
+        return messageDataBean.toFormatJsonString();
+    }
+
+
+    /**
      * 获取导购文章列表
      */
     @POST

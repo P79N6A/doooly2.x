@@ -4,24 +4,35 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.HttpClientUtil;
 import com.doooly.business.dict.ConfigDictServiceI;
+import com.doooly.business.meituan.MeituanOrderService;
 import com.doooly.business.meituan.MeituanService;
+import com.doooly.business.meituan.StaffService;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.service.RefundService;
 import com.doooly.business.payment.bean.ResultModel;
 import com.doooly.business.payment.impl.NewPaymentService;
 import com.doooly.common.IPUtils;
+import com.doooly.common.meituan.EncryptUtil;
 import com.doooly.common.meituan.MeituanConstants;
 import com.doooly.common.meituan.MeituanProductTypeEnum;
 import com.doooly.common.meituan.StaffTypeEnum;
+import com.doooly.common.util.MD5Util;
+import com.doooly.common.util.RandomUtil;
+import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.meituan.Order;
+import com.doooly.entity.meituan.StaffInfoVO;
+import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.publish.rest.meituan.MeituanRestService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.LongSerializationPolicy;
 import com.google.gson.reflect.TypeToken;
 import com.reach.redis.utils.GsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -72,55 +83,81 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    private StaffService staffService;
+
+    @Autowired
+    private MeituanOrderService meituanOrderService;
+
+    @Autowired
+    private AdBusinessDao adBusinessDao;
+
 
     @GET
     @Path("/getMeituanEasyLoginUrl")
     @Produces("application/json;charset=UTF-8")
     @Consumes("application/json;charset=UTF-8")
     public String getMeituanEasyLoginUrl(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-        String token = request.getHeader("token");
-        String userId = request.getHeader("userId");
+        String token = request.getParameter("token");//request.getHeader("token");
+        String userId = request.getParameter("userId");//request.getHeader("userId");
+        String deviceHash = request.getParameter("deviceHash");
         if (StringUtils.isBlank(token)) {
-            token = request.getParameter("token");
+            token = request.getHeader("token");
         }
         if (StringUtils.isBlank(userId)) {
-            userId = request.getParameter("userId");
+            userId = request.getHeader("userId");
         }
         String productType = request.getParameter("productType");
         if (StringUtils.isBlank(productType)) {
             productType = MeituanProductTypeEnum.WAIMAI.getCode();
         }
+        logger.info("getMeituanEasyLoginUrl参数：{},{},{},{}",token,userId,productType,deviceHash);
         String loginUrl = "";
         if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userId)) {
             AdUser adUser = adUserDao.getById(Integer.parseInt(userId));
             if (adUser != null) {
+                if (StringUtils.isBlank(deviceHash)) {
+                    deviceHash = MD5Util.digest(adUser.getId() + "");
+                }
+                Map<String,Object> riskParam = new HashMap<>();
+                riskParam.put("deviceHash",deviceHash);
+                riskParam.put("thirdUserIdHash",adUser.getId());
+                if (StringUtils.isNotBlank(adUser.getIdentityCard())) {
+                    riskParam.put("idCardHash",adUser.getIdentityCard());
+                }
                 try {
                     //判断是否已经同步
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("staffs",Arrays.asList(adUser.getTelephone()));
-                    jsonObject.put("staffType", StaffTypeEnum.StaffTypeEnum50.getCode());
-                    String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
-                    String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/getStaffs",jsonObject.toJSONString());
-                    List<Map<String,Object>> listMap = GsonUtils.son.fromJson(ret,new TypeToken<List<Map<String,Object>>>(){}.getType());
-                    logger.info("美团免登录查询员工结果：{}",ret);
-                    if (listMap != null && listMap.size() > 0) {
-                        loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                    List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(adUser.getCardNumber()),StaffTypeEnum.StaffTypeEnum30);
+                    logger.info("美团免登录查询员工结果：{}",GsonUtils.son.toJson(staffInfoVOS));
+                    if (staffInfoVOS != null && staffInfoVOS.size() > 0) {
+                        //判断手机号是否被修改
+                        if (adUser.getTelephone().equals(staffInfoVOS.get(0).getPhone())) {
+                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        } else {
+                            StaffInfoVO staffInfoVO = new StaffInfoVO();
+                            staffInfoVO.setName(adUser.getName());
+                            staffInfoVO.setPhone(adUser.getTelephone());
+                            staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                            staffInfoVO.setEmail(adUser.getMailbox());
+                            List<StaffInfoVO> staffInfoVOList = staffService.batchUpdateStaff(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
+                            if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                            }
+                        }
                     } else {
-                        //先同步用户
-                        JSONObject jsonObjectUser = new JSONObject();
-                        jsonObjectUser.put("name",adUser.getName());
-                        jsonObjectUser.put("phone",adUser.getTelephone());
-                        jsonObjectUser.put("entStaffNum",adUser.getCardNumber());
-                        JSONArray jsonArray = new JSONArray();
-                        jsonArray.add(jsonObjectUser);
-                        JSONObject jsonObjectParam = new JSONObject();
-                        jsonObjectParam.put("staffInfoVOList",jsonArray);
-                        jsonObjectParam.put("staffType",StaffTypeEnum.StaffTypeEnum30.getCode());
-                        String retStaff = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/batchSynStaffs",jsonObjectParam.toJSONString());
-                        List<Map<String,Object>> listStaffMap = GsonUtils.son.fromJson(retStaff,new TypeToken<List<Map<String,Object>>>(){}.getType());
-                        logger.info("美团免登录同步员工结果：{}",retStaff);
-                        if (listStaffMap != null && listStaffMap.size() > 0) {
-                            loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                        AdBusiness adBusiness = adBusinessDao.getByBusinessId(MeituanConstants.meituan_bussinesss_serial);
+                        if (adBusiness != null) {
+                            //先同步用户
+                            StaffInfoVO staffInfoVO = new StaffInfoVO();
+                            staffInfoVO.setName(adUser.getName());
+                            staffInfoVO.setPhone(adUser.getTelephone());
+                            staffInfoVO.setEntStaffNum(adUser.getCardNumber());
+                            staffInfoVO.setEmail(adUser.getMailbox());
+                            List<StaffInfoVO> staffInfoVOList = staffService.batchSynStaffs(Arrays.asList(staffInfoVO),StaffTypeEnum.StaffTypeEnum30);
+                            logger.info("美团免登录同步员工结果：{}",GsonUtils.son.toJson(staffInfoVOList));
+                            if (staffInfoVOList != null && staffInfoVOList.size() > 0) {
+                                loginUrl = meituanService.easyLogin(token,adUser.getCardNumber(),adUser.getTelephone(),riskParam,MeituanProductTypeEnum.getMeituanProductTypeByCode(productType));
+                            }
                         }
                     }
                     logger.info("用户:{}免登录url:{}",adUser.getTelephone(),loginUrl);
@@ -147,7 +184,8 @@ public class MeituanRestServiceImpl implements MeituanRestService {
         int status = 0;
         String message = "调用失败";
         if (StringUtils.isNotEmpty(entToken)) {
-            String userId = String.valueOf(stringRedisTemplate.boundValueOps(entToken).get());
+            String userId = stringRedisTemplate.opsForValue().get(entToken);
+            logger.info("美团调用easyLogin userId:{}",userId);
             AdUser adUser = null;
             try {
                 adUser = adUserDao.getById(Integer.parseInt(userId));
@@ -188,14 +226,35 @@ public class MeituanRestServiceImpl implements MeituanRestService {
      * @param response
      * @return
      */
-    @GET
+    @POST
     @Path("/pay")
     @Produces("application/json;charset=utf-8")
-    @Consumes("application/json;charset=utf-8")
-    public OrderMsg pay(@Context HttpServletRequest request,@Context HttpServletResponse response) {
-        JSONObject jsonObject = getJsonObjectFromRequest(request);
-        logger.info("美团调用pay：{}",GsonUtils.toString(jsonObject));
+    @Consumes("application/x-www-form-urlencoded;charset=utf-8")
+    public Map<String,Object> pay(@FormParam("token") String token,@FormParam("version") String version,
+                                  @FormParam("content") String content,
+                                  @Context HttpServletRequest request) {
+        JSONObject jsonObject = new JSONObject();
+        Enumeration<String> enumeration = request.getHeaderNames();
+        while (enumeration.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            String value = request.getHeader(key);
+            logger.info(key + "---" + value);
+        }
+        Enumeration<String> enumeration1 = request.getParameterNames();
+        while (enumeration1.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            String value = request.getParameter(key);
+            logger.info(key + "---" + value);
+        }
+        try {
+            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
+            jsonObject = JSONObject.parseObject(contentStr,JSONObject.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.info("美团调用pay：{},{},{},{}",token,version,content,GsonUtils.toString(jsonObject));
         boolean signValid = true;//validSign(jsonObject);
+        Map<String,Object> retMap = new HashMap<>();
         OrderMsg orderMsg = new OrderMsg(OrderMsg.success_code,OrderMsg.success_mess);
         try {
             if (signValid) {
@@ -209,50 +268,86 @@ public class MeituanRestServiceImpl implements MeituanRestService {
                 //商家未支付订单同步接口
                 //下单接口
                 jsonObject.put("clientIp", IPUtils.getIpAddr(request));
-                jsonObject.put("notifyUrl",MeituanConstants.url_meituan_pay_notify_doooly);
                 orderMsg = meituanService.createOrderMeituan(jsonObject);
                 logger.info("美团创建订单返回：{}",GsonUtils.son.toJson(orderMsg));
                 JSONObject jsonObject1 = new JSONObject();
                 jsonObject1.put("userId",orderMsg.getData().get("userId"));
                 jsonObject1.put("orderSource","meituan");
-                jsonObject1.put("return_url","https://app.jia-fu.cn/app-takeaway/h5/rec/sqt/checkstand");
+                jsonObject1.put("return_url",jsonObject.get("returnUrl"));
                 String redirectUrl = configDictServiceI.getValueByTypeAndKeyNoCache("MEITUAN_PAY_URL","MEITUAN_PAY_URL") +
                         orderMsg.getData().get("orderNum") +  meituanService.convertMapToUrlEncode(jsonObject1);
                 logger.info("美团pay跳转url：{}",redirectUrl);
-                orderMsg.getData().put("redirectUrl",redirectUrl);
-                //response.sendRedirect(redirectUrl);
+
+                if (orderMsg.getData().get("orderNum") != null) {
+                    retMap.put("status",0);
+                    retMap.put("msg","成功");
+                    Map<String,Object> data =  new HashMap<>();
+                    data.put("thirdPayOrderId",orderMsg.getData().get("orderNum"));
+                    data.put("thirdPayUrl",redirectUrl);
+                    retMap.put("data",EncryptUtil.aesEncrypt(JSONObject.toJSONString(data),MeituanConstants.aesKey_prod));
+                } else {
+                    retMap.put("status",500);
+                    retMap.put("msg",orderMsg.getMess());
+                }
+
             } else {
-                orderMsg = new OrderMsg(OrderMsg.invalid_sign_code,OrderMsg.invalid_sign_mess);
+                retMap.put("status",500);
+                retMap.put("msg","签名错误");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            retMap.put("status",500);
+            retMap.put("msg","下单异常");
+            logger.error("美团下单异常：",e);
         }
-        return orderMsg;
+        logger.info("美团下单返回：{},{}",jsonObject.getString("sqtOrderId"),JSONObject.toJSONString(retMap));
+        return retMap;
     }
 
 
     @POST
     @Path("/refund")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Map<String,Object> refund(JSONObject jsonObject) {
+    @Consumes("application/x-www-form-urlencoded;charset=utf-8")
+    public Map<String,Object> refund(@FormParam("token") String token,@FormParam("version") String version,
+                                     @FormParam("content") String content) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            String contentStr = EncryptUtil.aesDecrypt(content,MeituanConstants.aesKey_prod);
+            jsonObject = JSONObject.parseObject(contentStr,JSONObject.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         logger.info("美团调用refund：{}",GsonUtils.toString(jsonObject));
-        boolean signValid = validSign2(jsonObject);
+        boolean signValid = true;//validSign2(jsonObject);
         Map<String,Object> retMap = new HashMap<>();
+        String serialNum = "";
+        String sqtOrderId = "";
+        String orderNum = "";
+        String refundAmount = "";
         if (signValid) {
             //商企通订单号
-            String serialNum = jsonObject.getString("serialNum");
+            serialNum = jsonObject.getString("serialNum");
+            sqtOrderId = jsonObject.getString("sqtOrderId");
+            refundAmount = jsonObject.getString("refundAmount");
             if (StringUtils.isBlank(serialNum)) {
                 retMap.put("status",500);
                 retMap.put("msg","参数错误");
             }
             //退款
-            OrderVo orderVo = orderService.getByOrderNum(serialNum);
-            PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
+            orderNum = serialNum + "-" + sqtOrderId;
+            OrderVo orderVo = orderService.getByOrderNum(orderNum);
+            PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber(),refundAmount);
             //ResultModel resultModel = refundService.applyRefund(orderVo.getUserId(), serialNum,String.valueOf(orderVo.getTotalMount()));
             if ("1000".equals(payMsg.getCode())) {
+                Map<String,Object> data = new HashMap<>();
+                data.put("thirdRefundOrderId",serialNum);
+                try {
+                    retMap.put("data",EncryptUtil.aesEncrypt(JSONObject.toJSONString(data),MeituanConstants.aesKey_prod));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 retMap.put("status",0);
-                retMap.put("msg","success");
+                retMap.put("msg","成功");
             } else {
                 retMap.put("status",500);
                 retMap.put("msg",payMsg.getMess());
@@ -261,6 +356,7 @@ public class MeituanRestServiceImpl implements MeituanRestService {
             retMap.put("status",500);
             retMap.put("msg","签名校验失败");
         }
+        logger.info("美团退款返回：{}，{}",serialNum,JSONObject.toJSONString(retMap));
         return retMap;
     }
 
@@ -320,17 +416,51 @@ public class MeituanRestServiceImpl implements MeituanRestService {
     @Path("/queryOrderByOrderNum")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String,Object> queryOrderByOrderSN(JSONObject jsonObject) {
+    public ResultModel queryOrderByOrderSN(JSONObject jsonObject) {
         String orderNum = jsonObject.getString("orderNum");
-        Map<String,Object> retMap = new HashMap<>();
+        ResultModel resultModel = ResultModel.ok();
         if (StringUtils.isNotEmpty(orderNum)) {
-            Map<String,Object> params = new HashMap<>();
-            params.put("orderSN",orderNum);
-            String dooolyScheduleUrl = configDictServiceI.getValueByTypeAndKeyNoCache("dooolyScheduleUrl","dooolyScheduleUrl");
-            String ret = HttpClientUtil.doPost(dooolyScheduleUrl + "/meituan/queryOrderByOrderSN",GsonUtils.toString(params));
-            retMap = GsonUtils.son.fromJson(ret,Map.class);
+            try {
+                Order order = meituanOrderService.queryOrderByOrderSN(orderNum);
+                resultModel.setData(order);
+            } catch (Exception e) {
+                logger.error("queryOrderByOrderNum异常：",e);
+            }
         }
-        return retMap;
+        return resultModel;
+    }
+
+    @POST
+    @Path("/queryStaffByPhone")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel queryStaffByMobile(StaffInfoVO staffInfoVO) {
+        String phone = staffInfoVO.getPhone();
+        ResultModel resultModel = ResultModel.ok();
+        if (StringUtils.isNotEmpty(phone)) {
+            try {
+                List<StaffInfoVO> staffInfoVOS = staffService.getStaffs(Arrays.asList(phone),StaffTypeEnum.StaffTypeEnum50);
+                resultModel.setData(staffInfoVOS);
+            } catch (Exception e) {
+                logger.error("queryStaffByMobile异常：",e);
+            }
+        }
+        return resultModel;
+    }
+
+    @POST
+    @Path("/updateStaff")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ResultModel updateStaff(List<StaffInfoVO> staffInfoVOS) {
+        ResultModel resultModel = ResultModel.ok();
+        try {
+            List<StaffInfoVO> staffInfoVOSList = staffService.batchUpdateStaff(staffInfoVOS,StaffTypeEnum.StaffTypeEnum30);
+            resultModel.setData(staffInfoVOSList);
+        } catch (Exception e) {
+            logger.error("updateStaff出错：",e);
+        }
+        return resultModel;
     }
 
 

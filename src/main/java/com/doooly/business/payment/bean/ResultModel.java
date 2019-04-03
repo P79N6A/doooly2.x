@@ -1,3 +1,6 @@
+
+
+
 package com.doooly.business.payment.bean;
 
 
@@ -95,6 +98,14 @@ public class ResultModel {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 
     /**

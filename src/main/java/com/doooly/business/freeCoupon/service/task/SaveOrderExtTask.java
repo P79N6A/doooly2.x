@@ -42,13 +42,20 @@ public class SaveOrderExtTask implements Runnable{
     public void run() {
         // 方法进入时间
         logger.info("保存订单商品信息====orderId:{},开始");
-        Long startTime = System.currentTimeMillis();
+        Long startTime = null;
         int rows = 0;
-        Long orderId = req.getLong("orderId");
-        if (orderExt != null) {
-            rows += adOrderDeliveryDao.insert(orderId,orderExt);
+        Long orderId = null;
+        try {
+            startTime = System.currentTimeMillis();
+            rows = 0;
+            orderId = req.getLong("orderId");
+            if (orderExt != null) {
+                rows += adOrderDeliveryDao.insert(orderId,orderExt);
+            }
+            rows += adOrderDetailDao.bantchInsert(orderId,orderItem);
+        } catch (Exception e) {
+            logger.info("保存订单商品信息出错，错误原因" , e);
         }
-        rows += adOrderDetailDao.bantchInsert(orderId,orderItem);
         logger.info("保存订单商品信息====orderId:{},rows:{},成功保存订单执行耗时：{}" , orderId,rows,(System.currentTimeMillis() - startTime));
     }
 }

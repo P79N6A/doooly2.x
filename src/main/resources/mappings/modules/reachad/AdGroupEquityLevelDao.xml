@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdGroupEquityLevelDao">
+    
+	<sql id="adGroupEquityLevelColumns">
+		a.id AS "id",
+		a.ad_group_id AS "adGroupId",
+		a.ad_equity_id AS "adEquityId",
+		a.ad_group_equity_status AS "adGroupEquityStatus",
+		a.ad_group_level AS "adGroupLevel",
+		a.equity_name AS "equityName",
+		a.equity_type AS "equityType",
+		a.display_order AS "displayOrder",
+		a.enable_status AS "enableStatus",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id"
+	</sql>
+	
+	<sql id="adGroupEquityLevelJoins">
+	</sql>
+
+	<select id="getAllByGroupId" resultType="com.doooly.entity.reachad.AdGroupEquityLevel">
+		SELECT
+		    <include refid="adGroupEquityLevelColumns"/>,
+		       e.equity_logo AS "equityLogo",
+		       e.interface_url AS "interfaceUrl"
+		FROM
+		    ad_group_equity_level a
+		  	INNER JOIN ad_equity e ON a.ad_equity_id = e.id
+		WHERE
+		      a.ad_group_id = #{groupId}
+		  AND a.ad_group_equity_status = 1
+		  AND a.enable_status = 1
+		ORDER BY a.display_order, a.update_date DESC
+		<if test="limitCount != null and limitCount != ''">
+			LIMIT #{limitCount}
+		</if>
+	</select>
+
+	<select id="getAdGroupEquityList" resultType="com.doooly.entity.reachad.AdGroupEquityLevel">
+		SELECT a.ad_group_id,a.ad_equity_id,a.equity_name,b.equity_logo,b.equity_desc,b.user_service,b.instructions
+		FROM ad_group_equity_level a,ad_equity b
+		WHERE a.ad_equity_id = b.equity_id
+		AND a.ad_group_id = #{groupId}
+		AND a.ad_group_equity_status = 1
+		AND a.enable_status = 1
+		ORDER BY a.display_order
+	</select>
+
+</mapper>

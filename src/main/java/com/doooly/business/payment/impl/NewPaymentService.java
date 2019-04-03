@@ -7,12 +7,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.business.AdBusinessServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.mall.service.Impl.MallBusinessService;
+import com.doooly.business.myorder.service.MyOrderServiceI;
 import com.doooly.business.order.service.AdOrderReportServiceI;
 import com.doooly.business.order.service.OrderService;
 import com.doooly.business.order.vo.AdOrderBig;
 import com.doooly.business.order.vo.OrderItemVo;
 import com.doooly.business.order.vo.OrderVo;
 import com.doooly.business.pay.bean.PayFlow;
+import com.doooly.business.pay.bean.PayTypeEnum;
 import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessor;
 import com.doooly.business.pay.processor.refundprocessor.AfterRefundProcessorFactory;
 import com.doooly.business.pay.service.PayFlowService;
@@ -28,10 +30,13 @@ import com.doooly.business.product.entity.ActivityInfo;
 import com.doooly.business.recharge.AdRechargeConfServiceI;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.RedisLock;
+import com.doooly.common.constants.Constants;
 import com.doooly.common.constants.PaymentConstants;
 import com.doooly.common.util.HTTPSClientUtils;
+import com.doooly.common.util.HttpClientUtil;
 import com.doooly.common.util.RandomUtil;
 import com.doooly.common.webservice.WebService;
+import com.doooly.dao.payment.PayRecordMapper;
 import com.doooly.dao.reachad.AdBusinessDao;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdOrderReportDao;
@@ -40,18 +45,17 @@ import com.doooly.dao.reachad.AdRechargeRecordDao;
 import com.doooly.dao.reachad.AdReturnDetailDao;
 import com.doooly.dao.reachad.AdReturnFlowDao;
 import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdUserIntegralDao;
 import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
+import com.doooly.entity.payment.PayRecordDomain;
 import com.doooly.entity.reachad.AdBusiness;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdRechargeConf;
 import com.doooly.entity.reachad.AdRechargeRecord;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.entity.reachad.AdUser;
-import com.doooly.entity.reachad.AdUserIntegral;
 import com.doooly.entity.reachad.Order;
 import com.doooly.entity.reachad.OrderDetail;
 import org.apache.commons.httpclient.util.DateUtil;
@@ -60,13 +64,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.OrderUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +79,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
-import static com.doooly.common.webservice.WebService.WEBURL;
 
 /**
  * @Description:
@@ -118,7 +121,7 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Autowired
     private RedisLock redisLock;
     @Autowired
-    private AdUserIntegralDao userIntegralDao;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private AdOrderReportServiceI adOrderReportServiceI;
     @Autowired
@@ -127,6 +130,10 @@ public class NewPaymentService implements NewPaymentServiceI {
     private AdRechargeConfServiceI adRechargeConfServiceI;
     @Autowired
     private AdBusinessServiceI adBusinessServiceI;
+    @Autowired
+    private MyOrderServiceI myOrderServiceI;
+    @Autowired
+    private PayRecordMapper payRecordMapper;
 
     // 退款同步，唯一标识，放入缓存；如未领取设置值为4个0（0000），如已领取直接返回缓存值；
     private static String SYNC_REFUND_CODE_KEY = "sync_refund_code:%s";
@@ -161,6 +168,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel unifiedorder(JSONObject jsonObject) {
+        String orderNum = jsonObject.getString("orderNum");
         JSONObject orderSummary = getOrderSummary(jsonObject);
         if (orderSummary == null) {
             return new ResultModel(GlobalResultStatusEnum.FAIL, "登录用户和下单用户不匹配");
@@ -210,6 +218,15 @@ public class NewPaymentService implements NewPaymentServiceI {
             retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
+            }
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(orderNum);
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
+                retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
+            }else {
+                retJson.put("redirectUrl", "");
             }
             logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
@@ -554,6 +571,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
         //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
+
+
+
         JSONObject retJson = new JSONObject();
         retJson.put("productType", o.getProductType());
         retJson.put("totalFree", o.getTotalMount().toString());
@@ -563,6 +583,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("productImg", item.getProductImg());
         retJson.put("supportPayType", o.getSupportPayType());
         retJson.put("orderNum", orderNum);
+
         if ((o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()
         ) && o.getServiceCharge() != null) {
@@ -573,6 +594,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdUser paramUser = new AdUser();
         paramUser.setId(order.getUserId());
         AdUser user = adUserServiceI.getUser(paramUser);
+
+        List<OrderVo> orderVos = Arrays.asList(o);
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(o.getId());
+        adOrderBig.setTotalAmount(o.getTotalMount());
+        String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
+        retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
+
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
                 || o.getProductType() == OrderService.ProductType.NEXUS_RECHARGE_ACTIVITY.getCode()) {
@@ -596,7 +625,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdBusiness paramBusiness = new AdBusiness();
         paramBusiness.setId(o.getBussinessId());
         AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
-        AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
+        //AdUserIntegral userIntegral = userIntegralDao.getDirIntegralByUserId(Long.valueOf(userId));
         String price = String.valueOf(o.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(o.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
@@ -628,8 +657,11 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("company", business.getCompany());
-        retJson.put("userIntegral", user.getIntegral().add(userIntegral.getAvailIntegral()));
+        retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
+        if(Constants.GIFT_ORDER_TYPE.equals(o.getRemarks())){
+            retJson.put("orderType","1");
+        }
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", o.getBussinessId());//商户id
@@ -886,22 +918,50 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (!CollectionUtils.isEmpty(orders)) {
                 OrderVo order1 = orders.get(0);
                 Map<String, Object> map = new HashMap<>();
-                map.put("orderNum", order1.getOrderNumber());
-                map.put("orderId", order.getOrderId());
-                map.put("oid", order.getId());
-                map.put("totalAmount", order.getTotalMount());
-                //最终支付结果code
-                map.put("code", payMsg.getCode());
-                //手续费
-                if (order.getServiceCharge() != null) {
-                    map.put("serviceCharge", order.getServiceCharge());
+                if("gift_order".equals(order1.getRemarks())){
+                    MessageDataBean messageDataBean = new MessageDataBean();
+                    try {
+                        messageDataBean = myOrderServiceI.getLiftOrder(json);
+                        logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
+                    } catch (Exception e) {
+                        logger.error("获得礼包领取成功页出错", e);
+                        messageDataBean.setCode(MessageDataBean.failure_code);
+                    }
+                    map = messageDataBean.getData();
+                    map.put("orderType","1");
+                }else {
+                    map.put("orderType","0");
+                    map.put("orderNum", order1.getOrderNumber());
+                    map.put("orderId", order.getOrderId());
+                    map.put("oid", order.getId());
+                    map.put("totalAmount", order.getTotalMount());
+                    //最终支付结果code
+                    map.put("code", payMsg.getCode());
+                    //手续费
+                    if (order.getServiceCharge() != null) {
+                        map.put("serviceCharge", order.getServiceCharge());
 
-                }
-                //话费优惠活动- 分享需要的参数
-                if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
-                    AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
-                    map.put("openId", record.getOpenId());
-                    map.put("activityParam", record.getActivityParam());
+                    }
+                    //话费优惠活动- 分享需要的参数
+                    if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
+                        AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+                        map.put("openId", record.getOpenId());
+                        map.put("activityParam", record.getActivityParam());
+                    }
+                    //获取跳转链接
+                    PayRecordDomain payRecordDomain = new PayRecordDomain();
+                    payRecordDomain.setMerchantOrderNo(orderNum);
+                    payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+                    if(payRecordDomain != null){
+                        String returnUrl = payRecordDomain.getRedirectUrl();
+                        if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
+                                returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                            returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
+                        }
+                        map.put("redirectUrl", returnUrl);
+                    }else {
+                        map.put("redirectUrl", "");
+                    }
                 }
                 payMsg.setData(map);
             }
@@ -1031,10 +1091,20 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         // 订单状态
         if (order.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
+            return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已支付，请勿重新支付。");
         }
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已经取消，请重新下单。");
+            return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已经取消，请重新下单。");
+        }
+        if( Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())){
+            // 礼包商品判断能否领取
+            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+orderNum);
+            JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
+            JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
+            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+                logger.info("判断能否领取礼包：" + resultJson.toJSONString());
+                return new PayMsg(OrderMsg.coupon_stock_zero_code, resultJson.getString("info"));
+            }
         }
         //校验是否可以支付
         return canPay(order, param);
@@ -1362,7 +1432,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                 int payType1 = Integer.parseInt(payType);
                 if (payType1 != 0 && refundFee != null && refundFee != null && (new BigDecimal(refundFee).compareTo(new BigDecimal("0")) > 0)) {
                     //非积分需要插入流水
-                    payType1 = 3;//微信
+                    payType1 = PayTypeEnum.getDooolyCodeByCode(payType1);
                     saveOneOrder(order, payType1, refundFee, refundFee, merchantRefundNo);
                 }
                 //积分退款要修改businessId一致
@@ -1468,7 +1538,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType);
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType,null);
         logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }
@@ -1486,7 +1556,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(MeituanOrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

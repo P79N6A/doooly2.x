@@ -18,6 +18,8 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 				<value>adBusinessServiceImpl</value>
 				<value>adUserService</value>
 				<value>adGroupService</value>
+				<value>templateCacheServiceImpl</value>
+				<value>lifehomeServiceImpl</value>
 			</list>
 		</property>
  		

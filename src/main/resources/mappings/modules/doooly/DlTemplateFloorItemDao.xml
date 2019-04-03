@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.doooly.DlTemplateFloorItemDao">
+
+	<sql id="dlTemplateFloorItemColumns">
+		a.id AS "id",
+		a.template_id AS "templateId",
+		a.floor_id AS "floorId",
+		a.title AS "title",
+		a.sub_title AS "subTitle",
+		a.link_url AS "linkUrl",
+		a.icon_url AS "iconUrl",
+		a.image_url AS "imageUrl",
+		a.corner_mark_text AS "cornerMarkText",
+		a.state AS "state",
+		a.sort AS "sort",
+		a.relation_type AS "relationType",
+		a.relation_id AS "relationId",
+		a.del_flag AS "delFlag",
+		a.depict AS "depict",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate"
+	</sql>
+
+	<sql id="dlTemplateFloorItemJoins">
+	</sql>
+
+	<select id="getAllByFloorId" resultType="DlTemplateFloorItem">
+		SELECT
+			<include refid="dlTemplateFloorItemColumns"/>
+		FROM
+		     dl_template_floor_item a
+		WHERE
+		      a.del_flag = 0
+		  AND a.floor_id = #{floorId}
+		  AND a.state = 0
+		ORDER BY a.sort
+	</select>
+
+	<select id="getAllByTempIdAndFloorId" resultType="DlTemplateFloorItem">
+		SELECT
+		<include refid="dlTemplateFloorItemColumns"/>
+		FROM
+		dl_template_floor_item a
+		WHERE
+		a.del_flag = 0
+		AND a.floor_id = #{floorId}
+		AND a.template_id = #{templateId}
+		AND a.state = 0
+		ORDER BY a.sort
+	</select>
+
+	<update id="deleteByTemplateId">
+		UPDATE dl_template_floor_item SET
+			del_flag = 1
+		WHERE template_id = #{templateId}
+	</update>
+</mapper>

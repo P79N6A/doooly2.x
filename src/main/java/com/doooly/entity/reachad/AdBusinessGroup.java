@@ -7,7 +7,9 @@ public class AdBusinessGroup {
 	private String id;
 	private String businessId;
 	private String groupId;
+	private Long sceneId;
 	private Date createDate;
+	private Integer type;
 	
 	public String getId() {
 		return id;
@@ -32,5 +34,21 @@ public class AdBusinessGroup {
 	}
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public Long getSceneId() {
+		return sceneId;
+	}
+
+	public void setSceneId(Long sceneId) {
+		this.sceneId = sceneId;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
 	}
 }

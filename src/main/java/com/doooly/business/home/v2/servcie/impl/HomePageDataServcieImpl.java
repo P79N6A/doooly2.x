@@ -2,16 +2,16 @@ package com.doooly.business.home.v2.servcie.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.doooly.business.freeCoupon.service.FreeCouponBusinessServiceI;
+import com.doooly.business.freeCoupon.service.MyCouponsBusinessServiceI;
 import com.doooly.business.home.v2.servcie.HomePageDataServcie;
 import com.doooly.business.myorder.dto.HintReq;
 import com.doooly.business.myorder.dto.HintResp;
 import com.doooly.business.myorder.service.OrderService;
 import com.doooly.common.DooolyResponseStatus;
+import com.doooly.common.constants.PropertiesConstants;
 import com.doooly.common.constants.PropertiesHolder;
-import com.doooly.dao.reachad.AdAppHomePageDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdUserDao;
-import com.doooly.dao.reachad.AdUserIntegralDao;
+import com.doooly.common.util.HttpClientUtil;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.base.BaseResponse;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.coupon.FindExclusiveCouponResponse;
@@ -47,6 +47,8 @@ import java.util.*;
 @Service
 public class HomePageDataServcieImpl implements HomePageDataServcie {
 	private static Logger log = LoggerFactory.getLogger(HomePageDataServcieImpl.class);
+	private static final String PROJECT_ACTIVITY_URL = PropertiesConstants.dooolyBundle.getString("project.activity.url");
+
 	@Autowired
 	protected StringRedisTemplate redisTemplate;
 	@Autowired
@@ -63,6 +65,10 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 	
 	@Autowired
 	private OrderService orderservice;
+	@Autowired
+	private AdGroupEquityLevelDao adGroupEquityLevelDao;
+	@Autowired
+	private MyCouponsBusinessServiceI myCouponsBusinessServiceI;
 
 	@Override
 	public GetHomePageDataV2Response getHomePageDataV2(GetHomePageDataV2Request request,
@@ -434,6 +440,59 @@ public class HomePageDataServcieImpl implements HomePageDataServcie {
 			homePageData.setNewFinishFlag(resp.isNewFinishFlag());
 			homePageData.setNewCancelFlag(resp.isNewCancelFlag());
 		}
+		return response;
+	}
+
+	@Override
+	public GetHomePageDataV2Response getHomePageDataV3(GetHomePageDataV2Request request,
+														 GetHomePageDataV2Response response) {
+		response = this.getHomePageDataV2(request, response);
+		HomePageDataV2 homePageData = response.getData();
+		if (homePageData != null) {
+			// 小红点显示
+			HintReq req = new HintReq();
+			req.setUserId(String.valueOf(request.getUserId()));
+			HintResp resp = orderservice.getUserFlag(req);
+			homePageData.setRecentlyPlacedOrderFlag(resp.isRecentlyPlacedOrderFlag());
+			homePageData.setPendingPaymentFlag(resp.isPendingPaymentFlag());
+			homePageData.setRecentArrivalFlag(resp.isRecentArrivalFlag());
+			homePageData.setImminentArrivalFlag(resp.isImminentArrivalFlag());
+			// 查询企业权益
+			List<AdGroupEquityLevel> equityList = adGroupEquityLevelDao
+					.getAllByGroupId(response.getData().getAdGroup().getId().toString(), 5);
+
+			if (equityList != null && equityList.size() > 0) {
+				response.getData().setGroupLevel(equityList.get(0).getAdGroupLevel());
+
+				if (equityList.size() > 3) {
+					// 有更多
+					response.getData().setGroupEquitys(equityList.subList(0, 3));
+					response.getData().setHasMoreEquity(true);
+				} else {
+					// 没有更多
+					response.getData().setGroupEquitys(equityList);
+					response.getData().setHasMoreEquity(false);
+				}
+			} else {
+				response.getData().setGroupLevel(0);
+			}
+
+			// 未领取礼包数量
+			JSONObject json = new JSONObject();
+			json.put("userId", String.valueOf(request.getUserId()));
+			JSONObject resultJson = HttpClientUtil.httpPost(PROJECT_ACTIVITY_URL + "gift/bag/giftBagCount", json);
+			log.info("获得用户未领取礼包数量：" + resultJson.toJSONString());
+			if (MessageDataBean.success_code.equals(resultJson.getString("code"))) {
+				JSONObject date = (JSONObject) JSONObject.parse(resultJson.getString("data"));
+				response.getData().setGiftBagCount(date.getInteger("count"));
+			}
+
+			// 礼券数量
+			HashMap<String, Object> map = myCouponsBusinessServiceI.getCouponListByType(String.valueOf(request.getUserId()), "unuse", "0");
+			response.getData().setCouponCount(((ArrayList)map.get("actConnList")).size() + "");
+		}
+
+
 		return response;
 	}
 	

@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public class AdArea {
 
+	public final static String ALLCITY = "全国";
+
 	private int id;
 	private String parentId;// 父id
 	private String name;// 区域城市名

@@ -76,13 +76,6 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                     //说明订单已经完成
                     return null;
                 }
-                //AdOrderSource adOrderSource1 = new AdOrderSource();
-                //adOrderSource1.setOrderNumber(orderNum);
-                //adOrderSource1 =  adOrderSourceDao.get(adOrderSource1);
-                //if(adOrderSource1 != null){
-                //    //说明已经同步过
-                //    return null;
-                //}
                 if (order.getIsSource() == 3) {
                     //插入订单来源表,非自营会同步已支付订单
                     AdBusiness business = mallBusinessService.getById(String.valueOf(order.getBussinessId()));
@@ -154,16 +147,6 @@ public class DooolyCashierDeskPayServiceIMpl extends AbstractPaymentService {
                             logger.error("同步ad_pay_fow到ad_order_flow出现异常. adOrderFlow = {},e = {}", adOrderFlow, e);
                         }
                     }
-                    ////支付方式设为收银台
-                    //PayFlow payFlow = payFlowService.getById(payFlowId);
-                    //payFlow.setPayType(PayFlowService.PAYTYPE_CASHIER_DESK);
-                    //payFlowService.update(payFlow);
-                    //AdOrderSource adOrderSource = new AdOrderSource();
-                    //adOrderSource.setOrderNumber(orderNum);
-                    //adOrderSource.setBusinessId(business.getId());
-                    //adOrderSource.setCashDeskSource("d");
-                    //adOrderSource.setTraceCodeSource("d");
-                    //adOrderSourceDao.insert(adOrderSource);
                     // 返回解析结果数据
                     List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
                     Map<String, Object> map = new HashMap<String, Object>();

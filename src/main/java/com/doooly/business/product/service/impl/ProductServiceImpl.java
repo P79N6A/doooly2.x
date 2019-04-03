@@ -1,23 +1,14 @@
 package com.doooly.business.product.service.impl;
 
-import com.doooly.business.product.entity.ActivityInfo;
-import com.doooly.business.product.entity.AdGroupSelfProductPrice;
-import com.doooly.business.product.entity.AdSelfProduct;
-import com.doooly.business.product.entity.AdSelfProductImage;
-import com.doooly.business.product.entity.AdSelfProductSku;
-import com.doooly.business.product.entity.AdSelfProductType;
+import com.doooly.business.product.entity.*;
 import com.doooly.business.product.service.ProductService;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.constants.RedisConstants;
-import com.doooly.dao.reachad.AdConfigDictDao;
-import com.doooly.dao.reachad.AdGroupDao;
-import com.doooly.dao.reachad.AdOrderReportDao;
-import com.doooly.dao.reachad.AdSelfProductDao;
-import com.doooly.dao.reachad.AdSelfProductImageDao;
-import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.reachad.*;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdGroup;
 import com.doooly.entity.reachad.AdUser;
+import com.doooly.entity.reachad.AdUserIntegral;
 import com.reach.redis.annotation.Cacheable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,12 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -127,12 +113,12 @@ public class ProductServiceImpl implements ProductService {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		try {
 			// 1.查询自营商品总数(已上架)
-			int totalNum = adSelfProductDao.getSelfProductTotalNum();
-			if (totalNum > 0) {
-				Pagelab pagelab = new Pagelab(currentPage, pageSize);
-				pagelab.setTotalNum(totalNum);
-				// 2.获取分页的自营商品(排除sku全部被屏蔽的商品)
-				AdGroup group = adGroupDao.findGroupByUserId(userId);// 查询用户所属企业
+            AdGroup group = adGroupDao.findGroupByUserId(userId);// 查询用户所属企业
+            int totalNum = adSelfProductDao.getSelfProductTotalNum(group.getId());
+            if (totalNum > 0) {
+                Pagelab pagelab = new Pagelab(currentPage, pageSize);
+                pagelab.setTotalNum(totalNum);
+                // 2.获取分页的自营商品(排除sku全部被屏蔽的商品)
 				List<AdSelfProduct> selfProductList = adSelfProductDao.getSelfProductList(pagelab.getStartIndex(),
 						pagelab.getPageSize(), group.getId());
 				if (CollectionUtils.isNotEmpty(selfProductList)) {
@@ -192,6 +178,9 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	private AdConfigDictDao adConfigDictDao;
+
+	@Autowired
+	private AdUserIntegralDao userIntegralMapper;
 
 	@Override
 	public HashMap<String, Object> getSelfProductDetail(String productId, String userId,String activityName) {
@@ -258,6 +247,8 @@ public class ProductServiceImpl implements ProductService {
 
 			// 6.获取可用积分
 			BigDecimal availablePoint = adUserDao.getAvailablePoint(userId);
+			AdUserIntegral dirIntegal = userIntegralMapper.getDirIntegralByUserId(Long.parseLong(userId));
+			availablePoint = availablePoint.add(dirIntegal.getAvailIntegral());
 
 			map.put("code", MessageDataBean.success_code);
 			map.put("selfProduct", adSelfProduct);

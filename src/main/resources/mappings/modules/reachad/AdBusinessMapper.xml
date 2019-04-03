@@ -214,6 +214,14 @@
 		from ad_business a
 		where a.business_id=#{businessId}
 	</select>
+
+
+	<select id="getBusinessByCity" parameterType="java.lang.String" resultType="java.lang.String">
+		select b.business_id from  ad_business_area_conn b
+		LEFT JOIN ad_area a ON b.area_id = a.id
+		where a.`name` = #{city}
+	</select>
+
 	<select id="get" resultType="com.doooly.entity.reachad.AdBusiness">
 		select 
 			<include refid="adBusinessHColumns" />
@@ -522,5 +530,32 @@
                 AND a.business_id = #{businessId}
             </if>
         </where>
+	</select>
+
+	<select id="getListByBusinessIds" resultType="com.doooly.entity.reachad.AdBusiness">
+		select
+			id,
+		    deal_type as dealType,
+			company,
+			logo,
+			url,
+			app_url as appUrl,
+			server_end_time as serverEndTime
+		from
+			ad_business
+		WHERE
+			id in
+		<foreach collection="businessIds" item="businessId" separator="," open="(" close=")">
+			#{businessId}
+		</foreach>
+
+	</select>
+
+	<select id="getCntByBusinessIdAndScene" resultType="int">
+		select count(1) from ad_business
+		where FIND_IN_SET(#{sceneId},scene)
+		and id = #{businessId}
+		and is_active = 2
+		 and server_end_time > CURRENT_TIMESTAMP()
 	</select>
 </mapper>

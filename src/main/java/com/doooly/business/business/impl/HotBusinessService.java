@@ -231,13 +231,13 @@ public class HotBusinessService implements HotBusinessServiceI {
 						adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
 					} else {
 						//返回码002并不都是升级失败的，只有以下错误信息可以认定为升级失败
-						if(Constants.VIP_VOP_EMPLOYEE_ERROR_LIST.contains(result.getResultDesc())){
+						if (Constants.VIP_VOP_EMPLOYEE_ERROR_LIST.contains(result.getResultDesc())) {
 							adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_FAILURE);
-						}else{
+						} else {
 							//指定兜礼会员在唯品会的企业ID为16，如果有此异常，认定为升级成功；否则是在唯品会的其它企业，认定升级失败
-							if(StringUtils.isNotEmpty(result.getResultDesc()) && result.getResultDesc().contains(Constants.VIP_VOP_ENTERPRISE_EXIST_DESC) && !Constants.VIP_VOP_EMPLOYEE_SUCCESS_DESC.equals(result.getResultDesc())){
+							if (StringUtils.isNotEmpty(result.getResultDesc()) && result.getResultDesc().contains(Constants.VIP_VOP_ENTERPRISE_EXIST_DESC) && !Constants.VIP_VOP_EMPLOYEE_SUCCESS_DESC.equals(result.getResultDesc())) {
 								adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_FAILURE);
-							}else{
+							} else {
 								adBusiness.setUpGradeState(Constants.VIP_VOP_EMPLOYEE_CODE_SUCCESS);
 							}
 						}
@@ -254,6 +254,15 @@ public class HotBusinessService implements HotBusinessServiceI {
 						adBusiness.setUpGradeState("2");
 					}
 				}
+			}
+
+			// 如果是网易严选就在范文路径后添加电话号码参数
+			if (adBusiness.getCompany().contains("网易严选")) {
+				AdUser adUser = new AdUser();
+				adUser.setId(Long.valueOf(redisTemplate.opsForValue().get(token).toString()));
+				adUser = adUserDao.getUserActiveInfo(adUser);
+				adBusiness.setsWechatJumpUrl(adBusiness.getsWechatJumpUrl() + "?mobile=" + adUser.getTelephone());
+				adBusiness.setUrl(adBusiness.getUrl() + "?mobile=" + adUser.getTelephone());
 			}
 			messageDataBean.setData(map);
 			messageDataBean.setCode(MessageDataBean.success_code);

@@ -106,7 +106,7 @@ public class OneNumberService implements OneNumberServiceI {
         String mobileNumber = adUser.getTelephone();
         String before_token = "mobileNumber="+mobileNumber+"&secret=doolyJointLoginSecret";
         String sign = MD5Util.MD5Encode(before_token.toUpperCase(), KeyConstants.CHARSET);
-        String token = sign.substring(5, 20);
+        String token = sign.substring(5, 25);
         return String.format("%s?urlRefer=%s&merchantCode=%s&mobileNumber=%s&token=%s", adBusinessExpandInfo.getBusinessUrl(), adBusinessExpandInfo.getShopId(), adBusinessExpandInfo.getShopKey(),adUser.getTelephone(),token);
     }
 

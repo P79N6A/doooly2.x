@@ -103,17 +103,17 @@ public class WechatDevCallback {
 	@Path(value = "/callback2/{channel}")
 	public String callbackv2(@RequestBody String xmlStr, @PathParam("channel") String channel, @Context HttpServletRequest req, @Context HttpServletResponse res)
 			throws ServletException, IOException {
-			log.info("微信回调事件-请求参数xml=" + xmlStr);
+			log.info("callback2微信回调事件-请求参数xml=" + xmlStr);
 			JSONObject accessTokenTicket = WechatUtil.getAccessTokenTicketRedisByChannel(channel);
 			String token = accessTokenTicket.getString(WechatUtil.ACCESS_TOKEN);
-			String resXml = "<xml><ToUserName><![CDATA[$toUserName]]></ToUserName><FromUserName><![CDATA[$fromUserName]]></FromUserName><CreateTime>$createTime</CreateTime><MsgType><![CDATA[news]]></MsgType><ArticleCount>2</ArticleCount><Articles><item><Title><![CDATA[搜索引擎]]></Title><Description><![CDATA[感谢关注]]></Description><PicUrl><![CDATA[http://mmbiz.qpic.cn/mmbiz_jpg/nWY3YXezOzWbBOyZJMz6icMUfERSXds1w1pPaFAWeC76icNL4ZEiccAPLGsibuyP38zuknbuv7CJaFg1ILSqDkUHAg/0]]></PicUrl><Url><![CDATA[http://imooc.com]]></Url></item><item><Title><![CDATA[搜索引擎]]></Title><Description><![CDATA[感谢关注]]></Description><PicUrl><![CDATA[http://mmbiz.qpic.cn/mmbiz_jpg/nWY3YXezOzWbBOyZJMz6icMUfERSXds1w1pPaFAWeC76icNL4ZEiccAPLGsibuyP38zuknbuv7CJaFg1ILSqDkUHAg/0]]></PicUrl><Url><![CDATA[http://imooc.com]]></Url></item></Articles></xml>";
+			String resXml = "<xml><ToUserName><![CDATA[$touser]]></ToUserName><FromUserName><![CDATA[$fromuser]]></FromUserName><CreateTime>$createTime</CreateTime><MsgType><![CDATA[transfer_customer_service]]></MsgType></xml>";
 			org.json.JSONObject json = XML.toJSONObject(xmlStr).getJSONObject("xml");
 			String fromUserName = json.getString("FromUserName");
 			String toUserName = json.getString("ToUserName");
-			resXml = resXml.replace("$toUserName", fromUserName);
+			resXml = resXml.replace("$touser", fromUserName);
 			resXml = resXml.replace("$createTime", System.currentTimeMillis()+"");
-			resXml = resXml.replace("$fromUserName", toUserName);
-			log.info("微信回调事件-返回xml=" + resXml);
+			resXml = resXml.replace("$fromuser", toUserName);
+			log.info("callback2 微信回调事件-返回xml=" + resXml);
 			res.setContentType("text/xml;charset=UTF-8");
 			ServletOutputStream outputStream = res.getOutputStream();
 			outputStream.write(resXml.getBytes("utf-8"));

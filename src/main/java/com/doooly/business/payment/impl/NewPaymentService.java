@@ -317,7 +317,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     public String getDirIntegral( List<OrderVo> orderVos ,AdOrderBig adOrderBig,AdUser adUser) {
         //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
-        String getDirIntegralUrl =WebService.WEBURL+"/V2/mchpay/getDirIntegral/V2";
+        String getDirIntegralUrl = PaymentConstants.PAYMENT_HTTPS_V2+"/mchpay/getDirIntegral/V2";
         //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
         params.put("businessId", WebService.BUSINESSID);

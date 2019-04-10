@@ -505,7 +505,7 @@ public class ELMServiceImpl implements ELMServiceI {
             return resultModel;
         }
         OrderVo orderVo = orderList.get(0);
-        PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber());
+        PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber(),null);
         if (null == payMsg) {
             JSONObject res = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, ELMConstants.ELE_REFUND_OPERATION_FAIL,
                     "", "", "", "", zero,
@@ -750,7 +750,7 @@ public class ELMServiceImpl implements ELMServiceI {
             return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
         }
         //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
-        PayMsg payMsg = refundService.autoRefund(userId, orderNum);
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum,null);
         if(!payMsg.getCode().equals(PayMsg.success_code)){
             //退款失败
             return new OrderMsg(MessageDataBean.failure_code, payMsg.getMess());

@@ -40,4 +40,20 @@
 			</if>
         </where>
 	</select>
+
+
+	<select id="getBusinessAndExpandInfo" resultType="AdBusinessExpandInfo">
+		select
+			<include refid="adBusinessExpandInfoColumns"/>
+		from ad_business ab ,ad_business_expand_info a
+		<where>
+			ab.id = a.business_id
+			<if test="businessId != null and businessId != ''">
+				AND ab.business_id=#{businessId}
+			</if>
+			<if test="clientSecret != null and clientSecret != ''">
+				AND a.client_secret=#{clientSecret}
+			</if>
+		</where>
+	</select>
 </mapper>

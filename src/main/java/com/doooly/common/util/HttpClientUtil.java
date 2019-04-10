@@ -385,7 +385,7 @@ public class HttpClientUtil {
      * @param paramMap 参数
      * @return
      */
-    public static String doPost(String url, Map<String, String> headerMap, Map<String, String> paramMap) {
+    public static String doPost(String url, Map<String, String> headerMap, Map<String, String> paramMap, String bodyStr) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         String httpStr = null;
         HttpPost httpPost = new HttpPost(url);
@@ -421,6 +421,10 @@ public class HttpClientUtil {
                         httpPost.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName(CHARACTER_ENCODING)));
                         break;
                 }
+            }
+
+            if (null != bodyStr) {
+                httpPost.setEntity(new StringEntity(bodyStr, CHARACTER_ENCODING));
             }
             response = httpClient.execute(httpPost);
             HttpEntity entity = response.getEntity();

@@ -103,6 +103,16 @@ public class OrderVo {
     //订单类型 1 礼包订单
     private String orderType;
     private String giftBagId;		// 礼包表主键,礼品所属那个礼包, orderType为1时传递
+	// 饿了么企业订单号
+	private String cardOid;
+
+	public String getCardOid() {
+		return cardOid;
+	}
+
+	public void setCardOid(String cardOid) {
+		this.cardOid = cardOid;
+	}
 
 	public OrderVo() {
 		super();

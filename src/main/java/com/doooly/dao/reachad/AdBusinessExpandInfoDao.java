@@ -1,6 +1,7 @@
 package com.doooly.dao.reachad;
 
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @Description: 1号通接口
@@ -12,4 +13,7 @@ public interface AdBusinessExpandInfoDao {
     AdBusinessExpandInfo getByBusinessId(String businessId);
 
     AdBusinessExpandInfo getBusinessExpandInfo(AdBusinessExpandInfo adBusinessExpandInfo);
+
+    AdBusinessExpandInfo getBusinessAndExpandInfo(@Param("businessId")String businessId,
+                                                  @Param("clientSecret")String clientSecret);
 }

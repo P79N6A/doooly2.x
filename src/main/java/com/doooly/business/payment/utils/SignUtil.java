@@ -33,6 +33,7 @@ public class SignUtil {
             }
         }
         sb.append("client_secret="+client_secret);
+        System.out.println(sb.toString());
         return MD5Utils.encode(sb.toString()).toLowerCase();
     }
 

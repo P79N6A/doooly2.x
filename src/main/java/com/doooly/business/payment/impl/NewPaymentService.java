@@ -71,6 +71,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
+import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
+import static com.sun.tools.doclint.Entity.nu;
+import static com.sun.tools.doclint.Entity.or;
 
 /**
  * @Description:
@@ -180,7 +184,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //改造缓存 === zhangqing 20181227
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -244,9 +248,36 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("订单参数=======orderSummary========" + orderSummary.toJSONString());
         JSONObject param = orderSummary.getJSONObject("param");
         JSONObject retJson = orderSummary.getJSONObject("retJson");//页面展示数据集合
+        String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
-        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL_V2);
+        object.put("sign", sign);
+        String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.UNIFIED_ORDER_URL);
         JSONObject jsonResult = JSONObject.parseObject(result);
         if (jsonResult.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
@@ -254,31 +285,64 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
+            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
             logger.info("payment unifiedorder v2 result data={}", data);
             return ResultModel.ok(retJson);
         } else {
-            return ResultModel.error(GlobalResultStatusEnum.SIGN_VALID_ERROR);
+            return new ResultModel(jsonResult.getInteger("code"),jsonResult.getString("info"));
         }
     }
 
     private JSONObject getOrderSummaryV2(JSONObject json) {
         logger.info("getOrderSummaryV2() json = {}", json);
         JSONObject result = new JSONObject();
-        String bigOrderNumber = json.getString("bigOrderNumber");
+        String orderNum = json.getString("orderNum");//订单号
+        String redirectUrl = json.getString("redirectUrl");//支付成功跳转链接
         long userId = json.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
+        }
         //查询大订单
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("userId",adOrderBig.getUserId());
-        List<String> skus = getSkus(orderVos);
-        paramMap.put("skus",skus);
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(orderNum);
+            adOrderBig.setIsSource("3");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setBigOrderNumber(bigOrderNumber);
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
+        if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==1){
+            businessId = String.valueOf(orderVos.get(0).getBussinessBussinessId());
+        }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
@@ -292,11 +356,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         String amount = String.valueOf(adOrderBig.getTotalAmount().setScale(2, BigDecimal.ROUND_DOWN));
         JSONObject param = new JSONObject();
         param.put("cardNumber", user.getTelephone());
-        param.put("businessId", WebService.BUSINESSID);
-        param.put("merchantOrderNo", adOrderBig.getId());
+        param.put("businessId", businessId);
+        param.put("merchantOrderNo", orderNum);
         param.put("bigOrderNumber", adOrderBig.getId());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("redirectUrl", redirectUrl);
         param.put("body", "兜礼订单-"+adOrderBig.getId());
         param.put("isSource", adOrderBig.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));
@@ -312,6 +377,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
+        result.put("businessId", businessId);
         return result;
     }
 
@@ -439,7 +505,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String businessId = orderSummary.getString("businessId");//从返回参数获取商户id来查询扩展信息
         //改造缓存 === zhangqing 20181227
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -597,7 +663,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
         List<OrderVo> orderVos = Arrays.asList(o);
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(o.getId());
+        adOrderBig.setId(String.valueOf(o.getId()));
         adOrderBig.setTotalAmount(o.getTotalMount());
         String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
         retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
@@ -634,6 +700,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("merchantOrderNo", o.getOrderNumber());
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
+        param.put("expireTime", DateUtils.formatDateTime(DateUtils.add(o.getOrderDate(), Calendar.MINUTE, 15)));
         param.put("body", orderDesc);
         param.put("isSource", o.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(o.getOrderDate()));
@@ -683,7 +750,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         params.put("isPayPassword", isPayPassword);
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -729,8 +796,35 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
             return new ResultModel(Integer.parseInt(payMsg.getCode()), payMsg.getMess());
         }
+        String businessId = params.getString("businessId");
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        logger.info("下预付单参数=======accessToken========" + accessToken);
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(businessId);
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", params.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", params.toJSONString());
+        object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.GET_PAYFROM_URL_V2);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
@@ -743,24 +837,62 @@ public class NewPaymentService implements NewPaymentServiceI {
     }
 
     private PayMsg prePayNewV2(JSONObject params) {
-        // 校验订单
-        String bigOrderNumber = params.getString("bigOrderNumber");
+        String orderNum = params.getString("orderNum");//订单号
+        long userId = params.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
+        }
         //查询大订单
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
-        if (adOrderBig == null) {
-            return new PayMsg(PayMsg.failure_code, "没有找到订单");
+        //查询子订单
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(orderNum);
+            adOrderBig.setIsSource("3");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setBigOrderNumber(bigOrderNumber);
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
         }
-        if (adOrderBig.getState() == OrderService.PayState.PAID.getCode()) {
-            return new PayMsg(PayMsg.failure_code, "订单已支付，请勿重新支付。");
+        PayMsg payMsg = null;
+        for (OrderVo orderVo : orderVos) {
+            payMsg = canPay(orderVo, params);
+            //为空或者校验失败直接返回错误信息
+            if (payMsg != null && !payMsg.getCode().equals(OrderMsg.valid_pass_code)) {
+                return payMsg;
+            }
         }
-        //构建收银台接口需要参数
-        AdUser paramUser = new AdUser();
-        paramUser.setId(adOrderBig.getUserId());
-        AdUser user = adUserServiceI.getUser(paramUser);
-        params.put("isPayPassword", "2".equals(user.getIsPayPassword()) ? "2" : 1);//除了密码模式都是验证码模式
-        PayMsg payMsg = new PayMsg(OrderMsg.valid_pass_code, OrderMsg.valid_pass__mess);
+        JSONObject jsonData = payMsg.getJsonData();
+        if(orderVos.size()==1){
+            //说明子订单支付并且只有一个订单
+            businessId = jsonData.getString("businessId");
+        }
+        String isPayPassword = jsonData.getString("isPayPassword");
+        params.put("isPayPassword", isPayPassword);
+        params.put("businessId", businessId);
         return payMsg;
     }
 
@@ -847,9 +979,46 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("收银台支付回调通知结果V2:{}", resultJson);
         String param = resultJson.getString("param");
         JSONObject retJson = JSONObject.parseObject(param);
-        String bigOrderNumber = retJson.getString("bigOrderNumber");//大订单号
+        String orderNum = retJson.getString("orderNum");//大订单号
+        Long userId = retJson.getLong("userId");//大订单号
+        String bigOrderNumber = "";//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        List<OrderVo> orderVos = new ArrayList<>();
+        OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }else {
+            bigOrderNumber = orderNum;
+        }
+        //查询大订单
+        AdOrderBig adOrderBig = new AdOrderBig();
+        adOrderBig.setId(bigOrderNumber);
+        adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        List<OrderVo> orderVos = adOrderReportServiceI.getOrders(bigOrderNumber);
+        if(adOrderBig == null){
+            //自营没有大订单下单
+            adOrderBig = new AdOrderBig();
+            adOrderBig.setId(orderNum);
+            adOrderBig.setIsSource("3");
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
+            adOrderBig.setOrderDate(orderLimt.getOrderDate());
+            orderVos.add(orderLimt);
+        }else if(orderNum.contains("N")){
+            //兜礼子订单
+            orderVos.add(orderLimt);
+        }else {
+            //大订单
+            order.setBigOrderNumber(bigOrderNumber);
+            order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
+            orderVos = adOrderReportServiceI.getOrders(order);
+        }
         for (OrderVo orderVo : orderVos) {
             JSONObject json = new JSONObject();
             String orderNumber = orderVo.getOrderNumber();
@@ -864,6 +1033,56 @@ public class NewPaymentService implements NewPaymentServiceI {
             PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
             logger.info("收银台支付回调同步结果大订单号:{},子订单号:{},处理结果code:{},处理结果mess,{}",bigOrderNumber,orderNumber,payMsg.getCode(),payMsg.getMess());
         }
+        return ResultModel.ok();
+    }
+
+    //取消商家订单超时未支付的
+    @Override
+    public ResultModel cancelMerchantOrder() {
+        logger.info("cancelMerchantOrder start");
+        List<PayRecordDomain> payRecordDomains = payRecordMapper.getNeedCancaelMerchantOrder();
+        for (PayRecordDomain payRecordDomain : payRecordDomains) {
+            AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+            paramAdBusinessExpandInfo.setBusinessId(payRecordDomain.getBusinessId());
+            AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+            long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+            JSONObject param = new JSONObject();
+            param.put("businessId",payRecordDomain.getBusinessId());
+            param.put("merchantOrderNo",payRecordDomain.getMerchantOrderNo());
+            param.put("payId",payRecordDomain.getPayId());
+            SortedMap<Object, Object> parameters = new TreeMap<>();
+            String clientId = adBusinessExpandInfo.getClientId();
+            String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+            parameters.put("client_id", clientId);
+            parameters.put("timestamp", timestamp);
+            parameters.put("access_token", accessToken);
+            parameters.put("param", param.toJSONString());
+            String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
+            logger.info("取消订单参数=======param========" + param);
+            if (accessToken == null) {
+                ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+                if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                    Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                    accessToken = (String) data.get("access_token");
+                } else {
+                    return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+                }
+            }
+            JSONObject object = new JSONObject();
+            object.put("client_id", clientId);
+            object.put("timestamp", timestamp);
+            object.put("access_token", accessToken);
+            object.put("param", param.toJSONString());
+            object.put("sign", sign);
+            String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_CANCEL_URL);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            if (jsonObject !=null && jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                logger.info("cancelMerchantOrder 成功,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+            } else {
+                logger.info("cancelMerchantOrder 失败,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+            }
+        }
+        logger.info("cancelMerchantOrder 完成");
         return ResultModel.ok();
     }
 
@@ -934,7 +1153,7 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map.put("orderNum", order1.getOrderNumber());
                     map.put("orderId", order.getOrderId());
                     map.put("oid", order.getId());
-                    map.put("totalAmount", order.getTotalMount());
+                    map.put("totalAmount", order.getTotalMount().add(order.getServiceCharge()));
                     //最终支付结果code
                     map.put("code", payMsg.getCode());
                     //手续费
@@ -971,9 +1190,13 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel getPayResultV2(JSONObject json) {
-        String bigOrderNumber = json.getString("bigOrderNumber");
+        String orderNum = json.getString("orderNum");//订单号
+        if(orderNum.contains("N")){
+            //说明是自营子订单 走v1接口
+            return getPayResult(json);
+        }
         AdOrderBig adOrderBig = new AdOrderBig();
-        adOrderBig.setId(Long.parseLong(bigOrderNumber));
+        adOrderBig.setId(orderNum);
         //查询大订单状态
         AdOrderBig adOrderBig1 = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         ResultModel payMsg;
@@ -981,7 +1204,22 @@ public class NewPaymentService implements NewPaymentServiceI {
             //得到支付平台通知并已经处理过支付结果, 直接返回结果
             payMsg = ResultModel.ok();
             Map<String, Object> map = new HashMap<>();
-            map.put("totalAmount", adOrderBig1.getTotalAmount());
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(orderNum);
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if(payRecordDomain != null){
+                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2,BigDecimal.ROUND_HALF_UP));
+                String returnUrl = payRecordDomain.getRedirectUrl();
+                if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
+                        returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                    returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
+                }
+                map.put("redirectUrl", returnUrl);
+            }else {
+                map.put("totalAmount", adOrderBig.getTotalAmount());
+                map.put("redirectUrl", "");
+            }
             payMsg.setData(map);
         } else {
             payMsg = ResultModel.error(GlobalResultStatusEnum.PAY_STATUS_NON);
@@ -995,7 +1233,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         //20181227 --收银台缓存改造
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(id);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(id));
+        paramAdBusinessExpandInfo.setBusinessId(id);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -1089,6 +1327,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (order == null) {
             return new PayMsg(PayMsg.failure_code, "没有找到订单");
         }
+        //校验是否可以支付
+        return canPay(order, param);
+    }
+
+    private PayMsg canPay(OrderVo order, JSONObject json) {
+        logger.info("productType={}", order.getProductType());
         // 订单状态
         if (order.getState() == OrderService.PayState.PAID.getCode()) {
             return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已支付，请勿重新支付。");
@@ -1098,7 +1342,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         if( Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())){
             // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+orderNum);
+            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+order.getOrderNumber());
             JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
             if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
@@ -1106,12 +1350,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 return new PayMsg(OrderMsg.coupon_stock_zero_code, resultJson.getString("info"));
             }
         }
-        //校验是否可以支付
-        return canPay(order, param);
-    }
-
-    private PayMsg canPay(OrderVo order, JSONObject json) {
-        logger.info("productType={}", order.getProductType());
         //用户缓存改造
         //AdUser user = adUserDao.getById(order.getUserId().intValue());
         AdUser paramUser = new AdUser();
@@ -1185,7 +1423,8 @@ public class NewPaymentService implements NewPaymentServiceI {
                 consumptionAmount = new BigDecimal("0");
             }
             //已使用金额+订单实付金额+手续费-每月限制金额
-            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(order.getServiceCharge()).subtract(monthLimit);
+            BigDecimal serviceCharge = order.getServiceCharge()==null ? BigDecimal.ZERO : order.getServiceCharge();
+            BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(serviceCharge).subtract(monthLimit);
             if (subtract.compareTo(BigDecimal.ZERO) > 0) {
                 //说明已经超出限额
                 return new PayMsg(OrderMsg.failure_code, "您已超出每月限额");
@@ -1267,7 +1506,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String businessId = String.valueOf(orderVo.getBussinessId());
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
-        paramAdBusinessExpandInfo.setBusinessId(Long.valueOf(businessId));
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
         long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
         SortedMap<Object, Object> parameters = new TreeMap<>();
@@ -1308,8 +1547,46 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel integralPayV2(JSONObject param) {
         String orderNum = param.getString("orderNum");
+        long userId = param.getLong("userId");
+        String bigOrderNumber;//大订单号
+        String businessId = WebService.BUSINESSID;//商户编号
+        OrderVo order = new OrderVo();
+        order.setOrderNumber(orderNum);
+        order.setUserId(userId);
+        if(orderNum.contains("N")){
+            //说明是自营子订单
+            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
+            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
+            order.setBigOrderNumber(bigOrderNumber);
+            businessId = orderLimt.getBussinessBussinessId();
+        }
+        AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
+        paramAdBusinessExpandInfo.setBusinessId(businessId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
+        long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
+        SortedMap<Object, Object> parameters = new TreeMap<>();
+        String clientId = adBusinessExpandInfo.getClientId();
+        String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
+        if (accessToken == null) {
+            ResultModel authorize = this.authorize(String.valueOf(adBusinessExpandInfo.getBusinessId()));
+            if (authorize.getCode() == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                Map<Object, Object> data = (Map<Object, Object>) authorize.getData();
+                accessToken = (String) data.get("access_token");
+            } else {
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "接口授权认证失败");
+            }
+        }
+        parameters.put("client_id", clientId);
+        parameters.put("timestamp", timestamp);
+        parameters.put("access_token", accessToken);
+        parameters.put("param", param.toJSONString());
+        String sign = SignUtil.createSign(parameters, adBusinessExpandInfo.getClientSecret());
         JSONObject object = new JSONObject();
+        object.put("client_id", clientId);
+        object.put("timestamp", timestamp);
+        object.put("access_token", accessToken);
         object.put("param", param.toJSONString());
+        object.put("sign", sign);
         String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.INTEGRAL_PAY_URL_V2);
         JSONObject jsonObject = JSONObject.parseObject(result);
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
@@ -1556,7 +1833,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         try {
             OrderVo o = new OrderVo();
             o.setOrderNumber(orderNum);
-            //o.setType(MeituanOrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
+            //o.setType(OrderService.OrderStatus.HAD_FINISHED_ORDER.getCode());
             o.setState(OrderService.PayState.PAID.getCode());
             return orderService.getOrder(o).get(0);
         } catch (Exception e) {

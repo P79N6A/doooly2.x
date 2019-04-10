@@ -24,5 +24,8 @@ public interface AdOrderReportServiceI {
 
     List<OrderVo> getOrders(String bigOrderNumber);
 
+    List<OrderVo> getOrders(OrderVo order);
+
     AdOrderBig getAdOrderBig(AdOrderBig adOrderBig);
+
 }

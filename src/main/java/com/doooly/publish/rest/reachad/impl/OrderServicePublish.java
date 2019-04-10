@@ -156,8 +156,16 @@ public class OrderServicePublish {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String cancleOrderV2(JSONObject json){
 		long userId = json.getLongValue("userId");
-		String bigOrderNumber = json.getString("bigOrderNumber");//上一个接口返回的是大订单号
-		return orderService.cancleOrderV2(userId, bigOrderNumber).toJsonString();
+		String orderNum = json.getString("orderNum");//上一个接口返回的是大订单号
+		return orderService.cancleOrderV2(userId, orderNum).toJsonString();
+	}
+
+	@POST
+	@Path(value = "/cancelMerchantOrder")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String cancelMerchantOrder(JSONObject json){
+		return orderService.cancelMerchantOrder().toJsonString();
 	}
 
 	@POST

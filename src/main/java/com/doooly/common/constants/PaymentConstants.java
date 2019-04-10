@@ -43,4 +43,6 @@ public class PaymentConstants {
 
 	public static final String ORDER_APPLY_REFUND_URL = PAYMENT_HTTPS+"/mchpay/refund";// 兜礼支付申请退款接口
 
+	public static final String ORDER_CANCEL_URL = PAYMENT_HTTPS+"/pay/cancelOrder";// 订单取消接口
+
 }

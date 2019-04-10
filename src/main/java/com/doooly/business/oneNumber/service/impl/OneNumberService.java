@@ -3,17 +3,18 @@ package com.doooly.business.oneNumber.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.business.common.util.EncryptDecryptUtil;
 import com.doooly.business.oneNumber.service.OneNumberServiceI;
+import com.doooly.business.payment.constants.GlobalResultStatusEnum;
 import com.doooly.business.utils.MD5Util;
 import com.doooly.business.utils.RSAEncryptUtil;
-import com.doooly.common.constants.PropertiesHolder;
+import com.doooly.common.constants.KeyConstants;
+import com.doooly.common.elm.ELMConstants;
 import com.doooly.common.util.HttpClientUtil;
 import com.doooly.dao.reachad.AdBusinessExpandInfoDao;
 import com.doooly.dao.reachad.AdUserDao;
+import com.doooly.dao.report.UserSynRecordDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdBusinessExpandInfo;
 import com.doooly.entity.reachad.AdUser;
-import com.doooly.common.elm.ELMConstants;
-import com.doooly.dao.report.UserSynRecordDao;
 import com.doooly.entity.report.UserSynRecord;
 import com.koalii.bc.util.encoders.Hex;
 import org.apache.commons.codec.binary.Base64;
@@ -25,9 +26,12 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @Description: 1号通接口
@@ -84,6 +88,9 @@ public class OneNumberService implements OneNumberServiceI {
 		case 7:
 			resultUrl = getMeituanUrl(adUser,token,adBusinessExpandInfo);
 			break;
+		case 8:
+			resultUrl = getTuNiuUrl(adUser,adBusinessExpandInfo);
+			break;
 		default:
 			resultUrl = "";
 			break;
@@ -92,11 +99,76 @@ public class OneNumberService implements OneNumberServiceI {
 		logger.info("1号通生成的结果链接:" + resultUrl);
 		map.put("resultUrl", resultUrl);
 		messageDataBean.setCode(MessageDataBean.success_code);
-		messageDataBean.setData(map);
-		return messageDataBean;
+		messageDataBean.setData(map);	return messageDataBean;
 	}
 
-	/**
+    private String getTuNiuUrl(AdUser adUser, AdBusinessExpandInfo adBusinessExpandInfo) {
+        String mobileNumber = adUser.getTelephone();
+        String before_token = "mobileNumber="+mobileNumber+"&secret=doolyJointLoginSecret";
+        String sign = MD5Util.MD5Encode(before_token.toUpperCase(), KeyConstants.CHARSET);
+        String token = sign.substring(5, 25);
+        return String.format("%s?urlRefer=%s&merchantCode=%s&mobileNumber=%s&token=%s", adBusinessExpandInfo.getBusinessUrl(), adBusinessExpandInfo.getShopId(), adBusinessExpandInfo.getShopKey(),adUser.getTelephone(),token);
+    }
+
+    @Override
+    public MessageDataBean authorization(JSONObject json) {
+        String clientId = json.getString("clientId");
+        String mobile = json.getString("mobile");
+        String successRedirectUrl = json.getString("successRedirectUrl");
+        String failureRedirectUrl = json.getString("failureRedirectUrl");
+        String actionTime = json.getString("actionTime");
+        String sign = json.getString("sign");
+        json.remove("sign");
+        MessageDataBean messageDataBean = new MessageDataBean();
+        Map<String, Object> map = new HashMap<>();
+        AdUser userParam = new AdUser();
+        userParam.setCardNumber(mobile);
+        userParam.setTelephone(mobile);
+        AdUser loginUser = adUserDao.getUserInfo(userParam);
+        long timestamp = new Date().getTime() / 1000;
+        AdBusinessExpandInfo queryObj = new AdBusinessExpandInfo();
+        queryObj.setClientId(clientId);
+        AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getBusinessExpandInfo(queryObj);
+        String jsonToStr = MD5Util.getSortSignContent(json);
+        //String availableSign = MD5Util.MD5Psw(jsonToStr);
+        //logger.info(" -------------->> availableSign:" + availableSign);
+        Integer code = validatePayInfoParam(clientId, mobile, successRedirectUrl, failureRedirectUrl, actionTime, sign,
+                timestamp, loginUser, adBusinessExpandInfo, jsonToStr);
+        if(code == GlobalResultStatusEnum.ONE_NUMBER_LOGIN_SUCCESS.getCode()){
+            map.put("url",successRedirectUrl);
+            messageDataBean.setCode(MessageDataBean.success_code);
+            messageDataBean.setCode(MessageDataBean.success_mess);
+        } else {
+            map.put("url",failureRedirectUrl+"?code="+code);
+            messageDataBean.setCode(String.valueOf(code));
+        }
+        messageDataBean.setData(map);
+        return messageDataBean;
+    }
+
+
+    private Integer validatePayInfoParam(String clientId, String mobile, String successRedirectUrl,
+                                         String failureRedirectUrl, String actionTime, String sign, long timestamp, AdUser loginUser, AdBusinessExpandInfo adBusinessExpandInfo, String jsonToStr) {
+        if (StringUtils.isBlank(clientId) || StringUtils.isBlank(mobile)
+                || StringUtils.isBlank(failureRedirectUrl)
+                || StringUtils.isBlank(actionTime)
+                || StringUtils.isBlank(sign)|| adBusinessExpandInfo==null) {
+            return GlobalResultStatusEnum.ONE_NUMBER_PARAM_EMPTY.getCode();
+        }
+        if(((timestamp-Long.valueOf(actionTime))>180)){
+            return GlobalResultStatusEnum.ONE_NUMBER_LOGIN_TIMEOUT.getCode();
+        }
+        if(loginUser == null){
+            return GlobalResultStatusEnum.ONE_NUMBER_USER_EMPTY.getCode();
+        }
+        if(!MD5Util.MD5Encode(jsonToStr,"utf-8").equals(sign)){
+            return GlobalResultStatusEnum.ONE_NUMBER_SIGN_ERROR.getCode();
+        }
+        return GlobalResultStatusEnum.ONE_NUMBER_LOGIN_SUCCESS.getCode();
+    }
+
+
+    /**
 	 * 饿了么专属连接
 	 * @param adUser
 	 * @param adBusinessExpandInfo

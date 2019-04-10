@@ -64,4 +64,12 @@
         </where>
         limit 1
     </select>
+
+    <select id="getNeedCancaelMerchantOrder" parameterType="com.doooly.entity.payment.PayRecordDomain" resultType="com.doooly.entity.payment.PayRecordDomain">
+        SELECT
+              <include refid="adPayRecordColumns"/>
+        FROM ad_pay_record a
+        WHERE a.expire_time &gt; now() AND a.integral_pay_status =0
+    </select>
+
 </mapper>

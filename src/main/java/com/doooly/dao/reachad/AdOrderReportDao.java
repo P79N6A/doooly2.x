@@ -163,4 +163,6 @@ public interface AdOrderReportDao {
      * @return
      */
     Date getMaxOrderDateByUserAndType(@Param("userId") String userId, @Param("type") String type);
+
+    List<OrderVo> getOrders(OrderVo order);
 }

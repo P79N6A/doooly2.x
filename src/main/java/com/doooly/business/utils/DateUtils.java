@@ -269,7 +269,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
    	 * @param days
    	 * @return
    	 */
-   	private static Date add(Date date,int field,int amount) {
+   	public static Date add(Date date,int field,int amount) {
    		Calendar cad = Calendar.getInstance();
    		cad.setTime(date);
    		cad.add(field, amount);
@@ -319,5 +319,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 //		System.out.println(getDate("yyyy年MM月dd日 E"));
 //		long time = new Date().getTime()-parseDate("2012-11-19").getTime();
 //		System.out.println(time/(24*60*60*1000));
-	}
+        Date date = new Date();
+        Date add = add(date, Calendar.MINUTE, 15);
+        System.out.println(formatDateTime(add));
+    }
 }

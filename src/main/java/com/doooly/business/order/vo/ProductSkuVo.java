@@ -15,6 +15,9 @@ public class ProductSkuVo {
     private int productType;
     //话费充值运营商 cmcc cucc ctc
     private String operator;
+
+    private String cardno;		// 旅游卡号
+
 	public int getProductId() {
 		return productId;
 	}
@@ -48,5 +51,13 @@ public class ProductSkuVo {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    public String getCardno() {
+        return cardno;
+    }
+
+    public void setCardno(String cardno) {
+        this.cardno = cardno;
     }
 }

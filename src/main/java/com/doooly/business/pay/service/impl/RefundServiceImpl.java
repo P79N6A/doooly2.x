@@ -149,7 +149,15 @@ public class RefundServiceImpl extends AbstractRefundService {
         params.put("merchantRefundNo", UUID.randomUUID().toString().replace("-", ""));
         params.put("refundPrice",  String.valueOf(order.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN)));
         params.put("refundAmount",  String.valueOf(order.getTotalMount().setScale(2, BigDecimal.ROUND_DOWN)));
-        params.put("notifyUrl", order.getIsSource()==3?PaymentConstants.PAYMENT_REFUND_NOTIFY_URL:null);
+
+        //饿了么回调地址
+        String notifyUrl = null;
+        if (StringUtils.isNotBlank(order.getElmRefundNotifyUrl())) {
+            notifyUrl = order.getElmRefundNotifyUrl();
+        } else if (3 == order.getIsSource()) {
+            notifyUrl = PaymentConstants.PAYMENT_REFUND_NOTIFY_URL;
+        }
+        params.put("notifyUrl", notifyUrl);
         params.put("nonceStr", UUID.randomUUID().toString().replace("-", ""));
         params.put("id", business.getId());
         ResultModel resultModel = newPaymentServiceI.dooolyApplyPayRefund(params);
@@ -284,6 +292,5 @@ public class RefundServiceImpl extends AbstractRefundService {
         }
 
     }
-
 
 }

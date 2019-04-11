@@ -17,14 +17,15 @@ public interface RefundService {
 	public final static short PAY_TYPE_WECHAT_APP = (short)3;
 	public final static short PAY_TYPE_WECHAT_JSAPI = (short)10;
 	
-	public PayMsg autoRefund(long userId,String orderNum,String refundAmount);//就支付自动退款
+	public PayMsg autoRefund(long userId,String orderNum,String refundAmount, String elmRefundNotifyUrl);//就支付自动退款
 	
 	public PayMsg refund(long userId,String orderNum);
 	
 	public PayMsg refund(OrderVo order,PayFlow payFlow);
 
-	public ResultModel applyRefund(long userId, String orderNum, String totalAmount);
+	public ResultModel applyRefund(long userId, String orderNum, String totalAmount, String elmRefundNotifyUrl);
 
-	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType,String refundAmount);//兜礼收银台退款
+	public ResultModel dooolyCashDeskRefund(long userId, String orderNum, String returnFlowNumber, String payType,
+											String refundAmount, String elmRefundNotifyUrl);//兜礼收银台退款
 
 }

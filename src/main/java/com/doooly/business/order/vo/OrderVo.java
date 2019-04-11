@@ -105,6 +105,8 @@ public class OrderVo {
     private String giftBagId;		// 礼包表主键,礼品所属那个礼包, orderType为1时传递
 	// 饿了么企业订单号
 	private String cardOid;
+	//饿了么退款回调地址
+	private String elmRefundNotifyUrl;
 
 	public String getCardOid() {
 		return cardOid;
@@ -503,5 +505,13 @@ public class OrderVo {
     @Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+
+	public String getElmRefundNotifyUrl() {
+		return elmRefundNotifyUrl;
+	}
+
+	public void setElmRefundNotifyUrl(String elmRefundNotifyUrl) {
+		this.elmRefundNotifyUrl = elmRefundNotifyUrl;
 	}
 }

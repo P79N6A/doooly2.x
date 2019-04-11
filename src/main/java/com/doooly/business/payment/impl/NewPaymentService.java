@@ -1815,7 +1815,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType,null);
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType,null, null);
         logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }
@@ -1825,7 +1825,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String userId = json.getString("userId");
         String orderNum = json.getString("orderNum");
         String totalAmount = json.getString("totalAmount");
-        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum, totalAmount);
+        ResultModel resultModel = refundService.applyRefund(Long.parseLong(userId), orderNum, totalAmount, null);
         return resultModel;
     }
 

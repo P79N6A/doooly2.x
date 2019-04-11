@@ -107,7 +107,7 @@ public class OfPayServicePublish {
 				logger.info("mobileCallback() rows={}", rows);
 				//失败调用退款接口
 				if(ProductProcessor.RECHARGE_STATE_9.equals(ret_code)){
-					refundService.autoRefund(order.getUserId(),order.getOrderNumber(),null);
+					refundService.autoRefund(order.getUserId(),order.getOrderNumber(),null, null);
 				}
 			}
 		} catch (Exception e) {
@@ -138,7 +138,7 @@ public class OfPayServicePublish {
 				logger.info("flowCallback() rows={}", rows);
 				//失败调用退款接口
 				if(ProductProcessor.RECHARGE_STATE_9.equals(ret_code)){
-					refundService.autoRefund(order.getUserId(), order.getOrderNumber(),null);
+					refundService.autoRefund(order.getUserId(), order.getOrderNumber(),null, null);
 				}
 			}
 		} catch (Exception e) {

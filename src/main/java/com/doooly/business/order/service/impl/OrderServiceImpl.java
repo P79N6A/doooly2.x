@@ -1101,7 +1101,7 @@ public class OrderServiceImpl implements OrderService {
             return new OrderMsg(MessageDataBean.failure_code, "无效的订单号");
         }
         //2018/8/21/021 qing 取消支付订单 混合支付未完成退还积分
-        PayMsg payMsg = refundService.autoRefund(userId, orderNum, null);
+        PayMsg payMsg = refundService.autoRefund(userId, orderNum, null, null);
         if (StringUtils.isEmpty(orderNum) || userId <= 0) {
             return new OrderMsg(MessageDataBean.failure_code, "参数错误!");
         }

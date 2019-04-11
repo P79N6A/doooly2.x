@@ -66,7 +66,7 @@ public class MobikeProcessor implements ProductProcessor{
                     //400	非法的请求参数，具体错误信息参见返回的message内容
                     //500	系统维护，请求拒绝
                     //退款
-                    PayMsg payMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber(),null);
+                    PayMsg payMsg = refundService.autoRefund(order.getUserId(), order.getOrderNumber(),null, null);
                     // 如果退款失败发送以下短信
                     //【兜礼】尊敬的用户，您本次的话费充值/流量充值/都市旅游卡充值失败，积分会在两个工作日内退回，微信支付的退款事宜请联系兜礼客服热线4001582212咨询！
                     if (!PayMsg.success_code.equals(payMsg.getCode())) {

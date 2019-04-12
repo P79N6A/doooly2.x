@@ -325,7 +325,7 @@ public class ELMServiceImpl implements ELMServiceI {
                 orderService.updateOrderItem(newItem);
                 resultModel.setData(res);
             } else {
-                JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, jsonResult.getString("info"),
+                JSONObject res = getCreateOrderResult(ELMConstants.ELM_RESULT_FAIL, "预付下单失败",
                         PayStatusEnum.PayTypeNotPay.getCode(), "", transactionId, payAmount.toString());
                 resultModel.setData(res);
             }

@@ -114,6 +114,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         jsonObject.put("clientIp", IPUtils.getIpAddr(request));
         ResultModel resultModel = elmServiceI.createElmOrderAndPay(jsonObject);
         if (null == resultModel.getData()) {
+            logger.info("================================>>饿了么调用退款接口返回失败 resultModel is null");
             JSONObject res = createOrderResult(ELMConstants.ELE_CREATE_ORDER_FAIL);
             return res.toJSONString();
         }

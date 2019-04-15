@@ -240,7 +240,8 @@ public class ELMServiceImpl implements ELMServiceI {
             param.put("clientIp", json.get("clientIp"));
             param.put("nonceStr", json.get("nonceStr"));
 
-            param.put("redirectUrl", json.get("redirectUrl"));
+            String redirectUrl = json.getString("redirectUrl") + "?out_trade_no=" + transactionId;
+            param.put("redirectUrl", redirectUrl);
             //订单失效时间
             Date expireTime = DateUtils.parse(json.getString("timeExpire"), "yyyyMMddHHmmss");
             param.put("expireTime", DateUtils.dateFormatStr(expireTime, "yyyy-MM-dd HH:mm:ss"));

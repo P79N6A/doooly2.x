@@ -286,12 +286,12 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = vaileReq.getString("sign");
             vaileReq.remove("sign");
-            flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
-            //flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_PUBLIC_KEY, vaileReq, sign);     //LOCAL DEV OPEN, PRD DELETE
+            //flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
+            flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_PUBLIC_KEY, vaileReq, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(vaileReq), sign);
-                //String signStr = ELMConstants.rsaSign(ElmSignUtils.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
-                //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
+                String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
+                logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -338,7 +338,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("merchantNo", ELMConstants.ELM_MERCHANT_NO);  //三方分配的商户号
             res.put("transactionId", "");          //支付网关的订单号
             res.put("outTradeNo", "");             //第三方交易号，支付成功后必传。
-            res.put("payAmount", "");                //支付金额，单位：分
+            res.put("payAmount", 0);                //支付金额，单位：分
             res.put("payStatus", "");               //支付状态
             res.put("thirdUserId", "");            //S三方UserID，风控使用，支付成功后必传。
             res.put("thirdPayAccount", "");          //S三方收款账户，风控使用，支付成功后必传。
@@ -424,8 +424,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("refundStatus", "");
             res.put("transactionId", "");
             res.put("refundNo", "");
-            res.put("payAmount", "");
-            res.put("refundAmount", "");
+            res.put("payAmount", 0);
+            res.put("refundAmount", 0);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
             res.put("sign", signStr);
@@ -468,8 +468,8 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
             res.put("outRefundNo", "");
             res.put("transactionId", "");
             res.put("refundNo", "");
-            res.put("payAmount", "");
-            res.put("refundAmount", "");
+            res.put("payAmount", 0);
+            res.put("refundAmount", 0);
             res.put("refundStatus", "");
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);

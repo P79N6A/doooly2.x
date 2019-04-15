@@ -286,12 +286,12 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
         try {
             String sign = vaileReq.getString("sign");
             vaileReq.remove("sign");
-            //flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
-            flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_PUBLIC_KEY, vaileReq, sign);     //LOCAL DEV OPEN, PRD DELETE
+            flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_GIAVE_PUBLIC_KEY, vaileReq, sign); // PRD OPEN
+            //flag = ElmSignUtils.rsaCheck(ELMConstants.ELM_PUBLIC_KEY, vaileReq, sign);     //LOCAL DEV OPEN, PRD DELETE
             if (!flag) {
                 logger.info("验证签名失败，参数：{}，饿了么签名：{}", GsonUtils.toString(vaileReq), sign);
-                String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
-                logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
+               //String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, vaileReq);   //LOCAL DEV OPEN, PRD DELETE
+                //logger.info("----------------生成可用的签名：" + signStr);                  //LOCAL DEV OPEN, PRD DELETE
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -69,7 +69,7 @@
         SELECT
               <include refid="adPayRecordColumns"/>
         FROM ad_pay_record a
-        WHERE a.expire_time &gt; now() AND a.integral_pay_status =0
+        WHERE a.expire_time &lt; now() AND a.integral_pay_status =0
     </select>
 
 </mapper>

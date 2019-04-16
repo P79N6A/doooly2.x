@@ -240,7 +240,8 @@ public class ELMServiceImpl implements ELMServiceI {
             param.put("clientIp", json.get("clientIp"));
             param.put("nonceStr", json.get("nonceStr"));
 
-            param.put("redirectUrl", json.get("redirectUrl"));
+            String redirectUrl = json.getString("redirectUrl") + "?out_trade_no=" + transactionId;
+            param.put("redirectUrl", redirectUrl);
             //订单失效时间
             Date expireTime = DateUtils.parse(json.getString("timeExpire"), "yyyyMMddHHmmss");
             param.put("expireTime", DateUtils.dateFormatStr(expireTime, "yyyy-MM-dd HH:mm:ss"));
@@ -468,7 +469,7 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("returnCode", returnCode);
             res.put("returnMsg", returnsg);
             res.put("transactionId", transactionId);
-            res.put("payAmount", paAount);
+            res.put("payAmount", paAount.intValue());
             res.put("outTradeNo", outTradeNo);
             res.put("payStatus", paStatus);
             res.put("thirdUserId", thirdUserId);          //S三方UserID，风控使用，支付成功后必传。
@@ -517,20 +518,25 @@ public class ELMServiceImpl implements ELMServiceI {
         if (PayMsg.success_code.equals(payMsg.getCode())) {
             String outRefundNo = "";
             String outTradeNo = "";
-            // 支付流水
+            BigDecimal orderAmount = new BigDecimal("0");
+            BigDecimal refundAmount = new BigDecimal("0");
+                    // 支付流水
             AdPayRecord adPayRecord = getAdPayRecord(req.getString("transactionId"));
             if (null != adPayRecord) {
                 outTradeNo = adPayRecord.getOutTradeNo();
+                orderAmount = adPayRecord.getOrderAmount().multiply(new BigDecimal(100));
+
             }
             // 退款流水
             AdPayRefundRecord adPayRefundRecord = getAdPayRefundRecord(req.getString("transactionId"));
             if (null != adPayRefundRecord) {
                 outRefundNo = adPayRefundRecord.getOutRefundNo();
+                refundAmount = adPayRefundRecord.getRefundAmount().multiply(new BigDecimal(100));
             }
             JSONObject result = getElmRefundResult(ELMConstants.ELM_RESULT_SUCCESS, PayMsg.success_mess,
                     req.getString("transactionId"), outTradeNo,
-                    req.getString("refundNo"), outRefundNo, adPayRecord.getOrderAmount(),
-                    adPayRefundRecord.getRefundAmount(), RefundStatusEnum.RefundTypeSuccess.getCode());
+                    req.getString("refundNo"), outRefundNo, orderAmount,
+                    refundAmount, RefundStatusEnum.RefundTypeSuccess.getCode());
             resultModel.setData(result);
         } else {
             JSONObject result = getElmRefundResult(ELMConstants.ELM_RESULT_FAIL, PayMsg.success_mess,
@@ -567,6 +573,9 @@ public class ELMServiceImpl implements ELMServiceI {
                 resultModel.setData(res);
                 return resultModel;
             }
+            BigDecimal orderAmount = adPayRecord.getOrderAmount().multiply(new BigDecimal(100));
+            BigDecimal refundAmount = adPayRefundRecord.getRefundAmount().multiply(new BigDecimal(100));
+
             // 交易状态（i、交易中，s、交易成功，f、交易失败， d、重复支付， r、已退款）
             String payStatus = adPayRefundRecord.getRefundStatus();
             if (StringUtils.equalsIgnoreCase("s", payStatus) || StringUtils.equalsIgnoreCase("SUCCESS", payStatus)) {
@@ -577,8 +586,8 @@ public class ELMServiceImpl implements ELMServiceI {
             JSONObject res = crtRefundQueryRes(ELMConstants.ELM_RESULT_SUCCESS,
                     GlobalResultStatusEnum.SUCCESS_OK.getInfo(), req.getString("transactionId"),
                     adPayRefundRecord.getOutTradeNo(), req.getString("refundNo"),
-                    adPayRefundRecord.getOutRefundNo(), adPayRecord.getOrderAmount(),
-                    adPayRefundRecord.getRefundAmount(), refundStatus);
+                    adPayRefundRecord.getOutRefundNo(), orderAmount,
+                    refundAmount, refundStatus);
             resultModel.setData(res);
         } catch (Exception e) {
             e.printStackTrace();
@@ -612,8 +621,8 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("outTradeNo", outTradeNo);
             res.put("refundNo", refundNo);
             res.put("outRefundNo", outRefundNo);
-            res.put("payAmount", payAmount);
-            res.put("refundAmount", refundAmount);
+            res.put("payAmount", payAmount.intValue());
+            res.put("refundAmount", refundAmount.intValue());
             res.put("refundStatus", refundStatus);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);
@@ -711,8 +720,8 @@ public class ELMServiceImpl implements ELMServiceI {
             res.put("outTradeNo", outTradeNo);
             res.put("refundNo", refundNo);
             res.put("outRefundNo", outRefundNo);
-            res.put("payAmount", payAmount);
-            res.put("refundAmount", refundAmount);
+            res.put("payAmount", payAmount.intValue());
+            res.put("refundAmount", refundAmount.intValue());
             res.put("refundStatus", refundStatus);
             res.put("nonceStr", RandomUtil.getRandomStr(32));
             String signStr = ElmSignUtils.rsaSign(ELMConstants.ELM_PRIVATE_KEY, res);

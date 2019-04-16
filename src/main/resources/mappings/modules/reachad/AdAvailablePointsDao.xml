@@ -44,11 +44,12 @@
             </if>
             <if test="income != null and income == 2">
                 AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+                AND status IN (1,4)
             </if>
             <if test="income != null and income == 1">
-                AND a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0  
+                AND a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0
+                and a.status=1
             </if>
-            and a.status=1
         </where>
     </select>
 
@@ -79,11 +80,12 @@
             </if>
             <if test="income != null and income == 2">
                 AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+                AND status IN (1,4)
             </if>
             <if test="income != null and income == 1">
                 AND (a.type NOT IN (1,9) AND a.business_rebate_amount &gt; 0)
+                and a.status=1
             </if>
-             and a.status=1
         </where>
         ORDER BY
             a.create_date DESC

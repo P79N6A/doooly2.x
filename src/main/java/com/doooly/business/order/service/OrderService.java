@@ -17,8 +17,6 @@ public interface OrderService {
 
     MessageDataBean cancleOrderV2(long userId, String bigOrderNumber);
 
-    MessageDataBean cancelMerchantOrder();
-
     // 活动类型
 	public static enum ActivityType {
 

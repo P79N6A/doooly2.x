@@ -1066,21 +1066,6 @@ public class OrderServiceImpl implements OrderService {
         return new OrderMsg(MessageDataBean.failure_code, MessageDataBean.failure_mess);
     }
 
-    /***
-     * 取消订单
-     */
-    @Override
-    @Transactional
-    public OrderMsg cancelMerchantOrder() {
-        logger.info("cancelMerchantOrder start");
-        List<PayRecordDomain> payRecordDomains = payRecordMapper.getNeedCancaelMerchantOrder();
-        for (PayRecordDomain payRecordDomain : payRecordDomains) {
-
-        }
-        logger.info("cancelMerchantOrder 完成");
-        return new OrderMsg(MessageDataBean.success_code, MessageDataBean.success_mess);
-    }
-
     private OrderMsg cancelOrderv1(long userId, String orderNum) {
         if (StringUtils.isEmpty(orderNum) || userId <= 0) {
             return new OrderMsg(MessageDataBean.failure_code, "参数错误!");

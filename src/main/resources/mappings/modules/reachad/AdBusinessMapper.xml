@@ -415,7 +415,7 @@
 			#{item}
 		</foreach>
 		and abg.group_id =(select u.group_num from ad_user u where u.id=#{userId})
-        and (abg.type in (0,1))
+        and abg.type in (0,1)
 		<if test="type != null and type != ''">
 			AND a.type = #{type}
 		</if>

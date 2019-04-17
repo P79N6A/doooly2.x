@@ -91,6 +91,7 @@ public class MyPointRestService implements MyPointRestServiceI {
 			String userId = json.getString("userId");
 			Integer currentPage = json.getInteger("currentPage");
 			Integer pageSize = json.getInteger("pageSize");
+			logger.info("------------->> income:"+ income+", userId:"+ userId+", currentPage:"+ currentPage+", pageSize:"+ pageSize);
 			messageDataBean = myPointServiceI.getAvailablePoints(income, userId, currentPage, pageSize);
 			logger.info("查询所有可用积分列表信息返回数据"+messageDataBean.toJsonString());
 		} catch (Exception e) {

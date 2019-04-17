@@ -205,6 +205,13 @@ public class TestService {
         System.out.println(s);
     }
 
+
+    @Test
+    public void test6() {
+        List<String> list = adBusinessDao.getBusinessByCity("安徽");
+        System.out.println(new Gson().toJson(list));
+    }
+
 }
 
 

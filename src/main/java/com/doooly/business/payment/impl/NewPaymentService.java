@@ -415,7 +415,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         params.put("subOrders",subOrders);
         logger.info("查询可用定向积分V2，参数{}",params.toJSONString());
-        String resposeResult = HTTPSClientUtils.sendPost(params, getDirIntegralUrl);
+        String resposeResult = HTTPSClientUtils.sendHttpPost(params, getDirIntegralUrl);
         logger.info("查询可用定向积分V2，结果{}",resposeResult);
         JSONObject resultJson = JSON.parseObject(resposeResult);
         String dirIntegral1 = "0";

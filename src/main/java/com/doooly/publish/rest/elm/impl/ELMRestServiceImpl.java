@@ -96,7 +96,7 @@ public class ELMRestServiceImpl implements ELMRestServiceI {
     @Override
     public String createElmOrderAndPay(@Context HttpServletRequest request, @Context HttpServletResponse response) {
         JSONObject jsonObject = getJsonObjectFromRequest(request);
-        logger.info("饿了么调用落单接口 createElmOrderAndPay：{}", GsonUtils.toString(jsonObject));
+        logger.info("饿了么调用落单接口 createElmOrderAndPay:" + GsonUtils.toString(jsonObject));
         boolean validateParaRes = validateCrtOrderParam(jsonObject);
         if (validateParaRes) {
             JSONObject res = createOrderResult(GlobalResultStatusEnum.PARAM_VALID_ERROR.getInfo());

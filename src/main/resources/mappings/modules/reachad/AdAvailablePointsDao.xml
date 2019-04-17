@@ -79,7 +79,7 @@
                 AND a.user_id = #{userId}
             </if>
             <if test="income != null and income == 2">
-                AND (a.type IN (1,9) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
+                AND (a.type IN (1,9,15) OR (a.type = 0 AND a.business_rebate_amount &lt; 0))
                 AND status IN (1,4)
             </if>
             <if test="income != null and income == 1">

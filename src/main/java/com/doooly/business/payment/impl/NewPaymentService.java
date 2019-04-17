@@ -80,9 +80,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static com.doooly.business.pay.service.RefundService.REFUND_STATUS_S;
-import static com.koalii.bc.asn1.x509.X509ObjectIdentifiers.id;
-import static com.sun.tools.doclint.Entity.nu;
-import static com.sun.tools.doclint.Entity.or;
 
 /**
  * @Description:
@@ -1153,14 +1150,15 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map.put("orderNum", order1.getOrderNumber());
                     map.put("orderId", order.getOrderId());
                     map.put("oid", order.getId());
-                    map.put("totalAmount", order.getTotalMount().add(order.getServiceCharge()));
                     //最终支付结果code
                     map.put("code", payMsg.getCode());
+                    BigDecimal totalMount = order.getTotalMount();
                     //手续费
                     if (order.getServiceCharge() != null) {
                         map.put("serviceCharge", order.getServiceCharge());
-
+                        totalMount = totalMount.add(order.getServiceCharge());
                     }
+                    map.put("totalAmount", totalMount);
                     //话费优惠活动- 分享需要的参数
                     if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
                         AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());

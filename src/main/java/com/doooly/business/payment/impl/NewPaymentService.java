@@ -1100,6 +1100,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
         OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
+        if (order == null) {
+            paramOrder.setOrderNumber(null);
+            paramOrder.setBigOrderNumber(orderNum);
+            order = adOrderReportServiceI.getOrderLimt(paramOrder);
+            if(order==null){
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "没有找到订单");
+            }
+        }
         //自营商品全是兜礼支付
         ResultModel payMsg = null;
         //调用支付平台查询API,查询结果并处理支付记录
@@ -1334,7 +1342,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         paramOrder.setOrderNumber(orderNum);
         OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
         if (order == null) {
-            return new PayMsg(PayMsg.failure_code, "没有找到订单");
+            paramOrder.setOrderNumber(null);
+            paramOrder.setBigOrderNumber(orderNum);
+            order = adOrderReportServiceI.getOrderLimt(paramOrder);
+            if(order==null){
+                return new PayMsg(PayMsg.failure_code, "没有找到订单");
+            }
         }
         //校验是否可以支付
         return canPay(order, param);
@@ -1512,6 +1525,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
         OrderVo orderVo= adOrderReportServiceI.getOrderLimt(paramOrder);
+        if (orderVo == null) {
+            paramOrder.setOrderNumber(null);
+            paramOrder.setBigOrderNumber(orderNum);
+            orderVo = adOrderReportServiceI.getOrderLimt(paramOrder);
+            if(orderVo==null){
+                return new ResultModel(GlobalResultStatusEnum.FAIL, "没有找到订单");
+            }
+        }
         String businessId = String.valueOf(orderVo.getBussinessId());
         //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();

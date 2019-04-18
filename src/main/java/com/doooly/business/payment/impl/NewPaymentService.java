@@ -1242,7 +1242,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 map.put("redirectUrl", "");
             }
             OrderVo paramOrder = new OrderVo();
-            paramOrder.setOrderNumber(orderNum);
             paramOrder.setBigOrderNumber(orderNum);
             OrderVo order = adOrderReportServiceI.getOrderLimt(paramOrder);
             if ("gift_order".equals(order.getRemarks())) {

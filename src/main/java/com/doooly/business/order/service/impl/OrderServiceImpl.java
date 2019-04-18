@@ -293,6 +293,7 @@ public class OrderServiceImpl implements OrderService {
             String orderNum = IdGeneratorUtil.getOrderNumber(orderVo.getIsSource());
             int merchantId = merchantProduct.getMerchantId();
             orderVo.setCouponId(merchantProduct.getCouponId());
+            orderVo.setServiceCharge(BigDecimal.ZERO);//默认手续费0
             String remarks = merchantProduct.getRemarks();
             List<OrderItemVo> orderItems = new ArrayList<>();
             BigDecimal totalMount = new BigDecimal("0");//实付金额

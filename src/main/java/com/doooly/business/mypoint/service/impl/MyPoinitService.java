@@ -237,7 +237,15 @@ public class MyPoinitService implements MyPointServiceI {
 			map.put("adAvailablePoint", adAvailablePoint);
 			map.put("integral", "");
 			map.put("date", "");
-			if (adAvailablePoint.getOrderId() != null) {
+			if (StringUtils.equals(AdAvailablePoints.TYPE_DIR_INTEGRAL_RECYCLE, adAvailablePoint.getType())) {
+				AdRecharge adRecharge = adRechargeDao.get(adAvailablePoint.getRechargeId());
+				if (adRecharge != null) {
+					adRecharge.setRechargeDate(DateUtils.formatDate(adRecharge.getCreateDate(), "yyyy.MM.dd HH:mm:ss"));
+					map.put("showType", "recharge");
+					map.put("adRecharge", adRecharge);
+					messageDataBean.setCode(MessageDataBean.success_code);
+				}
+			} else if (adAvailablePoint.getOrderId() != null) {
 				// 查询订单
 				Order order = orderDao.get(String.valueOf(adAvailablePoint.getOrderId()));
 				if (order != null) {

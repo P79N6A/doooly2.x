@@ -63,6 +63,8 @@ public class AdAvailablePoints {
 	/** 可用积分表 积分交易类型：积分签到 */
 	public static final String TYPE_INTEGRAL_ATTEND = "11";
 
+	/** 可用积分表 积分交易类型：定向积分回收 */
+	public static final String TYPE_DIR_INTEGRAL_RECYCLE = "15";
 	/** 可用积分表 状态标识：已获得 */
 	public static final String STATUS_OBTAINED = "1";
 

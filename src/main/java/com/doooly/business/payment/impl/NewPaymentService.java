@@ -215,7 +215,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
-            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
+            retJson.put("payMethod", adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
@@ -223,9 +223,9 @@ public class NewPaymentService implements NewPaymentServiceI {
             PayRecordDomain payRecordDomain = new PayRecordDomain();
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-            if(payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())){
+            if (payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())) {
                 retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
-            }else {
+            } else {
                 retJson.put("redirectUrl", "");
             }
             logger.info("payment unifiedorder result data={}", data);
@@ -281,14 +281,14 @@ public class NewPaymentService implements NewPaymentServiceI {
             String payId = (String) data.get("payId");
             String integralRebatePayAmount = (String) data.get("integralRebatePayAmount");
             retJson.put("payId", payId);
-            retJson.put("payMethod",adBusinessExpandInfo.getPayMethod());
+            retJson.put("payMethod", adBusinessExpandInfo.getPayMethod());
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
             logger.info("payment unifiedorder v2 result data={}", data);
             return ResultModel.ok(retJson);
         } else {
-            return new ResultModel(jsonResult.getInteger("code"),jsonResult.getString("info"));
+            return new ResultModel(jsonResult.getInteger("code"), jsonResult.getString("info"));
         }
     }
 
@@ -296,7 +296,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("getOrderSummaryV2() json = {}", json);
         JSONObject result = new JSONObject();
         String orderNum = json.getString("orderNum");//订单号
-        if(StringUtils.isBlank(orderNum)){
+        if (StringUtils.isBlank(orderNum)) {
             orderNum = json.getString("bigOrderNumber");//订单号
         }
         String redirectUrl = json.getString("redirectUrl");//支付成功跳转链接
@@ -308,12 +308,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setUserId(userId);
         List<OrderVo> orderVos = new ArrayList<>();
         OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
-        if(orderNum.contains("N")){
+        if (orderNum.contains("N")) {
             //说明是自营子订单
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
-        }else {
+        } else {
             bigOrderNumber = orderNum;
         }
         //查询大订单
@@ -321,7 +321,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        if(adOrderBig == null){
+        if (adOrderBig == null) {
             //自营没有大订单下单
             adOrderBig = new AdOrderBig();
             adOrderBig.setId(orderNum);
@@ -330,26 +330,26 @@ public class NewPaymentService implements NewPaymentServiceI {
             adOrderBig.setTotalAmount(orderLimt.getTotalMount());
             adOrderBig.setOrderDate(orderLimt.getOrderDate());
             orderVos.add(orderLimt);
-        }else if(orderNum.contains("N")){
+        } else if (orderNum.contains("N")) {
             //兜礼子订单
             orderVos.add(orderLimt);
-        }else {
+        } else {
             //大订单
             order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
             orderVos = adOrderReportServiceI.getOrders(order);
         }
-        if(!CollectionUtils.isEmpty(orderVos) && orderVos.size()==1){
+        if (!CollectionUtils.isEmpty(orderVos) && orderVos.size() == 1) {
             businessId = String.valueOf(orderVos.get(0).getBussinessBussinessId());
         }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
-        String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
+        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
         JSONObject retJson = new JSONObject();
-        retJson.put("totalFree",adOrderBig.getTotalAmount().toString());
-        retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
-        getServiceCharge(orderVos,retJson,user);
+        retJson.put("totalFree", adOrderBig.getTotalAmount().toString());
+        retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
+        getServiceCharge(orderVos, retJson, user);
         //组建预支付订单参数
         String price = String.valueOf(adOrderBig.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
         String amount = String.valueOf(adOrderBig.getTotalAmount().setScale(2, BigDecimal.ROUND_DOWN));
@@ -361,7 +361,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("tradeType", "DOOOLY_JS");
         param.put("notifyUrl", PaymentConstants.PAYMENT_NOTIFY_URL);
         param.put("redirectUrl", redirectUrl);
-        param.put("body", "兜礼订单-"+adOrderBig.getId());
+        param.put("body", "兜礼订单-" + adOrderBig.getId());
         param.put("isSource", adOrderBig.getIsSource());
         param.put("orderDate", DateUtils.formatDateTime(adOrderBig.getOrderDate()));
         param.put("storesId", "A001");
@@ -380,9 +380,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         return result;
     }
 
-    public String getDirIntegral( List<OrderVo> orderVos ,AdOrderBig adOrderBig,AdUser adUser) {
+    public String getDirIntegral(List<OrderVo> orderVos, AdOrderBig adOrderBig, AdUser adUser) {
         //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
-        String getDirIntegralUrl = PaymentConstants.PAYMENT_HTTPS_V2+"/mchpay/getDirIntegral/V2";
+        String getDirIntegralUrl = PaymentConstants.PAYMENT_HTTPS_V2 + "/mchpay/getDirIntegral/V2";
         //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
         params.put("businessId", WebService.BUSINESSID);
@@ -396,29 +396,29 @@ public class NewPaymentService implements NewPaymentServiceI {
         //List<JSONObject> subOrders = new ArrayList<>();
         for (OrderVo order : orderVos) {
             JSONObject js = new JSONObject();
-            js.put("amount",String.valueOf(order.getTotalMount()));
-            js.put("price",String.valueOf(order.getTotalPrice()));
-            js.put("storesId","001");
-            js.put("orderDate", DateUtil.formatDate(order.getOrderDate(),"yyyy-MM-dd hh:mm:ss"));
-            js.put("orderNumber",order.getOrderNumber());
-            js.put("serialNumber",order.getOrderNumber());
-            js.put("businessId",order.getBussinessBussinessId());
+            js.put("amount", String.valueOf(order.getTotalMount()));
+            js.put("price", String.valueOf(order.getTotalPrice()));
+            js.put("storesId", "001");
+            js.put("orderDate", DateUtil.formatDate(order.getOrderDate(), "yyyy-MM-dd hh:mm:ss"));
+            js.put("orderNumber", order.getOrderNumber());
+            js.put("serialNumber", order.getOrderNumber());
+            js.put("businessId", order.getBussinessBussinessId());
             List<OrderItemVo> items = order.getItems();
             JSONArray array = new JSONArray();
             for (OrderItemVo adOrderDetailDomain : items) {
-                BigDecimal tax = adOrderDetailDomain.getTax() == null ? new BigDecimal("0"): adOrderDetailDomain.getTax();
+                BigDecimal tax = adOrderDetailDomain.getTax() == null ? new BigDecimal("0") : adOrderDetailDomain.getTax();
                 array.add(createGoods(adOrderDetailDomain.getCode(), adOrderDetailDomain.getGoods(), adOrderDetailDomain.getNumber().toString(), adOrderDetailDomain.getPrice().toString(), adOrderDetailDomain.getCategoryId(), adOrderDetailDomain.getAmount().toString(), tax.toEngineeringString()));
             }
-            js.put("orderDetails",array);
+            js.put("orderDetails", array);
             subOrders.add(js);
         }
-        params.put("subOrders",subOrders);
-        logger.info("查询可用定向积分V2，参数{}",params.toJSONString());
+        params.put("subOrders", subOrders);
+        logger.info("查询可用定向积分V2，参数{}", params.toJSONString());
         String resposeResult = HTTPSClientUtils.sendHttpPost(params, getDirIntegralUrl);
-        logger.info("查询可用定向积分V2，结果{}",resposeResult);
+        logger.info("查询可用定向积分V2，结果{}", resposeResult);
         JSONObject resultJson = JSON.parseObject(resposeResult);
         String dirIntegral1 = "0";
-        if(resultJson!= null && resultJson.getString("code").equals("0")){
+        if (resultJson != null && resultJson.getString("code").equals("0")) {
             dirIntegral1 = resultJson.getString("dirIntegral");
         }
         return dirIntegral1;
@@ -470,11 +470,11 @@ public class NewPaymentService implements NewPaymentServiceI {
     private void getServiceCharge(List<OrderVo> orderVos, JSONObject retJson, AdUser user) {
         BigDecimal serviceCharge = new BigDecimal("0");
         for (OrderVo orderVo : orderVos) {
-            if(orderVo.getProductType()==OrderService.ProductType.MOBILE_RECHARGE.getCode() && orderVo.getServiceCharge() != null){
+            if (orderVo.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode() && orderVo.getServiceCharge() != null) {
                 serviceCharge = serviceCharge.add(orderVo.getServiceCharge());
             }
         }
-        retJson.put("serviceCharge",serviceCharge);
+        retJson.put("serviceCharge", serviceCharge);
         //每月积分购买话费的金额
         Map<String, Object> paramOrderMap = new HashMap<>();
         paramOrderMap.put("userId", user.getId());
@@ -484,11 +484,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         paramMap.put("groupId", user.getGroupNum());
         AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
         retJson.put("monthLimit", (conf == null || conf.getMonthLimit() == null) ? "0" : conf.getMonthLimit().toString());
-        retJson.put("consumptionAmount",consumptionAmount);
+        retJson.put("consumptionAmount", consumptionAmount);
     }
 
     /**
      * 饿了么下单
+     *
      * @param jsonObject
      * @return
      */
@@ -585,7 +586,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         for (Object jsonObject : foodsInfo) {
             JSONObject params = (JSONObject) jsonObject;
             JSONObject jsonDetail = new JSONObject();
-            jsonDetail.put("code",params.getString("foodId"));
+            jsonDetail.put("code", params.getString("foodId"));
             jsonDetail.put("goods", params.getString("foodName"));
             jsonDetail.put("number", params.getString("count"));
             jsonDetail.put("price", params.getString("price"));
@@ -598,7 +599,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         for (Object orderExtra : orderExtras) {
             JSONObject params = (JSONObject) orderExtra;
             JSONObject jsonDetail = new JSONObject();
-            jsonDetail.put("code",params.getString("categoryId"));
+            jsonDetail.put("code", params.getString("categoryId"));
             jsonDetail.put("goods", params.getString("name"));
             jsonDetail.put("number", params.getString("quantity"));
             jsonDetail.put("price", params.getString("price"));
@@ -610,7 +611,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         param.put("orderDetail", jsonArray.toJSONString());
         logger.info("下单参数param=========" + param);
         result.put("param", param);
-        result.put("businessId",business.getId());//商户id
+        result.put("businessId", business.getId());//商户id
         return result;
     }
 
@@ -633,7 +634,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             order.setOrderNumber(null);
             order.setBigOrderNumber(orderNum);
             o = adOrderReportServiceI.getOrderLimt(order);
-            if(o==null){
+            if (o == null) {
                 return null;
             }
         }
@@ -641,7 +642,6 @@ public class NewPaymentService implements NewPaymentServiceI {
         String sku = item.getSku() != null ? item.getSku() : "";
         String orderDesc = item.getGoods() + sku;
         //String orderDesc = item.getGoods() + item.getSku() + "-" + orderNum;
-
 
 
         JSONObject retJson = new JSONObject();
@@ -669,8 +669,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(String.valueOf(o.getId()));
         adOrderBig.setTotalAmount(o.getTotalMount());
-        String dirIntegral = getDirIntegral(orderVos,adOrderBig,user);
-        retJson.put("dirIntegral",String.valueOf(dirIntegral));//定向积分
+        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
 
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
@@ -729,8 +729,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         retJson.put("company", business.getCompany());
         retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
-        if(Constants.GIFT_ORDER_TYPE.equals(o.getRemarks())){
-            retJson.put("orderType","1");
+        if (Constants.GIFT_ORDER_TYPE.equals(o.getRemarks())) {
+            retJson.put("orderType", "1");
         }
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
@@ -841,7 +841,7 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     private PayMsg prePayNewV2(JSONObject params) {
         String orderNum = params.getString("orderNum");//订单号
-        if(StringUtils.isBlank(orderNum)){
+        if (StringUtils.isBlank(orderNum)) {
             orderNum = params.getString("bigOrderNumber");//订单号
         }
         long userId = params.getLong("userId");
@@ -852,12 +852,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setUserId(userId);
         List<OrderVo> orderVos = new ArrayList<>();
         OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
-        if(orderNum.contains("N")){
+        if (orderNum.contains("N")) {
             //说明是自营子订单
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
-        }else {
+        } else {
             bigOrderNumber = orderNum;
         }
         //查询大订单
@@ -865,7 +865,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        if(adOrderBig == null){
+        if (adOrderBig == null) {
             //自营没有大订单下单
             adOrderBig = new AdOrderBig();
             adOrderBig.setId(orderNum);
@@ -874,10 +874,10 @@ public class NewPaymentService implements NewPaymentServiceI {
             adOrderBig.setTotalAmount(orderLimt.getTotalMount());
             adOrderBig.setOrderDate(orderLimt.getOrderDate());
             orderVos.add(orderLimt);
-        }else if(orderNum.contains("N")){
+        } else if (orderNum.contains("N")) {
             //兜礼子订单
             orderVos.add(orderLimt);
-        }else {
+        } else {
             //大订单
             order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
@@ -892,7 +892,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             }
         }
         JSONObject jsonData = payMsg.getJsonData();
-        if(orderVos.size()==1){
+        if (orderVos.size() == 1) {
             //说明子订单支付并且只有一个订单
             businessId = jsonData.getString("businessId");
         }
@@ -994,12 +994,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setUserId(userId);
         List<OrderVo> orderVos = new ArrayList<>();
         OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
-        if(orderNum.contains("N")){
+        if (orderNum.contains("N")) {
             //说明是自营子订单
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
-        }else {
+        } else {
             bigOrderNumber = orderNum;
         }
         //查询大订单
@@ -1007,7 +1007,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         adOrderBig.setId(bigOrderNumber);
         adOrderBig = adOrderReportServiceI.getAdOrderBig(adOrderBig);
         //查询子订单
-        if(adOrderBig == null){
+        if (adOrderBig == null) {
             //自营没有大订单下单
             adOrderBig = new AdOrderBig();
             adOrderBig.setId(orderNum);
@@ -1016,10 +1016,10 @@ public class NewPaymentService implements NewPaymentServiceI {
             adOrderBig.setTotalAmount(orderLimt.getTotalMount());
             adOrderBig.setOrderDate(orderLimt.getOrderDate());
             orderVos.add(orderLimt);
-        }else if(orderNum.contains("N")){
+        } else if (orderNum.contains("N")) {
             //兜礼子订单
             orderVos.add(orderLimt);
-        }else {
+        } else {
             //大订单
             order.setBigOrderNumber(bigOrderNumber);
             order.setIsSource(Integer.parseInt(adOrderBig.getIsSource()));
@@ -1037,7 +1037,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             json.put("payEndTime", retJson.getString("payEndTime"));
             json.put("code", MessageDataBean.success_code);
             PayMsg payMsg = payCallback(PayFlowService.PAYTYPE_CASHIER_DESK, PaymentService.CHANNEL_WECHAT, json.toJSONString());
-            logger.info("收银台支付回调同步结果大订单号:{},子订单号:{},处理结果code:{},处理结果mess,{}",bigOrderNumber,orderNumber,payMsg.getCode(),payMsg.getMess());
+            logger.info("收银台支付回调同步结果大订单号:{},子订单号:{},处理结果code:{},处理结果mess,{}", bigOrderNumber, orderNumber, payMsg.getCode(), payMsg.getMess());
         }
         return ResultModel.ok();
     }
@@ -1053,9 +1053,9 @@ public class NewPaymentService implements NewPaymentServiceI {
             AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
             long timestamp = System.currentTimeMillis() / 1000;//时间搓当前
             JSONObject param = new JSONObject();
-            param.put("businessId",payRecordDomain.getBusinessId());
-            param.put("merchantOrderNo",payRecordDomain.getMerchantOrderNo());
-            param.put("payId",payRecordDomain.getPayId());
+            param.put("businessId", payRecordDomain.getBusinessId());
+            param.put("merchantOrderNo", payRecordDomain.getMerchantOrderNo());
+            param.put("payId", payRecordDomain.getPayId());
             SortedMap<Object, Object> parameters = new TreeMap<>();
             String clientId = adBusinessExpandInfo.getClientId();
             String accessToken = redisTemplate.opsForValue().get(String.format(PaymentConstants.PAYMENT_ACCESS_TOKEN_KEY, clientId));
@@ -1082,10 +1082,10 @@ public class NewPaymentService implements NewPaymentServiceI {
             object.put("sign", sign);
             String result = HTTPSClientUtils.sendHttpPost(object, PaymentConstants.ORDER_CANCEL_URL);
             JSONObject jsonObject = JSONObject.parseObject(result);
-            if (jsonObject !=null && jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
-                logger.info("cancelMerchantOrder 成功,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+            if (jsonObject != null && jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
+                logger.info("cancelMerchantOrder 成功,merchantOrderNo,{}", payRecordDomain.getMerchantOrderNo());
             } else {
-                logger.info("cancelMerchantOrder 失败,merchantOrderNo,{}",payRecordDomain.getMerchantOrderNo());
+                logger.info("cancelMerchantOrder 失败,merchantOrderNo,{}", payRecordDomain.getMerchantOrderNo());
             }
         }
         logger.info("cancelMerchantOrder 完成");
@@ -1099,12 +1099,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         //OrderVo order = orderService.getByOrderNum(orderNum);
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
-        OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
+        OrderVo order = adOrderReportServiceI.getOrderLimt(paramOrder);
         if (order == null) {
             paramOrder.setOrderNumber(null);
             paramOrder.setBigOrderNumber(orderNum);
             order = adOrderReportServiceI.getOrderLimt(paramOrder);
-            if(order==null){
+            if (order == null) {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "没有找到订单");
             }
         }
@@ -1148,14 +1148,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
             List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
-            if(CollectionUtils.isEmpty(orders)){
+            if (CollectionUtils.isEmpty(orders)) {
                 orders = new ArrayList<>();
                 orders.add(order);
             }
             if (!CollectionUtils.isEmpty(orders)) {
                 OrderVo order1 = orders.get(0);
                 Map<String, Object> map = new HashMap<>();
-                if("gift_order".equals(order1.getRemarks())){
+                if ("gift_order".equals(order1.getRemarks())) {
                     MessageDataBean messageDataBean = new MessageDataBean();
                     try {
                         messageDataBean = myOrderServiceI.getLiftOrder(json);
@@ -1165,9 +1165,9 @@ public class NewPaymentService implements NewPaymentServiceI {
                         messageDataBean.setCode(MessageDataBean.failure_code);
                     }
                     map = messageDataBean.getData();
-                    map.put("orderType","1");
-                }else {
-                    map.put("orderType","0");
+                    map.put("orderType", "1");
+                } else {
+                    map.put("orderType", "0");
                     map.put("orderNum", order1.getOrderNumber());
                     map.put("orderId", order.getOrderId());
                     map.put("oid", order.getId());
@@ -1189,14 +1189,14 @@ public class NewPaymentService implements NewPaymentServiceI {
                     PayRecordDomain payRecordDomain = new PayRecordDomain();
                     payRecordDomain.setMerchantOrderNo(orderNum);
                     payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-                    if(payRecordDomain != null){
+                    if (payRecordDomain != null) {
                         String returnUrl = payRecordDomain.getRedirectUrl();
-                        if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
-                                returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                        if (StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost") ||
+                                returnUrl.contains("doooly") || returnUrl.contains("reach"))) {
                             returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
                         }
                         map.put("redirectUrl", returnUrl);
-                    }else {
+                    } else {
                         map.put("redirectUrl", "");
                     }
                 }
@@ -1209,10 +1209,10 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel getPayResultV2(JSONObject json) {
         String orderNum = json.getString("orderNum");//订单号
-        if(StringUtils.isBlank(orderNum)){
+        if (StringUtils.isBlank(orderNum)) {
             orderNum = json.getString("bigOrderNumber");//订单号
         }
-        if(orderNum.contains("N")){
+        if (orderNum.contains("N")) {
             //说明是自营子订单 走v1接口
             return getPayResult(json);
         }
@@ -1229,17 +1229,51 @@ public class NewPaymentService implements NewPaymentServiceI {
             PayRecordDomain payRecordDomain = new PayRecordDomain();
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-            if(payRecordDomain != null){
-                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2,BigDecimal.ROUND_HALF_UP));
+            if (payRecordDomain != null) {
+                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2, BigDecimal.ROUND_HALF_UP));
                 String returnUrl = payRecordDomain.getRedirectUrl();
-                if(StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost")||
-                        returnUrl.contains("doooly")||returnUrl.contains("reach"))){
+                if (StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost") ||
+                        returnUrl.contains("doooly") || returnUrl.contains("reach"))) {
                     returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
                 }
                 map.put("redirectUrl", returnUrl);
-            }else {
+            } else {
                 map.put("totalAmount", adOrderBig.getTotalAmount());
                 map.put("redirectUrl", "");
+            }
+            OrderVo paramOrder = new OrderVo();
+            paramOrder.setOrderNumber(orderNum);
+            paramOrder.setBigOrderNumber(orderNum);
+            OrderVo order = adOrderReportServiceI.getOrderLimt(paramOrder);
+            if ("gift_order".equals(order.getRemarks())) {
+                MessageDataBean messageDataBean = new MessageDataBean();
+                try {
+                    messageDataBean = myOrderServiceI.getLiftOrder(json);
+                    logger.info("获得礼包领取成功页返回数据" + messageDataBean.toJsonString());
+                } catch (Exception e) {
+                    logger.error("获得礼包领取成功页出错", e);
+                    messageDataBean.setCode(MessageDataBean.failure_code);
+                }
+                map = messageDataBean.getData();
+                map.put("orderType", "1");
+            } else {
+                map.put("orderType", "0");
+                map.put("orderNum", order.getOrderNumber());
+                map.put("orderId", order.getOrderId());
+                map.put("oid", order.getId());
+                //最终支付结果code
+                map.put("code", payMsg.getCode());
+                BigDecimal totalMount = order.getTotalMount();
+                //手续费
+                if (order.getServiceCharge() != null) {
+                    map.put("serviceCharge", order.getServiceCharge());
+                }
+                //话费优惠活动- 分享需要的参数
+                if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
+                    AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
+                    map.put("openId", record.getOpenId());
+                    map.put("activityParam", record.getActivityParam());
+                }
             }
             payMsg.setData(map);
         } else {
@@ -1344,12 +1378,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         OrderVo order = orders.get(0);*/
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
-        OrderVo order= adOrderReportServiceI.getOrderLimt(paramOrder);
+        OrderVo order = adOrderReportServiceI.getOrderLimt(paramOrder);
         if (order == null) {
             paramOrder.setOrderNumber(null);
             paramOrder.setBigOrderNumber(orderNum);
             order = adOrderReportServiceI.getOrderLimt(paramOrder);
-            if(order==null){
+            if (order == null) {
                 return new PayMsg(PayMsg.failure_code, "没有找到订单");
             }
         }
@@ -1366,12 +1400,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (order.getType() != OrderService.OrderStatus.NEED_TO_PAY.getCode()) {
             return new PayMsg(PayMsg.coupon_stock_zero_code, "订单已经取消，请重新下单。");
         }
-        if( Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())){
+        if (Constants.GIFT_ORDER_TYPE.equals(order.getRemarks())) {
             // 礼包商品判断能否领取
-            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS+order.getOrderNumber());
-            JSONObject jsonParam =  JSONObject.parseObject(mqMessageJson);
+            String mqMessageJson = stringRedisTemplate.opsForValue().get(Constants.GIFT_ORDER_REDIS_MESS + order.getOrderNumber());
+            JSONObject jsonParam = JSONObject.parseObject(mqMessageJson);
             JSONObject resultJson = HttpClientUtil.httpPost(Constants.PROJECT_ACTIVITY_URL + "gift/bag/isReceive", jsonParam);
-            if(resultJson!= null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode()!= resultJson.getInteger("code")){
+            if (resultJson != null && resultJson.getInteger("code") != null && GlobalResultStatusEnum.SUCCESS.getCode() != resultJson.getInteger("code")) {
                 logger.info("判断能否领取礼包：" + resultJson.toJSONString());
                 return new PayMsg(OrderMsg.coupon_stock_zero_code, resultJson.getString("info"));
             }
@@ -1399,10 +1433,10 @@ public class NewPaymentService implements NewPaymentServiceI {
                         int buyQuantity = item.getNumber().intValue();
                         //int byNum = orderService.getBuyNum(userId, skuId, activityName);
                         //20181226 优化-==zhangqing
-                        Map<String,Object> paramOrderMap = new HashMap<>();
-                        paramOrderMap.put("userId",userId);
-                        paramOrderMap.put("productSkuId",item.getProductSkuId());
-                        paramOrderMap.put("actType",activityName);
+                        Map<String, Object> paramOrderMap = new HashMap<>();
+                        paramOrderMap.put("userId", userId);
+                        paramOrderMap.put("productSkuId", item.getProductSkuId());
+                        paramOrderMap.put("actType", activityName);
                         int byNum = adOrderReportServiceI.getBuyNum(paramOrderMap);
                         logger.info("canPay() actLimitNum = {},byNum + buyQuantity = {}", actLimitNum, byNum + buyQuantity);
                         if (actLimitNum != null && actLimitNum < byNum + buyQuantity) {
@@ -1425,8 +1459,8 @@ public class NewPaymentService implements NewPaymentServiceI {
             //获取已使用额度
             //AdRechargeConf conf = adRechargeConfDao.getRechargeConf(String.valueOf(user.getGroupNum()));
             //20181227改造缓存---zhangqing
-            Map<String,Object> paramMap = new HashMap<>();
-            paramMap.put("groupId",user.getGroupNum().toString());
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("groupId", user.getGroupNum().toString());
             AdRechargeConf conf = adRechargeConfServiceI.getRechargeConf(paramMap);
             logger.info("conf = {}", conf);
             if (conf == null) {
@@ -1442,14 +1476,14 @@ public class NewPaymentService implements NewPaymentServiceI {
             //每月积分购买话费的金额
             //BigDecimal consumptionAmount = adOrderReportDao.getConsumptionAmount(order.getUserId());
             //每月积分购买话费的金额 == 收银台改造20181227--zhangqing
-            Map<String,Object> paramOrderMap = new HashMap<>();
-            paramOrderMap.put("userId",order.getUserId());
+            Map<String, Object> paramOrderMap = new HashMap<>();
+            paramOrderMap.put("userId", order.getUserId());
             BigDecimal consumptionAmount = adOrderReportServiceI.getConsumptionAmountByMap(paramOrderMap);
             if (consumptionAmount == null) {
                 consumptionAmount = new BigDecimal("0");
             }
             //已使用金额+订单实付金额+手续费-每月限制金额
-            BigDecimal serviceCharge = order.getServiceCharge()==null ? BigDecimal.ZERO : order.getServiceCharge();
+            BigDecimal serviceCharge = order.getServiceCharge() == null ? BigDecimal.ZERO : order.getServiceCharge();
             BigDecimal subtract = consumptionAmount.add(order.getTotalMount()).add(serviceCharge).subtract(monthLimit);
             if (subtract.compareTo(BigDecimal.ZERO) > 0) {
                 //说明已经超出限额
@@ -1527,16 +1561,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         PayRecordDomain payRecordDomain = new PayRecordDomain();
         payRecordDomain.setPayId(payId);
         payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-        String businessId =payRecordDomain.getBusinessId();//商户编号
+        String businessId = payRecordDomain.getBusinessId();//商户编号
         String orderNum = payRecordDomain.getMerchantOrderNo();
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
-        OrderVo orderVo= adOrderReportServiceI.getOrderLimt(paramOrder);
+        OrderVo orderVo = adOrderReportServiceI.getOrderLimt(paramOrder);
         if (orderVo == null) {
             paramOrder.setOrderNumber(null);
             paramOrder.setBigOrderNumber(orderNum);
             orderVo = adOrderReportServiceI.getOrderLimt(paramOrder);
-            if(orderVo==null){
+            if (orderVo == null) {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "没有找到订单");
             }
         }
@@ -1572,7 +1606,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         if (jsonObject.getInteger("code") == GlobalResultStatusEnum.SUCCESS.getCode()) {
             //说明获取成功
             Map<Object, Object> data = (Map<Object, Object>) jsonObject.get("data");
-            data.put("orderId",orderVo.getId());
+            data.put("orderId", orderVo.getId());
             return ResultModel.ok(data);
         } else {
             return new ResultModel(jsonObject.getInteger("code"), jsonObject.getString("info"));
@@ -1585,7 +1619,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         PayRecordDomain payRecordDomain = new PayRecordDomain();
         payRecordDomain.setPayId(payId);
         payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
-        String businessId =payRecordDomain.getBusinessId();//商户编号
+        String businessId = payRecordDomain.getBusinessId();//商户编号
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
         paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
@@ -1841,7 +1875,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         String orderNum = json.getString("orderNum");
         String returnFlowNumber = json.getString("returnFlowNumber");
         String payType = json.getString("payType");
-        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType,null, null);
+        ResultModel resultModel = refundService.dooolyCashDeskRefund(Long.parseLong(userId), orderNum, returnFlowNumber, payType, null, null);
         logger.info("退款返回结果，resultModel = {}", resultModel.toJsonString());
         return resultModel;
     }

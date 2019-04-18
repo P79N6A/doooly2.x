@@ -43,7 +43,6 @@ import com.doooly.dao.reachad.OrderDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.dto.common.OrderMsg;
 import com.doooly.dto.common.PayMsg;
-import com.doooly.entity.payment.PayRecordDomain;
 import com.doooly.entity.reachad.AdCoupon;
 import com.doooly.entity.reachad.AdCouponCode;
 import com.doooly.entity.reachad.AdRechargeConf;
@@ -485,6 +484,7 @@ public class OrderServiceImpl implements OrderService {
         CleanCartsTask cleanCartsTask = new CleanCartsTask(cart);
         myThreadPoolService.submitRunalbeTask(cleanCartsTask);
         msg.getData().put("orderNum", String.valueOf(bigOrderNumber));
+        msg.getData().put("bigOrderNumber", String.valueOf(bigOrderNumber));
         return msg;
     }
 

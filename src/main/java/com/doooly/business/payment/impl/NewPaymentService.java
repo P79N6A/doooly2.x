@@ -297,6 +297,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("getOrderSummaryV2() json = {}", json);
         JSONObject result = new JSONObject();
         String orderNum = json.getString("orderNum");//订单号
+        if(StringUtils.isBlank(orderNum)){
+            orderNum = json.getString("bigOrderNumber");//订单号
+        }
         String redirectUrl = json.getString("redirectUrl");//支付成功跳转链接
         long userId = json.getLong("userId");
         String bigOrderNumber;//大订单号
@@ -835,6 +838,9 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     private PayMsg prePayNewV2(JSONObject params) {
         String orderNum = params.getString("orderNum");//订单号
+        if(StringUtils.isBlank(orderNum)){
+            orderNum = params.getString("bigOrderNumber");//订单号
+        }
         long userId = params.getLong("userId");
         String bigOrderNumber;//大订单号
         String businessId = WebService.BUSINESSID;//商户编号
@@ -1188,6 +1194,9 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel getPayResultV2(JSONObject json) {
         String orderNum = json.getString("orderNum");//订单号
+        if(StringUtils.isBlank(orderNum)){
+            orderNum = json.getString("bigOrderNumber");//订单号
+        }
         if(orderNum.contains("N")){
             //说明是自营子订单 走v1接口
             return getPayResult(json);
@@ -1544,6 +1553,9 @@ public class NewPaymentService implements NewPaymentServiceI {
     @Override
     public ResultModel integralPayV2(JSONObject param) {
         String orderNum = param.getString("orderNum");
+        if(StringUtils.isBlank(orderNum)){
+            orderNum = param.getString("bigOrderNumber");//订单号
+        }
         long userId = param.getLong("userId");
         String bigOrderNumber;//大订单号
         String businessId = WebService.BUSINESSID;//商户编号

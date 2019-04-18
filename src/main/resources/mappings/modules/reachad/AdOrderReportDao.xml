@@ -372,8 +372,8 @@
 			<if test="orderNumber != null and orderNumber != ''" >
 				and o.order_number = #{orderNumber,jdbcType=VARCHAR}
 			</if>
-			<if test="orderNumber != null and orderNumber != ''" >
-				and o.big_order_number = #{orderNumber,jdbcType=VARCHAR}
+			<if test="bigOrderNumber != null and bigOrderNumber != ''" >
+				and o.big_order_number = #{bigOrderNumber,jdbcType=VARCHAR}
 			</if>
 			<if test="storesId != null and storesId != ''" >
 				and o.stores_id = #{storesId,jdbcType=VARCHAR}

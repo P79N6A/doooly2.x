@@ -631,7 +631,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         order.setUserId(userId);
         OrderVo o = adOrderReportServiceI.getOrderLimt(order);
         if (o == null) {
-            return null;
+            order.setOrderNumber(null);
+            order.setBigOrderNumber(orderNum);
+            o = adOrderReportServiceI.getOrderLimt(order);
+            if(o==null){
+                return null;
+            }
         }
         OrderItemVo item = o.getItems().get(0);
         String sku = item.getSku() != null ? item.getSku() : "";

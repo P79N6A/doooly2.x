@@ -506,6 +506,11 @@ public class ELMServiceImpl implements ELMServiceI {
             return resultModel;
         }
         OrderVo orderVo = orderList.get(0);
+
+        //将refundNo信息放入缓存,方便订单推送使用
+        String key =String.format(ELMConstants.ELM_REFUND_PREFIX, req.getString("transactionId"));
+        stringRedisTemplate.opsForValue().set(key, req.getString("refundNo"),15, TimeUnit.MINUTES);
+
         PayMsg payMsg = refundService.autoRefund(orderVo.getUserId(), orderVo.getOrderNumber(),null,
                 req.getString("notifyUrl"));
         if (null == payMsg) {

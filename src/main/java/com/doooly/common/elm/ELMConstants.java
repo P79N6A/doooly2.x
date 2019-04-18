@@ -24,6 +24,7 @@ public class ELMConstants {
     public static final String ELM_UPDATE_METHOD = "/v1/openapi/employee/update";
 
     public static final String ELM_ORDER_PREFIX = "ELM_ORDER_PREFIX:%s";
+    public static final String ELM_REFUND_PREFIX = "ELM_REFUND_PREFIX:%s";
 
     //饿了么MsgCode add by paul
     public final static int ELM_RESULT_SUCCESS = 1;  //成功处理

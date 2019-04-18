@@ -136,6 +136,7 @@ public class MyPointRestService implements MyPointRestServiceI {
 		try {
 			String availablePointsId = json.getString("availablePointsId");// 可用积分表id
 			String userId = json.getString("userId");
+			logger.info("------------>> userId:" + userId + ", availablePointsId:" + availablePointsId);
 			messageDataBean = myPointServiceI.getAvailablePointDetail(availablePointsId, userId);
 			logger.info("查询可用积分详情信息返回数据"+messageDataBean.toJsonString());
 		} catch (Exception e) {

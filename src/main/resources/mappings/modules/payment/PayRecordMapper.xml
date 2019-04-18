@@ -61,6 +61,9 @@
             <if test="businessId != null and businessId != ''">
                 AND a.business_id = #{businessId}
             </if>
+            <if test="payId != null and payId != ''">
+                AND a.pay_id = #{payId}
+            </if>
         </where>
         limit 1
     </select>

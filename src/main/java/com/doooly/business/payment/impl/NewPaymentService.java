@@ -1523,9 +1523,12 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel integralPay(JSONObject param) {
-        String orderNum = param.getString("orderNum");
-        //20181227 改造优化
-        //OrderVo orderVo = adOrderReportDao.getByOrderNum(orderNum).get(0);
+        String payId = param.getString("payId");
+        PayRecordDomain payRecordDomain = new PayRecordDomain();
+        payRecordDomain.setPayId(payId);
+        payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+        String businessId =payRecordDomain.getBusinessId();//商户编号
+        String orderNum = payRecordDomain.getMerchantOrderNo();
         OrderVo paramOrder = new OrderVo();
         paramOrder.setOrderNumber(orderNum);
         OrderVo orderVo= adOrderReportServiceI.getOrderLimt(paramOrder);
@@ -1537,8 +1540,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                 return new ResultModel(GlobalResultStatusEnum.FAIL, "没有找到订单");
             }
         }
-        String businessId = String.valueOf(orderVo.getBussinessId());
-        //AdBusinessExpandInfo adBusinessExpandInfo = adBusinessExpandInfoDao.getByBusinessId(businessId);
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
         paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);
@@ -1580,23 +1581,11 @@ public class NewPaymentService implements NewPaymentServiceI {
 
     @Override
     public ResultModel integralPayV2(JSONObject param) {
-        String orderNum = param.getString("orderNum");
-        if(StringUtils.isBlank(orderNum)){
-            orderNum = param.getString("bigOrderNumber");//订单号
-        }
-        long userId = param.getLong("userId");
-        String bigOrderNumber;//大订单号
-        String businessId = WebService.BUSINESSID;//商户编号
-        OrderVo order = new OrderVo();
-        order.setOrderNumber(orderNum);
-        order.setUserId(userId);
-        if(orderNum.contains("N")){
-            //说明是自营子订单
-            OrderVo orderLimt = adOrderReportServiceI.getOrderLimt(order);
-            bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
-            order.setBigOrderNumber(bigOrderNumber);
-            businessId = orderLimt.getBussinessBussinessId();
-        }
+        String payId = param.getString("payId");
+        PayRecordDomain payRecordDomain = new PayRecordDomain();
+        payRecordDomain.setPayId(payId);
+        payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+        String businessId =payRecordDomain.getBusinessId();//商户编号
         AdBusinessExpandInfo paramAdBusinessExpandInfo = new AdBusinessExpandInfo();
         paramAdBusinessExpandInfo.setBusinessId(businessId);
         AdBusinessExpandInfo adBusinessExpandInfo = adBusinessServiceI.getBusinessExpandInfo(paramAdBusinessExpandInfo);

@@ -1148,6 +1148,10 @@ public class NewPaymentService implements NewPaymentServiceI {
         // 跳转支付结果页面需要数据
         if (payMsg != null && GlobalResultStatusEnum.SUCCESS.getCode() == payMsg.getCode()) {
             List<OrderVo> orders = orderService.getByOrdersNum(orderNum);
+            if(CollectionUtils.isEmpty(orders)){
+                orders = new ArrayList<>();
+                orders.add(order);
+            }
             if (!CollectionUtils.isEmpty(orders)) {
                 OrderVo order1 = orders.get(0);
                 Map<String, Object> map = new HashMap<>();

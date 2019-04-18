@@ -375,7 +375,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
                 BigDecimal marketPrice = new BigDecimal(sku.getMarketPrice());
-                totalMount = totalMount.add(sellPrice.multiply(new BigDecimal(String.valueOf(buyQuantity)))).add(orderVo.getServiceCharge());
+                totalMount = totalMount.add(sellPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
                 totalPrice = totalPrice.add(marketPrice.multiply(new BigDecimal(String.valueOf(buyQuantity))));
                 OrderItemVo orderItem = buildOrderItem(orderVo, userId, remarks, buyQuantity, product, sku, sellPrice, marketPrice);
                 orderItems.add(orderItem);

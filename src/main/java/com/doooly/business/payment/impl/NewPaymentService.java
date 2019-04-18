@@ -1156,7 +1156,6 @@ public class NewPaymentService implements NewPaymentServiceI {
                     //手续费
                     if (order.getServiceCharge() != null) {
                         map.put("serviceCharge", order.getServiceCharge());
-                        totalMount = totalMount.add(order.getServiceCharge());
                     }
                     map.put("totalAmount", totalMount);
                     //话费优惠活动- 分享需要的参数

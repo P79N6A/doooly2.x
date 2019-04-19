@@ -257,6 +257,8 @@ public class MyPoinitService implements MyPointServiceI {
 						getTotalAmountAndTotalPrice(map, order);
 						messageDataBean.setCode(MessageDataBean.success_code);
 					}
+				} else if (StringUtils.equals(AdAvailablePoints.TYPE_INTEGRAL_REFUND, adAvailablePoint.getType())) {
+					messageDataBean.setCode(MessageDataBean.success_code);
 				} else {
 					messageDataBean.setMess("查无积分订单明细");
 				}

@@ -467,8 +467,8 @@ public class OrderServiceImpl implements OrderService{
 
 			Date recentlyPlacedOrderDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), null);
 			Date pendingPaymentDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "10");
-			Date recentArrivalDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "1");
-			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId());
+			Date recentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId(), "3");
+			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId(), "2");
 
 			if (recentlyPlacedOrderDate != null && recentlyPlacedOrderDate.getTime() > recentlyPlacedOrderFlag) {
 				hintResp.setRecentlyPlacedOrderFlag(true);

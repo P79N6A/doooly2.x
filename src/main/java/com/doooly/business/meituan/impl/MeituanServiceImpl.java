@@ -191,7 +191,7 @@ public class MeituanServiceImpl implements MeituanService{
         param.put("redirectUrl",json.get("returnUrl"));
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonDetail = new JSONObject();
-        jsonDetail.put("code", "");
+        jsonDetail.put("code", json.getIntValue("businessType"));
         jsonDetail.put("goods", json.getString("goodsName"));
         jsonDetail.put("number", 1);
         jsonDetail.put("price", total);

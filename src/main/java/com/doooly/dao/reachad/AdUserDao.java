@@ -349,4 +349,6 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	List<Map<String,Object>> selectUserToDelete(Map<String,Object> param);
 
 	Date getReturnPointsMaxCreateDateByUser(@Param("userId") String userId, @Param("status")String status);
+
+	Date getReturnPointsMaxUpdateDateByUser(@Param("userId") String userId, @Param("status")String status);
 }

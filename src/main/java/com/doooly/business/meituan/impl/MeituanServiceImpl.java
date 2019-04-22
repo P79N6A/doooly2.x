@@ -196,6 +196,7 @@ public class MeituanServiceImpl implements MeituanService{
         jsonDetail.put("number", 1);
         jsonDetail.put("price", total);
         jsonDetail.put("category", "0000");
+        jsonDetail.put("firstCategory", json.getIntValue("businessType"));
         jsonDetail.put("tax", 0);
         jsonDetail.put("amount", total);
         jsonArray.add(jsonDetail);

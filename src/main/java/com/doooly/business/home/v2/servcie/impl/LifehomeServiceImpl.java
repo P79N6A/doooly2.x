@@ -82,6 +82,7 @@ public class LifehomeServiceImpl implements LifehomeService{
                 if (!CollectionUtils.isEmpty(ads)) {
                     for (AdAd ad : ads) {
                         Map<String,Object> adMapItem = new HashMap<>();
+                        adMapItem.put("title",ad.getTitle());
                         adMapItem.put("linkUrl",ad.getImageLinkUrl());
                         adMapItem.put("iconUrl",ad.getImagePath());
                         adMapItemList.add(adMapItem);

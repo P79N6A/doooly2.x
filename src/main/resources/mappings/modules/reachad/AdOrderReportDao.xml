@@ -1494,7 +1494,7 @@
 		</if>
 	</select>
 
-	<select id="getOrderServiceCharge" resultType="java.math">
+	<select id="getOrderServiceCharge" resultType="java.math.BigDecimal">
 		SELECT
 	        IFNULL(SUM(integral_rebate_amount),0)
         FROM

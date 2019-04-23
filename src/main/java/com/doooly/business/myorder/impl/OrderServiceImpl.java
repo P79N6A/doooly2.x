@@ -123,6 +123,8 @@ public class OrderServiceImpl implements OrderService{
             if(Constants.GIFT_ORDER_TYPE.equals(report.getRemarks())){
                 resp.setOrderType("1");
             }
+            //查询手续费
+            BigDecimal totalService = adOrderReportDao.getOrderServiceCharge(report);
 			AdOrderReport adOrderReport = new AdOrderReport();
 			adOrderReport.setId(Long.parseLong(req.getOrderId()));
 			resp.setId(report.getId());
@@ -139,7 +141,7 @@ public class OrderServiceImpl implements OrderService{
 			resp.setOrderNumber(report.getOrderNumber());
 			resp.setProductType(report.getProductType());
 			resp.setSavePrice(report.getSavePrice());
-			resp.setServiceCharge(report.getServiceCharge());
+			resp.setServiceCharge(report.getServiceCharge().add(totalService));
 			resp.setState(report.getState());
 			resp.setStoreName(report.getStoreName());
 			resp.setPayAmount(report.getTotalMount());

@@ -345,10 +345,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
-        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        String dirIntegral = resultIntegral.getString("dirIntegral1");
+        String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
         JSONObject retJson = new JSONObject();
         retJson.put("totalFree", adOrderBig.getTotalAmount().toString());
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
+        retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
+        retJson.put("commonIntegralServiceCharge", String.valueOf(totalServiceCharge));//通用积分手续费
+        retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
         getServiceCharge(orderVos, retJson, user);
         //组建预支付订单参数
         String price = String.valueOf(adOrderBig.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
@@ -380,10 +385,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         return result;
     }
 
-    public String getDirIntegral(List<OrderVo> orderVos, AdOrderBig adOrderBig, AdUser adUser) {
-        //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
+    public JSONObject getDirIntegral(List<OrderVo> orderVos, AdOrderBig adOrderBig, AdUser adUser) {
+        JSONObject result = new JSONObject();
         String getDirIntegralUrl = PaymentConstants.PAYMENT_HTTPS_V2 + "/mchpay/getDirIntegral/V2";
-        //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
         params.put("businessId", WebService.BUSINESSID);
         params.put("dirIntegralSwitch", "1");
@@ -418,10 +422,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("查询可用定向积分V2，结果{}", resposeResult);
         JSONObject resultJson = JSON.parseObject(resposeResult);
         String dirIntegral1 = "0";
+        String totalServiceCharge = "0";
         if (resultJson != null && resultJson.getString("code").equals("0")) {
             dirIntegral1 = resultJson.getString("dirIntegral");
+            totalServiceCharge = resultJson.getString("totalServiceCharge");
         }
-        return dirIntegral1;
+        result.put("dirIntegral1",dirIntegral1);
+        result.put("totalServiceCharge",totalServiceCharge);
+        return result;
     }
 
     // 构造商品JSON
@@ -669,8 +677,13 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(String.valueOf(o.getId()));
         adOrderBig.setTotalAmount(o.getTotalMount());
-        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        String dirIntegral = resultIntegral.getString("dirIntegral1");
+        String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
+        retJson.put("commonIntegralServiceCharge", String.valueOf(totalServiceCharge));//通用积分手续费
+        retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
+        retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
 
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()

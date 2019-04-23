@@ -1494,4 +1494,15 @@
 		</if>
 	</select>
 
+	<select id="getOrderServiceCharge" resultType="java.math">
+		SELECT
+	        IFNULL(SUM(integral_rebate_amount),0)
+        FROM
+            ad_order_integral_record
+        WHERE
+            `status` = 0
+        AND payment_type = 1
+        AND order_number = #{orderNumber}
+	</select>
+
 </mapper>

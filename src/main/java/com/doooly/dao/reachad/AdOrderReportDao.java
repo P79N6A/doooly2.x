@@ -165,4 +165,6 @@ public interface AdOrderReportDao {
     Date getMaxOrderDateByUserAndType(@Param("userId") String userId, @Param("type") String type);
 
     List<OrderVo> getOrders(OrderVo order);
+
+    BigDecimal getOrderServiceCharge(OrderDetailReport report);
 }

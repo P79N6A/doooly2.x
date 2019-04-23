@@ -285,7 +285,16 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
-            logger.info("payment unifiedorder v2 result data={}", data);
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(param.getString("merchantOrderNo"));
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if (payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())) {
+                retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
+            } else {
+                retJson.put("redirectUrl", "");
+            }
+            logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
         } else {
             return new ResultModel(jsonResult.getInteger("code"), jsonResult.getString("info"));

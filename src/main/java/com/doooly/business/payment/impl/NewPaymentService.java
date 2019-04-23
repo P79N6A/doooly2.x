@@ -333,6 +333,8 @@ public class NewPaymentService implements NewPaymentServiceI {
         } else if (orderNum.contains("N")) {
             //兜礼子订单
             orderVos.add(orderLimt);
+            adOrderBig.setTotalPrice(orderLimt.getTotalPrice());
+            adOrderBig.setTotalAmount(orderLimt.getTotalMount());
         } else {
             //大订单
             order.setBigOrderNumber(bigOrderNumber);

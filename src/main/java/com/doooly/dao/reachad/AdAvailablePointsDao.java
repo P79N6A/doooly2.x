@@ -4,6 +4,7 @@ import com.doooly.entity.reachad.AdAvailablePoints;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,4 +31,12 @@ public interface AdAvailablePointsDao {
      * @return
      */
     BigDecimal getUserMonthArrivalIntegral(@Param("userId") String userid);
+
+    /**
+     * 获得用户最大到账时间
+     * type in (0 2 3 4 6 7 8 10 12)
+     * @param userId
+     * @return
+     */
+    Date maxArrivalAccountCreateDate(@Param("userId") String userId);
 }

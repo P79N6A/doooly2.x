@@ -138,7 +138,7 @@
 		)
 	</insert>
 
-    <select id="maxArrivalAccountCreateDate" resultType="java.util.Date">
+    <select id="maxArrivalAccountUpdateDate" resultType="java.util.Date">
         SELECT MAX(update_date) FROM ad_available_points WHERE type IN (0, 2, 3, 4, 6, 7, 8, 10, 12) AND user_id = #{userId}
     </select>
 </mapper>

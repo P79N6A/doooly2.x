@@ -470,7 +470,7 @@ public class OrderServiceImpl implements OrderService{
 			Date recentlyPlacedOrderDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), null);
 			Date pendingPaymentDate = adOrderReportDao.getMaxOrderDateByUserAndType(req.getUserId(), "10");
 //			Date recentArrivalDate = adUserDao.getReturnPointsMaxUpdateDateByUser(req.getUserId(), "3");
-			Date recentArrivalDate = adAvailablePointsDao.maxArrivalAccountCreateDate(req.getUserId());
+			Date recentArrivalDate = adAvailablePointsDao.maxArrivalAccountUpdateDate(req.getUserId());
 			Date imminentArrivalDate = adUserDao.getReturnPointsMaxCreateDateByUser(req.getUserId(), "2");
 
 			if (recentlyPlacedOrderDate != null && recentlyPlacedOrderDate.getTime() > recentlyPlacedOrderFlag) {

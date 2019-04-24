@@ -38,5 +38,5 @@ public interface AdAvailablePointsDao {
      * @param userId
      * @return
      */
-    Date maxArrivalAccountCreateDate(@Param("userId") String userId);
+    Date maxArrivalAccountUpdateDate(@Param("userId") String userId);
 }

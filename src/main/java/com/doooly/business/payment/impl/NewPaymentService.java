@@ -303,6 +303,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         long userId = json.getLong("userId");
         String bigOrderNumber;//大订单号
         String businessId = WebService.BUSINESSID;//商户编号
+        Long id = 0l;//商户表id
         OrderVo order = new OrderVo();
         order.setOrderNumber(orderNum);
         order.setUserId(userId);
@@ -313,6 +314,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             bigOrderNumber = String.valueOf(orderLimt.getBigOrderNumber());
             order.setBigOrderNumber(bigOrderNumber);
             businessId = orderLimt.getBussinessBussinessId();
+            id = orderLimt.getBussinessId();
         } else {
             bigOrderNumber = orderNum;
         }
@@ -343,6 +345,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         }
         if (!CollectionUtils.isEmpty(orderVos) && orderVos.size() == 1) {
             businessId = String.valueOf(orderVos.get(0).getBussinessBussinessId());
+            id = orderVos.get(0).getBussinessId();
         }
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
@@ -375,9 +378,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         AdBusiness paramBusiness = new AdBusiness();
-        paramBusiness.setBusinessId(businessId);
+        paramBusiness.setId(id);
         AdBusiness business = adBusinessServiceI.getBusiness(paramBusiness);
-        retJson.put("company", business.getCompany());
+        retJson.put("company", business==null?"":business.getCompany());
         retJson.put("userIntegral", user.getIntegral());
         retJson.put("isPayPassword", user.getIsPayPassword());
         logger.info("retJson = {}", retJson);

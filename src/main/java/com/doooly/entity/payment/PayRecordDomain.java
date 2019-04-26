@@ -123,6 +123,10 @@ public class PayRecordDomain implements Serializable {
     private Timestamp updateTime;
     /**兜礼支付id*/
     private String payId;
+
+    private BigDecimal totalServiceCharge;//总手续费
+    private BigDecimal dirIntegralServiceCharge;//定向积分手续费
+    private BigDecimal commonIntegralServiceCharge;//通用积分手续费
     public PayRecordDomain() {
     }
 
@@ -485,5 +489,29 @@ public class PayRecordDomain implements Serializable {
 
     public void setRedirectUrl(String redirectUrl) {
         this.redirectUrl = redirectUrl;
+    }
+
+    public BigDecimal getTotalServiceCharge() {
+        return totalServiceCharge;
+    }
+
+    public void setTotalServiceCharge(BigDecimal totalServiceCharge) {
+        this.totalServiceCharge = totalServiceCharge;
+    }
+
+    public BigDecimal getDirIntegralServiceCharge() {
+        return dirIntegralServiceCharge;
+    }
+
+    public void setDirIntegralServiceCharge(BigDecimal dirIntegralServiceCharge) {
+        this.dirIntegralServiceCharge = dirIntegralServiceCharge;
+    }
+
+    public BigDecimal getCommonIntegralServiceCharge() {
+        return commonIntegralServiceCharge;
+    }
+
+    public void setCommonIntegralServiceCharge(BigDecimal commonIntegralServiceCharge) {
+        this.commonIntegralServiceCharge = commonIntegralServiceCharge;
     }
 }

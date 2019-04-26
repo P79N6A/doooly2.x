@@ -1195,18 +1195,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map.put("oid", order.getId());
                     //最终支付结果code
                     map.put("code", payMsg.getCode());
-                    BigDecimal totalMount = order.getTotalMount();
-                    //手续费
-                    if (order.getServiceCharge() != null) {
-                        map.put("serviceCharge", order.getServiceCharge());
-                    }
-                    map.put("totalAmount", totalMount);
                     //话费优惠活动- 分享需要的参数
                     if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
                         AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
                         map.put("openId", record.getOpenId());
                         map.put("activityParam", record.getActivityParam());
                     }
+                    BigDecimal totalMount = order.getTotalMount();
                     //获取跳转链接
                     PayRecordDomain payRecordDomain = new PayRecordDomain();
                     payRecordDomain.setMerchantOrderNo(orderNum);
@@ -1218,9 +1213,15 @@ public class NewPaymentService implements NewPaymentServiceI {
                             returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
                         }
                         map.put("redirectUrl", returnUrl);
+                        totalMount= totalMount.add(payRecordDomain.getTotalServiceCharge());
                     } else {
                         map.put("redirectUrl", "");
                     }
+                    //手续费
+                    if (order.getServiceCharge() != null) {
+                        map.put("serviceCharge", order.getServiceCharge());
+                    }
+                    map.put("totalAmount", totalMount);
                 }
                 payMsg.setData(map);
             }
@@ -1252,7 +1253,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
             if (payRecordDomain != null) {
-                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).add(payRecordDomain.getTotalServiceCharge()).setScale(2, BigDecimal.ROUND_HALF_UP));
                 String returnUrl = payRecordDomain.getRedirectUrl();
                 if (StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost") ||
                         returnUrl.contains("doooly") || returnUrl.contains("reach"))) {

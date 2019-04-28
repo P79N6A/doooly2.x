@@ -309,8 +309,8 @@ public class OrderServiceImpl implements OrderService{
                     if(value1.equals(value11)){
                         BigDecimal totalMonthMount = value2.add(value4);
                         BigDecimal totalMonthsaveMount = value3.subtract(value4);
-                        map.put(key2,totalMonthMount.toEngineeringString());
-                        map.put(key3,totalMonthsaveMount.toEngineeringString());
+                        map.put(key2,totalMonthMount);
+                        map.put(key3,totalMonthsaveMount);
                         break;
                     }
                 }

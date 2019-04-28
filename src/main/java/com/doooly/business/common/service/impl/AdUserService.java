@@ -1220,9 +1220,10 @@ public class AdUserService implements AdUserServiceI {
 		String verificationCode = paramData.getString("verificationCode");
 		String groupId = paramData.getString("groupId");
 		String channel = paramData.getString(Constants.CHANNEL);
+        String flagF24SDC = paramData.getString("F24SDC"); // 福特2019年4月收货地址补填接口特有标志
 		try {
 			Long startTime = System.currentTimeMillis();
-			if (code.length() == 6) {
+			if (code.length() == 6||StringUtils.equalsIgnoreCase(flagF24SDC,"yes")) {
 				if (StringUtils.isNotBlank(staffNum)) {
 					// 福特激活处理
 					if (StringUtils.isBlank(telephone)) {
@@ -1238,7 +1239,12 @@ public class AdUserService implements AdUserServiceI {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "用户单位为空");
 					} else {
-						resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId,verificationCode);
+                        if (StringUtils.equalsIgnoreCase(flagF24SDC,"yes")) {
+                            // 处理福特2019年4月收货地址补填接口调用
+                            resultData = adActiveCodeServiceI.validateFord201904ShipAddrCollectorUser(telephone,staffNum,email,groupId,verificationCode);
+                        } else {
+                            resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId,verificationCode);
+                        }
 						if (resultData != null
 								&& ConstantsLogin.CodeActive.SUCCESS.getCode().equals(resultData.getString("code"))) {
 							isFailed = false;

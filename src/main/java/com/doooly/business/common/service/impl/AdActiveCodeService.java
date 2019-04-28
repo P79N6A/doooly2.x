@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -384,5 +385,125 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 		resultData.put("userId",adUser.getId());
 		return resultData;
 	}
+
+    @Override
+    @Transactional
+    public JSONObject validateFord201904ShipAddrCollectorUser
+            (String mobile, String staffNum, String email,String groupId, String verificationCode)
+            throws Exception{
+        JSONObject resultData = new JSONObject();
+        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+        resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+
+        //确保短信验证码正确
+        if(verificationCode==null||!checkVerificationCode(mobile, verificationCode)){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "请输入正确的验证码");
+            return resultData;
+        }
+        
+        //确保工号存在
+        AdUserPersonalInfo userPersonalInfo = adUserPersonalInfoDao.selectPersonByWorkNumber(staffNum);
+        if(userPersonalInfo==null){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "该工号不存在！");
+            return resultData;
+        }
+        
+        //确保邮箱与工号匹配
+        AdUser user = adUserDao.getById(Integer.parseInt(userPersonalInfo.getId().toString()));
+        if(!StringUtils.equalsIgnoreCase(user.getMailbox(),email)){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "请输入准确的工号和邮箱");
+            return resultData;
+        }
+        
+        //如果该账户已经绑定手机号
+        //    如果已经绑定相同手机号  直接登录
+        if(user.getTelephone()!=null && StringUtils.equals(user.getTelephone(),mobile)){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+            resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+            resultData.put("userId",user.getId());
+            return resultData;
+        }
+        //    否则：已经绑定其他手机号  提示输入正确手机号
+        if(user.getTelephone()!=null && !StringUtils.equals(user.getTelephone(),mobile)){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "该工号已绑定手机号，请输入正确的手机号！");
+            return resultData;
+        }
+        
+        // from now on, the case is user.getTelephone() == null
+        
+        //确保手机号没有被绑定
+        AdUser userByMobile = new AdUser();
+        userByMobile.setTelephone(mobile);
+        userByMobile = adUserDao.get(userByMobile);
+        if (userByMobile != null) {
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "该手机号已是兜礼用户，请输入其他手机号！");
+            return resultData;
+        }
+        
+        //绑定手机号
+        user.setTelephone(mobile);
+        user.setIsActive("2");
+        user.setActiveDate(new Date());
+        user.setUpdateDate(new Date());
+        user.setDataSyn(AdUser.DATA_SYN_ON);
+        if (StringUtils.isNotBlank(groupId)) {
+            user.setGroupNum(Long.parseLong(groupId));
+        }
+        if (0==adUserDao.updateByPrimaryKeySelective(user)) {
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
+            return resultData;
+        }
+
+        // 设置为福特员工
+        // todo 这批用户是否已经设置了group number 为福特
+        {
+            if (StringUtils.isNotBlank(groupId)) {
+                user.setGroupNum(Long.parseLong(groupId));
+            }
+            if (0==adUserDao.updateByPrimaryKeySelective(user)) {
+                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                resultData.put(ConstantsLogin.MSG, "设置为福特员工失败");
+                return resultData;
+            }
+        }
+        
+        LifeMember lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
+        if (lifeMember == null) {
+            lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+        }
+        if (lifeMember == null) {
+            adUserServiceI.saveMember(user);
+             lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
+        }
+        if (StringUtils.isNotBlank(groupId)) {
+            String groupNum = "";
+            LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
+            groupNum = lifeGroup.getId();
+            lifeMember.setGroupId(Long.valueOf(groupNum));
+            lifeMember.setName(user.getName());
+            lifeMember.setIsEnabled(2);
+            lifeMember.setMobile(mobile);
+            lifeMember.setLoginFailureCount(0);
+            lifeMember.setModifyDate(new Date());
+            lifeMember.setAdId(String.valueOf(user.getId()));
+            lifeMemberDao.updateActiveStatus(lifeMember);
+        }
+
+        //更新类型为 平台导入(白名单)
+        //数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码
+        logger.info("更新类型为专属码激活:{}",user.getTelephone());
+        userServiceI.updatePersonInfoDataSources(user.getTelephone(),0);
+
+        resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
+        resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
+        resultData.put("userId",user.getId());
+        return resultData;
+    }
 
 }

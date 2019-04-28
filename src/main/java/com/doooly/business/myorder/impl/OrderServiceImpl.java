@@ -148,11 +148,11 @@ public class OrderServiceImpl implements OrderService{
             resp.setOrderId(report.getOrderId());
             resp.setOrderNumber(orderNumber);
 			resp.setProductType(report.getProductType());
-			resp.setSavePrice(report.getSavePrice());
+			resp.setSavePrice(report.getSavePrice().subtract(totalService));
 			resp.setServiceCharge(report.getServiceCharge().add(totalService));
 			resp.setState(report.getState());
 			resp.setStoreName(report.getStoreName());
-			resp.setPayAmount(report.getTotalMount());
+			resp.setPayAmount(report.getTotalMount().add(totalService));
 			resp.setAmountPayable(report.getTotalPrice());
 			resp.setType(report.getType());
 			resp.setUserId(report.getUserId());

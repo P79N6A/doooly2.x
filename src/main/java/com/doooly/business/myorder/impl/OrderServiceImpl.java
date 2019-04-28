@@ -63,6 +63,9 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private AdReturnFlowDao adReturnFlowDao;
 
+    @Autowired
+    private AdOrderIntegralRecordDao adOrderIntegralRecordDao;
+
 	/**
 	 * 订单列表
 	 * @param orderReq
@@ -123,22 +126,27 @@ public class OrderServiceImpl implements OrderService{
             if(Constants.GIFT_ORDER_TYPE.equals(report.getRemarks())){
                 resp.setOrderType("1");
             }
+            String orderNumber = report.getOrderNumber();
             //查询手续费
-            BigDecimal totalService = adOrderReportDao.getOrderServiceCharge(report);
-			AdOrderReport adOrderReport = new AdOrderReport();
-			adOrderReport.setId(Long.parseLong(req.getOrderId()));
-			resp.setId(report.getId());
-			resp.setBusinessRebateAmount(report.getBusinessRebateAmount());
-			resp.setCompany(report.getCompany());
-			resp.setConsigneeMobile(report.getConsigneeMobile());
-			resp.setDelFlag(report.getDelFlag());
-			resp.setIsBusinessRebate(report.getIsBusinessRebate());
-			resp.setIsSource(report.getIsSource());
-			resp.setIsUserRebate(report.getIsUserRebate());
-			resp.setLogo(report.getLogo());
-			resp.setOrderDate(DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
-			resp.setOrderId(report.getOrderId());
-			resp.setOrderNumber(report.getOrderNumber());
+            //查询订单手续费
+            AdOrderIntegralRecord adOrderIntegralRecord = new AdOrderIntegralRecord();
+            adOrderIntegralRecord.setOrderNumber(orderNumber);
+            adOrderIntegralRecord.setPaymentType(1);
+            BigDecimal totalService = adOrderIntegralRecordDao.sumIntegralRebateAmount(adOrderIntegralRecord);
+            AdOrderReport adOrderReport = new AdOrderReport();
+            adOrderReport.setId(Long.parseLong(req.getOrderId()));
+            resp.setId(report.getId());
+            resp.setBusinessRebateAmount(report.getBusinessRebateAmount());
+            resp.setCompany(report.getCompany());
+            resp.setConsigneeMobile(report.getConsigneeMobile());
+            resp.setDelFlag(report.getDelFlag());
+            resp.setIsBusinessRebate(report.getIsBusinessRebate());
+            resp.setIsSource(report.getIsSource());
+            resp.setIsUserRebate(report.getIsUserRebate());
+            resp.setLogo(report.getLogo());
+            resp.setOrderDate(DateUtils.formatDate(report.getOrderDate(), "yyyy.MM.dd HH:mm:ss"));
+            resp.setOrderId(report.getOrderId());
+            resp.setOrderNumber(orderNumber);
 			resp.setProductType(report.getProductType());
 			resp.setSavePrice(report.getSavePrice());
 			resp.setServiceCharge(report.getServiceCharge().add(totalService));
@@ -276,18 +284,40 @@ public class OrderServiceImpl implements OrderService{
 	 
 
 		@Override
-		public List<Map<String,String>> getOrderdDetailSum(OrderPoReq req) {
+		public List<Map<String,Object>> getOrderdDetailSum(OrderPoReq req) {
 			
-			List<Map<String,String>> list = adOrderReportDao.findOrderdDetailSum(req);
+			List<Map<String,Object>> list = adOrderReportDao.findOrderdDetailSum(req);
 			putList(list, req);
 			return list;
 		}
 		
-		private void putList(List<Map<String,String>> list,OrderPoReq req) {
+		private void putList(List<Map<String,Object>> list,OrderPoReq req) {
+	        String key1 = "orderDate";
+            String key2 = "totalMonthMount";
+            String key3 = "totalMonthsaveMount";
+	        String key4 = "totalServiceCharge";
 			AdGroup adGroup =adGroupDao.getGroupLogoByUserId(req.getUserId().intValue());
-			for(Map<String,String> map : list) {
-				map.put("groupShortName",adGroup != null ? adGroup.getGroupShortName() : "");
-			}
+            List<Map<String,Object>> chargeList = adOrderIntegralRecordDao.findOrderServiceChargeSum(req);
+            for(Map<String,Object> map : list) {
+                map.put("groupShortName",adGroup != null ? adGroup.getGroupShortName() : "");
+                String value1 = (String) map.get(key1);
+                BigDecimal value2 = (BigDecimal) map.get(key2);
+                BigDecimal value3 = (BigDecimal) map.get(key3);
+                for (Map<String, Object> stringStringMap : chargeList) {
+                    String value11 = (String) stringStringMap.get(key1);
+                    BigDecimal value4 = (BigDecimal) stringStringMap.get(key4);
+                    if(value1.equals(value11)){
+                        BigDecimal totalMonthMount = value2.add(value4);
+                        BigDecimal totalMonthsaveMount = value3.subtract(value4);
+                        map.put(key2,totalMonthMount.toEngineeringString());
+                        map.put(key3,totalMonthsaveMount.toEngineeringString());
+                        break;
+                    }
+                }
+            }
+
+
+
 		}
 		
 

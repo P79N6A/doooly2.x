@@ -127,7 +127,7 @@ public interface AdOrderReportDao {
     OrderDetailReport getOrderDetail(OrderDetailPoReq req);
     
     
-    List<Map<String,String>> findOrderdDetailSum(OrderPoReq req);
+    List<Map<String,Object>> findOrderdDetailSum(OrderPoReq req);
     
     Integer getLatestOrderTotal(OrderPoReq req);
     
@@ -166,5 +166,5 @@ public interface AdOrderReportDao {
 
     List<OrderVo> getOrders(OrderVo order);
 
-    BigDecimal getOrderServiceCharge(OrderDetailReport report);
+
 }

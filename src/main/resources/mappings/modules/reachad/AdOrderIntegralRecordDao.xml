@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.doooly.dao.reachad.AdOrderIntegralRecordDao">
+
+	<sql id="adOrderIntegralRecordColumns">
+		a.id AS "id",
+		a.big_order_number AS "bigOrderNumber",
+		a.order_number AS "orderNumber",
+		a.user_id as "userId",
+		a.order_amount AS "orderAmount",
+		a.integral_rebate_amount AS "integralRebateAmount",
+		a.batch_no AS "batchNo",
+		a.status AS "status",
+		a.type AS "type",
+		a.create_date AS "createDate",
+		a.update_date AS "updateDate",
+		a.create_by AS "createBy.id",
+		a.update_by AS "updateBy.id",
+		a.payment_type AS "paymentType",
+		a.flow_type AS "flowType"
+	</sql>
+	
+
+	<select id="sumIntegralRebateAmount" resultType="java.math.BigDecimal" parameterType="com.doooly.entity.reachad.AdOrderIntegralRecord">
+		SELECT
+            SUM(IF(a.flow_type=0,a.integral_rebate_amount,-a.integral_rebate_amount)) AS "totalServiceCharge"
+		FROM
+		    ad_order_integral_record a
+		WHERE
+		      a.status = 0
+            <if test="orderNumber != null and orderNumber != ''">
+                AND a.order_number = #{orderNumber}
+            </if>
+            <if test="type != null and type != ''">
+                AND a.type = #{type}
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                AND a.payment_type = #{paymentType}
+            </if>
+	</select>
+
+    <select id="findOrderServiceChargeSum" parameterType="com.doooly.business.myorder.po.OrderPoReq" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(create_date, '%Y-%m') 'orderDate',
+            SUM(IF(a.flow_type=0,a.integral_rebate_amount,-a.integral_rebate_amount)) AS "totalServiceCharge"
+        FROM
+            ad_order_integral_record a
+        <where>
+            1=1
+
+            <if test=" userId !=null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+
+            AND a.payment_type = 1
+
+        </where>
+        GROUP BY
+        YEAR (create_date),
+        MONTH (create_date)
+        ORDER BY
+        a.create_date DESC
+    </select>
+
+    <select id="getOrderServiceCharge" resultType="java.math.BigDecimal">
+		SELECT
+	        IFNULL(SUM(integral_rebate_amount),0)
+        FROM
+            ad_order_integral_record
+        WHERE
+            `status` = 0
+        AND payment_type = 1
+        AND order_number = #{orderNumber}
+	</select>
+
+</mapper>

@@ -357,11 +357,12 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
         String dirIntegral = resultIntegral.getString("dirIntegral1");
         String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
+        String commonIntegralServiceCharge = resultIntegral.getString("commonIntegralServiceCharge");
         JSONObject retJson = new JSONObject();
         retJson.put("totalFree", adOrderBig.getTotalAmount().toString());
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
         retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
-        retJson.put("commonIntegralServiceCharge", String.valueOf(totalServiceCharge));//通用积分手续费
+        retJson.put("commonIntegralServiceCharge", String.valueOf(commonIntegralServiceCharge));//通用积分手续费
         retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
         getServiceCharge(orderVos, retJson, user);
         //组建预支付订单参数

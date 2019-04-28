@@ -433,12 +433,15 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject resultJson = JSON.parseObject(resposeResult);
         String dirIntegral1 = "0";
         String totalServiceCharge = "0";
+        String commonIntegralServiceCharge = "0";
         if (resultJson != null && resultJson.getString("code").equals("0")) {
             dirIntegral1 = resultJson.getString("dirIntegral");
             totalServiceCharge = resultJson.getString("totalServiceCharge");
+            commonIntegralServiceCharge = resultJson.getString("commonIntegralServiceCharge");
         }
         result.put("dirIntegral1",dirIntegral1);
         result.put("totalServiceCharge",totalServiceCharge);
+        result.put("commonIntegralServiceCharge", commonIntegralServiceCharge);
         return result;
     }
 
@@ -690,8 +693,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
         String dirIntegral = resultIntegral.getString("dirIntegral1");
         String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
+        String commonIntegralServiceCharge = resultIntegral.getString("commonIntegralServiceCharge");
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
-        retJson.put("commonIntegralServiceCharge", String.valueOf(totalServiceCharge));//通用积分手续费
+        retJson.put("commonIntegralServiceCharge", String.valueOf(commonIntegralServiceCharge));//通用积分手续费
         retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
         retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
 

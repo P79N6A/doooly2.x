@@ -388,7 +388,11 @@ public class OneNumberService implements OneNumberServiceI {
             String openApiUrl = eleConfig.getString("openApiUrl");
             JSONObject result = synStaff(adUser, consumerNo, consumerSecret, openApiUrl);
 
-            if (("200".equals(result.get("code").toString()))) {
+            if (result == null) {
+                resutlJson.put("code", "2000");
+                resutlJson.put("message", "饿了么用户同步接口访问失败");
+                logger.info("饿了么用户同步接口访问失败->返回值:" + result);
+            } else if (("200".equals(result.get("code").toString()))) {
                 // 用户同步成功
                 UserSynRecord synRecord = new UserSynRecord();
                 synRecord.setBussinessId(businessId);
@@ -417,6 +421,8 @@ public class OneNumberService implements OneNumberServiceI {
                 resutlJson.put("message", "用户同步成功");
                 logger.info("饿了么用户已同步->返回值:" + result);
             } else {
+                resutlJson.put("code", "2001");
+                resutlJson.put("message", "饿了么用户同步失败");
                 logger.info("饿了么用户同步失败->返回值:" + result);
             }
         } else {

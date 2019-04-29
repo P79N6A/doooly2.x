@@ -1223,7 +1223,7 @@ public class AdUserService implements AdUserServiceI {
         String flagF24SDC = paramData.getString("F24SDC"); // 福特2019年4月收货地址补填接口特有标志
 		try {
 			Long startTime = System.currentTimeMillis();
-			if (code.length() == 6||StringUtils.equalsIgnoreCase(flagF24SDC,"yes")) {
+			if (StringUtils.equalsIgnoreCase(flagF24SDC,"yes")||code.length() == 6) {
 				if (StringUtils.isNotBlank(staffNum)) {
 					// 福特激活处理
 					if (StringUtils.isBlank(telephone)) {

@@ -62,9 +62,12 @@
   		<if test="telephone != null and telephone != ''">
   			and telephone = #{telephone}
   		</if>
-  		<if test="isActive != null and isActive != ''">
-  			and is_active = #{isActive}
-  		</if>
+        <if test="isActive != null and isActive != ''">
+            and is_active = #{isActive}
+        </if>
+        <if test="mailbox != null and mailbox != ''">
+            and mailbox = #{mailbox}
+        </if>
   		and del_flag = 0
   	</where>
   	<!-- <where>

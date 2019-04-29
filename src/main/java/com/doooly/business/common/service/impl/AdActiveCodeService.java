@@ -385,7 +385,7 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
 	}
 
     @Override
-    @Transactional
+//    @Transactional
     public JSONObject validateFord201904ShipAddrCollectorUser
             (String mobile, String staffNum, String email,String groupId, String verificationCode)
             throws Exception{
@@ -411,7 +411,10 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         AdUser queryParamByEmail = new AdUser();
         queryParamByEmail.setMailbox(email);
         AdUser userByMail = adUserDao.get(queryParamByEmail);
-        if ( !StringUtils.equals(userByMail.getPersonalInfo().getWorkNumber(), staffNum)
+        AdUserPersonalInfo paramSelectByUserId = new AdUserPersonalInfo();
+        paramSelectByUserId.setId(userByMail.getId());
+        AdUserPersonalInfo personalInfoByMail = adUserPersonalInfoDao.select(paramSelectByUserId);
+        if ( !StringUtils.equals(personalInfoByMail.getWorkNumber(), staffNum)
            ||!StringUtils.equalsIgnoreCase(userByMail.getMailbox(), email)) {
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "请输入准确的工号和邮箱");
@@ -462,7 +465,6 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         }
 
         // 设置为福特员工
-        // todo 这批用户是否已经设置了group number 为福特
         {
             if (StringUtils.isNotBlank(groupId)) {
                 user.setGroupNum(Long.parseLong(groupId));

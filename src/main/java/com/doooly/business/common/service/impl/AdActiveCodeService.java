@@ -5,7 +5,6 @@ import com.doooly.business.common.service.AdActiveCodeServiceI;
 import com.doooly.business.common.service.AdUserServiceI;
 import com.doooly.business.reachLife.LifeGroupService;
 import com.doooly.business.user.service.UserServiceI;
-import com.doooly.common.constants.ActivityConstants;
 import com.doooly.common.constants.Constants;
 import com.doooly.common.util.HTTPSClientUtils;
 import com.doooly.common.webservice.WebService;
@@ -14,7 +13,6 @@ import com.doooly.dao.reachad.AdUserDao;
 import com.doooly.dao.reachad.AdUserPersonalInfoDao;
 import com.doooly.dao.reachlife.LifeMemberDao;
 import com.doooly.dto.common.ConstantsLogin;
-import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdActiveCode;
 import com.doooly.entity.reachad.AdUser;
 import com.doooly.entity.reachad.AdUserPersonalInfo;
@@ -403,20 +401,23 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         }
         
         //确保工号存在
-        AdUserPersonalInfo userPersonalInfo = adUserPersonalInfoDao.selectPersonByWorkNumber(staffNum);
-        if(userPersonalInfo==null){
+        if(adUserPersonalInfoDao.countPersonsByWorkNumber(staffNum)==0){
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "该工号不存在！");
             return resultData;
         }
         
         //确保邮箱与工号匹配
-        AdUser user = adUserDao.getById(Integer.parseInt(userPersonalInfo.getId().toString()));
-        if(!StringUtils.equalsIgnoreCase(user.getMailbox(),email)){
+        AdUser queryParamByEmail = new AdUser();
+        queryParamByEmail.setMailbox(email);
+        AdUser userByMail = adUserDao.get(queryParamByEmail);
+        if ( !StringUtils.equals(userByMail.getPersonalInfo().getWorkNumber(), staffNum)
+           ||!StringUtils.equalsIgnoreCase(userByMail.getMailbox(), email)) {
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "请输入准确的工号和邮箱");
             return resultData;
         }
+        AdUser user =userByMail;
         
         //如果该账户已经绑定手机号
         //    如果已经绑定相同手机号  直接登录

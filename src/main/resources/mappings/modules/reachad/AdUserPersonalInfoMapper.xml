@@ -87,9 +87,8 @@
 		where p.work_number = #{workNumber} and u.group_num = #{groupId} and u.telephone is null;
 	</select>
 
-    <select id="selectPersonByWorkNumber" parameterType="java.lang.String" resultType="com.doooly.entity.reachad.AdUserPersonalInfo">
-		select
-            <include refid="TableColumn" />
+    <select id="countPersonsByWorkNumber" parameterType="java.lang.String" resultType="java.lang.Long">
+		select count(*)
 		from ad_user_personal_info
 		where p.work_number = #{workNumber};
 	</select>

@@ -29,7 +29,7 @@ public interface OrderService {
 	 * @param req
 	 * @return
 	 */
-	public List<Map<String,String>> getOrderdDetailSum(OrderPoReq req);
+	public List<Map<String,Object>> getOrderdDetailSum(OrderPoReq req);
 
 	/**
 	 * 统计订单总数

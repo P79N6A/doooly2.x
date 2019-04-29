@@ -285,7 +285,16 @@ public class NewPaymentService implements NewPaymentServiceI {
             if (StringUtils.isNotBlank(integralRebatePayAmount)) {
                 retJson.put("integralRebatePayAmount", integralRebatePayAmount);
             }
-            logger.info("payment unifiedorder v2 result data={}", data);
+            //获取跳转链接
+            PayRecordDomain payRecordDomain = new PayRecordDomain();
+            payRecordDomain.setMerchantOrderNo(param.getString("merchantOrderNo"));
+            payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
+            if (payRecordDomain != null && StringUtils.isNotBlank(payRecordDomain.getRedirectUrl())) {
+                retJson.put("redirectUrl", payRecordDomain.getRedirectUrl());
+            } else {
+                retJson.put("redirectUrl", "");
+            }
+            logger.info("payment unifiedorder result data={}", data);
             return ResultModel.ok(retJson);
         } else {
             return new ResultModel(jsonResult.getInteger("code"), jsonResult.getString("info"));
@@ -350,10 +359,16 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdUser paramUser = new AdUser();
         paramUser.setId(userId);
         AdUser user = adUserServiceI.getUser(paramUser);
-        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        String dirIntegral = resultIntegral.getString("dirIntegral1");
+        String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
+        String commonIntegralServiceCharge = resultIntegral.getString("commonIntegralServiceCharge");
         JSONObject retJson = new JSONObject();
         retJson.put("totalFree", adOrderBig.getTotalAmount().toString());
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
+        retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
+        retJson.put("commonIntegralServiceCharge", String.valueOf(commonIntegralServiceCharge));//通用积分手续费
+        retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
         getServiceCharge(orderVos, retJson, user);
         //组建预支付订单参数
         String price = String.valueOf(adOrderBig.getTotalPrice().setScale(2, BigDecimal.ROUND_DOWN));
@@ -389,10 +404,9 @@ public class NewPaymentService implements NewPaymentServiceI {
         return result;
     }
 
-    public String getDirIntegral(List<OrderVo> orderVos, AdOrderBig adOrderBig, AdUser adUser) {
-        //String addIntegralAuthorizationUrl = configManager.getWsUrl() + RestConstants.CHECK_INTEGRAL_CONSUMPTION_URL_V2;
+    public JSONObject getDirIntegral(List<OrderVo> orderVos, AdOrderBig adOrderBig, AdUser adUser) {
+        JSONObject result = new JSONObject();
         String getDirIntegralUrl = PaymentConstants.PAYMENT_HTTPS_V2 + "/mchpay/getDirIntegral/V2";
-        //String addIntegralAuthorizationUrl ="http://localhost:8012/api/services/rest/checkIntegralConsumption/V2";
         JSONObject params = new JSONObject();
         params.put("businessId", WebService.BUSINESSID);
         params.put("dirIntegralSwitch", "1");
@@ -427,10 +441,17 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("查询可用定向积分V2，结果{}", resposeResult);
         JSONObject resultJson = JSON.parseObject(resposeResult);
         String dirIntegral1 = "0";
+        String totalServiceCharge = "0";
+        String commonIntegralServiceCharge = "0";
         if (resultJson != null && resultJson.getString("code").equals("0")) {
             dirIntegral1 = resultJson.getString("dirIntegral");
+            totalServiceCharge = resultJson.getString("totalServiceCharge");
+            commonIntegralServiceCharge = resultJson.getString("commonIntegralServiceCharge");
         }
-        return dirIntegral1;
+        result.put("dirIntegral1",dirIntegral1);
+        result.put("totalServiceCharge",totalServiceCharge);
+        result.put("commonIntegralServiceCharge", commonIntegralServiceCharge);
+        return result;
     }
 
     // 构造商品JSON
@@ -678,8 +699,14 @@ public class NewPaymentService implements NewPaymentServiceI {
         AdOrderBig adOrderBig = new AdOrderBig();
         adOrderBig.setId(String.valueOf(o.getId()));
         adOrderBig.setTotalAmount(o.getTotalMount());
-        String dirIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        JSONObject resultIntegral = getDirIntegral(orderVos, adOrderBig, user);
+        String dirIntegral = resultIntegral.getString("dirIntegral1");
+        String totalServiceCharge = resultIntegral.getString("totalServiceCharge");
+        String commonIntegralServiceCharge = resultIntegral.getString("commonIntegralServiceCharge");
         retJson.put("dirIntegral", String.valueOf(dirIntegral));//定向积分
+        retJson.put("commonIntegralServiceCharge", String.valueOf(commonIntegralServiceCharge));//通用积分手续费
+        retJson.put("totalServiceCharge", String.valueOf(totalServiceCharge));//总手续费
+        retJson.put("dirIntegralServiceCharge", "0.00");//定向积分手续费 现在不收为0
 
         //话费充值需要校验积分消费金额,用到此参数
         if (o.getProductType() == OrderService.ProductType.MOBILE_RECHARGE.getCode()
@@ -1182,18 +1209,13 @@ public class NewPaymentService implements NewPaymentServiceI {
                     map.put("oid", order.getId());
                     //最终支付结果code
                     map.put("code", payMsg.getCode());
-                    BigDecimal totalMount = order.getTotalMount();
-                    //手续费
-                    if (order.getServiceCharge() != null) {
-                        map.put("serviceCharge", order.getServiceCharge());
-                    }
-                    map.put("totalAmount", totalMount);
                     //话费优惠活动- 分享需要的参数
                     if (OrderService.ProductType.MOBILE_RECHARGE_PREFERENCE.getCode() == order.getProductType()) {
                         AdRechargeRecord record = adRechargeRecordDao.getRecordByOrderNumber(order.getOrderNumber());
                         map.put("openId", record.getOpenId());
                         map.put("activityParam", record.getActivityParam());
                     }
+                    BigDecimal totalMount = order.getTotalMount();
                     //获取跳转链接
                     PayRecordDomain payRecordDomain = new PayRecordDomain();
                     payRecordDomain.setMerchantOrderNo(orderNum);
@@ -1205,9 +1227,15 @@ public class NewPaymentService implements NewPaymentServiceI {
                             returnUrl = returnUrl + payRecordDomain.getMerchantOrderNo();
                         }
                         map.put("redirectUrl", returnUrl);
+                        totalMount= totalMount.add(payRecordDomain.getTotalServiceCharge());
                     } else {
                         map.put("redirectUrl", "");
                     }
+                    //手续费
+                    if (order.getServiceCharge() != null) {
+                        map.put("serviceCharge", order.getServiceCharge());
+                    }
+                    map.put("totalAmount", totalMount);
                 }
                 payMsg.setData(map);
             }
@@ -1239,7 +1267,7 @@ public class NewPaymentService implements NewPaymentServiceI {
             payRecordDomain.setMerchantOrderNo(orderNum);
             payRecordDomain = payRecordMapper.getPayRecordDomain(payRecordDomain);
             if (payRecordDomain != null) {
-                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                map.put("totalAmount", payRecordDomain.getIntegralPayAmount().add(payRecordDomain.getPayAmount()).add(payRecordDomain.getTotalServiceCharge()).setScale(2, BigDecimal.ROUND_HALF_UP));
                 String returnUrl = payRecordDomain.getRedirectUrl();
                 if (StringUtils.isNotBlank(returnUrl) && (returnUrl.contains("localhost") ||
                         returnUrl.contains("doooly") || returnUrl.contains("reach"))) {

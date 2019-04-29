@@ -20,8 +20,10 @@ import com.doooly.business.myorder.vo.OrderVoResp;
 import com.doooly.business.utils.DateUtils;
 import com.doooly.business.utils.Pagelab;
 import com.doooly.common.dto.BaseRes;
+import com.doooly.dao.reachad.AdOrderIntegralRecordDao;
 import com.doooly.dto.common.MessageDataBean;
 import com.doooly.entity.reachad.AdOrderDetail;
+import com.doooly.entity.reachad.AdOrderIntegralRecord;
 import com.doooly.entity.reachad.AdReturnFlow;
 import com.doooly.publish.rest.life.MyOrderRestServiceI;
 import com.google.gson.Gson;
@@ -61,6 +63,9 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 	
 	 @Autowired
 	 private ConfigDictServiceI configDictServiceI;
+	 @Autowired
+     private AdOrderIntegralRecordDao adOrderIntegralRecordDao;
+
 
 	@POST
 	@Path("/getOrders")
@@ -190,14 +195,21 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		Map<Long,AdOrderDetail>  orderDetailMap = listDetailConvetMap(adOrderDetailList);
 		for(OrderPoResp  orderPoResp : orderResultList) {
 			resp = new OrderResp();
-			resp.setAmountPayable(orderPoResp.getTotalPrice());
-			resp.setIsSource(orderPoResp.getIsSource());
-			resp.setIsUserRebate(Integer.parseInt(orderPoResp.getIsUserRebate()));
-			resp.setOrderDate(DateUtils.formatDate(orderPoResp.getOrderDate(), "yyyy-MM-dd HH:mm:ss"));
-			resp.setOrderDateStr(DateUtils.formatDate(orderPoResp.getOrderDate(), "M-d HH:mm"));
-			resp.setOrderId(orderPoResp.getId());
-			resp.setOrderNumber(orderPoResp.getOrderNumber());
-			resp.setPayAmount(orderPoResp.getTotalMount());
+            String orderNumber = orderPoResp.getOrderNumber();
+            //查询订单手续费
+            AdOrderIntegralRecord adOrderIntegralRecord = new AdOrderIntegralRecord();
+            adOrderIntegralRecord.setOrderNumber(orderNumber);
+            adOrderIntegralRecord.setPaymentType(1);
+            BigDecimal serviceCharge = adOrderIntegralRecordDao.sumIntegralRebateAmount(adOrderIntegralRecord);
+
+            resp.setAmountPayable(orderPoResp.getTotalPrice());
+            resp.setIsSource(orderPoResp.getIsSource());
+            resp.setIsUserRebate(Integer.parseInt(orderPoResp.getIsUserRebate()));
+            resp.setOrderDate(DateUtils.formatDate(orderPoResp.getOrderDate(), "yyyy-MM-dd HH:mm:ss"));
+            resp.setOrderDateStr(DateUtils.formatDate(orderPoResp.getOrderDate(), "M-d HH:mm"));
+            resp.setOrderId(orderPoResp.getId());
+            resp.setOrderNumber(orderNumber);
+			resp.setPayAmount(orderPoResp.getTotalMount().add(serviceCharge==null?BigDecimal.ZERO:serviceCharge));
 			resp.setState(String.valueOf(orderPoResp.getState()));
 			resp.setType(String.valueOf(orderPoResp.getType()));
 			resp.setStoreName(orderPoResp.getStoreName());
@@ -229,7 +241,7 @@ public class MyOrderRestService implements MyOrderRestServiceI {
 		pagelab.setTotalNum(countOrderNum.intValue());
 		OrderPoReq orderPoReq = new OrderPoReq();
 		orderPoReq.setUserId(Long.parseLong(req.getUserId()));
-		List<Map<String,String>> listMap = orderservice.getOrderdDetailSum(orderPoReq);
+		List<Map<String,Object>> listMap = orderservice.getOrderdDetailSum(orderPoReq);
 
 		OrderVoResp orderVoResp = new OrderVoResp();
 		orderVoResp.setCurrentPage(pagelab.getCountPage());

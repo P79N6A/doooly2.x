@@ -1,16 +1,16 @@
 package com.doooly.business.myorder.vo;
 
+import com.doooly.business.myorder.dto.OrderResp;
+
 import java.util.List;
 import java.util.Map;
-
-import com.doooly.business.myorder.dto.OrderResp;
 
 public class OrderVoResp{
 	
 	private Integer totalPage;
 	private Integer totalNum;
 	private Integer currentPage;
-	List<Map<String,String>> orderDataList;
+	List<Map<String,Object>> orderDataList;
 	List<OrderResp> page;
 	public Integer getTotalPage() {
 		return totalPage;
@@ -30,10 +30,10 @@ public class OrderVoResp{
 	public void setCurrentPage(Integer currentPage) {
 		this.currentPage = currentPage;
 	}
-	public List<Map<String, String>> getOrderDataList() {
+	public List<Map<String, Object>> getOrderDataList() {
 		return orderDataList;
 	}
-	public void setOrderDataList(List<Map<String, String>> orderDataList) {
+	public void setOrderDataList(List<Map<String, Object>> orderDataList) {
 		this.orderDataList = orderDataList;
 	}
 	public List<OrderResp> getPage() {

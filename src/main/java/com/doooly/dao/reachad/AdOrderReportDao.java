@@ -127,7 +127,7 @@ public interface AdOrderReportDao {
     OrderDetailReport getOrderDetail(OrderDetailPoReq req);
     
     
-    List<Map<String,String>> findOrderdDetailSum(OrderPoReq req);
+    List<Map<String,Object>> findOrderdDetailSum(OrderPoReq req);
     
     Integer getLatestOrderTotal(OrderPoReq req);
     
@@ -165,4 +165,6 @@ public interface AdOrderReportDao {
     Date getMaxOrderDateByUserAndType(@Param("userId") String userId, @Param("type") String type);
 
     List<OrderVo> getOrders(OrderVo order);
+
+
 }

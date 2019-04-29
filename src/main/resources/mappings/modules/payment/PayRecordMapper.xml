@@ -44,6 +44,9 @@
         a.create_time AS "createTime",
         a.pay_end_time AS "payEndTime",
         a.update_time AS "updateTime",
+        a.total_service_charge AS "totalServiceCharge",
+        a.common_integral_service_charge AS "commonIntegralServiceCharge",
+        a.dir_integral_service_charge AS "dirIntegralServiceCharge",
         a.big_order_number AS "bigOrderNumber"
     </sql>
 

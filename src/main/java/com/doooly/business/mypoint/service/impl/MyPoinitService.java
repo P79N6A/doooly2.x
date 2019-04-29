@@ -82,6 +82,8 @@ public class MyPoinitService implements MyPointServiceI {
 
 	@Autowired
 	private AdGroupDao adGroupDao;
+    @Autowired
+    private AdOrderIntegralRecordDao adOrderIntegralRecordDao;
 
 	/**
 	 * 通过家属邀请的所有id查询到返利的列表和积分的总和
@@ -368,7 +370,13 @@ public class MyPoinitService implements MyPointServiceI {
 			// 睿仕之家退单,orderNumber随机为时间戳,并不能取到type为1的总计,则取type为5的总计
 			totalOrder = orderDao.getTotalByOrderNumberByTypeFive(order.getOrderNumber());
 		}
-		order.setTotalAmount(totalOrder.getTotalAmount());
+		//查询手续费
+        //查询订单手续费
+        AdOrderIntegralRecord adOrderIntegralRecord = new AdOrderIntegralRecord();
+        adOrderIntegralRecord.setOrderNumber(order.getOrderNumber());
+        adOrderIntegralRecord.setPaymentType(1);
+        BigDecimal totalService = adOrderIntegralRecordDao.sumIntegralRebateAmount(adOrderIntegralRecord);
+		order.setTotalAmount(totalOrder.getTotalAmount().add(totalService));
 		order.setTotalPrice(totalOrder.getTotalPrice());
 		order.setUserRebate(totalOrder.getUserRebate());
 		order.setAmount(totalOrder.getAmount());

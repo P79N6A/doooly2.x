@@ -388,7 +388,7 @@ public class NewPaymentService implements NewPaymentServiceI {
         logger.info("下单参数param=========" + param);
         result.put("param", param);
         retJson.put("userIntegral", user.getIntegral());
-        retJson.put("isPayPassword", user.getIsPayPassword());
+        retJson.put("isPayPassword", "2".equals(user.getIsPayPassword())?"2":"1");
         logger.info("retJson = {}", retJson);
         result.put("retJson", retJson);
         result.put("businessId", businessId);

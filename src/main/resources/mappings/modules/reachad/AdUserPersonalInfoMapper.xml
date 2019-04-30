@@ -87,6 +87,12 @@
 		where p.work_number = #{workNumber} and u.group_num = #{groupId} and u.telephone is null;
 	</select>
 
+    <select id="countPersonsByWorkNumber" parameterType="java.lang.String" resultType="java.lang.Long">
+		select count(*)
+		from ad_user_personal_info
+		where work_number = #{workNumber};
+	</select>
+
 	<select id="selectAll" resultMap="AdUserPersonalInfoMap">
 		SELECT
 		<include refid="TableColumn" />

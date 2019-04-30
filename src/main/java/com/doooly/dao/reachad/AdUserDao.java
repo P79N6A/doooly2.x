@@ -351,4 +351,6 @@ public interface AdUserDao extends BaseDaoI<AdUser> {
 	Date getReturnPointsMaxCreateDateByUser(@Param("userId") String userId, @Param("status")String status);
 
 	Date getReturnPointsMaxUpdateDateByUser(@Param("userId") String userId, @Param("status")String status);
+
+    List<AdUser> findByMailbox(String mailbox);
 }

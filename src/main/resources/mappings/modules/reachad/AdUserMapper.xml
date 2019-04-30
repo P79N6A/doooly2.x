@@ -62,9 +62,12 @@
   		<if test="telephone != null and telephone != ''">
   			and telephone = #{telephone}
   		</if>
-  		<if test="isActive != null and isActive != ''">
-  			and is_active = #{isActive}
-  		</if>
+        <if test="isActive != null and isActive != ''">
+            and is_active = #{isActive}
+        </if>
+        <if test="mailbox != null and mailbox != ''">
+            and mailbox = #{mailbox}
+        </if>
   		and del_flag = 0
   	</where>
   	<!-- <where>
@@ -1399,5 +1402,14 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
         <if test="status != null and status != ''">
             AND p.status= #{status}
         </if>
+    </select>
+
+    <select id="findByMailbox" resultType="com.doooly.entity.reachad.AdUser" parameterType="java.lang.String">
+        Select *
+        From ad_user
+        <where>
+            mailbox = #{mailbox}
+            and del_flag = 0
+        </where>
     </select>
 </mapper>

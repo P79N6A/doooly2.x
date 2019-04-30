@@ -1403,4 +1403,13 @@ group_num= #{groupNum},pay_password= #{payPassword}, is_active=2 ,del_flag=0 ,ac
             AND p.status= #{status}
         </if>
     </select>
+
+    <select id="findByMailbox" resultType="com.doooly.entity.reachad.AdUser" parameterType="java.lang.String">
+        Select *
+        From ad_user
+        <where>
+            mailbox = #{mailbox}
+            and del_flag = 0
+        </where>
+    </select>
 </mapper>

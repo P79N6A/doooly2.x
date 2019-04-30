@@ -408,19 +408,23 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         }
         
         //确保邮箱与工号匹配
-        AdUser queryParamByEmail = new AdUser();
-        queryParamByEmail.setMailbox(email);
-        AdUser userByMail = adUserDao.get(queryParamByEmail);
-        AdUserPersonalInfo paramSelectByUserId = new AdUserPersonalInfo();
-        paramSelectByUserId.setId(userByMail.getId());
-        AdUserPersonalInfo personalInfoByMail = adUserPersonalInfoDao.select(paramSelectByUserId);
-        if ( !StringUtils.equals(personalInfoByMail.getWorkNumber(), staffNum)
-           ||!StringUtils.equalsIgnoreCase(userByMail.getMailbox(), email)) {
+        List<AdUser> usersByMailbox = adUserDao.findByMailbox(email);
+        AdUser userMatch = null;
+        for (AdUser userByMail : usersByMailbox) {
+            AdUserPersonalInfo paramSelectByUserId = new AdUserPersonalInfo();
+            paramSelectByUserId.setId(userByMail.getId());
+            AdUserPersonalInfo personalInfoByMail = adUserPersonalInfoDao.select(paramSelectByUserId);
+            if (StringUtils.equals(personalInfoByMail.getWorkNumber(), staffNum)
+                    && StringUtils.equalsIgnoreCase(userByMail.getMailbox(), email)) {
+                userMatch = userByMail;
+            }
+        }
+        if (userMatch == null) {
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "请输入准确的工号和邮箱");
             return resultData;
         }
-        AdUser user =userByMail;
+        AdUser user = userMatch;
         
         //如果该账户已经绑定手机号
         //    如果已经绑定相同手机号  直接登录

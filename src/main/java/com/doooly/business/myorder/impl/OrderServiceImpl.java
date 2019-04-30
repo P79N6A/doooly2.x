@@ -149,7 +149,7 @@ public class OrderServiceImpl implements OrderService{
             resp.setOrderNumber(orderNumber);
 			resp.setProductType(report.getProductType());
 			resp.setSavePrice(report.getSavePrice().subtract(totalService));
-			resp.setServiceCharge(report.getServiceCharge().add(totalService));
+			resp.setServiceCharge(report.getServiceCharge()!=null?report.getServiceCharge().add(totalService):totalService);
 			resp.setState(report.getState());
 			resp.setStoreName(report.getStoreName());
 			resp.setPayAmount(report.getTotalMount().add(totalService));
@@ -225,7 +225,7 @@ public class OrderServiceImpl implements OrderService{
 				resp.setUserRebate(new BigDecimal(0));
 			}
 		}catch(Exception e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(),e);
 		}
 		return resp;
 	}

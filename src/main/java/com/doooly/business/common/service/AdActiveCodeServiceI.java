@@ -34,5 +34,5 @@ public interface AdActiveCodeServiceI {
 
 	JSONObject validateFordUser(String code, String mobile, String staffNum, String email, String groupId,String verificationCode) throws Exception;
 
-    JSONObject validateFord201904ShipAddrCollectorUser(String mobile, String staffNum, String email,String groupId, String verificationCode) throws Exception;
+    JSONObject validateFord201904ShipAddrCollectorUser(String mobile, String staffNum, String email, String verificationCode) throws Exception;
 }

@@ -1235,13 +1235,13 @@ public class AdUserService implements AdUserServiceI {
 					} else if (StringUtils.isBlank(email)) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "邮箱为空");
-					} else if (StringUtils.isBlank(groupId)) {
+					} else if (!StringUtils.equalsIgnoreCase(flagF24SDC,"yes") && StringUtils.isBlank(groupId)) {
 						resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.CODE_STATE_ERROR.getCode());
 						resultData.put(ConstantsLogin.MSG, "用户单位为空");
 					} else {
                         if (StringUtils.equalsIgnoreCase(flagF24SDC,"yes")) {
                             // 处理福特2019年4月收货地址补填接口调用
-                            resultData = adActiveCodeServiceI.validateFord201904ShipAddrCollectorUser(telephone,staffNum,email,groupId,verificationCode);
+                            resultData = adActiveCodeServiceI.validateFord201904ShipAddrCollectorUser(telephone,staffNum,email,verificationCode);
                         } else {
                             resultData = adActiveCodeServiceI.validateFordUser(code, telephone, staffNum, email, groupId,verificationCode);
                         }

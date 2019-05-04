@@ -387,7 +387,7 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
     @Override
 //    @Transactional
     public JSONObject validateFord201904ShipAddrCollectorUser
-            (String mobile, String staffNum, String email,String groupId, String verificationCode)
+            (String mobile, String staffNum, String email, String verificationCode)
             throws Exception{
         JSONObject resultData = new JSONObject();
         resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
@@ -461,47 +461,10 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         user.setActiveDate(new Date());
         user.setUpdateDate(new Date());
         user.setDataSyn(AdUser.DATA_SYN_ON);
-        if (StringUtils.isNotBlank(groupId)) {
-            user.setGroupNum(Long.parseLong(groupId));
-        }
         if (0==adUserDao.updateByPrimaryKeySelective(user)) {
             resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
             resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
             return resultData;
-        }
-
-        // 设置为福特员工
-        {
-            if (StringUtils.isNotBlank(groupId)) {
-                user.setGroupNum(Long.parseLong(groupId));
-            }
-            if (0==adUserDao.updateByPrimaryKeySelective(user)) {
-                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-                resultData.put(ConstantsLogin.MSG, "设置为福特员工失败");
-                return resultData;
-            }
-        }
-        
-        LifeMember lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
-        if (lifeMember == null) {
-            lifeMember = lifeMemberDao.findMemberByMobile(mobile);
-        }
-        if (lifeMember == null) {
-            adUserServiceI.saveMember(user);
-             lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
-        }
-        if (StringUtils.isNotBlank(groupId)) {
-            String groupNum = "";
-            LifeGroup lifeGroup = lifeGroupService.getGroupByGroupId(groupId);
-            groupNum = lifeGroup.getId();
-            lifeMember.setGroupId(Long.valueOf(groupNum));
-            lifeMember.setName(user.getName());
-            lifeMember.setIsEnabled(2);
-            lifeMember.setMobile(mobile);
-            lifeMember.setLoginFailureCount(0);
-            lifeMember.setModifyDate(new Date());
-            lifeMember.setAdId(String.valueOf(user.getId()));
-            lifeMemberDao.updateActiveStatus(lifeMember);
         }
 
         //更新类型为 平台导入(白名单)

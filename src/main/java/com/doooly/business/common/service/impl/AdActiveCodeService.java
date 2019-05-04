@@ -477,6 +477,16 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
             paramFindByAdId.setAdId(user.getId().toString());
             lifeMember = lifeMemberDao.findLifeMemberByAdId(paramFindByAdId);
         }
+        //   如果已经创建了xx_member则更新
+        if (lifeMember != null){
+            lifeMember.setName(user.getName());
+            lifeMember.setIsEnabled(2);
+            lifeMember.setMobile(mobile);
+            lifeMember.setLoginFailureCount(0);
+            lifeMember.setModifyDate(new Date());
+            lifeMemberDao.updateActiveStatus(lifeMember);
+        }
+        //   如果没有就新建
         if (lifeMember == null) {
             try {
                 adUserServiceI.saveMember(user);

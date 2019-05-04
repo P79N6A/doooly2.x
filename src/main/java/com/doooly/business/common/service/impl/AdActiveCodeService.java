@@ -466,6 +466,27 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
             resultData.put(ConstantsLogin.MSG, "用户绑定手机号失败");
             return resultData;
         }
+        
+        //确保为该用户创建了xx_member记录
+        LifeMember lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
+        if (lifeMember == null){
+            lifeMember = lifeMemberDao.findMemberByMobile(mobile);
+        }
+        if (lifeMember == null){
+            LifeMember paramFindByAdId = new LifeMember();
+            paramFindByAdId.setAdId(user.getId().toString());
+            lifeMember = lifeMemberDao.findLifeMemberByAdId(paramFindByAdId);
+        }
+        if (lifeMember == null) {
+            try {
+                adUserServiceI.saveMember(user);
+            } catch (Exception e) {
+                resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+                logger.error(String.format("为ad_user{id=%s}创建xx_member失败", user.getId().toString()), e);
+                return resultData;
+            }
+            lifeMember = lifeMemberDao.findMemberByUsername(user.getCardNumber());
+        }
 
         //更新类型为 平台导入(白名单)
         //数据来源 0:平台导入(白名单) 2：企业口令激活，3：卡激活，4：专属码

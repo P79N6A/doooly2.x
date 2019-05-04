@@ -392,13 +392,6 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
         JSONObject resultData = new JSONObject();
         resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.SUCCESS.getCode());
         resultData.put(ConstantsLogin.MSG, ConstantsLogin.CodeActive.SUCCESS.getMsg());
-
-        //确保短信验证码正确
-        if(verificationCode==null||!checkVerificationCode(mobile, verificationCode)){
-            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
-            resultData.put(ConstantsLogin.MSG, "请输入正确的验证码");
-            return resultData;
-        }
         
         //确保工号存在
         if(adUserPersonalInfoDao.countPersonsByWorkNumber(staffNum)==0){
@@ -452,6 +445,15 @@ public class AdActiveCodeService implements AdActiveCodeServiceI {
             resultData.put(ConstantsLogin.MSG, "该手机号已是兜礼用户，请输入其他手机号！");
             return resultData;
         }
+
+        //确保短信验证码正确
+        if(verificationCode==null||!checkVerificationCode(mobile, verificationCode)){
+            resultData.put(ConstantsLogin.CODE, ConstantsLogin.CodeActive.FAIL.getCode());
+            resultData.put(ConstantsLogin.MSG, "请输入正确的验证码");
+            return resultData;
+        }
+
+        //验证通过，开始更新数据库
         
         //绑定手机号
         user.setTelephone(mobile);

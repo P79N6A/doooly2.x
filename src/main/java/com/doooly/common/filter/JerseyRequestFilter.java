@@ -6,6 +6,7 @@ import com.doooly.common.exception.GlobalException;
 import com.doooly.common.token.TokenUtil;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import javax.ws.rs.container.PreMatching;
@@ -43,6 +44,7 @@ public class JerseyRequestFilter implements ContainerRequestFilter {
 				|| reqUrl.contains("/share/getFamilyInviteInfoRestFul")
 				|| reqUrl.contains("/forumInvitation/registerForum")
 				|| reqUrl.contains("/daily-activity/v1/jiaohang/lottery")
+                || StringUtils.containsIgnoreCase(reqUrl,"/member/verifyCodeToActive")
 		) {
 			return request;
 		}
